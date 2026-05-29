@@ -173,7 +173,7 @@ tests/                       # 单元和集成测试
 
 ## 📄 许可证
 
-MIT © yourname
+MIT © aiKeeo
 
 ---
 
