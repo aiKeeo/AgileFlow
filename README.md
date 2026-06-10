@@ -1,208 +1,318 @@
-<!--
-  DevFlow - Human-Gated AI Development Workflow
-  https://github.com/yourusername/devflow
--->
+# Agileflow — AI Agent Skill · Ship in ~1 Hour
 
-<p align="center">
-  <img src="https://img.shields.io/badge/BDD%20→%20DDD%20→%20SDD%20→%20TDD-8A2BE2" alt="BDD→DDD→SDD→TDD" />
-  <img src="https://img.shields.io/badge/1_Hour-Full_Stack_App-brightgreen" alt="1 Hour Full Stack App" />
-  <img src="https://img.shields.io/badge/Human_Gate-mandatory-blue" alt="Human Gate Mandatory" />
-  <img src="https://img.shields.io/badge/Cursor-Agent_Ready-orange" alt="Cursor Agent Ready" />
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License MIT" />
-</p>
+**English** | [中文](README.zh-CN.md)
 
-<h1 align="center">DevFlow</h1>
-<p align="center">
-  <strong>Stop AI from jumping ahead.<br />Enforce real engineering discipline – with your approval at every gate.</strong>
-</p>
+> Turn ideas into **runnable, testable, handoff-ready** software with a five-stage agile pipeline and **BDD→DDD→SDD→TDD**. Simple projects ship in **~1 hour**; MVPs in **half a day**.
 
-<p align="center">
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-why-devflow">Why DevFlow?</a> •
-  <a href="#-the-5-phases">The 5 Phases</a> •
-  <a href="#-skills">Skills</a> •
-  <a href="#-how-it-works">How It Works</a> •
-  <a href="#-faq">FAQ</a> •
-  <a href="README.zh-CN.md">中文文档</a>
-</p>
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#why-ship-in-1-hour)
 
 ---
 
-## 🧠 What Is DevFlow?
+## One-liner
 
-**DevFlow is a human‑gated AI development workflow** that turns vague prompts into production‑ready code – without letting the AI skip design, tests, or your approval.
+**Agileflow** encodes software engineering best practices into an AI-executable Skill: **BDD** for requirements, **DDD** for modeling, **SDD** for design, **TDD** for code — with human confirmation gates at every stage and a full `specs/` documentation trail.  
+Tell your AI *"run agileflow"* — from zero to deployable in **as little as 1 hour**, usually an MVP within half a day.
 
-It integrates **BDD, DDD, SDD, and TDD** into a linear, phase‑gated process:
+---
+
+## Why ship in ~1 hour?
+
+Typical AI coding: **code first, think later** → missing tests, missing docs, requirements change and everything gets thrown away. Delivery measured in **days**.
+
+Agileflow: **compress the pipeline without dropping structure**.
+
+| Step | Traditional | Agileflow (Fast Mode) | Typical Time |
+|------|-------------|----------------------|--------------|
+| Requirements | Verbal, AI guesses | BDD scenarios + 1 round of confirmation | **5–10 min** |
+| Modeling | Skipped or patched later | Lightweight DDD: core tables + DDL | **5–10 min** |
+| Design | Written while coding | SDD template: API + task list | **10–15 min** |
+| Development | Large dumps, hard to maintain | Atomic tasks, one at a time | **20–30 min** |
+| Acceptance | Manual click-through | L1+L3 automated | **5–10 min** |
+| **Total** | 1–3 days + rework | **~1 hour** (simple CRUD / tools) | |
+
+> **Faster**: hotfix, tiny edits → skip full pipeline, **L1+L3 in minutes**.  
+> **Safer**: payments / auth / core business → strict mode, TDD + full L1–L5.
+
+---
+
+## Who is this for?
+
+| Audience | Pain Point | How Agileflow Helps |
+|----------|------------|---------------------|
+| **Indie devs / founders** | Ideas sit for weeks before a demo | Fast mode: **deployable demo in ~1 hour** |
+| **Freelancers** | No docs at handoff, hard to close projects | Full `specs/` + REQ ↔ acceptance report mapping |
+| **Tech leads (small teams)** | AI output hard to review or hand off | Five-stage artifacts: divisible, auditable |
+| **Backend / full-stack engineers** | Schema and API drift apart | DDD first — confirm DDL & API before coding |
+| **Users afraid AI goes off-track** | AI codes silently, wrong direction = full rewrite | **Stage gates + requirement cards** — you approve each step |
+| **Users stuck mid-flow** | Missing keys/env, AI pretends it's done | **humanTodo** lists what *you* must do; incomplete = `BLOCKED-HUMAN` |
+| **Users who lose visibility** | Close chat, lose all progress | **`specs/todo.md` live progress** + resume with *"continue agileflow"* |
+| **Compliance-minded teams** | Req → impl → test not traceable | BDD scenarios → tests → per-REQ acceptance reports |
+
+---
+
+## Key Highlights
+
+### 🚀 Ship in ~1 Hour
+
+Not "AI dumps a pile of code" — **compressed pipeline, preserved structure**. Simple CRUD / tool projects: five stages, **~1 hour** to deploy; MVPs **same day**.
+
+| Mode | Speed | Best For |
+|------|-------|----------|
+| **Fast** | ~1 hour | Demos, CRUD, internal tools |
+| **Strict** | Half day – 1 day | Payments, auth, core business |
+| **Exempt path** | Minutes | One-line bugfix, hotfix (L1+L3) |
+
+---
+
+### 📐 Five Stages × BDD→DDD→SDD→TDD
+
+Each stage binds one engineering method — **think first, code second**:
 
 ```
-Requirements → Data Modeling → Solution Design → Development → Testing
+Requirements → Modeling → Solution → Development → Testing
+     BDD          DDD        SDD         TDD        L1–L5
+   ~10min       ~10min     ~15min      ~30min      ~10min
 ```
 
-At the end of each phase, DevFlow **stops and asks for your confirmation** using `ask_followup_question`. No surprises, no “magic” leaps.
+| Stage | Method | Key Output |
+|:-----:|:------:|------------|
+| 1 Requirements | **BDD** | `REQ-*.md` (Given-When-Then scenarios) |
+| 2 Modeling | **DDD** | Aggregates, invariants, ER diagram, `sql/init.sql` |
+| 3 Solution | **SDD** | Architecture, API contracts, observability, atomic tasks |
+| 4 Development | **TDD** | Business code + tests (strict: red→green→refactor) |
+| 5 Testing | **BDD trace-back** | Per-REQ acceptance reports + L1–L5 pipeline |
 
-## 🚀 Quick Start
+---
 
-### 1. Install Skills
-Copy the `skills/` folder into your Cursor workspace:
+### 🤝 Human-in-the-Loop — AI asks when it needs you
 
-```bash
-cp -r skills/ .cursor/skills/
+AI doesn't bulldoze through — **key decisions and external resources require humans**:
+
+| Mechanism | When | What you do |
+|-----------|------|-------------|
+| **Requirement confirmation card** | Stage 1: unclear input / draft done | Pick scope, confirm BDD scenarios |
+| **Domain rule confirmation** | Stage 2: modeling draft done | Confirm aggregates, invariants, schema |
+| **Stage gate** | End of stages 1–4 | Click *"Yes, continue"* to proceed; *"No, pause"* anytime |
+| **humanTodo** | Any stage with external deps | Provide API keys, merchant IDs, `.env`, business sign-off, ops resources |
+
+**humanTodo example** (AI writes to `specs/humanTodo.md` automatically):
+
+| Item | Source Stage | Status |
+|------|--------------|--------|
+| Provide WeChat Pay merchant ID & API key | Requirements | ⬜ Pending |
+| Confirm `.env.local` DB connection configured | Solution | ⬜ Pending |
+| Business confirms order state transitions | Modeling | ✅ Done |
+
+- AI sees ⬜ pending → **stops proactively**, never fakes completion
+- You finish & notify AI → unblock and continue
+- Missing resources → acceptance marked **`BLOCKED-HUMAN`**, never falsely "delivered"
+
+**You steer direction; AI executes — not the other way around.**
+
+---
+
+### 📊 Full Progress Visibility — always know where AI is
+
+Open the `specs/` folder — **see exactly where the project stands**:
+
+**① Stage declaration** — first line of every AI reply:
+
+```
+📍 Agileflow | Mode: Fast | Stage: 3-Solution Design | Basis: next incomplete stage in todo
 ```
 
-### 2. Start the flow
-In Cursor, type:
+**② `specs/todo.md`** — AI tasks + pipeline progress + change history:
 
-```
-/dev-flow I need a user authentication system
-```
+```markdown
+## Pipeline Progress
+- [x] Requirements ✅
+- [x] Modeling ✅
+- [ ] Solution Design 🔄     ← current stage
+- [ ] Development
+- [ ] Testing
 
-### 3. Follow the gates
-Answer a few questions at each phase. In about **one hour**, you'll have:
+## Dev Tasks
+- [x] Create database tables
+- [ ] Implement user API 🔄  ← in progress
+- [ ] Implement order API
 
-- ✅ Clear requirements (with Given‑When‑Then scenarios)
-- ✅ A domain model and database schema
-- ✅ API contracts and task breakdown
-- ✅ Fully tested backend + frontend code
-- ✅ A delivery report
-
-> **Real example** – from blank project to a running full‑stack app in ~60 minutes.
-
-## 🔥 Why DevFlow?
-
-Most AI tools are **too eager** – they jump straight to code, ignore domain logic, skip tests, and produce “works‑on‑my‑machine” throwaways.
-
-**DevFlow is different.**
-
-| Problem | DevFlow Solution |
-|---------|------------------|
-| AI writes code without understanding the domain | **DDD** – aggregates, invariants, state machines |
-| No shared understanding of behavior | **BDD** – each requirement has Given‑When‑Then scenarios |
-| No design, just random files | **SDD** – API contracts + atomic tasks before coding |
-| Zero tests, untestable code | **TDD** – red‑green‑refactor, 100% core coverage in rigorous mode |
-| AI decides everything without asking you | **Mandatory human gates** – after every phase, you must click “continue” |
-| External dependencies block the flow | `specs/humanTodo.md` – AI pauses and waits for your input |
-
-### 📋 Know Where You Stand – Always
-
-Two files keep you and the AI perfectly aligned:
-
-| File | Purpose | Who Updates | Example |
-|------|---------|-------------|---------|
-| `specs/todo.md` | **Task tracking** – what's done, what's next, phase progress | AI (auto‑updated after each task/phase) | `- [x] Requirements`<br>`- [ ] Data Modeling` |
-| `specs/humanTodo.md` | **Human dependencies** – API keys, approvals, external configs | AI writes, you check off | `⬜ Provide WeChat Pay API key`<br>`⬜ Confirm order cancellation rule` |
-
-**No more guessing.**  
-- Stuck? Check `humanTodo.md` – the AI will even **pause and ask** you to complete pending items.  
-- Want to resume after a break? Open `todo.md` – you see exactly which phase or task is next.
-
-> This turns AI from a "black box" into a **transparent teammate**.
-
-## 📐 The 5 Phases
-
-| Phase | Skill | Output | Human Gate |
-|-------|-------|--------|------------|
-| 1. **Requirements** | `product-requirement` | `REQ-*.md` (BDD scenarios) | ✅ must confirm |
-| 2. **Data Modeling** | `data-modeling` | Domain model, ER diagram, `sql/init.sql` | ✅ must confirm |
-| 3. **Solution Design** | `solution-design` | API contracts, task list (`todo.md`) | ✅ must confirm |
-| 4. **Development** | `development` | `src/`, `tests/` (TDD driven) | ✅ must confirm |
-| 5. **Testing** | `testing` | Test report, delivery report | – flow ends |
-
-> **No phase can start without your explicit “yes”.**  
-> The AI physically cannot jump ahead – it uses `ask_followup_question` and stops.
-
-## 🧩 Skills Included
-
-| Skill | Responsibility |
-|-------|----------------|
-| `dev-flow` | Orchestrates the 5‑phase flow, enforces gates, manages `todo.md` and `humanTodo.md` |
-| `product-requirement` | Writes REQ‑*.md with BDD scenarios, version tracking |
-| `data-modeling` | Creates domain model (aggregates, invariants), ER diagram, SQL DDL |
-| `solution-design` | Writes technical solution, API contracts, atomic tasks |
-| `development` | Implements code (fast mode or strict TDD), updates task status |
-| `testing` | Runs all tests, validates against BDD scenarios, produces delivery report |
-| `task-tracking` | Maintains `specs/todo.md` and `specs/humanTodo.md` |
-
-All skills are **atomic**, **self‑contained**, and designed to work with Cursor’s Agent mode.
-
-## 🎬 How It Works (Minimal Example)
-
-```text
-User: /dev-flow Build a simple login page
-─────────────────────────────────────────────
-✅ Phase 1 done → REQ-001-login.md
-⏸️   DevFlow: "Continue to Data Modeling?" [Yes] [No]
-
-User clicks Yes
-─────────────────────────────────────────────
-✅ Phase 2 done → Domain model (User), ER diagram
-⏸️   DevFlow: "Continue to Solution Design?" [Yes] [No]
-
-User clicks Yes
-─────────────────────────────────────────────
-✅ Phase 3 done → API spec (POST /login), task list
-⏸️   DevFlow: "Continue to Development?" [Yes] [No]
-
-User clicks Yes
-─────────────────────────────────────────────
-✅ Phase 4 done → src/ + tests/ (TDD)
-⏸️   DevFlow: "Continue to Testing?" [Yes] [No]
-
-User clicks Yes
-─────────────────────────────────────────────
-✅ Phase 5 done → Tests pass, delivery report generated.
-🎉 Flow complete.
+## Change History
+| Time | Action | Note |
+| 2026-06-11 10:30 | Done | REQ-001 confirmed |
+| 2026-06-11 10:45 | In progress | Modeling draft awaiting confirmation |
 ```
 
-### 👤 When humanTodo.md has pending items
+**③ REQ lifecycle** — every requirement doc has clear states:
 
-```text
-📋 humanTodo.md has pending items:
-   ⬜ Provide Stripe API key
-⏸️ DevFlow: "Waiting for human tasks. Complete them and reply 'done'."
+```
+Draft → Confirmed → Implemented → (Deprecated)
 ```
 
-## 📁 Project Structure After Running DevFlow
+**④ Resume from breakpoint** — close chat, come back, say *"continue agileflow"* — AI reads `todo.md` and picks up. **No re-explaining.**
+
+**⑤ Acceptance reports** — Stage 5: one report per REQ, scenario-by-scenario ✅/❌, conclusion PASS / BLOCKED-HUMAN / FAIL.
+
+---
+
+### 🛡️ Quality Assured — L1–L5 Layered Acceptance
+
+| Layer | What | Fast | Strict |
+|-------|------|:----:|:------:|
+| L1 | Lint / Type Check | ✅ | ✅ |
+| L2 | Build | ✅ | ✅ |
+| L3 | Unit / integration tests (incl. REQ cases) | ✅ | ✅ |
+| L4 | Coverage ≥80% | — | ✅ |
+| L5 | Smoke / E2E (real external resources) | skippable | ✅ |
+
+On failure, AI retries up to 3 rounds; still failing → back to Stage 4. **Never marks PASS with bugs.**
+
+---
+
+### 📁 specs/ Documentation — fast delivery, still handoff-ready
+
+Auto-generated throughout — **reviewable, divisible, auditable**:
 
 ```
 specs/
-├── requirements/            # REQ-*.md (BDD scenarios)
-├── 002-data-model.md        # Domain model, ER, SQL
-├── 003-solution.md          # API contracts, architecture
-├── 004-test-report.md       # Test results
-├── delivery-report.md       # Final deliverable summary
-├── todo.md                  # Atomic task list (auto‑updated)
-├── humanTodo.md             # Human tasks (API keys, approvals…)
-sql/
-└── init.sql                 # Database DDL
-src/                         # Generated application code
-tests/                       # Unit & integration tests
+├── requirements/REQ-001-xxx.md   # BDD requirements (Given-When-Then)
+├── 002-data-model.md             # DDD domain model + DDL
+├── 003-solution.md               # SDD architecture + API + task list
+├── tests/REQ-001-acceptance.md   # Per-REQ acceptance evidence
+├── todo.md                       # AI progress (open anytime)
+└── humanTodo.md                  # What needs your help (open anytime)
 ```
-
-## ❓ FAQ
-
-### Does DevFlow only work with Cursor?
-It’s designed for **Cursor (Agent mode)** because it uses `ask_followup_question`. But the skills can be adapted to other AI coding assistants that support similar tool calls.
-
-### Can I skip the gates?
-**No.** The AI is instructed to **never** proceed without calling `ask_followup_question`. This is enforced at the prompt level. You remain in control.
-
-### How is DevFlow different from `agents-setup` or `cursor-team-kit`?
-Those provide many individual skills. DevFlow is **a single opinionated workflow** that chains them together with mandatory human gates and explicit BDD→DDD→SDD→TDD methodology.
-
-### What if I already have existing requirements?
-You can skip Phase 1 and manually place your own `REQ-*.md` files, then start from Phase 2.
-
-## 🤝 Contributing
-
-We welcome new skills, improvements to existing ones, or better gate mechanisms. Please open an issue or PR.
-
-## 📄 License
-
-MIT © aikeeo
 
 ---
 
-<p align="center">
-  Built for developers who want AI to be a teammate, not a runaway train.
-</p>
+### 🧭 Smart Routing — small things skip the full pipeline
+
+| Scenario | Path |
+|----------|------|
+| One-line bugfix, Q&A, hotfix | Exempt from five stages, L1+L3 in **minutes** |
+| API / DB / auth / multi-module changes | Full five-stage pipeline |
+| User says *"fast track / skip pipeline"* | Micro-change path, no REQ/002/003 |
+
+AI won't pull "explain this line" into five stages — **fast when it should be, strict when it must be**.
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/aiKeeo/AgileFlow.git
 ```
+
+Copy `skills/agileflow` to your project's Skill directory (pick the one you use):
+
+| Tool | Project | Global |
+|------|---------|--------|
+| **Cursor** | `YOUR_PROJECT/.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
+| **Claude Code** | `YOUR_PROJECT/.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
+| **Trae** | `YOUR_PROJECT/.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
+
+```bash
+# Example (Cursor)
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
+
+# Example (Claude Code)
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.claude/skills/
+
+# Example (Trae)
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.trae/skills/
+```
+
+Repository: [github.com/aiKeeo/AgileFlow](https://github.com/aiKeeo/AgileFlow)
+
+---
+
+## Usage
+
+```
+Run agileflow — I need a todo-list API shipped today
+```
+
+```
+Continue agileflow                 # Resume from specs/todo.md breakpoint
+Full pipeline, fast mode, deliver in 1 hour
+```
+
+Stage-specific: `write requirements` / `model data` / `design solution` / `implement` / `run acceptance tests`
+
+AI stage declaration example:
+
+```
+📍 Agileflow | Mode: Fast | Stage: 1-Requirements | Basis: new feature, 1h delivery target
+```
+
+---
+
+## 1-Hour Delivery Example
+
+**Scenario**: Expense-tracking API (CRUD + SQLite)
+
+| Time | Stage | AI Output |
+|------|-------|-----------|
+| 0:05 | Requirements | REQ-001.md |
+| 0:10 | Modeling | 002-data-model.md + init.sql |
+| 0:20 | Solution | 003-solution.md + dev tasks |
+| 0:50 | Development | Business code + L3 tests |
+| 1:00 | Testing | L1+L3 PASS, acceptance report |
+
+**Result**: Runnable code + `specs/` docs + acceptance report — deploy or demo immediately.
+
+---
+
+## Flow Diagram
+
+```mermaid
+flowchart LR
+    S1[BDD Requirements] --> S2[DDD Modeling]
+    S2 --> S3[SDD Solution]
+    S3 --> S4[Development]
+    S4 --> S5[L1-L5 Acceptance]
+```
+
+---
+
+## Directory Structure
+
+```
+AgileFlow/
+├── README.md
+├── README.zh-CN.md
+├── LICENSE
+└── skills/agileflow/
+    ├── SKILL.md
+    ├── phases/          # Five-stage instructions
+    ├── templates/       # Doc & gate templates
+    └── examples/
+```
+
+---
+
+## When to Use / Skip
+
+| ✅ Use | ❌ Skip |
+|--------|---------|
+| Run agileflow / full pipeline / ship today | Pure Q&A, explanations |
+| Build from scratch, MVP, demo | Code review, read code |
+| Have `specs/` and say *"continue agileflow"* | Single-file tweak, one-line bugfix |
+
+---
+
+## Version
+
+**v4.2.0** — see [SKILL.md](skills/agileflow/SKILL.md)
+
+---
+
+## License
+
+MIT
+
+---
+
+## Contributing
+
+Issues and PRs welcome.

@@ -1,206 +1,318 @@
-<!--
-  DevFlow - 人机协同的 AI 开发流程
-  https://github.com/yourusername/devflow
--->
+# Agileflow — AI Agent Skill · 1 小时快速交付
 
-<p align="center">
-  <img src="https://img.shields.io/badge/BDD%20→%20DDD%20→%20SDD%20→%20TDD-8A2BE2" alt="BDD→DDD→SDD→TDD" />
-  <img src="https://img.shields.io/badge/1小时-全栈应用-brightgreen" alt="1小时全栈应用" />
-  <img src="https://img.shields.io/badge/人工闸门-强制-blue" alt="人工闸门强制" />
-  <img src="https://img.shields.io/badge/Cursor-Agent就绪-orange" alt="Cursor Agent就绪" />
-</p>
+[English](README.md) | **中文**
 
-<h1 align="center">DevFlow</h1>
-<p align="center">
-  <strong>让 AI 不再跳过设计、测试和你的审批。<br />在每个阶段都要你说“是”。</strong>
-</p>
+> 用敏捷五阶段 + **BDD→DDD→SDD→TDD**，把「想法」变成「可运行、可验收、可交接」的成品。简单项目 **~1 小时上线**，MVP **当天可交付**。
 
-<p align="center">
-  <a href="#-快速开始">快速开始</a> •
-  <a href="#-为什么是devflow">为什么是 DevFlow？</a> •
-  <a href="#-五个阶段">五个阶段</a> •
-  <a href="#-技能列表">技能列表</a> •
-  <a href="#-工作原理">工作原理</a> •
-  <a href="README.md">English</a>
-</p>
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#为什么能-1-小时上线)
 
 ---
 
-## 🧠 什么是 DevFlow？
+## 一句话介绍
 
-**DevFlow 是一个有人工闸门的 AI 开发流程**，将模糊需求转化为生产就绪的代码，同时防止 AI 跳过设计、测试和你的审批。
+**Agileflow** 把软件工程最佳实践写成 AI 可执行的 Skill：**BDD** 写需求、**DDD** 建模型、**SDD** 定方案、**TDD** 写代码，每阶段有人类确认闸门，全程产出 `specs/` 文档。  
+对 AI 说「走 agileflow」—— 从 0 到可部署，**最快 1 小时，通常半天内完成 MVP**。
 
-它集成了 **BDD、DDD、SDD 和 TDD**，形成线性的、阶段闸门式流程：
+---
+
+## 为什么能 1 小时上线？
+
+传统 AI 编程：**想到哪写到哪** → 缺测试、缺文档、改需求全推翻，上线周期以「天」计。
+
+Agileflow 的做法：**流程压缩，但不牺牲结构**。
+
+| 环节 | 传统做法 | Agileflow 快速模式 | 典型耗时 |
+|------|----------|-------------------|----------|
+| 需求 | 口头描述，AI 猜 | BDD 场景 + 1 轮确认 | **5–10 min** |
+| 建模 | 跳过或事后补 | 轻量 DDD：核心表 + DDL | **5–10 min** |
+| 方案 | 边写边改 | SDD 模板：API + 任务清单 | **10–15 min** |
+| 开发 | 大段生成、难维护 | 按原子任务逐块实现 | **20–30 min** |
+| 验收 | 手动点一点 | L1+L3 自动跑通 | **5–10 min** |
+| **合计** | 1–3 天 + 返工 | **~1 小时**（简单 CRUD / 工具类） | |
+
+> **更快**：hotfix、微型改动 → 豁免全流程，**L1+L3 几分钟**。  
+> **更稳**：支付 / 权限 / 核心业务 → 严谨模式，TDD + L1–L5 全验收。
+
+---
+
+## 解决谁的痛点？
+
+| 人群 | 常见痛点 | Agileflow 怎么帮 |
+|------|----------|------------------|
+| **独立开发者 / 创业者** | 有想法但 weeks 才出 Demo | 快速模式：**~1 小时**出可部署 Demo |
+| **接外包 / 副业开发者** | 交付无文档难收尾 | specs/ 全套 + REQ ↔ 验收报告一一对应 |
+| **小团队 Tech Lead** | AI 产出难 Review、难交接 | 五阶段产出可分工、可审计 |
+| **后端 / 全栈工程师** | 表结构和 API 对不上 | DDD 前置，DDL 和 API 先确认再写码 |
+| **怕 AI 跑偏的用户** | AI 闷头写，方向错了全推翻 | **阶段闸门 + 需求确认卡片**，每步等你点头 |
+| **AI 干一半就卡死的用户** | 缺密钥、缺环境，AI 假装完成 | **humanTodo** 明确列出需要你帮忙的事，未齐则 `BLOCKED-HUMAN` |
+| **不知道 AI 在干嘛的用户** | 对话关了进度全丢 | **`specs/todo.md` 实时进度** + 断点续跑「继续 agileflow」 |
+| **需要合规的团队** | 需求→实现→测试无法追溯 | BDD 场景 → 测试 → 独立验收报告，全程留痕 |
+
+---
+
+## 核心亮点
+
+### 🚀 1 小时快速交付
+
+不是「AI 乱写一堆代码」，而是**压缩流程、保留结构** —— 简单 CRUD / 工具类项目，五阶段跑完 **~1 小时**可部署；MVP **当天交付**。
+
+| 模式 | 速度 | 适用 |
+|------|------|------|
+| **快速模式** | ~1 小时 | Demo、CRUD、内部工具 |
+| **严谨模式** | 半天–1 天 | 支付/权限/核心业务 |
+| **豁免通道** | 几分钟 | 改一行 bug、hotfix（L1+L3） |
+
+---
+
+### 📐 敏捷五阶段 × BDD→DDD→SDD→TDD
+
+每一阶段绑定一种工程方法论，**先想清楚再写代码**，不是 AI 想到哪写到哪：
 
 ```
-需求澄清 → 数据建模 → 方案设计 → 开发实现 → 测试验收
+需求澄清 → 数据建模 → 技术方案 → 开发实现 → 测试验收
+   BDD        DDD         SDD         TDD      L1–L5
+  ~10min     ~10min      ~15min      ~30min    ~10min
 ```
 
-在每个阶段结束时，DevFlow 使用 `ask_followup_question` **停下来并等待你的确认**。没有意外，没有“魔法跳跃”。
+| 阶段 | 方法论 | 核心产出 |
+|:----:|:------:|----------|
+| 1 需求澄清 | **BDD** | `REQ-*.md`（Given-When-Then 验收场景） |
+| 2 数据建模 | **DDD** | 聚合根、不变量、ER 图、`sql/init.sql` |
+| 3 技术方案 | **SDD** | 架构、API 契约、可观测性、原子任务拆解 |
+| 4 开发实现 | **TDD** | 业务代码 + 测试（严谨模式：红→绿→重构） |
+| 5 测试验收 | **BDD 回溯** | 逐 REQ 验收报告 + L1–L5 流水线 |
 
-## 🚀 快速开始
+---
 
-### 1. 安装技能
-将 `skills/` 文件夹复制到你的 Cursor 工作区：
+### 🤝 人类在环 — AI 干不了的，明确找你要
 
-```bash
-cp -r skills/ .cursor/skills/
+AI 不是闷头干到底，**关键决策和外部资源必须人类参与**：
+
+| 机制 | 什么时候触发 | 你需要做什么 |
+|------|-------------|-------------|
+| **需求确认卡片** | 阶段 1：信息不足 / 草稿完成 | 选功能范围、确认 BDD 场景对不对 |
+| **领域规则确认** | 阶段 2：建模草稿完成 | 确认聚合根、不变量、表结构 |
+| **阶段闸门** | 阶段 1–4 每阶段结束 | 点「是，继续」才进入下一阶段；点「否，暂停」随时停 |
+| **humanTodo 人类待办** | 任何阶段识别到外部依赖 | 提供 API 密钥、商户号、`.env`、业务拍板、运维资源等 |
+
+**humanTodo 示例**（AI 自动写入 `specs/humanTodo.md`）：
+
+| 事项 | 来源 | 状态 |
+|------|------|------|
+| 提供微信支付商户号及 API 密钥 | 需求澄清 | ⬜ 待办 |
+| 确认 `.env.local` 数据库连接已配置 | 技术方案 | ⬜ 待办 |
+| 业务方确认订单状态流转规则 | 数据建模 | ✅ 已完成 |
+
+- AI 遇到 ⬜ 待办 → **主动暂停**，不会假装完成
+- 你完成后通知 AI → 解除阻塞，继续流程
+- 资源未齐时验收结论为 **`BLOCKED-HUMAN`**，不会误标「交付完成」
+
+**你掌控方向，AI 负责执行 —— 不是 AI 替你做决定。**
+
+---
+
+### 📊 进度全程可见 — 随时知道 AI 卡在哪
+
+打开 `specs/` 文件夹，**一眼看清项目走到哪、还剩什么**：
+
+**① 阶段声明行** — 每次 AI 回复首行告诉你当前状态：
+
+```
+📍 Agileflow | 模式：快速 | 阶段：3-技术方案 | 依据：todo 下一未完成阶段
 ```
 
-### 2. 启动流程
-在 Cursor 中输入：
+**② `specs/todo.md`** — AI 任务 + 流程进度 + 变更历史：
 
-```
-/dev-flow 帮我开发一个用户登录认证系统
-```
+```markdown
+## 流程进度
+- [x] 需求澄清 ✅
+- [x] 数据建模 ✅
+- [ ] 技术方案 🔄        ← 当前阶段
+- [ ] 开发实现
+- [ ] 测试验收
 
-### 3. 跟随闸门
-在每个阶段回答几个问题。大约 **一小时后**，你将拥有：
+## 开发任务
+- [x] 创建数据库表
+- [ ] 实现用户 API 🔄    ← 正在做
+- [ ] 实现订单 API
 
-- ✅ 清晰的需求（含 Given‑When‑Then 场景）
-- ✅ 领域模型和数据库表结构
-- ✅ API 契约和任务拆解
-- ✅ 经过测试的后端 + 前端代码
-- ✅ 交付报告
-
-> **真实案例** – 从空白项目到可运行的全栈应用，约 60 分钟。
-
-## 🔥 为什么是 DevFlow？
-
-大多数 AI 工具太“着急” – 它们直接跳到代码，忽略领域逻辑，跳过测试，产出“能跑就行”的一次性产物。
-
-**DevFlow 完全不同。**
-
-| 痛点 | DevFlow 的解法 |
-|------|----------------|
-| AI 不理解领域就写代码 | **DDD** – 聚合根、不变量、状态机 |
-| 没有统一的行为理解 | **BDD** – 每个需求都有 Given‑When‑Then |
-| 没有设计，只有随机文件 | **SDD** – 编码前先约定 API 和原子任务 |
-| 零测试，无法维护 | **TDD** – 红绿重构，严谨模式核心覆盖率 100% |
-| AI 自己做决定不问你 | **强制人工闸门** – 每个阶段后必须你点“继续” |
-| 外部依赖阻塞流程 | `specs/humanTodo.md` – AI 主动暂停并等待你的输入 |
-
-### 📋 时刻清楚当前状态 – 不再迷路
-
-两个文件让你和 AI 始终对齐：
-
-| 文件 | 作用 | 谁更新 | 示例 |
-|------|------|--------|------|
-| `specs/todo.md` | **任务跟踪** – 哪些已完成、下一步做什么、流程进度 | AI 自动更新（每个任务/阶段后） | `- [x] 需求澄清`<br>`- [ ] 数据建模` |
-| `specs/humanTodo.md` | **人类依赖** – API 密钥、审批、外部配置 | AI 写入，你勾选完成 | `⬜ 提供微信支付商户号`<br>`⬜ 确认订单取消规则` |
-
-**不再靠猜。**  
-- 卡住了？查看 `humanTodo.md` – AI 甚至会**主动暂停并提醒你**完成待办事项。  
-- 休息后想继续？打开 `todo.md` – 你一眼就能看到下一个阶段或任务是什么。
-
-> 这让 AI 从“黑盒”变成了**透明的队友**。
-
-## 📐 五个阶段
-
-| 阶段 | 技能 | 产出 | 人工闸门 |
-|------|------|------|----------|
-| 1. **需求澄清** | `product-requirement` | `REQ-*.md`（BDD 场景） | ✅ 必须确认 |
-| 2. **数据建模** | `data-modeling` | 领域模型、ER 图、`sql/init.sql` | ✅ 必须确认 |
-| 3. **技术方案** | `solution-design` | API 契约、任务清单（`todo.md`） | ✅ 必须确认 |
-| 4. **开发实现** | `development` | `src/`、`tests/`（TDD 驱动） | ✅ 必须确认 |
-| 5. **测试验收** | `testing` | 测试报告、交付报告 | – 流程结束 |
-
-> **没有你的明确“是”，任何阶段都不能开始。**  
-> AI 在物理上无法跳过 – 它必须调用 `ask_followup_question` 并停下来。
-
-## 🧩 技能列表
-
-| 技能 | 职责 |
-|------|------|
-| `dev-flow` | 编排 5 阶段流程，强制闸门，维护 `todo.md` 和 `humanTodo.md` |
-| `product-requirement` | 编写带 BDD 场景的 REQ‑*.md，版本追踪 |
-| `data-modeling` | 产出领域模型（聚合、不变量）、ER 图、SQL DDL |
-| `solution-design` | 编写技术方案、API 契约、原子任务 |
-| `development` | 实现代码（快速模式或严格 TDD），更新任务状态 |
-| `testing` | 运行所有测试，对照 BDD 场景验收，产出交付报告 |
-| `task-tracking` | 维护 `specs/todo.md` 和 `specs/humanTodo.md` |
-
-所有技能都是**原子的**、**自包含的**，专为 Cursor 的 Agent 模式设计。
-
-## 🎬 工作原理（最小示例）
-
-```text
-用户: /dev-flow 做一个简单的登录页
-─────────────────────────────────────────────
-✅ 阶段1完成 → REQ-001-login.md
-⏸️   DevFlow: “是否继续进入【数据建模】？” [是] [否]
-
-用户点击“是”
-─────────────────────────────────────────────
-✅ 阶段2完成 → 领域模型 (User), ER 图
-⏸️   DevFlow: “是否继续进入【技术方案】？” [是] [否]
-
-用户点击“是”
-─────────────────────────────────────────────
-✅ 阶段3完成 → API 规范 (POST /login), 任务列表
-⏸️   DevFlow: “是否继续进入【开发实现】？” [是] [否]
-
-用户点击“是”
-─────────────────────────────────────────────
-✅ 阶段4完成 → src/ + tests/（TDD）
-⏸️   DevFlow: “是否继续进入【测试验收】？” [是] [否]
-
-用户点击“是”
-─────────────────────────────────────────────
-✅ 阶段5完成 → 测试通过，交付报告生成。
-🎉 流程结束。
+## 变更历史
+| 时间 | 操作 | 说明 |
+| 2026-06-11 10:30 | 完成 | REQ-001 需求已确认 |
+| 2026-06-11 10:45 | 进行中 | 数据建模草稿待确认 |
 ```
 
-### 👤 当 humanTodo.md 有待办事项时的行为
+**③ REQ 状态流转** — 每个需求文档有明确生命周期：
 
-```text
-📋 humanTodo.md 中有未完成事项：
-   ⬜ 提供 Stripe API 密钥
-⏸️ DevFlow: “等待人类任务。完成后回复‘已处理’。”
+```
+草稿 → 已确认 → 已实现 → （已废弃）
 ```
 
-## 📁 运行 DevFlow 后的项目结构
+**④ 断点续跑** — 关掉对话再回来，说「继续 agileflow」，AI 读 `todo.md` 从断点接着干，**不用重复解释**。
+
+**⑤ 验收报告** — 阶段 5 每个 REQ 一份报告，场景逐条 ✅ / ❌，结论 PASS / BLOCKED-HUMAN / FAIL。
+
+---
+
+### 🛡️ 质量有保障 — L1–L5 分层验收
+
+| 层 | 验什么 | 快速模式 | 严谨模式 |
+|----|--------|:--------:|:--------:|
+| L1 | Lint / Type Check | ✅ | ✅ |
+| L2 | Build 编译 | ✅ | ✅ |
+| L3 | 单元 / 集成测试（含 REQ 用例） | ✅ | ✅ |
+| L4 | 覆盖率 ≥80% | — | ✅ |
+| L5 | 冒烟 / E2E（真连外部资源） | 可 skip | ✅ |
+
+测试失败 AI 自动重跑最多 3 轮；仍失败 → 回阶段 4 修复，**不会带着 bug 标 PASS**。
+
+---
+
+### 📁 specs/ 文档体系 — 快交付也能交接
+
+全程自动生成，**可 Review、可分工、可审计**：
 
 ```
 specs/
-├── requirements/            # REQ-*.md (BDD 场景)
-├── 002-data-model.md        # 领域模型、ER、SQL
-├── 003-solution.md          # API 契约、架构
-├── 004-test-report.md       # 测试结果
-├── delivery-report.md       # 最终交付摘要
-├── todo.md                  # 原子任务列表（自动更新）
-├── humanTodo.md             # 人类待办（API 密钥、审批…）
-sql/
-└── init.sql                 # 数据库 DDL
-src/                         # 生成的应用程序代码
-tests/                       # 单元和集成测试
+├── requirements/REQ-001-xxx.md   # BDD 需求（Given-When-Then）
+├── 002-data-model.md             # DDD 领域模型 + DDL
+├── 003-solution.md               # SDD 架构 + API + 任务清单
+├── tests/REQ-001-验收报告.md       # 逐 REQ 验收证据
+├── todo.md                       # AI 进度（你随时打开看）
+└── humanTodo.md                  # 需要你帮忙的事（你随时打开做）
 ```
-
-## ❓ 常见问题
-
-### DevFlow 只支持 Cursor 吗？
-它为 **Cursor（Agent 模式）** 设计，因为用到了 `ask_followup_question`。但技能可以适配其他支持类似工具调用的 AI 编程助手。
-
-### 我能跳过闸门吗？
-**不能。** AI 被明确指示 **永远** 不能在不调用 `ask_followup_question` 的情况下继续。提示词层面就强制了这一点。你始终掌握控制权。
-
-### DevFlow 和 `agents-setup` 或 `cursor-team-kit` 有什么不同？
-那些提供了许多独立技能。DevFlow 是一个**单一的、有观点的流程**，将它们串联起来，并强制了人工闸门和 BDD→DDD→SDD→TDD 方法论。
-
-### 如果我已经有现成的需求文档怎么办？
-你可以跳过阶段 1，手动放入你自己的 `REQ-*.md` 文件，然后从阶段 2 开始。
-
-## 🤝 贡献
-
-欢迎贡献新的技能、改进现有技能或更好的闸门机制。请开 Issue 或 PR。
-
-## 📄 许可证
-
-MIT © aikeeeo
 
 ---
 
-<p align="center">
-  为那些希望 AI 成为队友而非脱缰野马的开发者而构建。
-</p>
+### 🧭 智能路由 — 小事不走全流程
+
+| 场景 | 走什么 |
+|------|--------|
+| 改一行 bug、纯答疑、hotfix | 豁免五阶段，L1+L3 **几分钟** |
+| API / DB / 权限 / 多模块变更 | 强制完整五阶段 |
+| 用户说「快速通道 / 不走流程」 | 微型改动通道，不写 REQ/002/003 |
+
+AI 不会把「解释这行代码」也拉进五阶段，**该快则快，该重则重**。
+
+---
+
+## 安装
+
+```bash
+git clone https://github.com/aiKeeo/AgileFlow.git
 ```
+
+将 `skills/agileflow` 复制到你使用的 Skill 目录：
+
+| 工具 | 项目内 | 全局 |
+|------|--------|------|
+| **Cursor** | `YOUR_PROJECT/.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
+| **Claude Code** | `YOUR_PROJECT/.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
+| **Trae** | `YOUR_PROJECT/.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
+
+```bash
+# 示例（Cursor）
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
+
+# 示例（Claude Code）
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.claude/skills/
+
+# 示例（Trae）
+cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.trae/skills/
+```
+
+项目地址：[github.com/aiKeeo/AgileFlow](https://github.com/aiKeeo/AgileFlow)
+
+---
+
+## 使用
+
+```
+走 agileflow，我想做一个待办清单 API，今天就要上线
+```
+
+```
+继续 agileflow                    # 从 specs/todo.md 断点续跑
+走完整流程，快速模式，1 小时内交付
+```
+
+指定阶段：`写需求` / `做数据建模` / `出技术方案` / `按方案开发` / `跑验收测试`
+
+AI 首行声明示例：
+
+```
+📍 Agileflow | 模式：快速 | 阶段：1-需求澄清 | 依据：新功能，目标 1h 交付
+```
+
+---
+
+## 1 小时交付示例
+
+**场景**：记账 API（CRUD + SQLite）
+
+| 时间 | 阶段 | AI 产出 |
+|------|------|---------|
+| 0:05 | 需求澄清 | REQ-001.md |
+| 0:10 | 数据建模 | 002-data-model.md + init.sql |
+| 0:20 | 技术方案 | 003-solution.md + 开发任务 |
+| 0:50 | 开发实现 | 业务代码 + L3 测试 |
+| 1:00 | 测试验收 | L1+L3 PASS，验收报告 |
+
+**结果**：可运行代码 + specs/ 文档 + 验收报告，直接部署或演示。
+
+---
+
+## 流程示意
+
+```mermaid
+flowchart LR
+    S1[BDD 需求] --> S2[DDD 建模]
+    S2 --> S3[SDD 方案]
+    S3 --> S4[开发实现]
+    S4 --> S5[L1-L5 验收]
+```
+
+---
+
+## 目录结构
+
+```
+AgileFlow/
+├── README.md
+├── README.zh-CN.md
+├── LICENSE
+└── skills/agileflow/
+    ├── SKILL.md
+    ├── phases/          # 五阶段指令
+    ├── templates/       # 文档 & 闸门模板
+    └── examples/
+```
+
+---
+
+## 适用 / 不适用
+
+| ✅ 适合 | ❌ 不必 |
+|--------|--------|
+| 走 agileflow / 完整流程 / 今天上线 | 纯解释、答疑 |
+| 从零做系统、MVP、Demo | Code Review、读代码 |
+| 已有 specs/ 说「继续 agileflow」 | 单文件小改、改一行 bug |
+
+---
+
+## 版本
+
+**v4.2.0** — 详见 [SKILL.md](skills/agileflow/SKILL.md)
+
+---
+
+## License
+
+MIT
+
+---
+
+## 贡献
+
+欢迎 Issue / PR。
