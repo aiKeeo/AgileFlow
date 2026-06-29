@@ -1,6 +1,10 @@
 # 需求澄清 AskQuestion 模板
 
-## 第 1 步：初次提问（信息不足时）
+> **入口铁律**：进入阶段 1 后**第一件事**就是本卡片；用户已发长需求也**不可跳过**——用本卡片做确认/补充，而非直接写 REQ。
+
+## 第 1 步：澄清/确认（进入阶段 1 后必须先做）
+
+根据用户**已述内容**生成选项（把用户提到的功能写进 `core_features`，勿留空占位）：
 
 ```
 title: "{项目名} - 需求澄清"
@@ -21,21 +25,30 @@ questions:
       - { id: "unsure", label: "还没想好，帮我建议" }
 
   - id: "core_features"
-    prompt: "核心功能有哪些？（可多选）"
+    prompt: "核心功能有哪些？（可多选，已根据你的描述预填）"
     allow_multiple: true
     options:
-      - { id: "feature_a", label: "（根据用户描述填入具体选项）" }
-      - { id: "feature_b", label: "..." }
-      - { id: "other", label: "其他（我会在下轮补充）" }
+      - { id: "feature_a", label: "（根据用户描述填入）" }
+      - { id: "other", label: "还有其他要补充" }
 
   - id: "priority"
     prompt: "第一版 MVP 最优先解决什么？"
     options:
       - { id: "mvp_a", label: "（根据上下文填入）" }
-      - { id: "mvp_b", label: "..." }
+      - { id: "all", label: "第一版就要全部功能" }
+
+  - id: "ui_scope"
+    prompt: "项目是否涉及用户可见界面（Web/App/小程序）？"
+    options:
+      - { id: "ui_yes", label: "有，需要描述页面/交互（样式我后面自己定）" }
+      - { id: "ui_partial", label: "有界面，但第一版可以先做 API/后端" }
+      - { id: "ui_no", label: "无 UI（纯 API/CLI/批处理）" }
+      - { id: "ui_unsure", label: "不确定，帮我判断" }
 ```
 
-## 第 3 步：确认提问
+**调用 AskQuestion 后立即停止**；禁止同回复写 REQ。
+
+## 第 3 步：草稿确认（写完 REQ 草稿后）
 
 ```
 title: "需求确认"
@@ -56,10 +69,17 @@ questions:
       - { id: "share", label: "分享/协作" }
       - { id: "offline", label: "离线使用" }
       - { id: "other", label: "其他（下轮文字补充）" }
+
+  - id: "ui_confirm"
+    prompt: "界面描述（UID）是否准确？\n\n（列出已生成的 UID-xxx 或「本项目无 UI」）\n\n注：此处只确认结构与交互；视觉样式由你后续决定。"
+    options:
+      - { id: "ui_ok", label: "界面描述 OK / 无 UI 无需描述" }
+      - { id: "ui_add", label: "还要补充页面或交互" }
+      - { id: "ui_revise", label: "界面描述需要大改" }
 ```
 
 ## 正误示例
 
 **✅ 正确**：AskQuestion 收集 → 草稿 → AskQuestion 确认 → 标已确认 → 阶段闸门（askquestion-gate.md）
 
-**❌ 错误**：一句话直接写 5 个 REQ；正文追问平台；草稿未确认就标「已确认」
+**❌ 错误**：未 AskQuestion 就写 REQ；一句话直接写 5 个 REQ；AskQuestion 后同回复继续写文档；正文聊天追问平台

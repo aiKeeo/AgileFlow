@@ -1,6 +1,6 @@
 # 可观测性与日志（语言无关）
 
-> 阶段 3 写入 003、阶段 4 实现、阶段 5 验收均引用本文件。**以 `003 §可观测性` 为唯一依据**，禁止硬套某一语言或目录。
+> 阶段 3 写入 `specs/solution/architecture.md` 可观测性章节、阶段 4 实现、阶段 5 验收均引用本文件。**以 architecture.md 为唯一依据**，禁止硬套某一语言或目录。
 
 ## 选型原则
 
@@ -8,11 +8,11 @@
 |----|------|
 | 日志框架 | 使用该语言/框架**生态惯用方案**（见下表示例，非穷尽） |
 | 格式 | 结构化：含 `timestamp`、`level`、`traceId`、`event`；JSON 或 key=value |
-| 输出 | dev/prod **必须文件落盘**；路径在 003 约定；test profile 可仅控制台 |
+| 输出 | dev/prod **必须文件落盘**；路径在 architecture.md 约定；test profile 可仅控制台 |
 | traceId | HTTP/API 入站生成，向下游与日志传递 |
-| event | 名称、字段、级别以 003「REQ→event 映射表」为准；禁止未备案 event |
+| event | 名称、字段、级别以 architecture.md「REQ→event 映射表」为准；禁止未备案 event |
 
-## 按技术栈选框架（003 中填实际选型）
+## 按技术栈选框架（architecture.md 中填实际选型）
 
 | 栈 | 常用框架 | 配置/入口示例 |
 |----|----------|---------------|
@@ -23,11 +23,11 @@
 | Rust | tracing / log | `tracing_subscriber` |
 | .NET | Serilog / ILogger | `appsettings.json`、`Program.cs` |
 | PHP | Monolog | `monolog.yaml` |
-| 前端 | 可上报 + 本地 debug 文件（若 003 要求） | 按 003 约定 |
+| 前端 | 可上报 + 本地 debug 文件（若 architecture.md 要求） | 按 architecture.md 约定 |
 
-**禁止**：未在 003 选型就写死 `backend/logs/`、logback、winston 等。
+**禁止**：未在 architecture.md 选型就写死 `backend/logs/`、logback、winston 等。
 
-## 003 §可观测性 必须约定
+## architecture.md 可观测性章节必须约定
 
 ```markdown
 ## 可观测性方案
@@ -39,7 +39,7 @@
 | 日志框架 | {如 slf4j + logback} | 生态惯用即可 |
 | 格式 | JSON / key=value | 须含 traceId、event |
 | 日志目录 | {如 logs/ 或 backend/logs/} | **按项目结构约定** |
-| 日志文件 | {如 app.log, app.json.log} | 文件名在 003 写明 |
+| 日志文件 | {如 app.log, app.json.log} | 文件名在 architecture.md 写明 |
 | 环境变量 | {如 LOG_PATH} | 可覆盖默认路径 |
 | 链路追踪 | X-Request-Id / traceId | 入站生成并传递 |
 
@@ -63,7 +63,7 @@
 
 ## 验收取证（阶段 5）
 
-从 **003 约定的日志目录与文件名** 检索，示例（将 `{LOG_DIR}`、`{LOG_FILE}` 替换为 003 值）：
+从 **architecture.md 约定的日志目录与文件名** 检索，示例（将 `{LOG_DIR}`、`{LOG_FILE}` 替换为 architecture.md 中的值）：
 
 | 检查项 | Linux/macOS | Windows (PowerShell) |
 |--------|-------------|----------------------|
