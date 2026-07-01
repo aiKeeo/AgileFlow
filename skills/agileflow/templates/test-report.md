@@ -1,13 +1,13 @@
-# 测试验收报告模板
+﻿# 测试验收报告模板
 
 > AC 规范：[ac-guide.md](ac-guide.md)
 
-## REQ 验收报告（`specs/tests/REQ-XXX-验收报告.md`）
+## REQ 验收报告（`atlas/tests/REQ-XXX-验收报告.md`）
 
 ```markdown
 # [REQ-XXX] 验收报告
 
-- 关联需求：`specs/requirements/REQ-XXX-名称.md`
+- 关联需求：`atlas/requirements/REQ-XXX-名称.md`
 - 关联功能：F-xxx（可选）
 - 验收时间：{{时间}}
 - 验收模式：快速 | 严谨
@@ -33,10 +33,10 @@
 - ⚠️ FE 人工 AC 列表及点验说明
 ```
 
-## README（`specs/tests/README.md`）
+## README（`atlas/tests/README.md`）
 
 含：交付概览、全流程结论、REQ 对照表（含 AC 覆盖）、流水线摘要、humanTodo 状态。
 
 ## 可观测性验收命令
 
-从 `specs/solution/architecture.md` 可观测性章节取 `{LOG_DIR}`、`{LOG_FILE}`，完整示例见 [observability-logging.md](observability-logging.md#验收取证阶段-5)。
+从 `atlas/solution/architecture.md` 可观测性章节取 `{LOG_DIR}`、`{LOG_FILE}`，完整示例见 [observability-logging.md](observability-logging.md#验收取证阶段-5)。

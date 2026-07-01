@@ -1,6 +1,6 @@
-# 阶段 3：方案设计（sol:）
+﻿# 阶段 3：方案设计（sol:）
 
-> **用户前缀**：`sol:` = `specs/solution/`  
+> **用户前缀**：`sol:` = `atlas/solution/`  
 > 模板：[templates/solution-core.md](../templates/solution-core.md)  
 > **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 批次 A。
 
@@ -11,14 +11,14 @@
 | **1** | **功能（含边界）** | `features/F-xxx.md` — 说明 + **§边界** + 验收要点 |
 | **2** | **契约 / 接口文档（按需）** | `contracts/` — **暴露面详细规格集中存放**；feature 只链 ID |
 | **3** | **架构（全局一份）** | `architecture.md` — 全项目共享，不按功能拆 |
-| **4** | **任务编排** | `specs/todo.md` + 功能依赖表（供阶段 4 **串行**排序；并行时作批次参考） |
+| **4** | **任务编排** | `atlas/todo.md` + 功能依赖表（供阶段 4 **串行**排序；并行时作批次参考） |
 
 **阶段 4 才写**：源码、AC 测试代码、dev/ 实现步骤。
 
 ## 目录结构
 
 ```
-specs/solution/
+atlas/solution/
 ├── README.md
 ├── features/          # 含 §边界，无单独 boundaries.md
 ├── contracts/         # 接口/暴露面文档库（有 API/UI/JOB/EVT 才写）
@@ -45,7 +45,7 @@ specs/solution/
 
 1. **调用 `AskQuestion` 工具**，弹出 [阶段闸门小卡片](../templates/askquestion-gate.md#阶段闸门模板)
 2. prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`
-3. **调用后立即停止**——禁止同回复写 `specs/dev/` 或业务源码
+3. **调用后立即停止**——禁止同回复写 `atlas/dev/` 或业务源码
 
 | 禁止 | 说明 |
 |------|------|

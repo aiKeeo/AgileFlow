@@ -1,16 +1,16 @@
-# 任务跟踪（贯穿各阶段）
+﻿# 任务跟踪（贯穿各阶段）
 
 > todo 模板：[templates/todo.md](../templates/todo.md)
 > humanTodo / 阻塞检查：[templates/human-todo.md](../templates/human-todo.md)
 
 ## 作用
 
-维护 `specs/todo.md`（AI/开发者任务）、`specs/humanTodo.md`（人类待办）、`specs/active-edits.md`（并行改文件锁）。
+维护 `atlas/todo.md`（AI/开发者任务）、`atlas/humanTodo.md`（人类待办）、`atlas/active-edits.md`（并行改文件锁）。
 
 ## 执行时机
 
 1. 项目初始化：创建 todo + humanTodo 模板
-2. 阶段 3（sol:）：拆解开发任务 + **功能依赖表**写入 `specs/todo.md`；用户显式并行出方案时走 [parallel-orchestration.md](parallel-orchestration.md) 批次 A
+2. 阶段 3（sol:）：拆解开发任务 + **功能依赖表**写入 `atlas/todo.md`；用户显式并行出方案时走 [parallel-orchestration.md](parallel-orchestration.md) 批次 A
 3. 阶段 4：**默认单 Agent 串行** — 取 todo 首个 **① 未勾** 的 T-xxx → **`TodoWrite` 同步三步** → 严格 **①→②→③** 逐项勾选（见 [todo.md 开发任务](../templates/todo.md#开发任务)）→ 父任务 ✅ → 下一任务。**Write 业务源码前须过 W0–W7**（[04-development Write 拦截](04-development.md#write-拦截构思未完成--禁止写码)）；用户显式并行时读 parallel-orchestration 批次 B→C；**仅主 Agent** 更新 todo / dev **九** / active-edits
 4. 各阶段：**识别人类依赖 → 当次追加 humanTodo**（见 [human-todo 沉淀铁律](../templates/human-todo.md#沉淀铁律易忘)）；阶段 4 写 dev 时同步检查
 5. **阶段 4 开始前、阶段 5 开始前**：humanTodo 阻塞检查
@@ -23,28 +23,28 @@
 - todo「变更历史」须记录每次更新
 - 阻塞检查逻辑见 human-todo.md
 - 用户反馈人类待办完成 → 更新状态并重新检查
-- 并行写码前须维护 `specs/active-edits.md`；见 [templates/active-edits.md](../templates/active-edits.md)
+- 并行写码前须维护 `atlas/active-edits.md`；见 [templates/active-edits.md](../templates/active-edits.md)
 
 ## 强制文档产出
 
 | 文件 | 说明 |
 |------|------|
-| `specs/README.md` | 项目总览 |
-| `specs/todo.md` | AI 任务 + 流程进度 |
-| `specs/humanTodo.md` | 人类待办 |
-| `specs/model/` | 数据建模（阶段 2） |
-| `specs/solution/` | 方案（sol:，阶段 3） |
-| `specs/dev/` | 功能实现思路（阶段 4） |
-| `specs/tests/REQ-*-验收报告.md` | 每 REQ 一份（**阶段 5** 产出） |
-| `specs/tests/README.md` | 索引 + 交付汇总 |
-| `specs/active-edits.md` | 并行改文件锁（阶段 4 并行时） |
+| `atlas/README.md` | 项目总览 |
+| `atlas/todo.md` | AI 任务 + 流程进度 |
+| `atlas/humanTodo.md` | 人类待办 |
+| `atlas/model/` | 数据建模（阶段 2） |
+| `atlas/solution/` | 方案（sol:，阶段 3） |
+| `atlas/dev/` | 功能实现思路（阶段 4） |
+| `atlas/tests/REQ-*-验收报告.md` | 每 REQ 一份（**阶段 5** 产出） |
+| `atlas/tests/README.md` | 索引 + 交付汇总 |
+| `atlas/active-edits.md` | 并行改文件锁（阶段 4 并行时） |
 
 ## 项目初始化
 
-若 `specs/` 不存在，创建：
+若 `atlas/` 不存在，创建：
 
 ```
-specs/
+atlas/
 ├── README.md
 ├── todo.md
 ├── humanTodo.md
@@ -56,7 +56,7 @@ specs/
 └── tests/README.md
 ```
 
-阶段 2 初始化 `specs/model/`；阶段 3 初始化 `specs/solution/`；阶段 4 初始化 `specs/dev/`。
+阶段 2 初始化 `atlas/model/`；阶段 3 初始化 `atlas/solution/`；阶段 4 初始化 `atlas/dev/`。
 
 模板见 [templates/todo.md](../templates/todo.md)、[templates/human-todo.md](../templates/human-todo.md)、[templates/active-edits.md](../templates/active-edits.md)。
 

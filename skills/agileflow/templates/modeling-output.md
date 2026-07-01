@@ -1,4 +1,4 @@
-# 数据建模模板（specs/model/）
+﻿# 数据建模模板（atlas/model/）
 
 ## README.md 模板
 

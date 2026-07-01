@@ -1,4 +1,4 @@
-# 阶段 1：需求澄清
+﻿# 阶段 1：需求澄清
 
 > AskQuestion 规范：[templates/askquestion-gate.md](../templates/askquestion-gate.md)
 > 提问卡片：[templates/requirement-askquestion.md](../templates/requirement-askquestion.md)
@@ -9,7 +9,7 @@
 
 **用户发来需求（无论长短、无论是否像 PRD）→ 必须先 AskQuestion → 立即停止。**
 
-- ❌ **禁止**未 AskQuestion 就创建 `specs/requirements/`、写 REQ 草稿、写 AC 表
+- ❌ **禁止**未 AskQuestion 就创建 `atlas/requirements/`、写 REQ 草稿、写 AC 表
 - ❌ **禁止**用聊天文字追问代替 AskQuestion 卡片
 - ❌ **禁止**AskQuestion 后在同一回复里继续写 REQ 文档
 - ✅ 即使用户已写很长需求，仍须 AskQuestion **确认/补充**（见 requirement-askquestion.md），用户选完后再进入第 2 步
@@ -29,13 +29,13 @@
 ### 第 2 步：生成需求草稿（仅用户回答第 1 步之后）
 
 1. 提炼需求清单（每个独立功能一个 REQ）
-2. 生成 `specs/requirements/REQ-XXX-名称.md`（状态：**草稿**）
-3. 生成 `specs/requirements/README.md`、初始化 `specs/todo.md`、`specs/humanTodo.md`（若无）
+2. 生成 `atlas/requirements/REQ-XXX-名称.md`（状态：**草稿**）
+3. 生成 `atlas/requirements/README.md`、初始化 `atlas/todo.md`、`atlas/humanTodo.md`（若无）
 4. **UI 设计描述（按需）**：
-   - AskQuestion `ui_scope` 选「有界面」→ 评估页面/流程 → 新建 `specs/requirements/ui/UID-xxx-名称.md`（见 [req-ui-design.md](../templates/req-ui-design.md)）
+   - AskQuestion `ui_scope` 选「有界面」→ 评估页面/流程 → 新建 `atlas/requirements/ui/UID-xxx-名称.md`（见 [req-ui-design.md](../templates/req-ui-design.md)）
    - **只写结构与交互**（布局区块、组件、状态、跳转）；**视觉样式标「待定」**，由用户后续决定
    - 无 UI → REQ「界面描述」节写「无 UI」，不建 UID
-   - 维护 `specs/requirements/ui/README.md` 索引；REQ 头部链对应 UID
+   - 维护 `atlas/requirements/ui/README.md` 索引；REQ 头部链对应 UID
 5. 需求中需人类确认/提供的事项 → **追加 humanTodo**（含「提供视觉参考稿/定样式」若用户尚未给）
 
 ### 第 3 步：AskQuestion 确认草稿（必须）
@@ -78,11 +78,11 @@ REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 hum
 
 | 文件 | 说明 |
 |------|------|
-| `specs/requirements/REQ-XXX-*.md` | 每需求一份 |
-| `specs/requirements/ui/UID-xxx-*.md` | **可选** — 界面结构与交互描述（样式待定） |
-| `specs/requirements/ui/README.md` | UID 索引 |
-| `specs/requirements/README.md` | 索引 |
-| `specs/todo.md` / `specs/humanTodo.md` | 进度与人类依赖 |
+| `atlas/requirements/REQ-XXX-*.md` | 每需求一份 |
+| `atlas/requirements/ui/UID-xxx-*.md` | **可选** — 界面结构与交互描述（样式待定） |
+| `atlas/requirements/ui/README.md` | UID 索引 |
+| `atlas/requirements/README.md` | 索引 |
+| `atlas/todo.md` / `atlas/humanTodo.md` | 进度与人类依赖 |
 
 ## 正误示例
 

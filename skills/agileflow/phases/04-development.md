@@ -1,4 +1,4 @@
-# 阶段 4：开发实现
+﻿# 阶段 4：开发实现
 
 > **dev 规则（构思）**：[dev-rationale dev 规则](../templates/dev-rationale.md#dev-规则构思先行)  
 > **构思模板**：[dev-rationale 七段构思模板](../templates/dev-rationale.md#七段构思模板-①-必须按此格式输出)  
@@ -7,12 +7,12 @@
 ## dev 规则：构思先行（最高优先级）
 
 > **开发的第一件事不是写码，是构思落盘。**  
-> `specs/dev/T-xxx.md` = 本任务的构思文档；②③ 都是执行这份构思。
+> `atlas/dev/T-xxx.md` = 本任务的构思文档；②③ 都是执行这份构思。
 
 | 规则 | 说明 |
 |------|------|
 | **R1 构思先于写码** | 没 dev 文档 → **禁止** Write 业务源码（W2） |
-| **R2 构思必须落盘** | 构思只放脑子里或聊天里 → **无效**；必须写进 `specs/dev/` |
+| **R2 构思必须落盘** | 构思只放脑子里或聊天里 → **无效**；必须写进 `atlas/dev/` |
 | **R3 一任务一构思** | 1 个 T-xxx = 1 个 dev 文件；禁止多任务糅合 |
 | **R4 七段齐全** | 一～七 + **八**（九表头）；格式见 dev-rationale |
 | **R5 五、核心流程是构思核心** | 逐步编号主逻辑；禁止「实现某某模块」 |
@@ -30,7 +30,7 @@
 ① 构思落盘          ② 按构思开发           ③ 对照 REQ 验收 AC
 ────────────────    ────────────────       ─────────────────────
 七段写全、落盘        严格按 五 写码          跑 八 规划的 test/ac
-specs/dev/           注释对齐构思             全绿 → 九 回填 → todo ✅
+atlas/dev/           注释对齐构思             全绿 → 九 回填 → todo ✅
 ```
 
 | 违规 | 后果 |
@@ -44,7 +44,7 @@ specs/dev/           注释对齐构思             全绿 → 九 回填 → to
 
 ## ① 构思落盘：七段齐全
 
-一任务一文件：`specs/dev/T-{id}-{简述}-{BE|FE}.md`
+一任务一文件：`atlas/dev/T-{id}-{简述}-{BE|FE}.md`
 
 **必须按 [dev-rationale 七段构思模板](../templates/dev-rationale.md#七段构思模板-①-必须按此格式输出) 输出**：
 
@@ -72,7 +72,7 @@ specs/dev/           注释对齐构思             全绿 → 九 回填 → to
 
 | # | 检查（构思维度） | 否 → |
 |---|------------------|------|
-| W0 | `specs/todo.md` 该 T-xxx **① 已勾**；`TodoWrite` ① 已 ✅ | **先完成 ① 构思并勾 todo** |
+| W0 | `atlas/todo.md` 该 T-xxx **① 已勾**；`TodoWrite` ① 已 ✅ | **先完成 ① 构思并勾 todo** |
 | W1 | 单个 T-xxx | 读 todo |
 | W2 | **构思已落盘**：`T-{id}-*.md` 存在 | **先完成 ① 构思** |
 | W3 | 七段齐全（一～七）+ **八** + **九表头** | 补全构思 |
@@ -112,7 +112,7 @@ specs/dev/           注释对齐构思             全绿 → 九 回填 → to
 | dev 只写「实现登录模块」 | **五** 逐步编号主逻辑 |
 | 多个 T-xxx 写一个 dev | 一任务一构思文档 |
 | **八** 自造 AC | 只引用 REQ AC |
-| 聊天里说说思路不落盘 | 写进 `specs/dev/T-xxx.md` |
+| 聊天里说说思路不落盘 | 写进 `atlas/dev/T-xxx.md` |
 | ② 写码时临时改方案不更新 **五** | 改构思 → 先更新 dev，再写码 |
 | ③ 未全绿就标 todo ✅ | **九** 须全 🟢 |
 
@@ -120,12 +120,13 @@ specs/dev/           注释对齐构思             全绿 → 九 回填 → to
 
 ## 默认路径（单 Agent 串行）
 
-1. `specs/todo.md` 取首个 **① 未勾** 的 T-xxx → 写入「进行中」（含当前步）  
+1. `atlas/todo.md` 取首个 **① 未勾** 的 T-xxx → 写入「进行中」（含当前步）  
 2. **`TodoWrite` 同步该任务三步子项**（①构思落盘 / ②按五写码 / ③对照REQ验收AC）  
 3. **只做 ①**：按七段模板构思落盘 → G0–G8 → **勾 todo ① + TodoWrite ① ✅**  
 4. **只做 ②**：按 **五** 写码 → **勾 todo ② + TodoWrite ② ✅**  
 5. **只做 ③**：对照 REQ 验收 → **九** → **勾 todo ③ + TodoWrite ③ ✅** → 父任务 ✅  
-6. 下一任务 → **新 dev 文档**（禁止预写 T+n）
+6. 若该 REQ 关联任务 **全部 ③ ✅** → **AskQuestion [init 增量 refresh](../templates/init-doc.md#init-增量-refresh-askquestion)**（as-is 有变更时；可跳过）→ 停止  
+7. 下一任务 → **新 dev 文档**（禁止预写 T+n）
 
 > **硬约束**：todo ① 未勾 / TodoWrite ① 未完成 → **禁止 Write 业务源码**（W2 叠加）。
 
@@ -167,4 +168,4 @@ specs/dev/           注释对齐构思             全绿 → 九 回填 → to
 
 ## 收尾
 
-R6 todo ✅ · R7 active-edits · R8 dev/README · **禁止**本阶段写 specs/tests/
+R6 todo ✅ · R7 active-edits · R8 dev/README · **禁止**本阶段写 atlas/tests/

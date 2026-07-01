@@ -1,4 +1,4 @@
-# 人类待办与 BLOCKED-HUMAN
+﻿# 人类待办与 BLOCKED-HUMAN
 
 > **AI 任务 → todo.md** · **人类任务 → 本文件**（禁止混写、禁止只口头提醒不沉淀）
 
@@ -33,7 +33,7 @@
 
 ## 文件位置
 
-`specs/humanTodo.md`
+`atlas/humanTodo.md`
 
 ## 模板
 
@@ -60,7 +60,7 @@
 
 1. 读 humanTodo，筛 ⬜ / 🔄  
 2. 有阻塞 → 列出序号，暂停或仅 mock/L1–L3  
-3. **humanTodo 未清** → 禁止 specs/tests 标 PASS  
+3. **humanTodo 未清** → 禁止 atlas/tests 标 PASS  
 
 返回：`{ blocked, items[], allowAutomationOnly }`
 

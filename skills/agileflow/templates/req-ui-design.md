@@ -1,4 +1,4 @@
-# REQ 阶段 UI 设计描述模板
+﻿# REQ 阶段 UI 设计描述模板
 
 > **定位**：REQ 阶段描述**界面做什么、怎么交互**——供后续方案 `contracts/UI-xxx` 与 FE 开发生成 UI。  
 > **不定义视觉样式**（配色、字体、圆角、动效细节等）——**样式由用户后续决定**（方案或开发前 AskQuestion / humanTodo）。  
@@ -11,7 +11,7 @@
 | 条件 | 动作 |
 |------|------|
 | 有 Web / App / 小程序等**用户可见界面** | 评估是否需 UID |
-| 页面/流程 ≥1 且交互非 trivial | **新建** `specs/requirements/ui/UID-xxx-名称.md` |
+| 页面/流程 ≥1 且交互非 trivial | **新建** `atlas/requirements/ui/UID-xxx-名称.md` |
 | 纯 API / CLI / 后台批处理、无 UI | **跳过**，REQ 注明「无 UI」 |
 | 用户说「样式我自己定 / 先不定样式」 | 仍写 UID（结构与交互）；**样式节只写「待定」** |
 
@@ -22,7 +22,7 @@
 ## 目录与命名
 
 ```
-specs/requirements/
+atlas/requirements/
 ├── REQ-001-用户登录.md
 ├── ui/
 │   ├── README.md              # UID 索引

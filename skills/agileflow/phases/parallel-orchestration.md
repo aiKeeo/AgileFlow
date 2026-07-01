@@ -1,4 +1,4 @@
-# 并行编排（可选）
+﻿# 并行编排（可选）
 
 > 默认不启用。须用户显式「并行 / subagent」。**开发顺序与串行相同**：todo ① 构思落盘→② 写码→③ AC验收，仅切片可并发。  
 > 细则 → [04-development.md](04-development.md) · 阶段闸门 → [askquestion-gate.md](../templates/askquestion-gate.md)
@@ -39,7 +39,7 @@
 ## subagent prompt 必含
 
 ```
-切片：{T-xxx 唯一} · dev：{specs/dev/T-xxx-...md}
+切片：{T-xxx 唯一} · dev：{atlas/dev/T-xxx-...md}
 顺序：① 构思落盘（七段模板，五逐步）→ ② 仅按 五 写码 → ③ 对照 八 test/ac 全绿
 禁止：多 T 合一 dev；跳过 ①；自行标 ✅
 ```

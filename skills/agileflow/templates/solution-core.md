@@ -1,4 +1,4 @@
-# 方案设计核心模板（specs/solution/）
+﻿# 方案设计核心模板（atlas/solution/）
 
 > **四要素**：① 功能（含边界） ② **契约/接口文档**（按需，集中放 `contracts/`） ③ 架构（全局一份） ④ 任务（todo.md）
 
@@ -23,7 +23,7 @@
 ## 目录结构
 
 ```
-specs/solution/
+atlas/solution/
 ├── README.md              # 索引 + 状态
 ├── features/              # 每功能一文件（含 §边界）
 ├── contracts/             # 【接口/暴露面文档库】API、UI、JOB、EVT 详细规格
@@ -45,7 +45,7 @@ specs/solution/
 
 - 状态：草稿 | 已确认
 - 关联需求：REQ-001, REQ-002
-- 关联模型：[specs/model/README.md](../model/README.md)
+- 关联模型：[atlas/model/README.md](../model/README.md)
 - 全局架构：[architecture.md](architecture.md)
 
 ## 功能清单
@@ -63,7 +63,7 @@ specs/solution/
 
 ## 开发任务
 
-见 [specs/todo.md](../todo.md)
+见 [atlas/todo.md](../todo.md)
 ```
 
 ## features/F-xxx-{名}.md 模板

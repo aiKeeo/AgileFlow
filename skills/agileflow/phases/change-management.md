@@ -1,4 +1,4 @@
-# 需求变更管理
+﻿# 需求变更管理
 
 > AskQuestion 规范：[templates/askquestion-gate.md](../templates/askquestion-gate.md)
 > 变更提问卡片：[templates/req-change-askquestion.md](../templates/req-change-askquestion.md)
@@ -26,11 +26,11 @@
 
 ### ① 更新 REQ 文档
 
-1. 定位 `specs/requirements/REQ-XXX-*.md`
+1. 定位 `atlas/requirements/REQ-XXX-*.md`
 2. 修改 BDD 场景 / 验收标准 / 用户故事
 3. 版本号 +0.1（如 v1.0 → v1.1），追加「变更记录」
 4. 若原状态为「已实现」→ 改回 **已确认**（待重新开发验收）；若「已确认」→ 标 **变更中**
-5. 更新 `specs/todo.md` 变更历史
+5. 更新 `atlas/todo.md` 变更历史
 
 ### ② 影响分析 AskQuestion（必须）
 
@@ -60,10 +60,10 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 
 | 顺序 | 目录/文件 | 改什么 |
 |------|-----------|--------|
-| 1 | `specs/model/` | 领域模型、实体关系、规则、物理模型 |
-| 2 | `specs/solution/` | `features/`（含 §边界）、`contracts/`（按需）、`architecture.md` |
-| 3 | `specs/todo.md` | 增删改开发任务，关联功能/契约 ID |
-| 4 | `specs/dev/` | 更新或新建受影响的功能思路文档 |
+| 1 | `atlas/model/` | 领域模型、实体关系、规则、物理模型 |
+| 2 | `atlas/solution/` | `features/`（含 §边界）、`contracts/`（按需）、`architecture.md` |
+| 3 | `atlas/todo.md` | 增删改开发任务，关联功能/契约 ID |
+| 4 | `atlas/dev/` | 更新或新建受影响的功能思路文档 |
 
 规则：
 - 每改完一层，该层 README 状态改 **草稿** → 小改确认后可保持 **已确认**（见下）
@@ -97,7 +97,7 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 - 已确认/已实现 REQ 变更 → **必须先影响分析 AskQuestion**，禁止猜范围
 - 影响分析 → 改文档 → 是否实现，**两步 AskQuestion 不可合并、不可跳过**
 - **默认**：变更后重跑阶段 4→5，已实现状态不可保留
-- 若变更使原验收报告失效，在 `specs/tests/` 标注「待更新」
+- 若变更使原验收报告失效，在 `atlas/tests/` 标注「待更新」
 
 ## 产出
 
@@ -105,7 +105,7 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 |------|------|
 | 更新的 REQ | 版本 + 变更记录 |
 | 按需更新的 model/、solution/、dev/ | 用户勾选范围 |
-| `specs/todo.md` | 任务增删 + 变更历史 |
+| `atlas/todo.md` | 任务增删 + 变更历史 |
 | 可选：阶段 4 代码 | 用户确认「要实现」后 |
 
 ## 正误示例

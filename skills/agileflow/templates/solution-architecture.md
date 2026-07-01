@@ -1,4 +1,4 @@
-# architecture.md 模板（specs/solution/）
+﻿# architecture.md 模板（atlas/solution/）
 
 > 技术栈、架构、测试依赖、可观测性、验证命令合并在一份文档。
 > **技术栈须来自 [solution-tech-askquestion.md](solution-tech-askquestion.md) 用户选择或仓库实际栈，禁止直接抄下方示例值。**
@@ -102,18 +102,18 @@ src/modules/payment/
 
 ## 开发任务写入 todo.md（阶段 3 第 8 步）
 
-**禁止**在 solution/ 下另建 tasks.md。拆解后直接写入 `specs/todo.md`：
+**禁止**在 solution/ 下另建 tasks.md。拆解后直接写入 `atlas/todo.md`：
 
 ```markdown
 ## 开发任务
 
 ### T-001：[BE] 创建 orders 表（30min）— F-001
-- [ ] **① 构思落盘** → `specs/dev/T-001-orders表-BE.md`
+- [ ] **① 构思落盘** → `atlas/dev/T-001-orders表-BE.md`
 - [ ] **② 按 五、核心流程 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 
 ### T-002：[BE] 实现创建订单 API（2h）— F-001 / API-001
-- [ ] **① 构思落盘** → `specs/dev/T-002-创建订单API-BE.md`
+- [ ] **① 构思落盘** → `atlas/dev/T-002-创建订单API-BE.md`
 - [ ] **② 按 五、核心流程 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 ```

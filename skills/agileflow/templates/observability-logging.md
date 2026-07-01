@@ -1,6 +1,6 @@
-# 可观测性与日志（语言无关）
+﻿# 可观测性与日志（语言无关）
 
-> 阶段 3 写入 `specs/solution/architecture.md` 可观测性章节、阶段 4 实现、阶段 5 验收均引用本文件。**以 architecture.md 为唯一依据**，禁止硬套某一语言或目录。
+> 阶段 3 写入 `atlas/solution/architecture.md` 可观测性章节、阶段 4 实现、阶段 5 验收均引用本文件。**以 architecture.md 为唯一依据**，禁止硬套某一语言或目录。
 
 ## 选型原则
 

@@ -1,4 +1,4 @@
-# 需求变更 AskQuestion 模板
+﻿# 需求变更 AskQuestion 模板
 
 ## 影响分析（REQ 改完后第一步）
 
@@ -8,14 +8,14 @@
 title: "REQ-{XXX} 变更影响确认"
 questions:
   - id: "impact_model"
-    prompt: "本次需求变更，数据建模（specs/model/）是否需要修改？\n\nAI 判断：{是/否/不确定} — {一句话理由}"
+    prompt: "本次需求变更，数据建模（atlas/model/）是否需要修改？\n\nAI 判断：{是/否/不确定} — {一句话理由}"
     options:
       - { id: "yes", label: "是，需要改 model/" }
       - { id: "no", label: "否，model 不用动" }
       - { id: "unsure", label: "不确定，按你的摘要建议改" }
 
   - id: "impact_solution"
-    prompt: "方案（specs/solution/）是否需要修改？\n\n涉及：features/（含§边界）/ contracts/ / architecture.md"
+    prompt: "方案（atlas/solution/）是否需要修改？\n\n涉及：features/（含§边界）/ contracts/ / architecture.md"
     allow_multiple: true
     options:
       - { id: "features", label: "功能 features/（含边界）" }
@@ -24,7 +24,7 @@ questions:
       - { id: "none", label: "都不需要改" }
 
   - id: "impact_tasks"
-    prompt: "开发任务（specs/todo.md）是否需要增删改？"
+    prompt: "开发任务（atlas/todo.md）是否需要增删改？"
     options:
       - { id: "add", label: "是，新增任务" }
       - { id: "modify", label: "是，修改已有任务" }
@@ -32,7 +32,7 @@ questions:
       - { id: "no", label: "否，任务不变" }
 
   - id: "impact_dev"
-    prompt: "功能思路（specs/dev/）是否需要更新？"
+    prompt: "功能思路（atlas/dev/）是否需要更新？"
     options:
       - { id: "yes", label: "是，更新实现思路" }
       - { id: "no", label: "否" }

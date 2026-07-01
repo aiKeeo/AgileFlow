@@ -1,8 +1,8 @@
-# 需求文档输出模板
+﻿# 需求文档输出模板
 
 > AC 规范：[ac-guide.md](ac-guide.md)
 
-## REQ 文档（`specs/requirements/REQ-XXX-名称.md`）
+## REQ 文档（`atlas/requirements/REQ-XXX-名称.md`）
 
 ```markdown
 # [REQ-XXX] 需求名称
@@ -65,7 +65,7 @@
 
 > 已确认/已实现 REQ 变更须走 [change-management.md](../phases/change-management.md)；版本 +0.1 并更新上表。
 
-## 索引（`specs/requirements/README.md`）
+## 索引（`atlas/requirements/README.md`）
 
 ```markdown
 # 需求索引

@@ -4,7 +4,7 @@
 
 ## 阶段完成硬规则（最高优先级）
 
-**阶段 1 / 2 / 3 / 4 的本阶段产出完成后：**
+**阶段 0 / 1–4 的本阶段产出完成后：**
 
 1. **必须**调用 `AskQuestion` 工具，弹出[阶段闸门](#阶段闸门模板)小卡片
 2. **立即停止生成**——本回复不得再写下一阶段文档、不得写码、不得总结后继续
@@ -26,7 +26,7 @@ Cursor 结构化提问工具名：**`AskQuestion`**。
 
 | 场景 | AskQuestion |
 |------|-------------|
-| **阶段 1–4 结束** | ✅ **必须** |
+| **阶段 0/1–4 结束** | ✅ **必须** |
 | 阶段 1 入口 / REQ 草稿确认 | ✅ **必须** |
 | 阶段 3 写 architecture 前技术栈 | ✅ **必须** |
 | 聊天式「是否继续」 | ❌ **禁止** |
@@ -54,6 +54,7 @@ questions:
 
 | 当前阶段 | 下一阶段名 |
 |----------|-----------|
+| 项目盘点（init） | 需求澄清（或用户指定 sol/dev） |
 | 需求澄清 | 数据建模（或按需→方案设计） |
 | 数据建模 | 方案设计 |
 | 方案设计 | 开发实现 |
@@ -65,6 +66,8 @@ questions:
 
 | 职责 | 阶段 | 模板 |
 |------|------|------|
+| init 确认 | 0 | [init-doc.md](init-doc.md#init-确认-askquestion) |
+| init 增量 refresh | 0 / 4 / 5 | [init-doc.md](init-doc.md#init-增量-refresh-askquestion) |
 | 需求收集/确认 | 1 | [requirement-askquestion.md](requirement-askquestion.md) |
 | 建模确认 | 2 | [modeling-output.md](modeling-output.md) |
 | 技术栈 | 3 | [solution-tech-askquestion.md](solution-tech-askquestion.md) |

@@ -1,4 +1,4 @@
-# 入口意图识别与阶段路由
+﻿# 入口意图识别与阶段路由
 
 > **启用 Agileflow 时**，必须先执行本章，再读取**一个**对应 `phases/xx.md` + 该 phase **显式链接**的 `templates/*`。禁止预读其他 phase；禁止跳过识别直接写代码或写文档。
 
@@ -7,9 +7,9 @@
 | 启用 ✅ | 不启用 ❌（直接回答或按 user rules 处理） |
 |---------|---------------------------------------------|
 | 用户 @agileflow 或说「走 agileflow / 走完整流程」 | 纯解释、答疑、概念问题 |
-| **目录前缀**：`req:` / `mod:` / `sol:` / `dev:` / `tests:` | code review、读代码、改一行 bug（走豁免） |
+| **目录前缀**：`init:` / `req:` / `mod:` / `sol:` / `dev:` / `tests:` | code review、读代码、改一行 bug（走豁免） |
 | 「从零做 XX 系统」「完整交付」类新功能 | 未提流程的普通「写代码」「改 bug」 |
-| 已有 `specs/` 且说「继续 agileflow」「下一步」（流程语境） | 单文件小改、hotfix（走豁免，不进流程） |
+| 已有 `atlas/` 且说「继续 agileflow」「下一步」（流程语境） | 单文件小改、hotfix（走豁免，不进流程） |
 | 明确指定阶段：写 REQ、建模、出方案、验收测试 | |
 
 **歧义时**：AskQuestion 确认是否启用 Agileflow，禁止默认套用全流程。
@@ -18,15 +18,16 @@
 
 ## 目录前缀（最高优先级）
 
-> **记法**：前缀 = `specs/` 子目录缩写 + `:`。与文件夹一一对应，只记五个。
+> **记法**：前缀 = `atlas/` 子目录缩写 + `:`。与文件夹一一对应。
 
 | 前缀 | 目录 | 阶段 |
 |------|------|------|
-| `req:` | `specs/requirements/` | 1 需求 |
-| `mod:` | `specs/model/` | 2 建模（按需） |
-| `sol:` | `specs/solution/` | 3 方案 |
-| `dev:` | `specs/dev/` | 4 开发 |
-| `tests:` | `specs/tests/` | 5 验收 |
+| **`init:`** | `atlas/init/` | **0 项目盘点（仅 brownfield）** |
+| `req:` | `atlas/requirements/` | 1 需求 |
+| `mod:` | `atlas/model/` | 2 建模（按需） |
+| `sol:` | `atlas/solution/` | 3 方案 |
+| `dev:` | `atlas/dev/` | 4 开发 |
+| `tests:` | `atlas/tests/` | 5 验收 |
 
 兼容：`test:`→`tests:`，`model:`→`mod:`（旧写法，不必记）。
 
@@ -36,10 +37,20 @@
 
 **任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **逐项** 构思落盘→开发→AC验收。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)。
 
-## §specs/ 结构
+## §atlas/ 结构
+
+> **命名**：根目录 **`atlas/`**（项目图谱）— 存放 Agileflow 全流程交付文档；前缀 `init:`/`req:`/… 对应其下子目录，**勿**再用 `spec/`、`specs/` 等旧名。
 
 ```
-specs/
+atlas/
+├── init/            # init: brownfield 项目 as-is 盘点（greenfield 不建）
+│   ├── README.md
+│   ├── p0-business.md   # 业务、用户、流程、核心术语（≤8）
+│   ├── glossary/        # 术语多/跨域时按需
+│   ├── p0-*.md
+│   ├── p1-*.md      # P1 写码前必读
+│   ├── codebase/
+│   └── data/        # entities/ relations/ state-machines/（有才有）
 ├── requirements/    # req:
 │   └── ui/          # UID 界面描述（REQ 阶段，样式待定）
 ├── model/           # mod:
@@ -56,6 +67,32 @@ specs/
 
 - 各目录下 `temp/` 放临时稿（见 §TEMP）
 - 无独立前缀：`todo.md` / `humanTodo.md` / `active-edits.md` 随 req/sol/dev 阶段更新
+
+---
+
+## init 判定（brownfield / greenfield）
+
+> 细则：[00-project-init.md](00-project-init.md)
+
+| 类型 | 判定（任一） | init |
+|------|--------------|------|
+| **brownfield** | 已有业务源码 / migration / 可运行应用；用户说接手、二次开发 | **须 init** |
+| **greenfield** | 从零、新系统、脚手架、完整交付（无既有业务代码）；空仓库新建 | **禁止 init** |
+
+**greenfield** → 跳过阶段 0，从阶段 1 `req:` 开始。  
+**brownfield 且 `atlas/init/` 不存在或未确认** → 进 `dev:`/`sol:` 前先 **init:** 或自动进入阶段 0。
+
+REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后**按 [init refresh](00-project-init.md#增量-refreshreq-开发完毕后) 增量更新。
+
+### init 自动触发（brownfield）
+
+满足 **全部** → 建议阶段 **0**：
+
+1. brownfield 判定通过
+2. `atlas/init/` 不存在 **或** `README.md` 状态非「已确认」
+3. 用户意图为 `dev:` / `sol:` / 「继续 agileflow」且含写码/方案，或首次接手
+
+**不自动 init**：greenfield；豁免；用户明确「跳过 init / 熟悉项目」。
 
 ### §dev 入口分支
 
@@ -74,10 +111,10 @@ specs/
 
 | 目录 | 路径 | 命名 | 示例 |
 |------|------|------|------|
-| 需求 | `specs/requirements/temp/` | `{NNN}-{名}.md` | `001-登录缓存.md` |
-| 建模 | `specs/model/temp/` | `{NNN}-{名}.md` | 探活用的草稿模型 |
-| 方案 | `specs/solution/features/temp/` | `{NNN}-{名}.md` | 仅当需要临时接口契约 |
-| 开发 | `specs/dev/temp/` | `{NNN}-{名}-{FE\|BE\|FULL}.md` | `001-登录缓存-BE.md` |
+| 需求 | `atlas/requirements/temp/` | `{NNN}-{名}.md` | `001-登录缓存.md` |
+| 建模 | `atlas/model/temp/` | `{NNN}-{名}.md` | 探活用的草稿模型 |
+| 方案 | `atlas/solution/features/temp/` | `{NNN}-{名}.md` | 仅当需要临时接口契约 |
+| 开发 | `atlas/dev/temp/` | `{NNN}-{名}-{FE\|BE\|FULL}.md` | `001-登录缓存-BE.md` |
 | AC 测试 | `test/ac/temp/` | `temp{NNN}_*` | `temp001_login` |
 
 **规则**：
@@ -92,7 +129,7 @@ specs/
 
 **默认跳过阶段 2**，直接进入阶段 3，当**全部**满足：
 
-- 已有 `specs/model/README.md` 为 **已确认**
+- 已有 `atlas/model/README.md` 为 **已确认**
 - 本次工作**不引入**新聚合根/实体/值对象
 - **不改变**实体间关系（基数、归属、外键）
 - **不新增/修改**领域规则、状态机、存储结构
@@ -134,7 +171,7 @@ specs/
 
 **豁免边界（任一命中走完整流程）**：API/DB/权限、支付/敏感数据、多模块、用户要求完整流程、跨 2+ 文件或 >20 行、**用户说只看成品/直接开发但 scope 为新系统 MVP**。
 
-豁免只更新 `specs/todo.md`；不生成 REQ/model/solution 文档。L1–L5 见 [l1-l5-pipeline.md](../templates/l1-l5-pipeline.md)。
+豁免只更新 `atlas/todo.md`；不生成 REQ/model/solution 文档。L1–L5 见 [l1-l5-pipeline.md](../templates/l1-l5-pipeline.md)。
 
 ---
 
@@ -150,16 +187,17 @@ specs/
 
 ## ② 读取项目状态（判断「当前在哪」）
 
-按顺序检查仓库与 `specs/`（不存在则视为**全新项目**）：
+按顺序检查仓库与 `atlas/`（不存在则视为**全新项目**）：
 
 | 检查项 | 路径 | 状态含义 |
 |--------|------|----------|
-| 流程进度 | `specs/todo.md` →「流程进度」区 | 哪几阶段已 ✅ |
-| 需求 | `specs/requirements/REQ-*.md` | 有文件但「草稿」→ 阶段 1 未完成；「已确认」→ 可进阶段 2 |
-| 建模 | `specs/model/README.md` | 不存在或「草稿」→ 阶段 2；「已确认」→ 可进阶段 3 |
-| 方案 | `specs/solution/README.md` | 不存在或「草稿」→ 阶段 3；「已确认」且开发任务未清空 → 阶段 4 |
-| 开发 | `specs/todo.md` →「开发任务」| 有未完成任务 → 阶段 4；全部 ✅ 且测试未 ✅ → 阶段 5 |
-| 验收 | `specs/tests/README.md` | 已有 PASS → 交付已完成，问用户要维护还是新需求 |
+| **项目盘点** | `atlas/init/README.md` | 不存在 → brownfield 须阶段 0；greenfield 忽略；「已确认」→ 可进后续 |
+| 流程进度 | `atlas/todo.md` →「流程进度」区 | 哪几阶段已 ✅ |
+| 需求 | `atlas/requirements/REQ-*.md` | 有文件但「草稿」→ 阶段 1 未完成；「已确认」→ 可进阶段 2 |
+| 建模 | `atlas/model/README.md` | 不存在或「草稿」→ 阶段 2；「已确认」→ 可进阶段 3 |
+| 方案 | `atlas/solution/README.md` | 不存在或「草稿」→ 阶段 3；「已确认」且开发任务未清空 → 阶段 4 |
+| 开发 | `atlas/todo.md` →「开发任务」| 有未完成任务 → 阶段 4；全部 ✅ 且测试未 ✅ → 阶段 5 |
+| 验收 | `atlas/tests/README.md` | 已有 PASS → 交付已完成，问用户要维护还是新需求 |
 
 **推导「建议阶段」** = 第一个未完成的前置阶段（流水线顺序 1→2→3→4→5）。
 
@@ -176,8 +214,9 @@ specs/
 
 | 用户表达（含但不限于） | 目标阶段 |
 |------------------------|----------|
-| **目录前缀** `req:` / `mod:` / `sol:` / `dev:` / `tests:` | **以前缀为准**（`test:`=`tests:`） |
-| 新功能、从零、完整流程、项目搭建、做一个 XX 系统 | **1**（或从建议阶段续跑） |
+| **目录前缀** `init:` / `init: refresh …` | **0**（brownfield；greenfield → 提示跳过） |
+| **目录前缀** `req:` / `mod:` / `sol:` / `dev:` / `tests:` | **以前缀为准**（brownfield 下 dev/sol 前置 init 见上） |
+| 新功能、从零、完整流程、项目搭建、做一个 XX 系统 | **1**（greenfield）；brownfield 有 init 则从建议阶段续跑 |
 | 需求、澄清、PRD、用户故事、BDD、写 REQ | **1** |
 | 建模、DDD、表结构、ER、聚合、sql、数据库设计 | **2** |
 | 方案、架构、契约、任务拆解 | **3**（`sol:`） |
@@ -187,14 +226,14 @@ specs/
 | 并行开发 / 同时开发 FE+BE / 多 subagent | **4** + 读 [parallel-orchestration.md](parallel-orchestration.md)（仍须 ①→②→③） |
 | 测试、验收、跑流水线、L1、L5、出验收报告 | **5** |
 | 改需求、变更 REQ、需求调整、场景修改、需求不对 | **change-management**（见 [change-management.md](change-management.md)） |
-| 继续 agileflow、下一步（且存在 specs/）、接着做流程 | **建议阶段**（见 ②） |
+| 继续 agileflow、下一步（且存在 atlas/）、接着做流程 | **建议阶段**（见 ②） |
 | 只更新 todo、人类待办、标记完成 | **task-tracking** |
 
 ### 意图优先级
 
 1. **用户明确指定阶段**（「帮我写需求」「先别开发只出方案」）→ 以用户为准
-2. **用户说「继续 agileflow / 下一步」（且存在 specs/）** → 以 ② 建议阶段为准
-3. **用户说新功能但未指定阶段** → 若 specs 为空从 **1** 开始；否则 **AskQuestion 确认**（见 ④）
+2. **用户说「继续 agileflow / 下一步」（且存在 atlas/）** → 以 ② 建议阶段为准
+3. **用户说新功能但未指定阶段** → 若 `atlas/` 为空从 **1** 开始；否则 **AskQuestion 确认**（见 ④）
 4. **无法判断** → 必须 AskQuestion，禁止猜测
 
 ---
@@ -205,9 +244,11 @@ specs/
 
 | 目标阶段 | 最低前置条件 | 不满足时 |
 |----------|--------------|----------|
+| **0 init** | brownfield 判定 | greenfield → 跳过，进阶段 1 |
+| 1 需求 | greenfield **或** brownfield 且 init 已确认（或本轮将完成 init） | brownfield → 阶段 0 |
 | 2 建模 | ≥1 个 REQ「已确认」 | 退回阶段 1 或 AskQuestion |
 | 3 方案 | model **已确认或按需跳过**（见 [建模按需判定](#建模按需判定阶段-2-非必经)） | 无 model 且需建模 → 阶段 2；否则 AskQuestion |
-| 4 开发 | solution 已确认 **或** TEMP/dev 快速通道（AskQuestion 确认） | 退回阶段 3 或 TEMP |
+| 4 开发 | solution 已确认 **且** brownfield 时 init 已确认 **或** TEMP/dev 快速通道 | 退回阶段 3 / init / TEMP |
 | 5 测试 | 开发任务已完成（或用户明确只验部分） | 提示先开发或 AskQuestion |
 
 **按需跳过建模**：阶段 3 前置不要求 model 已确认，但 Agent 须在首行声明标注 `建模：跳过/增量/全量`。
@@ -224,6 +265,7 @@ questions:
   - id: "target_phase"
     prompt: "检测到你希望【{用户意图}】，当前项目进度：{流程进度摘要}。\n请选择本次要从哪个阶段开始："
     options:
+      - { id: "phase_0", label: "阶段 0：项目盘点（init，brownfield）" }
       - { id: "phase_1", label: "阶段 1：需求澄清" }
       - { id: "phase_2", label: "阶段 2：数据建模" }
       - { id: "phase_3", label: "阶段 3：方案设计（sol:）" }
@@ -248,15 +290,16 @@ questions:
 
 | 场景 | 动作 |
 |------|------|
-| **`req: 新需求描述…`** | 阶段 1 → AskQuestion → 停止；**不自动进 model/sdd** |
-| **`dev: 实现某功能`** | 有 solution → 阶段 4；无 REQ 关联 → `dev/temp/` |
+| **`init:` / `init: refresh data`** | 阶段 0 → 读 00-project-init + init-doc → AskQuestion → 停止 |
+| **`req: 新需求…`** | greenfield/brownfield 均阶段 1；brownfield 无 init 时 AskQuestion 先 init 或 req |
+| **`dev: 实现某功能`** | brownfield：init 已确认 + solution → 阶段 4；无 REQ → `dev/temp/` |
 | **`dev: 只写思路`** | 阶段 4 步骤 ① 构思落盘 → AskQuestion 是否进入 ② → 停止 |
 | **`sol: 出支付方案`** | 阶段 3 方案设计；建模按需判定 |
 | **`tests: 验收 REQ-001`** | 阶段 5 |
 | 纯解释、无交付物 | 豁免，不启用阶段 |
 | 改一行 bug | 豁免 L1+L3 |
-| 新项目 / 用户发需求 | 阶段 1 → **AskQuestion 需求卡片** → 停止（禁止直接写 REQ） |
-| 新项目 + 仅模糊一词 | 同上 |
+| 新项目 **greenfield** / 用户发需求 | 阶段 1 → **AskQuestion 需求卡片** → 停止（**不建 init**） |
+| 接手 **brownfield** / 无 atlas/init | 阶段 0 → init 落盘 → AskQuestion → 停止 |
 | 有 todo、用户说「继续 agileflow」 | 读建议阶段 → 读对应 phase；**默认不读** parallel-orchestration |
 | 用户指定阶段且前置满足 | 直接进该 phase |
 | 用户指定阶段但前置不满足 | AskQuestion：补前置 or 豁免 |
@@ -269,10 +312,10 @@ questions:
 ## 进入阶段后的行为
 
 1. 输出阶段声明行（见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
-2. **只读一个 phase 文件**（变更 → `change-management.md`）
-3. **允许共读**：该 phase 文内显式链接的 `templates/*`
+2. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`）
+3. **允许共读**：该 phase 文内显式链接的 `templates/*`（init → `init-doc.md`）
 4. 阶段 4 额外共读 [dev-rationale.md](../templates/dev-rationale.md)
-5. **阶段 1–4 产出完成** → 必读 [askquestion-gate.md](../templates/askquestion-gate.md) → **调用 AskQuestion 阶段闸门 → 停止**
+5. **阶段 0/1–4 产出完成** → 必读 [askquestion-gate.md](../templates/askquestion-gate.md) 或 init 专用卡片 → **AskQuestion → 停止**
 6. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)
 
 ## 正误示例

@@ -1,4 +1,4 @@
-# AC（验收标准）与代码验收规范
+﻿# AC（验收标准）与代码验收规范
 
 > **阶段 1**：在 REQ 写 AC 表 — **AC 唯一定义处**，后续阶段只读、不改。  
 > **阶段 4 ③ 对照 REQ 验收 AC**：**② 写码完成后**，按 dev **八** 引用的 REQ AC 在 `test/ac/` 写验收测试并跑全绿（细则 [04-development.md](../phases/04-development.md)）。  
@@ -79,8 +79,8 @@ ac{REQ三位}_{序号}_{简述}
 
 ## 阶段 5（tests:）
 
-- **5A**：复跑 `test/ac/` → AC 状态 ✅ → `specs/tests/REQ-XXX-验收报告.md`  
-- **5B**：全量 L1–L5 → `specs/tests/README.md` PASS
+- **5A**：复跑 `test/ac/` → AC 状态 ✅ → `atlas/tests/REQ-XXX-验收报告.md`  
+- **5B**：全量 L1–L5 → `atlas/tests/README.md` PASS
 
 ## 禁止
 
