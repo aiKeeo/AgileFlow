@@ -8,7 +8,7 @@
 | 标签 | 含义 | 典型文件 |
 |------|------|----------|
 | **P0** | 不读完不宜动手：业务是谁、解决什么、能否跑通、仓库 | `p0-business.md`、`p0-repository.md`、`p0-environment.md` |
-| **P1** | 写业务代码前必读：栈、架构、代码结构、现有数据 | `p1-*.md`、`codebase/`、`data/` |
+| **P1** | 写业务代码前必读：栈、代码结构（含架构模块）、现有数据 | `p1-tech-stack.md`、`codebase/`、`data/` |
 
 - **没有就不建文件**（不写 N/A、不建空目录）
 - **多个实体/关系/状态机 → 多个 `p1-*.md` 文件**，不要合并成大文档后再拆
@@ -37,7 +37,7 @@
 
 ## 技术摘要
 - 技术栈：{摘要} → [p1-tech-stack.md](p1-tech-stack.md)
-- 架构：{摘要} → [p1-architecture.md](p1-architecture.md)
+- 架构与代码：{摘要} → [codebase/p1-{端}.md](codebase/p1-backend.md)（§一 含模块一览）
 
 ## 怎么跑
 
@@ -45,7 +45,20 @@
 
 ## 数据概览（有 data/ 时）
 
-{一行关系摘要，链到 data/relations/}
+{一句话：谁拥有什么数据} → [data/README.md](data/README.md)（实体是干什么的）· [data/relations/](data/relations/)（表怎么连）
+
+## 实体从哪查（有 data/ 时）
+
+| 我想知道… | 看哪 |
+|-----------|------|
+| 表/实体是**干什么的**、用户操作产生什么数据 | [data/README.md](data/README.md) → [data/entities/](data/entities/) |
+| 某张表**字段**与 **API** | `data/entities/p1-{名}.md` |
+| 表与表**什么关系** | [data/relations/](data/relations/) |
+| **代码怎么写** | [codebase/p1-{端}.md](codebase/p1-backend.md) §三 |
+
+## 代码结构 + 写法
+
+→ [codebase/p1-{端}.md](codebase/p1-backend.md)（§一目录 · §二规范 · §三模板）
 
 ## P0 — 开工前必读
 
@@ -68,8 +81,7 @@
 | 文档 | 说明 | 状态 |
 |------|------|------|
 | [p1-tech-stack.md](p1-tech-stack.md) | 技术栈 | ✅ |
-| [p1-architecture.md](p1-architecture.md) | 架构与模块 | ✅ |
-| [codebase/p1-backend.md](codebase/p1-backend.md) | 后端结构 | ✅ |
+| [codebase/p1-{端}.md](codebase/p1-backend.md) | 架构·目录·写法·模板（**不单建 architecture**） | ✅ |
 
 ### data/entities/（有则列）
 
@@ -118,6 +130,17 @@
 ## 核心业务场景（as-is）
 1. {例：用户浏览商品 → 下单 → 支付}
 2. {…}
+
+## 实体 ↔ 功能对照（一眼看懂）
+
+> **目的**：接手人不用先看 SQL 就能知道「用户干啥 → 存哪张表」。细节见 [data/entities/](data/entities/)。
+
+| 用户/界面在… | 干什么 | 后端实体/表 | 文档 |
+|--------------|--------|-------------|------|
+| {登录页} | {微信登录} | `users` | [p1-user.md](data/entities/p1-user.md) |
+| {订单列表} | {下单} | `orders` | [p1-order.md](data/entities/p1-order.md) |
+
+> 无前端路由时：从 Controller 路径、模块包名、AC 测试名推断「这个功能对应哪张表」。
 
 ## 核心术语（≤8 个放此处）
 
@@ -247,72 +270,215 @@
 
 ---
 
-## p1-architecture.md
-
-> **只写模块一览**，分层/响应/模板 → [codebase/p1-{端}.md](codebase/p1-{端}.md) §二§三
-
-```markdown
-> **P1** · 架构与模块 · 最后验证：{{日期}}
-
-# 架构与模块
-
-## 总体形态
-- 类型：{单体 / 微服务 / …}
-- API 前缀 / 鉴权：{简述}
-
-## 业务模块一览
-| 模块 | 包/路径 | 职责 |
-|------|---------|------|
-| {auth} | `{path}` | {…} |
-
-## 代码怎么写
-→ [codebase/p1-{端}.md](codebase/p1-{端}.md)（§二 规范 · §三 模板）
-
-## 与 model/ 的分工
-- init/：as-is · model/：to-be
-```
-
 ---
 
 ## codebase/p1-{端或模块名}.md
 
+> **init 不单独建 `p1-architecture.md`**——总体形态、模块一览、目录树、写法、模板 **全在本文件**。  
+> greenfield 的 to-be 全局架构仍在 `atlas/solution/architecture.md`（与 init 无关）。
+
 **模式 B（默认）** — 四段式单文件：
 
 ```markdown
-> **P1** · {端}代码 · 结构+写法 · 最后验证：{{日期}}
+> **P1** · {端}代码 · 架构+目录+写法 · 最后验证：{{日期}}
 
-# {端}代码（目录 + 怎么写）
+# {端}代码
 
-## 一、目录结构
+## 一、架构与目录
+
+### 1.1 总体形态
+- 类型：{单体 / 微服务 / …}
+- API 前缀 / 鉴权：{如 /api/v1 · JWT}
+
+### 1.2 业务模块一览
+| 模块 | 包/路径 | 职责 |
+|------|---------|------|
+| {auth} | `{path}` | {…} |
+
+### 1.3 目录树
+{src 结构}
+
+### 1.4 入口与配置
+- 启动类 / 端口 / 公开路径 / 测试入口
+
 ## 二、写法规范
-## 三、代码模板（参考 path:行号）
-## 四、新功能自检
+
+> 逐项摘录，禁止写「遵循最佳实践」。完整检查表 → [init-scan-checklist.md §二](init-scan-checklist.md#步骤-5--codebasep1-端md)。
+
+### 2.1 分层与命名（后端示例）
+| 层 | 包路径 | 类名示例 |
+|----|--------|----------|
+| Controller | `{实际路径}` | `{真实类名}` |
+| Service | `{实际路径}` | `{真实类名}` |
+
+### 2.2 统一响应与异常
+- 成功结构：`{摘录字段，如 code/data/message}`
+- 成功调用：`{摘录 1 行，如 ApiResponse.ok(...)}`
+- 业务异常：`{类名 + 抛法 + 典型 code}`
+
+### 2.3 校验 / 鉴权 / 分页 / 事务
+| 项 | 本项目写法 |
+|----|------------|
+| 校验 | `{如 @Valid @RequestBody + DTO 字段注解}` |
+| 当前用户 | `{如 AuthContext.requireUserId()}` |
+| 分页 | `{page 从 1 还是 0；Repository 写法}` |
+| 事务 | `{@Transactional 在哪一层}` |
+
+### 2.4 HTTP 与主键
+- 创建：`{201 + 路径}` · 删除：`{204}` · 幂等：`{200/201 规则}`
+- 主键：`{UUID/自增}` · 工厂：`{Entity.createNew 等}`
+
+### 2.5 模块参考（抄作业）
+| 场景 | 参考 |
+|------|------|
+| 标准 CRUD | `{module/路径}` |
+| 分页列表 | `{类:行号}` |
+| 幂等/upsert | `{类:行号}` |
+
+### 2.6 前端（有则写，无则删节）
+- UI 库、请求 import、Hook、样式文件命名、types 目录
+
+## 三、代码模板
+
+> 每节须：**参考 path:行号** · **适用** · **禁止偏离** · **真实代码块**。见 [init-scan-checklist §三](init-scan-checklist.md#三-代码模板每类-必含)。
+
+### 3.1 分页列表
+{…}
+
+### 3.2 详情
+{…}
+
+### 3.3 创建/更新
+{…}
+
+### 3.4 幂等/状态变更（无则写「暂无」）
+{…}
+
+## 四、新功能自检（≥6 条，项目特定）
+- [ ] {如：新接口路径在 /api/v1 下}
+- [ ] {如：返回 ApiResponse，不裸返 Entity}
+- [ ] …
+
+## 与 model/ 的分工
+- init/codebase：as-is 怎么写 · model/：to-be 设计
 ```
 
-**模式 A** — codebase 仅 §一，模板在 `atlas/conventions/`（用户显式要求时）。
+**模式 A** — codebase 仅 §一目录，模板在 `atlas/conventions/`（用户显式要求时）。
+
+---
+
+---
+
+## data/ 目录：实体是干什么的？
+
+> **init 的 data/ 不是 ER 图堆砌**，而是回答：**用户在系统里做什么 → 数据存哪 → 和别的数据什么关系**。  
+> AI 写码前读 entities 才能懂业务字段含义；读 relations 才能懂 join/外键约束。
+
+| 文件 | 回答什么 | 不写什么 |
+|------|----------|----------|
+| `data/README.md` | 主流程 ↔ 实体总览；推断依据 | 字段明细、Controller 模板 |
+| `data/entities/p1-*.md` | **这张表干什么**、用户怎么用、相关 API、关键字段 | 怎么写 Service（→ codebase §三） |
+| `data/relations/p1-*.md` | 谁和谁 1:N、唯一约束、业务含义 | 重复贴实体业务描述 |
+| `p0-business.md` §实体对照 | P0 速查表：页面/功能 → 表 | 不替代 entities 详情 |
+
+**扫描实体文档时必写「业务用途」**，禁止只列字段表。  
+**完成度检查** → [init-scan-checklist.md §步骤 6](init-scan-checklist.md#步骤-6--data-实体文档)
+
+---
+
+## data/README.md（有持久化时建议建）
+
+```markdown
+> **P1** · 数据域总览 · 最后验证：{{日期}}
+
+# 数据域：实体是干什么的？
+
+> 用户在 {小程序/Web/…} 里做什么 → 后端存哪张表。
+
+## 推断依据（这些表是干啥的从哪看出来）
+
+| 来源 | 例子 |
+|------|------|
+| README / 产品描述 | 「体重记录、打卡」 |
+| Controller / 路由 | `POST /diet-records` = 饮食记录 |
+| migration 注释 | `V4__goals.sql`「每用户一条目标」 |
+| 模块包名 | `module/checkin` = 打卡域 |
+| AC / 验收测试 | `Ac003DietTest` = 饮食已实现 |
+
+## 主流程 ↔ 实体（简图）
+
+\`\`\`text
+{登录} → User
+{设目标} → Goal
+{记饮食} → DietRecord
+\`\`\`
+
+## 实体索引（详情点进 entities/）
+
+| 实体/表 | 一句话：干什么 | 文档 |
+|---------|----------------|------|
+| **User** | 微信登录后的「是谁」 | [p1-user.md](entities/p1-user.md) |
+| **Order** | 用户下的购买单 | [p1-order.md](entities/p1-order.md) |
+
+## 相关
+
+- 业务背景 → [../p0-business.md](../p0-business.md)
+- 代码怎么写 → [../codebase/p1-{端}.md](../codebase/p1-backend.md)
+```
 
 ---
 
 ## data/entities/p1-{实体名}.md
 
+> **每个实体文件必须先回答「干什么、谁用、产生数据的动作是什么」**，再写字段。
+
 ```markdown
-> **P1** · 实体 · {EntityName} · 来源：{migration/Entity 路径}
+> **P1** · 实体 · {EntityName} · 来源：{migration/Entity 路径} · 最后验证：{{日期}}
 
 # {EntityName}（{表名}）
 
+## 业务用途
+
+{1~3 句：**这张表在业务里是干什么的**。例：「用户每天称体重记一条；同日期重复提交则覆盖。」}
+
+## 用户 / 界面里怎么用
+
+| {页面/功能} | 用户操作 | 写入/更新的数据 |
+|-------------|----------|-----------------|
+| {体重页} | 输入 kg 保存 | `weight_records` 一行 |
+
+> 无前端时：从 API + AC 测试 + 模块名推断。
+
+## 相关 API
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/v1/...` | {创建/更新…} |
+| GET | `/api/v1/...` | {查询…} |
+
+## 和其他实体的关系
+
+- {例：归属 User，见 [../relations/p1-user-records.md](../relations/p1-user-records.md)}
+- {例：被 Goal 读取算进度}
+
+## 推断依据
+
+- {README / Controller 注释 / migration / Ac00xTest / 前端路由}
+
 ## 关键字段
+
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | {type} | 主键 |
-| {status} | {type} | {含义；术语见 glossary 若有} |
-
-## 关联
-- 关系 → [../relations/p1-{名}.md](../relations/p1-{名}.md)
-- 状态 → [../state-machines/p1-{名}.md](../state-machines/p1-{名}.md)（有则链）
+| {status} | {type} | {业务含义，非仅类型} |
 
 ## 代码映射
+
 - `{Entity 类路径}`
+- `{主要 Service}`
 ```
+
+**禁止**：只有字段表、没有「业务用途」和「用户怎么用」的实体文档。
 
 ---
 
@@ -323,11 +489,13 @@
 
 # {A} → {B}
 
+**一句话**：{业务上为什么是这个关系。例：「一个用户有多条饮食记录，按 user_id 归属。」}
+
 - **类型**：{N:1 / 1:N / N:M}
 - **字段**：{from.field → to.field}
 - **约束**：{非空 / 唯一 / …}
-- **说明**：{业务含义}
-- **中间表**（N:M 时）：{表名}
+- **业务规则**：{例：每用户每天一条打卡}
+- **实体详情** → [../entities/p1-{a}.md](../entities/p1-{a}.md)
 ```
 
 ---
@@ -350,6 +518,14 @@
 ## 所属实体
 - [../entities/p1-{名}.md](../entities/p1-{名}.md)
 ```
+
+---
+
+## init 落盘自检（AskQuestion 前必过）
+
+> 全量勾选 → [init-scan-checklist.md §落盘自检](init-scan-checklist.md#init-落盘自检askquestion-前须全-)
+
+**任一项未 ✅ → 不得弹出下方 init 确认卡片。**
 
 ---
 
@@ -384,7 +560,7 @@ questions:
       - id: "yes_data"
         label: "是，刷新 data/（表/实体/关系/状态机变更）"
       - id: "yes_codebase"
-        label: "是，刷新 init/codebase/ 或 p1-architecture.md"
+        label: "是，刷新 init/codebase/（含架构模块与 §三模板）"
       - id: "yes_conventions"
         label: "是，刷新 atlas/conventions/（仅模式 A 项目）"
       - id: "yes_env"

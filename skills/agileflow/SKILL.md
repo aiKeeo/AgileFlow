@@ -4,7 +4,7 @@ description: >-
   Agileflow 结构化交付（init→req→mod→sol→dev→tests），文档落盘 atlas/，开发须构思落盘再写码。
   写法锚点默认模式 B：init/codebase 或 solution/code-patterns 单文件（结构+规范+模板），不建 conventions/。
   init: 仅 brownfield。在用户 @agileflow、init:/req:/mod:/sol:/dev:/tests: 或走完整流程时使用。
-version: 7.16.0
+version: 8.0.0
 ---
 
 # Agileflow
@@ -43,7 +43,7 @@ version: 7.16.0
 |------|------|
 | 任意启用 | [00-intent-routing.md](phases/00-intent-routing.md) |
 | 当前阶段 | **一个** `phases/xx.md` + 文内链接的 templates |
-| `init:` | [init-doc.md](templates/init-doc.md) · 写法锚点 [code-conventions.md](templates/code-conventions.md) |
+| `init:` | [init-doc.md](templates/init-doc.md) + **[init-scan-checklist.md](templates/init-scan-checklist.md)**（逐步勾选） |
 | `dev:` | [dev-quickstart.md](templates/dev-quickstart.md) + [04-development.md](phases/04-development.md) |
 | 阶段结束 | [askquestion-gate.md](templates/askquestion-gate.md) |
 
@@ -57,6 +57,7 @@ version: 7.16.0
 |----|-----|
 | **写法锚点** · 默认模式 B · `codebase/p1-*.md` 或 `code-patterns-*.md` | 默认建 `atlas/conventions/`（除非模式 A） |
 | **init:** brownfield as-is | greenfield 建 init/ |
+| **data/entities/** | 每张表 **干什么、用户怎么用**；不是字段字典 | 只列字段不写业务用途 |
 | **① 构思落盘** | 口头想想直接写码 |
 | **UID**（REQ 界面描述） | REQ 里定配色/px |
 
@@ -84,9 +85,10 @@ version: 7.16.0
 4. **AC 只在 REQ**；dev **八** 只引用 REQ
 5. **写法锚点默认模式 B**——单文件四段式；**禁止** conventions 与 codebase 双份维护
 6. **dev ② 前** Read 写法锚点 §三；首个典型功能 **③ 后 refresh §三**
-7. **p1-architecture** 只写模块一览；分层/模板在 **codebase §二§三**
-8. humanTodo 未清 → 禁止 tests 标 PASS
-9. REQ 开发完毕 → 可选 `init: refresh codebase`
+7. **init 不建 p1-architecture**——架构模块进 `codebase/p1-*.md` §一
+8. **init AskQuestion 前** → [init-scan-checklist](templates/init-scan-checklist.md) 落盘自检全 ✅
+9. humanTodo 未清 → 禁止 tests 标 PASS
+10. REQ 开发完毕 → 可选 `init: refresh codebase`
 
 ---
 

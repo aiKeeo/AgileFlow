@@ -31,7 +31,7 @@ questions:
       - id: "yes_data"
         label: "是，刷新 p1-entity-* / p1-relation-* / p1-state-machine-*"
       - id: "yes_codebase"
-        label: "是，刷新 p1-codebase-* / p1-architecture"
+        label: "是，刷新 init/codebase/（含 §一架构模块）"
       - id: "yes_env"
         label: "是，刷新 p0-environment / p1-tech-stack"
       - id: "yes_full"

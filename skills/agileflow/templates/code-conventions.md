@@ -23,10 +23,10 @@
 ## 单文件四段式（模式 B 标准结构）
 
 ```markdown
-# {端}代码（目录 + 怎么写）
+# {端}代码
 
-## 一、目录结构
-{树、入口、配置、测试路径}
+## 一、架构与目录
+### 1.1 总体形态 · 1.2 业务模块一览 · 1.3 目录树 · 1.4 入口与配置
 
 ## 二、写法规范
 {分层、命名、注解、响应、校验、禁止项}
@@ -73,22 +73,15 @@ dev 首个 CRUD:    ③ ✅ → 从源码摘录 refresh §三 → 📝
 init: refresh codebase / 新模块新写法 → 增量更新 §三
 ```
 
-### brownfield · init 步骤 6b
+### brownfield · init 步骤 5
 
-1. 判定模式：**默认 B**；用户说「独立 conventions / 全栈分开维护」→ A
-2. 各找 1 份典型样本（列表页或 Controller、样式、service…）
-3. **① 统计高频** → **② 摘录 §三 真实片段** → **③ 写入** `codebase/p1-{端}.md`
-4. `p1-architecture.md` **只写模块一览**，分层/响应链到 codebase §二
-5. 无样本标 **待补充**，**禁止** npm 文档冒充
+**逐步勾选** → [init-scan-checklist.md](init-scan-checklist.md)（§一~§四、W1~W12、§三 模板、落盘自检）。
 
-扫描输入：
+摘要：
 
-| 前端 | 后端 |
-|------|------|
-| 列表/CRUD 页 | Controller |
-| 封装组件 | Service |
-| 样式文件 | Repository/Mapper |
-| service/hook | DTO + 统一响应 |
+1. 写满 `codebase/p1-{端}.md`；**禁止** `p1-architecture.md`
+2. §二 **逐项摘录**真实类名/路径，禁止「遵循规范」
+3. §三 每模板 **path:行号 + 真实代码块**
 
 ### greenfield · sol 步骤 6b
 
@@ -120,14 +113,16 @@ init: refresh codebase / 新模块新写法 → 增量更新 §三
 
 ---
 
-## init 内分工（避免 architecture 与 codebase 重复）
+## init 内分工
 
-| 文件 | 写什么 | 不写什么 |
-|------|--------|----------|
-| `p1-architecture.md` | 总体形态、模块一览、API 前缀 | 分层细节、响应格式、代码模板 |
-| `codebase/p1-*.md` | §一目录 + §二写法 + §三模板 + §四自检 | 业务术语、REQ |
-| `p0-business.md` | 业务、用户、实体对照（简表） | 代码模板 |
-| `data/entities/` | 表/字段/业务用途 | 怎么写 Controller |
+| 文件 | 写什么 |
+|------|--------|
+| `codebase/p1-*.md` | **§一架构+模块+目录** · §二规范 · §三模板 · §四自检（**不单建 p1-architecture**） |
+| `p0-business.md` | 业务、用户、实体对照简表 |
+| `data/entities/` | 表干什么、用户怎么用、API、字段 |
+| `p1-tech-stack.md` | 语言/框架/版本 |
+
+> greenfield to-be 全局架构 → `solution/architecture.md`（L1–L5、测试栈），与 init 无关。
 
 ---
 

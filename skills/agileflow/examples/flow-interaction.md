@@ -38,17 +38,16 @@
 
 **用户**：`init:` 接手 lossfat-server
 
-→ 扫描源码 → `init/codebase/p1-backend.md` 四段式  
-→ `p1-architecture` 仅模块一览  
-→ **不建** `conventions/`  
+→ 扫描源码 → `init/codebase/p1-backend.md`（§一含架构模块）  
+→ **不建** `p1-architecture.md` · **不建** `conventions/`  
 → AskQuestion init 确认 → **停止**
 
 ---
 
 ## 示例 5：违规反例
 
-- ❌ 默认建 `atlas/conventions/` 又与 `codebase/p1-*.md` §三重复  
-- ❌ `p1-architecture` 写分层细节 + codebase §二 再写一遍  
+- ❌ init 建 `p1-architecture.md`（与 codebase §一 重复，已废弃）  
+- ❌ conventions 与 codebase §三 双份维护  
 - ❌ dev ② 不读写法锚点 §三  
 - ❌ 没 ① 落盘就写源码  
 - ❌ 阶段完成不 AskQuestion  

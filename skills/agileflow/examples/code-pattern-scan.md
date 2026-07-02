@@ -9,10 +9,8 @@
 
 ```
 init:
-  扫描 UserList / DietController / …
-  → 写满 init/codebase/p1-backend.md（§一~§四）
-  → p1-architecture.md 只留模块一览
-  → 不建 conventions/
+  扫描源码
+  → 写满 init/codebase/p1-backend.md（§一含模块一览+目录，不建 p1-architecture）
 ```
 
 ```

@@ -1,12 +1,13 @@
 ﻿# 阶段 0：项目盘点（init — 仅 brownfield）
 
 > 文档模板：[templates/init-doc.md](../templates/init-doc.md)  
+> **扫描清单（逐步勾选）**：[templates/init-scan-checklist.md](../templates/init-scan-checklist.md)  
 > 路由与触发：[00-intent-routing.md](00-intent-routing.md#init-判定brownfield--greenfield)
 
 ## 本阶段做什么
 
 对 **已有代码 / 可运行应用** 的仓库做 **as-is 盘点**，落盘 `atlas/init/`。  
-回答：**业务给谁用、解决什么、核心流程是什么；怎么跑；代码与现有数据长什么样**。
+回答：**业务给谁用、解决什么、核心流程是什么；怎么跑；现有数据每张表是干什么的、怎么连**。
 
 **不回答**：本次任务、AC、接口设计、改动决策（分别在 requirements / solution / dev）。
 
@@ -34,9 +35,8 @@ atlas/init/
 ├── glossary/                 # 术语 >8 或跨域时按需建
 │   └── p0-{域}.md            # 按领域拆分，禁止一词一文件
 ├── p1-tech-stack.md
-├── p1-architecture.md
 ├── codebase/
-│   └── p1-{端}.md          # 模式 B 默认：§一目录 §二规范 §三模板 §四自检
+│   └── p1-{端}.md          # §一架构与目录 · §二规范 · §三模板 · §四自检（**不另建 p1-architecture**）
 └── data/                     # 有持久化
     ├── entities/
     │   └── p1-{实体}.md
@@ -80,11 +80,10 @@ atlas/init/
 | 2 | `git remote`、分支 | 仓库、分支策略 | `p0-repository.md`（无 git 跳过） |
 | 3 | docker-compose、`.env.example`、启动脚本 | 启动命令、依赖、端口 | `p0-environment.md` |
 | 4 | package.json / pom.xml / go.mod 等 | 语言、框架、版本 | `p1-tech-stack.md` |
-| 5 | 顶层目录、模块划分 | 单体/微服务、分层 | `p1-architecture.md` |
-| 6 | `src/` 等结构、入口、典型 Controller/页面 | 目录 + **写法 + §三模板**（模式 B） | `codebase/p1-*.md` |
-| 6b | 同上 + 样式/service/DTO | 高频统计、四类经典片段 | 写入 `codebase/p1-*.md` §二§三（见 [code-conventions.md](../templates/code-conventions.md)） |
-| 7 | migration、Entity、schema | 表、字段、FK、status 枚举 | `data/entities/`、`relations/`、`state-machines/` |
-| 8 | — | 汇总索引；README「业务与用户」从 p0-business 摘要 | `README.md`（最后写） |
+| 5 | `src/` 结构、模块划分、入口、典型 Controller/页面 | **§一架构模块+目录** + §二§三写法模板 | `codebase/p1-*.md` |
+| 5b | 样式/service/DTO 等 | 高频统计、四类经典片段 | 写入 `codebase/p1-*.md` §二§三 |
+| 6 | migration、Entity、schema、Controller/API、前端路由 | 实体干什么、关系 | `data/` |
+| 7 | — | 汇总索引 | `README.md`（最后写） |
 
 **业务扫描须读尽以下来源（有则读，无则跳过并在 p0-business 标注）**：
 
@@ -92,8 +91,12 @@ atlas/init/
 - 已有 `atlas/requirements/REQ-*.md`（仅摘业务价值/用户角色，不抄 AC）
 - 前端：路由表、菜单配置、页面 title
 - 后端：包名、模块划分、Controller/Service 命名
-- 数据：Entity 名、核心表 — 辅助理解领域
+- 数据：Entity 名、核心表 — **须写清业务用途**（不只字段清单）
 - **术语**：docs 词汇表、代码 Enum/常量注释、字段 comment、内部 wiki 缩写表
+
+**步骤 5 · codebase** → 按 [init-scan-checklist §步骤 5](templates/init-scan-checklist.md#步骤-5--codebasep1-端md) **W1~W12 / F1~F6 / §三** 逐项写满。
+
+**步骤 6 · 实体** → 按 [init-scan-checklist §步骤 6](templates/init-scan-checklist.md#步骤-6--data-实体文档) **E1~E7** 逐实体写满。
 
 **术语落盘判定**：
 
@@ -102,20 +105,11 @@ atlas/init/
 | ≤8 个 | 全部写在 `p0-business.md`「核心术语」表 |
 | >8 或跨订单/支付/库存等多域 | `p0-business` 只留 3~5 个总览词 + 建 `glossary/p0-{域}.md` |
 
-**仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全（**含易混淆的内部术语**）。
+**仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全。
 
-**写法锚点（步骤 6/6b，默认模式 B）**：
+greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`。示例 → [code-pattern-scan.md](../examples/code-pattern-scan.md)。
 
-> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。
-
-1. **默认模式 B**：一次写满 `codebase/p1-{端}.md` 四段式；**不建** `atlas/conventions/`
-2. `p1-architecture.md` 只写模块一览；分层/响应/模板 → codebase §二§三
-3. 从真实代码摘录 §三；标注 `path:行号`；无样本标待补充
-4. 用户明确要求「独立 conventions / 全栈分开维护」→ 模式 A
-
-greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`。
-
-示例 → [code-pattern-scan.md](../examples/code-pattern-scan.md)
+**禁止**：建 `p1-architecture.md`；conventions 与 codebase 双份维护；实体只写字段不写用途。
 
 ### ③ 落盘
 
@@ -124,6 +118,8 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 - `README.md` 状态先标 **草稿**
 
 ### ④ AskQuestion 确认
+
+**前置**： [init-scan-checklist 落盘自检](../templates/init-scan-checklist.md#init-落盘自检askquestion-前须全-) **全 ✅**。
 
 弹出 [init 确认卡片](../templates/init-doc.md#init-确认-askquestion) → **停止**。
 
@@ -150,7 +146,7 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 |-------------|------|
 | `init: refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`glossary/` + README 摘要 |
 | `init: refresh data` | 重扫 migration + Entity，增删改 `data/**/p1-*.md` |
-| `init: refresh codebase` | 更新 `codebase/p1-*.md`（含 §三模板）；`p1-architecture` 仅模块变化时改 |
+| `init: refresh codebase` | 更新 `codebase/p1-*.md`（§一架构模块 + §二§三） |
 | `init: refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |
 | `init: refresh environment` | 更新 `p0-environment.md`、`p1-tech-stack.md` |
 | `init:` 或 `init: refresh` | 全量重扫 |
