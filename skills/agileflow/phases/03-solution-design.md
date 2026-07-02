@@ -20,9 +20,10 @@
 ```
 atlas/solution/
 ├── README.md
-├── features/          # 含 §边界，无单独 boundaries.md
-├── contracts/         # 接口/暴露面文档库（有 API/UI/JOB/EVT 才写）
-└── architecture.md    # 全局唯一
+├── features/
+├── contracts/         # 按需
+├── architecture.md    # 全局唯一
+└── code-patterns-{端}.md   # greenfield 模式 B 🌱（§三待补充；默认）
 ```
 
 ## 标准流程（默认）
@@ -32,14 +33,15 @@ atlas/solution/
 3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**、验收要点
 4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 须基于 UID** 补充路由、组件树、API 绑定（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）
 5. **AskQuestion 技术栈** → 停止
-6. 写或更新 **`architecture.md`（全局一份）**：栈、模块、`test/ac/`、L1–L5
-7. 根据 AskQuestion **`ui_style`** 答案：更新 UID/UI-xxx 样式状态；`style_reference` → humanTodo；**禁止 Agent 替用户定配色**
-8. **humanTodo 沉淀**（必做）：密钥/沙箱/证书/AppID/第三方账号/**视觉参考稿**等 → **逐条追加** [humanTodo.md](../templates/human-todo.md)，architecture 中 mock 项须对应 humanTodo 序号
-9. 拆解任务 → `todo.md` 开发任务（**每 T-xxx 含 ①②③ 三步子项 + dev 路径**）+ **功能依赖表**（阶段 4 一任务一 dev）
-10. 更新 README 索引 → **AskQuestion 确认方案** → 停止
-11. 确认后 README **已确认** → 更新 todo
+6. 写 **`architecture.md`**：栈、模块、`test/ac/`、L1–L5（**不写**分层细节与代码模板）
+7. **写法锚点 🌱**（默认模式 B）：建 `solution/code-patterns-{backend|frontend}.md` 四段式，§三标待补充 → [code-conventions.md](../templates/code-conventions.md)
+8. 根据 **`ui_style`** 更新 UID；`style_reference` → humanTodo
+9. **humanTodo 沉淀**
+10. 拆解任务 → `todo.md`（每 T-xxx 含 ①②③ + dev 路径）+ 功能依赖表
+11. 更新 README → **AskQuestion 确认方案** → 停止
+12. 确认后 README **已确认**
 
-### 第 12 步：阶段收尾 — **强制 AskQuestion 阶段闸门**
+### 第 13 步：阶段收尾 — **强制 AskQuestion 阶段闸门**
 
 `solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀本阶段人类依赖** 后，本阶段完成。**必须**：
 
@@ -73,7 +75,7 @@ atlas/solution/
 
 - 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`
 - 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
-- **禁止** `boundaries.md`；**禁止** 每功能一份 architecture
+- greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
 - `architecture.md` 全项目**只维护一份**；Write architecture 前须 AskQuestion 技术栈
 - 任务只写 `todo.md`
 

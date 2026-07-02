@@ -31,7 +31,8 @@ atlas/solution/
 │   ├── API-001-创建订单.md
 │   ├── UI-001-下单页.md
 │   └── JOB-001-日终对账.md
-└── architecture.md        # 【全局唯一】技术栈、架构、L1–L5、可观测性
+├── architecture.md        # 【全局唯一】技术栈、模块一览、L1–L5（不写代码模板）
+└── code-patterns-{端}.md    # greenfield 模式 B 🌱：§一~§四（见 code-conventions.md）
 ```
 
 **无** `boundaries.md`——边界写在各 `features/F-xxx.md` 的 `## 边界` 节。

@@ -1,8 +1,6 @@
 ﻿# 阶段 4：开发实现
 
-> **dev 规则（构思）**：[dev-rationale dev 规则](../templates/dev-rationale.md#dev-规则构思先行)  
-> **构思模板**：[dev-rationale 七段构思模板](../templates/dev-rationale.md#七段构思模板-①-必须按此格式输出)  
-> AC：[ac-guide.md](../templates/ac-guide.md) · humanTodo：[human-todo.md](../templates/human-todo.md) · 闸门：[askquestion-gate.md](../templates/askquestion-gate.md)
+> **dev 速查**：[dev-quickstart.md](../templates/dev-quickstart.md) · 写法锚点：[code-conventions.md](../templates/code-conventions.md)
 
 ## dev 规则：构思先行（最高优先级）
 
@@ -80,6 +78,7 @@ atlas/dev/           注释对齐构思             全绿 → 九 回填 → to
 | W5 | G0–G8 构思闸门通过 | 停止 |
 | W6 | Write 内容在 **五** 当前步骤范围内 | 先更新 dev **五** 再写 |
 | W7 | **七** humanTodo 已沉淀 | 先追加 humanTodo |
+| W8 | 写法锚点存在 → 已 Read；dev **七** 已引用 §三（brownfield：`init/codebase/`；greenfield：`solution/code-patterns/`；模式 A：`conventions/` §2） | 先读 [dev-quickstart](../templates/dev-quickstart.md) 并补 dev 七 |
 
 ---
 
@@ -88,7 +87,10 @@ atlas/dev/           注释对齐构思             全绿 → 九 回填 → to
 - **只做一件事**：把 **五、核心流程** 变成代码
 - 严格按 **五** 步序，一步一动作
 - 代码注释对齐构思（数据模型、状态约束写进代码）
-- **禁止**脱离 **五** 即兴扩 scope（那是新构思，须回 ①）
+- **② 写码前** Read 写法锚点 §三（定位见 [dev-quickstart](../templates/dev-quickstart.md)）；dev **七** 引用 `§3.x`
+- **禁止**引入 architecture/§二 未列出的库或分层
+- **首个典型功能 ③ ✅ 后** refresh 写法锚点 §三（greenfield 必做）
+- **禁止**脱离 **五** 即兴扩 scope
 
 ---
 
@@ -99,6 +101,7 @@ atlas/dev/           注释对齐构思             全绿 → 九 回填 → to
 - 在 `test/ac/` 写/跑 **八** 规划的用例 → **全绿**
 - **九** 回填 L3 + 终端证据
 - **任务 ✅** = **九** 可自动化 AC 全 🟢
+- **首个典型功能 ③ ✅ 后**：refresh `code-patterns-*.md` 或 `codebase/p1-*.md` §三
 
 细则 → [ac-guide.md](../templates/ac-guide.md)
 

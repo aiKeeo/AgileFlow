@@ -58,6 +58,7 @@ architecture / contracts 讲**是什么**；**dev 讲这任务怎么构思、怎
 ## 七、技术选型与依赖
 - 框架版本：
 - 中间件：
+- **写法对齐**：`init/codebase/p1-{端}.md §3.x` 或 `solution/code-patterns-{端}.md §3.x`（模式 A：`conventions §2.x`）
 - 关键假设：
 - humanTodo：（须已追加序号，或写「无」）
 ```

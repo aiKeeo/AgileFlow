@@ -43,26 +43,15 @@
 
 ```
 atlas/
-├── init/            # init: brownfield 项目 as-is 盘点（greenfield 不建）
-│   ├── README.md
-│   ├── p0-business.md   # 业务、用户、流程、核心术语（≤8）
-│   ├── glossary/        # 术语多/跨域时按需
-│   ├── p0-*.md
-│   ├── p1-*.md      # P1 写码前必读
-│   ├── codebase/
-│   └── data/        # entities/ relations/ state-machines/（有才有）
-├── requirements/    # req:
-│   └── ui/          # UID 界面描述（REQ 阶段，样式待定）
-├── model/           # mod:
-├── solution/        # sol:
-│   ├── features/    # 功能 + §边界
-│   ├── contracts/   # 接口/暴露面文档库（按需）
-│   └── architecture.md
-├── dev/             # dev:
-├── tests/           # tests: 验收报告
-├── todo.md
-├── humanTodo.md
-└── active-edits.md  # 阶段 4 并行写码时启用（默认串行可不建）
+├── init/                      # init: 仅 brownfield
+│   ├── codebase/p1-{端}.md    # 模式 B 默认：§一~§四
+│   ├── p0-business.md … data/
+├── solution/
+│   ├── architecture.md
+│   └── code-patterns-{端}.md  # greenfield 模式 B 🌱
+├── conventions/               # 模式 A 可选；默认不建
+├── requirements/ … model/ … dev/ … tests/
+├── todo.md · humanTodo.md · active-edits.md（按需）
 ```
 
 - 各目录下 `temp/` 放临时稿（见 §TEMP）
@@ -196,6 +185,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 需求 | `atlas/requirements/REQ-*.md` | 有文件但「草稿」→ 阶段 1 未完成；「已确认」→ 可进阶段 2 |
 | 建模 | `atlas/model/README.md` | 不存在或「草稿」→ 阶段 2；「已确认」→ 可进阶段 3 |
 | 方案 | `atlas/solution/README.md` | 不存在或「草稿」→ 阶段 3；「已确认」且开发任务未清空 → 阶段 4 |
+| **写法锚点** | `init/codebase/p1-*.md` 或 `solution/code-patterns-*.md` | 模式 B 默认；dev 对齐 §三 |
 | 开发 | `atlas/todo.md` →「开发任务」| 有未完成任务 → 阶段 4；全部 ✅ 且测试未 ✅ → 阶段 5 |
 | 验收 | `atlas/tests/README.md` | 已有 PASS → 交付已完成，问用户要维护还是新需求 |
 
@@ -314,7 +304,7 @@ questions:
 1. 输出阶段声明行（见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
 2. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`）
 3. **允许共读**：该 phase 文内显式链接的 `templates/*`（init → `init-doc.md`）
-4. 阶段 4 额外共读 [dev-rationale.md](../templates/dev-rationale.md)
+4. 阶段 4 额外共读 [dev-quickstart.md](../templates/dev-quickstart.md)
 5. **阶段 0/1–4 产出完成** → 必读 [askquestion-gate.md](../templates/askquestion-gate.md) 或 init 专用卡片 → **AskQuestion → 停止**
 6. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)
 

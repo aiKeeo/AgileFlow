@@ -4,61 +4,60 @@
 
 **用户**：`req: 订单要支持优惠券抵扣`
 
-→ AskQuestion 需求卡片（含 **ui_scope**）→ **停止**  
-→ 写 REQ 草稿 + **按需 UID**（页面结构与交互，样式标待定）→ AskQuestion 确认（含 **ui_confirm**）→ **AskQuestion 阶段闸门** → **停止**
+→ AskQuestion 需求卡片 → **停止**  
+→ REQ 草稿 + UID → AskQuestion 确认 → **阶段闸门** → **停止**
 
 ---
 
-## 示例 2：方案
+## 示例 2：方案（greenfield · 模式 B）
 
 **用户**：`sol: 设计退款功能`
 
 → features + contracts → AskQuestion 技术栈 → **停**  
-→ architecture + todo → AskQuestion 方案确认 → **停**  
-→ README 已确认 → **AskQuestion 阶段闸门**（「方案设计已完成。是否继续进入【开发实现】？」）→ **停止**
+→ architecture + **`code-patterns-backend.md` 🌱** + todo → AskQuestion 方案确认 → **停**  
+→ **阶段闸门** → **停止**
 
 ---
 
-## 示例 3：开发（串行，顺序不可跳）
+## 示例 3：开发（串行）
 
-**用户**：阶段闸门已选「是，继续」→ 开始 T-000
+**用户**：阶段闸门已选「是，继续」→ T-000
 
-→ **`TodoWrite`**：T-000 三步（①构思 / ②写码 / ③验收）  
-→ **① 构思落盘** `atlas/dev/T-000-BE.md`（七段齐全）→ **勾 todo ①**  
-→ **② 按 五、核心流程 写码** → **勾 todo ②**  
-→ **③ 对照 REQ 跑 test/ac 全绿** → **九** 回填 → **勾 todo ③** → T-000 父任务 ✅  
-→ 下一任务重复；**全部父任务 ✅** → **AskQuestion 阶段闸门** → **停止**
+→ TodoWrite：①构思 / ②写码 / ③验收  
+→ **①** `atlas/dev/T-000-BE.md`（七 引用 `code-patterns-backend §3.1` 或 `codebase/p1-backend §3.1`）  
+→ **②** 按 五 写码  
+→ **③** test/ac 全绿 → T-000 ✅  
+→ **首个典型功能 ③ 后 refresh §三**
 
-**首行声明示例**：
-`📍 Agileflow | 模式：严谨 | 阶段：4-开发 | 步骤：①构思落盘 | 任务：T-000 | dev：atlas/dev/T-000-BE.md | todo：①进行中`
-
----
-
-## 示例 4：阶段完成却不提问（违规）
-
-**❌** 写完 REQ 标已确认 → 直接写 `atlas/model/`  
-**❌** 方案 README 标已确认 → 同回复建 `atlas/dev/` 并写码  
-**❌** 用「接下来进入方案阶段吗？」代替 AskQuestion 小卡片  
-
-**✅** 本阶段产出完成 → **调用 AskQuestion 工具**发阶段闸门 → **本回复结束**
+**首行声明**：
+`📍 Agileflow | 阶段：4-开发 | 步骤：②按构思开发 | 任务：T-000 | 写法：codebase §3.1`
 
 ---
 
-## 示例 5：只看成品
+## 示例 4：init（brownfield · 模式 B）
 
-用户在上个闸门选「只看成品 / 全部做完」：
+**用户**：`init:` 接手 lossfat-server
 
-- **可**：任务间连续 ①→②→③；dev 正文精简  
-- **不可**：跳过 ① 构思落盘；跳过 ③ AC 验收；**跳过阶段 4 结束的阶段闸门**
+→ 扫描源码 → `init/codebase/p1-backend.md` 四段式  
+→ `p1-architecture` 仅模块一览  
+→ **不建** `conventions/`  
+→ AskQuestion init 确认 → **停止**
 
 ---
 
-## 反例速查
+## 示例 5：违规反例
 
-- ❌ 未 AskQuestion 就写 REQ / 进下一阶段  
-- ❌ **没 ① 落盘就写源码**（接手人看不懂）  
-- ❌ **`T003-T010-后端.md` 糅合多个 todo**  
-- ❌ **五** 只写「实现登录模块」（须逐步编号主逻辑）  
-- ❌ 说「需要密钥」却不写 humanTodo  
-- ❌ 未显式并行就 Task 整包写码  
-- ❌ ③ 未全绿标 ✅
+- ❌ 默认建 `atlas/conventions/` 又与 `codebase/p1-*.md` §三重复  
+- ❌ `p1-architecture` 写分层细节 + codebase §二 再写一遍  
+- ❌ dev ② 不读写法锚点 §三  
+- ❌ 没 ① 落盘就写源码  
+- ❌ 阶段完成不 AskQuestion  
+
+---
+
+## 示例 6：只看成品
+
+- **可**：任务间连续 ①→②→③  
+- **不可**：跳过 ①；跳过 ③；跳过阶段闸门  
+
+更多 → [code-pattern-scan.md](code-pattern-scan.md) · [dev-quickstart.md](../templates/dev-quickstart.md)

@@ -36,7 +36,7 @@ atlas/init/
 ├── p1-tech-stack.md
 ├── p1-architecture.md
 ├── codebase/
-│   └── p1-{端或模块}.md      # 有几端/几模块几个文件
+│   └── p1-{端}.md          # 模式 B 默认：§一目录 §二规范 §三模板 §四自检
 └── data/                     # 有持久化
     ├── entities/
     │   └── p1-{实体}.md
@@ -81,7 +81,8 @@ atlas/init/
 | 3 | docker-compose、`.env.example`、启动脚本 | 启动命令、依赖、端口 | `p0-environment.md` |
 | 4 | package.json / pom.xml / go.mod 等 | 语言、框架、版本 | `p1-tech-stack.md` |
 | 5 | 顶层目录、模块划分 | 单体/微服务、分层 | `p1-architecture.md` |
-| 6 | `src/` 等结构、入口文件 | 分层路径、参考实现 | `codebase/p1-*.md` |
+| 6 | `src/` 等结构、入口、典型 Controller/页面 | 目录 + **写法 + §三模板**（模式 B） | `codebase/p1-*.md` |
+| 6b | 同上 + 样式/service/DTO | 高频统计、四类经典片段 | 写入 `codebase/p1-*.md` §二§三（见 [code-conventions.md](../templates/code-conventions.md)） |
 | 7 | migration、Entity、schema | 表、字段、FK、status 枚举 | `data/entities/`、`relations/`、`state-machines/` |
 | 8 | — | 汇总索引；README「业务与用户」从 p0-business 摘要 | `README.md`（最后写） |
 
@@ -103,7 +104,18 @@ atlas/init/
 
 **仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全（**含易混淆的内部术语**）。
 
-**禁止**：扫描阶段写任务/AC；无状态机仍建 `state-machines/`；合并多实体为一个 `entities.md`；跳过 p0-business。
+**写法锚点（步骤 6/6b，默认模式 B）**：
+
+> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。
+
+1. **默认模式 B**：一次写满 `codebase/p1-{端}.md` 四段式；**不建** `atlas/conventions/`
+2. `p1-architecture.md` 只写模块一览；分层/响应/模板 → codebase §二§三
+3. 从真实代码摘录 §三；标注 `path:行号`；无样本标待补充
+4. 用户明确要求「独立 conventions / 全栈分开维护」→ 模式 A
+
+greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`。
+
+示例 → [code-pattern-scan.md](../examples/code-pattern-scan.md)
 
 ### ③ 落盘
 
@@ -138,7 +150,8 @@ atlas/init/
 |-------------|------|
 | `init: refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`glossary/` + README 摘要 |
 | `init: refresh data` | 重扫 migration + Entity，增删改 `data/**/p1-*.md` |
-| `init: refresh codebase` | 重扫目录结构，更新 `codebase/`、`p1-architecture.md` |
+| `init: refresh codebase` | 更新 `codebase/p1-*.md`（含 §三模板）；`p1-architecture` 仅模块变化时改 |
+| `init: refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |
 | `init: refresh environment` | 更新 `p0-environment.md`、`p1-tech-stack.md` |
 | `init:` 或 `init: refresh` | 全量重扫 |
 | [增量 refresh 卡片](../templates/init-doc.md#init-增量-refresh-askquestion) | 按用户选择范围执行 |

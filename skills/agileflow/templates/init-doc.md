@@ -249,50 +249,47 @@
 
 ## p1-architecture.md
 
+> **只写模块一览**，分层/响应/模板 → [codebase/p1-{端}.md](codebase/p1-{端}.md) §二§三
+
 ```markdown
 > **P1** · 架构与模块 · 最后验证：{{日期}}
 
 # 架构与模块
 
 ## 总体形态
-- 类型：{单体 / 微服务 / 前后端分离 / …}
-- 模块划分：{简述}
+- 类型：{单体 / 微服务 / …}
+- API 前缀 / 鉴权：{简述}
 
-## 分层约定（后端示例）
-| 层 | 路径 | 职责 |
-|----|------|------|
-| 入口 | `{controller/}` | API |
-| 业务 | `{service/}` | 逻辑 |
-| 数据 | `{repository/}` | 持久化 |
+## 业务模块一览
+| 模块 | 包/路径 | 职责 |
+|------|---------|------|
+| {auth} | `{path}` | {…} |
+
+## 代码怎么写
+→ [codebase/p1-{端}.md](codebase/p1-{端}.md)（§二 规范 · §三 模板）
 
 ## 与 model/ 的分工
-- **init/**：现有 as-is 盘点
-- **model/**：REQ 驱动的 to-be 设计；实现落地后再 refresh init
+- init/：as-is · model/：to-be
 ```
 
 ---
 
 ## codebase/p1-{端或模块名}.md
 
+**模式 B（默认）** — 四段式单文件：
+
 ```markdown
-> **P1** · 代码结构 · {backend|frontend|服务名} · 最后验证：{{日期}}
+> **P1** · {端}代码 · 结构+写法 · 最后验证：{{日期}}
 
-# {端/模块} 代码结构
+# {端}代码（目录 + 怎么写）
 
-## 根路径
-`{相对路径}`
-
-## 目录含义
-| 路径 | 职责 |
-|------|------|
-| `{path}` | {说明} |
-
-## 入口
-- {main / App / 路由入口文件}
-
-## 类似功能参考（可选）
-- {已有功能} → `{路径}`（新功能可先对照此写法）
+## 一、目录结构
+## 二、写法规范
+## 三、代码模板（参考 path:行号）
+## 四、新功能自检
 ```
+
+**模式 A** — codebase 仅 §一，模板在 `atlas/conventions/`（用户显式要求时）。
 
 ---
 
@@ -387,7 +384,9 @@ questions:
       - id: "yes_data"
         label: "是，刷新 data/（表/实体/关系/状态机变更）"
       - id: "yes_codebase"
-        label: "是，刷新 codebase/ 或 architecture"
+        label: "是，刷新 init/codebase/ 或 p1-architecture.md"
+      - id: "yes_conventions"
+        label: "是，刷新 atlas/conventions/（仅模式 A 项目）"
       - id: "yes_env"
         label: "是，刷新 p0-environment / p1-tech-stack"
       - id: "yes_full"
