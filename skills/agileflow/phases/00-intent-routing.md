@@ -35,7 +35,7 @@
 
 带前缀即启用 Agileflow；每阶段结束 AskQuestion → 停止。
 
-**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **逐项** 构思落盘→开发→AC验收。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)。
+**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①**，再主 Agent 逐项构思落盘→开发→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须每 T 已有合规①）。
 
 ## §atlas/ 结构
 

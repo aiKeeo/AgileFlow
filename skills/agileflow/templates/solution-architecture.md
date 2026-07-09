@@ -85,7 +85,7 @@ src/modules/payment/
 | L1 | `npm run lint` | 无 error |
 | L2 | `npm run build` | 成功 |
 | L3 | `npm test` | 全过 |
-| L4 | `npm run test:cov` | 变更模块 ≥80%（严谨） |
+| L4 | `npm run test:cov` | 快速：出报告即可；严谨：变更模块 ≥80% |
 | L5 | `npm run test:e2e` | 核心冒烟通过 |
 ```
 
@@ -118,4 +118,4 @@ src/modules/payment/
 - [ ] **③ 对照 REQ 验收 AC**
 ```
 
-规则：每项 ≤4h；必须关联功能 ID；实现接口的任务须关联接口 ID；**每 T-xxx 必须含 ①②③ 三步子项与 dev 路径**（见 [todo.md](todo.md)）。
+规则：每项 ≤4h；必须关联功能 ID；实现接口的任务须关联接口 ID；**每 T-xxx 必须含 ①②③ 三步子项与 dev 路径**；阶段 4 入口须 **TodoWrite 为每个 T 展开①**（见 [todo.md](todo.md#todowrite-强制展开防漏①--最高优先级)）。

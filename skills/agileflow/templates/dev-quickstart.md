@@ -5,15 +5,27 @@
 
 ---
 
-## 序（不可跳、不可批量①）
+## 序（不可跳、不可批量①、不可 Subagent 外包）
 
 ```
-Read exemplar（本端）→ 写【1 个】T 的完整 dev
-  →【闸门 A】→ 勾 ① →【闸门 B】→ ② 写码 → ③
-下一 T 再重复。禁止先写完 T-002～T-011 的 dev 再统一写码。
+【默认·主 Agent 串行】
+0. TodoWrite 展开：每个 T ≥1 条「① 构思→atlas/dev/T-xxx…」（推荐每 T ①②③）
+   ※ 未展开 → 禁止 Write 业务源码（见 todo.md「TodoWrite 强制展开」）
+1. 取下一条未完成的① → Read exemplar → 写【该】T 完整 dev
+   →【闸门 A】→ 勾 ①（TodoWrite + atlas/todo.md）→【闸门 B】→ ② → ③
+2. 下一条①再重复。禁止先写完多份 dev 再统一写码（无并行许可时）。
 ```
 
-**连续做** = 按序重复上面；**≠** 摘要版 / 空壳标题 / 合并多 T。
+**连续做 / 全部开发 / yes_all** = **先展开 TodoWrite**，再按清单逐条做；**≠** 摘要 / 空壳 / 合并多 T / **派 Subagent 一次写完 BE+FE** / **跳过 TodoWrite**。
+
+| 用户说 | 主 Agent 必须 | 禁止 |
+|--------|---------------|------|
+| 全部开发 / 直接全开发 | **先** TodoWrite 为每个 T 建① → 串行逐条 ①→②→③ | 启 Task 批量写码；1 个 Todo 覆盖多 T；无①条目就写码 |
+| 并行 / 多 subagent（显式） | 先读 [parallel-orchestration](../phases/parallel-orchestration.md)；每 T 先有合规① | 无 dev 就让 Subagent Write 业务源码 |
+
+**未读到用户原话含「并行/subagent」→ 禁止启用 A1 并行例外。**
+
+**标「开发实现 ✅」前**：`dev` 数 = T 头数 **且** 每个 T 的 TodoWrite① 均为 completed（`顺序：⚠️` 补盘不计正式①）。
 
 ---
 
@@ -22,7 +34,7 @@ Read exemplar（本端）→ 写【1 个】T 的完整 dev
 | # | 检查 |
 |---|------|
 | A0 | 已 Read exemplar-BE 或 exemplar-FE |
-| A1 | 只 1 个 T；无其他「①勾完②未完」 |
+| A1 | **串行**：只 1 个 T；无其他「①勾完②未完」。**显式并行**：批次 B 允许多个①已勾②未开；批次 C 允许多 T 同时②（1 Task=1 T） |
 | A2 | 文件存在 |
 | A3 | 段标题（下表） |
 | A4 | 五可执行 + FE 则 3.1/3.2/3.3 |
