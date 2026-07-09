@@ -10,7 +10,7 @@
 
 | | **模式 B（默认）** | **模式 A（显式选用）** |
 |---|-------------------|------------------------|
-| **文件** | 单文件四段式 | `atlas/conventions/` 目录 |
+| **文件** | 单文件五段式（有 REST 时） | `atlas/conventions/` 目录 |
 | **brownfield** | `init/codebase/p1-{端}.md` | `init/codebase/` 仅结构 + `conventions/*-patterns.md` |
 | **greenfield** | `solution/code-patterns-{端}.md` | `conventions/` 🌱 种子 |
 | **何时用** | 单端仓库、monorepo 单服务、**减冗余** | 全栈多端、前后端独立 refresh、用户明确要求 |
@@ -20,13 +20,13 @@
 
 ---
 
-## 单文件四段式（模式 B 标准结构）
+## 单文件五段式（模式 B · brownfield 有 REST 时）
 
 ```markdown
-# {端}代码
+# {端}代码（目录 + 怎么写）
 
-## 一、架构与目录
-### 1.1 总体形态 · 1.2 业务模块一览 · 1.3 目录树 · 1.4 入口与配置
+## 一、目录结构
+{树、入口、配置、测试路径}
 
 ## 二、写法规范
 {分层、命名、注解、响应、校验、禁止项}
@@ -34,12 +34,16 @@
 ## 三、代码模板（从现有代码摘录，含 path:行号）
 ### 3.1 分页列表 / 表单 / …
 ### 3.2 …
-### 3.3 …
-### 3.4 …（无则删）
 
-## 四、新功能自检
+## 四、典型请求链路剖析（mermaid sequenceDiagram，2~4 条，须对照源码）
+### 4.1 跨模块聚合读
+### 4.2 写操作 + 跨模块前置
+
+## 五、新功能自检
 - [ ] …
 ```
+
+> 无 REST：可四段式（跳过 §四，§五→§四）。
 
 ### 前后端四类模板
 
@@ -67,21 +71,24 @@
 ## 生命周期
 
 ```
-brownfield init:  扫描源码 → 写满 init/codebase/p1-{端}.md（尽量 ✅）
+brownfield init:  扫描源码 → p1-architecture（模块依赖）
+                  → 写满 init/codebase/p1-{端}.md（§一~§五，含 §四 序列图）
+                  → p0-domain-math.md 集中公式
+                  → LAYERS.md + README 业务沙盘
 greenfield sol:   定栈 → 建 solution/code-patterns-{端}.md 🌱（§三待补充）
 dev 首个 CRUD:    ③ ✅ → 从源码摘录 refresh §三 → 📝
-init: refresh codebase / 新模块新写法 → 增量更新 §三
+init: refresh codebase / 新模块新写法 → 增量更新 §三§四
 ```
 
-### brownfield · init 步骤 5
+### brownfield · init 步骤 6
 
-**逐步勾选** → [init-scan-checklist.md](init-scan-checklist.md)（§一~§四、W1~W12、§三 模板、落盘自检）。
+**逐步勾选** → [init-scan-checklist.md](init-scan-checklist.md)（含取长补短表、W/E 逐项、落盘自检）。
 
 摘要：
 
-1. 写满 `codebase/p1-{端}.md`；**禁止** `p1-architecture.md`
+1. `p1-architecture.md` 写 **模块依赖**；`codebase` 写 §一~§五
 2. §二 **逐项摘录**真实类名/路径，禁止「遵循规范」
-3. §三 每模板 **path:行号 + 真实代码块**
+3. §三 每模板 **path:行号 + 真实代码块**；§四 **对照源码**序列图
 
 ### greenfield · sol 步骤 6b
 
@@ -107,7 +114,7 @@ init: refresh codebase / 新模块新写法 → 增量更新 §三
 
 - ❌ 有锚点文件却不读就写码（W8）
 - ❌ 引入 architecture/§二 未列出的库或分层
-- ❌ brownfield 扫描编造模板
+- ❌ brownfield 扫描编造模板或序列图
 - ❌ greenfield 首个功能完成后不 refresh（永远 🌱）
 - ❌ 锚点文件里写 REQ/AC/todo（那些属于 requirements/solution/dev）
 
@@ -115,14 +122,9 @@ init: refresh codebase / 新模块新写法 → 增量更新 §三
 
 ## init 内分工
 
-| 文件 | 写什么 |
-|------|--------|
-| `codebase/p1-*.md` | **§一架构+模块+目录** · §二规范 · §三模板 · §四自检（**不单建 p1-architecture**） |
-| `p0-business.md` | 业务、用户、实体对照简表 |
-| `data/entities/` | 表干什么、用户怎么用、API、字段 |
-| `p1-tech-stack.md` | 语言/框架/版本 |
+init 各文件写什么/不写什么 → [init-doc.md §文件分工](init-doc.md#l0l6-分层模型)（**不在此重复**）。
 
-> greenfield to-be 全局架构 → `solution/architecture.md`（L1–L5、测试栈），与 init 无关。
+> greenfield to-be → `solution/architecture.md`，与 init 无关。
 
 ---
 

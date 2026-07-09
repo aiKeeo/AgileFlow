@@ -177,7 +177,7 @@ atlas/requirements/
 |------|--------------|
 | **1 REQ** | 新建/维护 UID；样式标「待定」 |
 | **3 sol** | 读 UID → 生成 `contracts/UI-xxx`（路由、组件树、API 绑定）；AskQuestion **样式/设计系统** |
-| **4 dev FE** | dev **二**（组件/状态）链 UID + UI-xxx；② 写码以用户确认的样式为准 |
+| **4 dev FE** | Read `UID-xxx` + `UI-xxx` + `API-xxx`；dev **三、3.2** 映射表「契约字段」= API **JSON 英文字段名**（与 contracts 一致，便于 grep）；**二** state 优先同名；② 按映射表绑 UI |
 
 ---
 
@@ -189,3 +189,4 @@ atlas/requirements/
 | REQ 直接写 `contracts/UI-001` | 写 `requirements/ui/UID-001` |
 | 有页面却不建 UID | 评估后建 UID 或 REQ 注明「无 UI」 |
 | Agent 替用户定配色/字体 | 标待定 + humanTodo 或 sol AskQuestion |
+| FE dev 映射表写中文「体重」 | 写 API 英文字段 ``value`` / ``recordedAt`` |

@@ -1,5 +1,6 @@
 ﻿# 需求文档输出模板
 
+> **格式模板**：示例中的功能名/页面名仅为演示结构，落盘时替换为**当前项目**内容。  
 > AC 规范：[ac-guide.md](ac-guide.md)
 
 ## REQ 文档（`atlas/requirements/REQ-XXX-名称.md`）

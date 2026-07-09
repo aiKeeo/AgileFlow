@@ -1,6 +1,7 @@
 ﻿# 阶段 2：数据建模（按需）
 
 > AskQuestion 规范：[templates/askquestion-gate.md](../templates/askquestion-gate.md)
+> **本阶段完成 = `atlas/model/` 文件已写出（或 todo 标跳过）**，不是聊过建模。
 > 文档模板与确认卡片：[templates/modeling-output.md](../templates/modeling-output.md)
 > **何时需要建模**：[00-intent-routing 建模按需判定](00-intent-routing.md#建模按需判定阶段-2-非必经)
 
@@ -24,17 +25,28 @@
 
 ## 目录结构（必须）
 
+**严谨模式** — 五件套：
+
 ```
 atlas/model/
-├── README.md              # 索引 + 整体状态（草稿/已确认）
-├── domain-model.md        # 领域模型：聚合根、实体、值对象
-├── entity-relations.md    # 实体关系：ER 图、关系说明
-├── domain-rules.md        # 领域规则：不变量、状态机、值对象校验
-└── physical-model.md      # 物理模型：表结构/DDL（无 DB 项目写 N/A）
+├── README.md
+├── domain-model.md
+├── entity-relations.md
+├── domain-rules.md
+└── physical-model.md
+```
+
+**快速模式** — 可单文件（见 [flow-modes.md](../templates/flow-modes.md#快速模式建模精简)）：
+
+```
+atlas/model/
+├── README.md
+└── model-overview.md
 ```
 
 ## 执行流程
 
+0. **决策权**：入口卡或 todo 全局 → [stage-delegation.md](../templates/stage-delegation.md)
 1. 阅读已确认 REQ（`atlas/requirements/REQ-*.md`）
 2. 若 `atlas/model/` 不存在，按模板初始化目录与 `README.md`
 3. 编写 `domain-model.md`：识别聚合根、实体、值对象及职责
@@ -44,10 +56,13 @@ atlas/model/
    - 有持久化：表结构、约束、索引、DDL（可内嵌或附录 `schema.sql`）
    - 无持久化：标注 `N/A`，说明数据存放方式（内存/文件/第三方）
 7. 更新 `README.md` 索引，整体状态标 **草稿**
-8. **AskQuestion 确认建模**（见 modeling-output.md）→ 停止
-9. 确认后 `README.md` 状态改 **已确认**，更新 todo
+8. **user_decide**：AskQuestion 确认建模（见 modeling-output.md）→ 停止  
+   **ai_decide**：追加 **AI 决策记录** → **审阅闸门** → 停止（跳过建模确认卡）
+9. 确认后（或审阅闸门 confirm/skip）`README.md` 状态改 **已确认**，更新 todo
 
-### 第 10 步：阶段收尾 — **强制 AskQuestion 阶段闸门**
+### 第 10 步：阶段收尾 — **阶段闸门**（仅 user_decide）
+
+> **AI 自主**：审阅闸门已处理是否继续，**不走本步**。
 
 `model/README.md` 标 **已确认** 后，本阶段完成。**必须**：
 

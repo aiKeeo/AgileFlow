@@ -46,7 +46,18 @@ questions:
       - { id: "ui_unsure", label: "不确定，帮我判断" }
 ```
 
-**调用 AskQuestion 后立即停止**；禁止同回复写 REQ。
+**调用 AskQuestion 后立即停止（本回复）**；禁止**同回复**写 REQ。
+
+## 第 2 步：用户回答后 — 必须写 REQ（下一条回复执行）
+
+用户完成第 1 步点选/回复后，Agent **下一条回复必须**：
+
+1. 写 `atlas/requirements/REQ-XXX-*.md`（状态：草稿）
+2. 写 `atlas/requirements/README.md`，初始化 `atlas/todo.md`
+3. 按需写 `atlas/requirements/ui/UID-*.md`
+4. 再 AskQuestion 第 3 步确认 → **停止（本回复）**
+
+**禁止**：用户已答需求卡片却不下 REQ 文件；只回复「好的，我记下了」。
 
 ## 第 3 步：草稿确认（写完 REQ 草稿后）
 

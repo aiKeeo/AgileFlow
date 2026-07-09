@@ -2,17 +2,17 @@
 
 > **启用 Agileflow 时**，必须先执行本章，再读取**一个**对应 `phases/xx.md` + 该 phase **显式链接**的 `templates/*`。禁止预读其他 phase；禁止跳过识别直接写代码或写文档。
 
-## 何时启用 / 不启用
+## 何时启用
 
-| 启用 ✅ | 不启用 ❌（直接回答或按 user rules 处理） |
-|---------|---------------------------------------------|
-| 用户 @agileflow 或说「走 agileflow / 走完整流程」 | 纯解释、答疑、概念问题 |
-| **目录前缀**：`init:` / `req:` / `mod:` / `sol:` / `dev:` / `tests:` | code review、读代码、改一行 bug（走豁免） |
-| 「从零做 XX 系统」「完整交付」类新功能 | 未提流程的普通「写代码」「改 bug」 |
-| 已有 `atlas/` 且说「继续 agileflow」「下一步」（流程语境） | 单文件小改、hotfix（走豁免，不进流程） |
-| 明确指定阶段：写 REQ、建模、出方案、验收测试 | |
+**一条判定**：用户要你**交付/改动可运行产物**（产品、功能、模块、接口…——**用用户原话理解，不套关键词表**）→ **启用**；先 `atlas/` 流程，**禁止直接 Write 业务源码**。
 
-**歧义时**：AskQuestion 确认是否启用 Agileflow，禁止默认套用全流程。
+| 启用 | 不启用 |
+|------|--------|
+| 用户用自然语言描述要做啥（具体业务由用户说） | 纯解释、答疑、概念问题 |
+| `@agileflow`、`继续 agileflow` | 单文件 ≤20 行、hotfix、明确说不走流程 |
+| 前缀 `init:` `req:` `mod:` `sol:` `dev:` `tests:` | code review |
+
+首条回复：`📍 Agileflow …` + AskQuestion（决策权或需求澄清）→ **停止**。细则见各 phase，本章不重复列动词/形态清单。
 
 ---
 
@@ -90,7 +90,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 有已确认 REQ + solution | 正常阶段 4 三步序（构思落盘→开发→AC验收） |
 | 用户只要「写 dev 思路 / 构思落盘」 | 仅 ① → **AskQuestion 是否进入 ② 写码** → 停止 |
 | **无关联 REQ**（小工具、重构、探活） | 用 **`temp/` 子目录**，见 §TEMP |
-| solution 未确认但用户 insist | AskQuestion：补 sol: / 快速通道豁免 / dev/temp/ |
+| solution 未确认但用户 insist | AskQuestion：补 sol:（**新系统/多 T/有 API·DB → 禁止** `dev/temp/` 与快速通道） |
 
 ---
 
@@ -100,11 +100,11 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 | 目录 | 路径 | 命名 | 示例 |
 |------|------|------|------|
-| 需求 | `atlas/requirements/temp/` | `{NNN}-{名}.md` | `001-登录缓存.md` |
-| 建模 | `atlas/model/temp/` | `{NNN}-{名}.md` | 探活用的草稿模型 |
-| 方案 | `atlas/solution/features/temp/` | `{NNN}-{名}.md` | 仅当需要临时接口契约 |
-| 开发 | `atlas/dev/temp/` | `{NNN}-{名}-{FE\|BE\|FULL}.md` | `001-登录缓存-BE.md` |
-| AC 测试 | `test/ac/temp/` | `temp{NNN}_*` | `temp001_login` |
+| 需求 | `atlas/requirements/temp/` | `{NNN}-{简述}.md` | `001-缓存优化.md` |
+| 建模 | `atlas/model/temp/` | `{NNN}-{简述}.md` | `001-草稿模型.md` |
+| 方案 | `atlas/solution/features/temp/` | `{NNN}-{简述}.md` | `001-临时功能.md` |
+| 开发 | `atlas/dev/temp/` | `{NNN}-{简述}-{FE\|BE\|FULL}.md` | `001-探活接口-BE.md` |
+| AC 测试 | `test/ac/temp/` | `temp{NNN}_*` | `temp001_smoke` |
 
 **规则**：
 - NNN 三位递增；各 `temp/README.md`（或父目录 README §临时区）登记序号与说明
@@ -156,7 +156,8 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | **Hotfix** | 用户说 hotfix / 紧急修复 | **L1+L3**；核心路径 **L1–L3+L5 冒烟** | ❌ |
 | **快速通道** | 用户说快速改 / 不走流程 | 微型改动 + 不写 REQ/model/solution | ❌ |
 
-**快速通道边界**：「不走流程」仅适用微型改动豁免。**不**适用于 MVP/多模块。后者可压缩文档，**当前任务 ① 构思落盘仍 mandatory**；**阶段结束仍须 AskQuestion 闸门**（见 [SKILL.md A. 阶段闸门](../SKILL.md#a-阶段结束--必须-askquestion-小卡片--停止)）。
+**快速通道边界**：「不走流程」仅微型改动。MVP/多模块/API·DB → **禁止** temp/快速通道。  
+「可压缩」**仅指** AskQuestion 次数与快速模式下二四六七可省略，**不指**把五压成摘要或空壳标题。
 
 **豁免边界（任一命中走完整流程）**：API/DB/权限、支付/敏感数据、多模块、用户要求完整流程、跨 2+ 文件或 >20 行、**用户说只看成品/直接开发但 scope 为新系统 MVP**。
 
@@ -166,11 +167,9 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## 模式判定（快速 / 严谨）
 
-| 快速 | 严谨 |
-|------|------|
-| 原型/Demo、简单 CRUD、开发 <1 天、无高并发 | 核心业务/服务端/DB、支付/权限/用户数据、开发 >1 天、团队协作 |
+**权威** → [flow-modes.md](../templates/flow-modes.md)（多模块/DB/权限 → **强制严谨**；「全部做」只催进度不切模式）。
 
-进入阶段后在首行声明中标注模式。
+进入阶段后首行声明 `模式：快速|严谨` 与 `决策：用户|AI自主`；无法判断 → AskQuestion。
 
 ---
 
@@ -198,37 +197,30 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ---
 
-## ③ 解析用户意图（判断「用户想干什么」）
+## ③ 解析意图（看用户想干什么，不靠关键词表）
 
-### 关键词 → 目标阶段
+| 优先级 | 规则 | 目标 |
+|--------|------|------|
+| 1 | 有目录前缀 | 以前缀为准（见上表） |
+| 2 | 用户指定阶段（「写需求」「别开发只出方案」） | 该阶段 |
+| 3 | 有 `atlas/` 且说继续/下一步 | ② 建议阶段 |
+| 4 | **用户描述要做的东西**（任何具体业务表述） | **阶段 1** |
+| 5 | 说写码/实现但无 REQ/solution | 退回阶段 3 或 `dev/temp/` |
+| 6 | 改已确认 REQ | [change-management](change-management.md) |
+| 7 | 说不清 | AskQuestion 选阶段 |
 
-| 用户表达（含但不限于） | 目标阶段 |
-|------------------------|----------|
-| **目录前缀** `init:` / `init: refresh …` | **0**（brownfield；greenfield → 提示跳过） |
-| **目录前缀** `req:` / `mod:` / `sol:` / `dev:` / `tests:` | **以前缀为准**（brownfield 下 dev/sol 前置 init 见上） |
-| 新功能、从零、完整流程、项目搭建、做一个 XX 系统 | **1**（greenfield）；brownfield 有 init 则从建议阶段续跑 |
-| 需求、澄清、PRD、用户故事、BDD、写 REQ | **1** |
-| 建模、DDD、表结构、ER、聚合、sql、数据库设计 | **2** |
-| 方案、架构、契约、任务拆解 | **3**（`sol:`） |
-| 实现、开发、写代码、编码、补功能、按方案做 | **4**（**须先 ① 构思落盘**，见 [04-development Write 拦截](04-development.md#write-拦截构思未完成--禁止写码)） |
-| 全部做 / 全部做完 / 快速交付 / 直接开发 / 只看成品 | **4**（**催进度≠跳过 ①**；逐项 构思落盘→开发→AC验收；**禁止** Task 整包写码） |
-| 开始 MVP / 脚手架 / 做第一个任务 | **4**（**禁止**跳过 ① 直接写码；**默认串行**） |
-| 并行开发 / 同时开发 FE+BE / 多 subagent | **4** + 读 [parallel-orchestration.md](parallel-orchestration.md)（仍须 ①→②→③） |
-| 测试、验收、跑流水线、L1、L5、出验收报告 | **5** |
-| 改需求、变更 REQ、需求调整、场景修改、需求不对 | **change-management**（见 [change-management.md](change-management.md)） |
-| 继续 agileflow、下一步（且存在 atlas/）、接着做流程 | **建议阶段**（见 ②） |
-| 只更新 todo、人类待办、标记完成 | **task-tracking** |
+**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→③；禁止合并 todo；多模块强制严谨。
 
-### 意图优先级
+### 决策委派话术（→ [stage-delegation.md](../templates/stage-delegation.md)）
 
-1. **用户明确指定阶段**（「帮我写需求」「先别开发只出方案」）→ 以用户为准
-2. **用户说「继续 agileflow / 下一步」（且存在 atlas/）** → 以 ② 建议阶段为准
-3. **用户说新功能但未指定阶段** → 若 `atlas/` 为空从 **1** 开始；否则 **AskQuestion 确认**（见 ④）
-4. **无法判断** → 必须 AskQuestion，禁止猜测
+| 用户说 | 动作 |
+|--------|------|
+| 这阶段你定 / 后面都你定 / 不审了继续 | ai_decide / global / skip_review |
+| 这阶段我来 | user_decide |
 
----
+### 用户描述需求（最常见入口）
 
-## ④ 前置校验 & 用户确认
+用户**用原话**说要做啥 → **阶段 1** → 决策权或需求 AskQuestion → 停止 → 下条落盘 REQ。**禁止**因「描述已够细」跳过 AskQuestion 或直接写码。
 
 ### 硬规则：不可跳阶段（豁免与前缀单阶段模式除外）
 
@@ -270,9 +262,11 @@ questions:
 
 ### 全新项目 / 用户发来需求
 
-用户描述想法、发 PRD、列功能清单（无论多详细）→ **阶段 1** → 读 [01-requirement.md](01-requirement.md) → **必须先 AskQuestion 需求卡片** → **停止**。
+用户描述想法、发 PRD → **阶段 1** → **决策权卡**（用户已说「你定」或 todo 全局 AI自主 可跳过）→ 按 [01-requirement](01-requirement.md) 分支落盘。
 
-**禁止**：认为「用户已经说够了」而跳过 AskQuestion 直接写 REQ。
+**用户回答后下一条回复**：**必须**执行 [01-requirement 第 2 步](01-requirement.md#第-2-步生成需求草稿仅用户回答第-1-步之后) 写 REQ 落盘。
+
+**禁止**：只问不写；认为「用户说够了」跳过 AskQuestion；用户答完后仍不写 REQ。
 
 ---
 
@@ -284,16 +278,21 @@ questions:
 | **`req: 新需求…`** | greenfield/brownfield 均阶段 1；brownfield 无 init 时 AskQuestion 先 init 或 req |
 | **`dev: 实现某功能`** | brownfield：init 已确认 + solution → 阶段 4；无 REQ → `dev/temp/` |
 | **`dev: 只写思路`** | 阶段 4 步骤 ① 构思落盘 → AskQuestion 是否进入 ② → 停止 |
-| **`sol: 出支付方案`** | 阶段 3 方案设计；建模按需判定 |
+| **`sol:`** | 阶段 3 方案；建模按需 |
 | **`tests: 验收 REQ-001`** | 阶段 5 |
 | 纯解释、无交付物 | 豁免，不启用阶段 |
 | 改一行 bug | 豁免 L1+L3 |
-| 新项目 **greenfield** / 用户发需求 | 阶段 1 → **AskQuestion 需求卡片** → 停止（**不建 init**） |
+| 新项目 **greenfield** / 用户发需求 | 阶段 1 → AskQuestion → **用户答后下条回复写 REQ** |
+| 阶段闸门选「是，继续」 | **下条回复**落盘下一阶段（model/solution/dev） |
 | 接手 **brownfield** / 无 atlas/init | 阶段 0 → init 落盘 → AskQuestion → 停止 |
 | 有 todo、用户说「继续 agileflow」 | 读建议阶段 → 读对应 phase；**默认不读** parallel-orchestration |
 | 用户指定阶段且前置满足 | 直接进该 phase |
 | 用户指定阶段但前置不满足 | AskQuestion：补前置 or 豁免 |
 | 意图模糊 | AskQuestion 阶段确认卡片 |
+| 「这阶段你定 / 不用问我 / 全自动」 | 当阶段 **ai_decide** → [stage-delegation.md](../templates/stage-delegation.md) |
+| 「后面都你定」 | **ai_decide_global** → 写 todo 决策委派 |
+| 「不审了继续 / 跳过审阅」 | 审阅闸门 **skip_review_continue** |
+| 「这阶段我来决策」 | 覆盖全局 → **user_decide** |
 | 仅维护 todo/humanTodo | [task-tracking.md](task-tracking.md) |
 | 改已确认/已实现 REQ | [change-management.md](change-management.md) |
 
@@ -301,17 +300,20 @@ questions:
 
 ## 进入阶段后的行为
 
-1. 输出阶段声明行（见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
-2. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`）
-3. **允许共读**：该 phase 文内显式链接的 `templates/*`（init → `init-doc.md`）
-4. 阶段 4 额外共读 [dev-quickstart.md](../templates/dev-quickstart.md)
-5. **阶段 0/1–4 产出完成** → 必读 [askquestion-gate.md](../templates/askquestion-gate.md) 或 init 专用卡片 → **AskQuestion → 停止**
-6. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)
+1. 输出阶段声明行（含 `模式` + `决策`；见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
+2. **阶段入口**：`todo` 未设全局 AI自主 → 决策权卡；**已全局 AI自主 → 跳过**，直接落盘（[stage-delegation](../templates/stage-delegation.md)）
+3. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`）
+4. **允许共读**：该 phase 文内显式链接的 `templates/*`
+5. 阶段 4 额外共读 [dev-quickstart.md](../templates/dev-quickstart.md)
+6. **阶段 0/1–4 产出完成** → user_decide：阶段闸门；ai_decide：审阅闸门 → **停止**
+7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)
 
 ## 正误示例
 
 **✅ 用户**：「继续 agileflow」→ todo 方案 ⬜ → 建议阶段 3 → 读 03-solution-design.md
 
-**❌ 用户**：发来大段需求 / PRD → 直接生成 REQ（须 AskQuestion → 停止）
+**❌ 用户**：提出**新建产品**需求 → Agent **直接写业务源码**（须启用 Agileflow：决策权/需求 AskQuestion → 落盘 REQ → 禁止先写码）
 
-**❌ 用户**：方案设计写完 → 直接开始写 `server/`（须 **AskQuestion 阶段闸门** → 用户选「是，继续」→ 下一回复再进阶段 4）
+**❌ 用户**：发来 PRD/长需求 → 未 AskQuestion 直接写 REQ（须先决策权或澄清卡 → 停止）
+
+**❌ 用户**：方案设计写完 → 直接写业务源码（须结束闸门 → 用户选继续 → 下条回复再进阶段 4）

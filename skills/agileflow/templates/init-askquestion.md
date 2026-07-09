@@ -1,6 +1,7 @@
 ﻿# init AskQuestion 卡片
 
-> 阶段流程：[00-project-init.md](../phases/00-project-init.md)
+> 阶段流程：[00-project-init.md](../phases/00-project-init.md)  
+> **前置**： [init-scan-checklist 落盘自检](init-scan-checklist.md#init-落盘自检askquestion-前须全-) 全 ✅
 
 ## init 确认（阶段 0 收尾）
 
@@ -27,13 +28,15 @@ questions:
     prompt: "REQ-{编号} 开发已完成。是否增量更新 atlas/init/（同步 as-is）？"
     options:
       - id: "yes_business"
-        label: "是，刷新 p0-business / p0-glossary-*（业务或术语）"
+        label: "是，刷新 p0-business / p0-domain-math / glossary（业务或规则变更）"
       - id: "yes_data"
-        label: "是，刷新 p1-entity-* / p1-relation-* / p1-state-machine-*"
+        label: "是，刷新 data/（表/实体/关系/api-catalog/schema 变更）"
       - id: "yes_codebase"
-        label: "是，刷新 init/codebase/（含 §一架构模块）"
+        label: "是，刷新 codebase/p1-* / p1-architecture（含 §三模板、§四序列图）"
+      - id: "yes_conventions"
+        label: "是，刷新 atlas/conventions/（仅模式 A 项目）"
       - id: "yes_env"
-        label: "是，刷新 p0-environment / p1-tech-stack"
+        label: "是，刷新 p0-environment / p1-tech-stack / p0-integrations"
       - id: "yes_full"
         label: "是，全量重扫 init"
       - id: "no"

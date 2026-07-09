@@ -1,6 +1,8 @@
 ﻿# 阶段 3：方案设计（sol:）
 
-> **用户前缀**：`sol:` = `atlas/solution/`  
+> **本阶段完成 = `atlas/solution/` + `atlas/todo.md` 开发任务已写出**。
+> 用户阶段闸门选「是，继续」后，下条回复进入 dev 须写 `atlas/dev/T-xxx.md`。
+> **用户前缀**：`sol:` = `atlas/solution/`
 > 模板：[templates/solution-core.md](../templates/solution-core.md)  
 > **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 批次 A。
 
@@ -28,34 +30,46 @@ atlas/solution/
 
 ## 标准流程（默认）
 
+0. **决策权**：入口 AskQuestion 或读 todo 全局委派 → [stage-delegation.md](../templates/stage-delegation.md)
 1. 读已确认 REQ +（按需）model/ + **有 UID 时读 `requirements/ui/`**
 2. 初始化 `solution/`：README、features/、contracts/（目录即可）
 3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**、验收要点
 4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 须基于 UID** 补充路由、组件树、API 绑定（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）
-5. **AskQuestion 技术栈** → 停止
-6. 写 **`architecture.md`**：栈、模块、`test/ac/`、L1–L5（**不写**分层细节与代码模板）
-7. **写法锚点 🌱**（默认模式 B）：建 `solution/code-patterns-{backend|frontend}.md` 四段式，§三标待补充 → [code-conventions.md](../templates/code-conventions.md)
-8. 根据 **`ui_style`** 更新 UID；`style_reference` → humanTodo
-9. **humanTodo 沉淀**
-10. 拆解任务 → `todo.md`（每 T-xxx 含 ①②③ + dev 路径）+ 功能依赖表
-11. 更新 README → **AskQuestion 确认方案** → 停止
-12. 确认后 README **已确认**
 
-### 第 13 步：阶段收尾 — **强制 AskQuestion 阶段闸门**
+**user_decide 分支**（**先落盘再确认**，见 [flow-modes 阶段 3](../templates/flow-modes.md#阶段-3--先落盘再确认快速也适用)）：
 
-`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀本阶段人类依赖** 后，本阶段完成。**必须**：
+5. **AskQuestion 技术栈** → 停止（禁止此时确认「方案」——architecture 尚未写）
+6. **下条**写 `architecture.md` + `code-patterns` + 补全 features/contracts + 拆解 `todo.md`
+7. **AskQuestion**：  
+   - **快速**：方案确认 + 是否继续 **合并 1 卡** → 停止（含继续则不再单独阶段闸门）  
+   - **严谨**：方案确认卡 → 停止 → 再 **阶段闸门** → 停止  
+8. 确认后 README **已确认**
 
-1. **调用 `AskQuestion` 工具**，弹出 [阶段闸门小卡片](../templates/askquestion-gate.md#阶段闸门模板)
+**ai_decide 分支**（跳过技术栈/确认/闸门用户卡）：
+
+5. Agent **自行选定**技术栈（写入决策记录）
+6. 写 `architecture.md` + `code-patterns-*.md` + features/contracts + `todo` + **AI 决策记录**
+7. **审阅闸门** → 停止（用户可选「不审继续」→ 下条进 dev）
+
+### 阶段收尾 — **结束闸门**（仅 user_decide · 严谨）
+
+> **AI 自主**：审阅闸门已含「继续下一阶段」，**不走本步**。  
+> **快速**：若确认卡已含「是，继续」→ **不走本步**（见 flow-modes）。
+
+`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀** 后，本阶段完成。**严谨 + user_decide 必须**：
+
+1. **调用 `AskQuestion` 工具**，弹出 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)
 2. prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`
 3. **调用后立即停止**——禁止同回复写 `atlas/dev/` 或业务源码
 
 | 禁止 | 说明 |
 |------|------|
-| ❌ 方案确认后直接写码 | 须等小卡片「是，继续」 |
-| ❌ 用户上轮说「全部做完」就跳过本闸门 | 催进度不豁免阶段闸门 |
-| ❌ 文字问「开始开发吗？」 | 须用 AskQuestion 小卡片 |
+| ❌ 未写 architecture 就发方案确认 | 先落盘再确认 |
+| ❌ 方案确认后直接写码 | 须等「是，继续」 |
+| ❌ 催进度跳过结束闸门 | 不豁免 |
+| ❌ 文字问「开始开发吗？」 | 须用 AskQuestion |
 
-并行批次 A 路径：方案审阅 AskQuestion 之后，仍须再发**本阶段闸门** → 停止。
+并行批次 A：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
 
 ## 批次 A（可选 — 仅用户显式要求并行出方案）
 

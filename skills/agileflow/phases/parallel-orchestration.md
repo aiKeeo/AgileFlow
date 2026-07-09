@@ -5,15 +5,14 @@
 
 ## 不豁免
 
-- **① 构思落盘 → G0–G8 → ② 按 五、核心流程 写码 → ③ 对照 八、REQ 验收 AC**；阶段 4 结束仍须 AskQuestion 阶段闸门
-- 催进度仅可少**阶段内**批次审阅卡，**不可少阶段闸门、不可跳过构思落盘**
-- 禁止整包委派「实现全部 MVP」跳过 ① 构思
+- **① → 闸门 A → 勾① → 闸门 B → ② → ③**；阶段 4 结束仍须结束闸门
+- 催进度不可少结束闸门、不可跳过构思；禁止整包「实现全部 MVP」跳过 ①
 
 ## 阶段 4 并行序
 
 ```
-批次 B：各切片 ① 构思落盘 → 勾 todo ① → G0–G8 → （可选）AskQuestion dev 审阅 → 停
-批次 C：各切片 ② → 勾 todo ② → ③ → 勾 todo ③ → 主 Agent 标父任务 ✅
+批次 B：各切片写 dev → 闸门 A → 勾 ① →（可选）AskQuestion → 停
+批次 C：各切片 闸门 B → ② → 勾 ② → ③ → 勾 ③ → 主 Agent 标父任务 ✅
 下一批次重复；全部 ✅ → AskQuestion 阶段闸门 → 停
 ```
 
@@ -27,7 +26,7 @@
 
 | 角色 | 做 | 禁止 |
 |------|-----|------|
-| 主 Agent | 拆片、G0–G8、**全部 AskQuestion**、todo、合并 | 跳过阶段闸门；未授权启 subagent |
+| 主 Agent | 拆片、闸门 A/B、**全部 AskQuestion**、todo、合并 | 跳过结束闸门；未授权启 subagent |
 | Subagent | 指派 ① 或 ②+③；prompt 含 dev 路径 + **五** 流程清单 | 标 ✅；AskQuestion；跳过 ① |
 
 批次 C 前登记 [active-edits.md](../templates/active-edits.md)。

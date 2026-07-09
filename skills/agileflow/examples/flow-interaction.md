@@ -1,62 +1,72 @@
 ﻿# Agileflow 交互示例
 
+> 下列「用户」话术仅演示**节奏**；具体业务以用户当次原话为准，示例不写死领域。
+
 ## 示例 1：需求（单阶段）
 
-**用户**：`req: 订单要支持优惠券抵扣`
+### 严谨模式（3 停）
 
-→ AskQuestion 需求卡片 → **停止**  
-→ REQ 草稿 + UID → AskQuestion 确认 → **阶段闸门** → **停止**
+**用户**：`req:` + 用户描述要做的功能（原话）
+
+→ **回复 1**：AskQuestion 需求卡片 → **停止**  
+→ **用户点选**  
+→ **回复 2**：写 `REQ-xxx.md` → AskQuestion 确认 → **停止**  
+→ **用户确认** → 标已确认 → **阶段闸门** → **停止**  
+→ **用户选「是，继续」** → **下条回复**写 model/ 或 solution/
+
+### 快速模式（2 停）
+
+**用户**：`req:` + 已附完整需求描述
+
+→ **回复 1**：写 `REQ-xxx.md` → **确认+闸门合并卡** → **停止**  
+→ **用户确认+选继续** → **下条回复**写 model/ 或 solution/
 
 ---
 
-## 示例 2：方案（greenfield · 模式 B）
+## 示例 2：方案
 
-**用户**：`sol: 设计退款功能`
+**用户**：`sol:` + 用户要设计的范围
 
 → features + contracts → AskQuestion 技术栈 → **停**  
-→ architecture + **`code-patterns-backend.md` 🌱** + todo → AskQuestion 方案确认 → **停**  
-→ **阶段闸门** → **停止**
+→ architecture + code-patterns + todo → 方案确认 → **阶段闸门** → **停**
+
+（快速：技术栈 → 落盘 architecture → 确认+继续合并卡，见 flow-modes.md）
 
 ---
 
 ## 示例 3：开发（串行）
 
-**用户**：阶段闸门已选「是，继续」→ T-000
+**用户**：阶段闸门已选「是，继续」→ 进入 T-000
 
-→ TodoWrite：①构思 / ②写码 / ③验收  
-→ **①** `atlas/dev/T-000-BE.md`（七 引用 `code-patterns-backend §3.1` 或 `codebase/p1-backend §3.1`）  
-→ **②** 按 五 写码  
-→ **③** test/ac 全绿 → T-000 ✅  
-→ **首个典型功能 ③ 后 refresh §三**
-
-**首行声明**：
-`📍 Agileflow | 阶段：4-开发 | 步骤：②按构思开发 | 任务：T-000 | 写法：codebase §3.1`
+→ **①** `atlas/dev/T-000-BE.md` → 闸门 A → 勾 todo ① → 闸门 B → ②
+→ **②** 按 **五** 写码 → 勾 todo ②  
+→ **③** test/ac 全绿 → T-000 ✅
 
 ---
 
-## 示例 4：init（brownfield · 模式 B）
+## 示例 4：init（接手已有代码库）
 
-**用户**：`init:` 接手 lossfat-server
+**用户**：`init:`
 
-→ 扫描源码 → `init/codebase/p1-backend.md`（§一含架构模块）  
-→ **不建** `p1-architecture.md` · **不建** `conventions/`  
-→ AskQuestion init 确认 → **停止**
-
----
-
-## 示例 5：违规反例
-
-- ❌ init 建 `p1-architecture.md`（与 codebase §一 重复，已废弃）  
-- ❌ conventions 与 codebase §三 双份维护  
-- ❌ dev ② 不读写法锚点 §三  
-- ❌ 没 ① 落盘就写源码  
-- ❌ 阶段完成不 AskQuestion  
+→ 扫描源码 → 落盘 init/（业务沙盘、模块、实体、写法锚点）  
+→ 自检全 ✅ → AskQuestion → **停止**
 
 ---
 
-## 示例 6：只看成品
+## 示例 5：AI 自主（审阅可跳过）
 
-- **可**：任务间连续 ①→②→③  
-- **不可**：跳过 ①；跳过 ③；跳过阶段闸门  
+**用户**：描述要做的东西 + 「这阶段你定」
 
-更多 → [code-pattern-scan.md](code-pattern-scan.md) · [dev-quickstart.md](../templates/dev-quickstart.md)
+→ 写 REQ + `AI 决策记录` → **审阅闸门** → **停**  
+→ 用户选「不审了，直接继续」→ **下条**写 solution/
+
+---
+
+## 违规反例
+
+- ❌ 用户描述需求 → Agent **直接写业务源码**（须先 AskQuestion → 落盘 REQ）  
+- ❌ 没 ① dev 构思就写码  
+- ❌ AI 自主但不写 atlas/  
+- ❌ 用户选「不审继续」后只寒暄
+
+更多 → [dev-quickstart.md](../templates/dev-quickstart.md)

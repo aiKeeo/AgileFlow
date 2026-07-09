@@ -1,6 +1,6 @@
 # 写法锚点 · 工作流示例
 
-> 默认 **模式 B**：单文件四段式，**不建** `atlas/conventions/`。  
+> 默认 **模式 B**：`p1-architecture`（模块依赖）+ `codebase` 五段式，**不建** `atlas/conventions/`。  
 > 完整规则 → [code-conventions.md](../templates/code-conventions.md)
 
 ---
@@ -10,7 +10,11 @@
 ```
 init:
   扫描源码
-  → 写满 init/codebase/p1-backend.md（§一含模块一览+目录，不建 p1-architecture）
+  → p0-business（实体↔功能）+ p0-domain-math（公式）
+  → p1-architecture.md（模块依赖 mermaid）
+  → init/codebase/p1-backend.md（§二规范 · §三模板 · §四序列图 · §五自检）
+  → data/api-catalog + LAYERS.md + README 业务沙盘
+  → init-scan-checklist 落盘自检全 ✅ → AskQuestion
 ```
 
 ```
@@ -57,6 +61,8 @@ dev 七：conventions 对齐 frontend §2.2
 ```
 dev ② 要写码？
   ├─ brownfield + init/codebase/？ → Read §三，dev 七 引用 §3.x
+  ├─ 跨模块 bug？ → Read p1-architecture + codebase §四
+  ├─ 业务计算？ → Read p0-domain-math
   ├─ greenfield + solution/code-patterns/？ → Read §三
   ├─ 模式 A + conventions/？ → Read §2
   └─ 都没有？ → sol 应先建 code-patterns 🌱；brownfield 应先 init
