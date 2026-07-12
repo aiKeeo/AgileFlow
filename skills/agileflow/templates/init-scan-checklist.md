@@ -1,9 +1,99 @@
 # init 扫描清单（brownfield 必读）
 
-> **何时读**：`init:` 步骤 ② 扫描时逐步勾选；AskQuestion 前落盘自检须全绿。  
-> **模板正文**（只此一处）：[init-doc.md](init-doc.md) · 写法锚点：[code-conventions.md](code-conventions.md)
+> **何时读**：`init:` 步骤 ② 扫描时逐步勾选；AskQuestion 前落盘自检须过 **P0**。  
+> **模板正文**：[init-doc.md](init-doc.md) · 写法锚点：[code-conventions.md](code-conventions.md)  
+> **大仓**：先读下方 **「大仓分级（P0/P1/P2）」**——AI 按表执行，禁止假装全库扫完。
 
 **原则**：写满路径/行号/表名/API/公式，禁止 `{…}` 占位后标 ✅。
+
+---
+
+## 大仓分级（P0/P1/P2 · AI 省力 · 对抗定稿）
+
+> **问题**：大仓一次「全扫」→ 文档巨厚 → AI/人都不读 → init 作废。  
+> **定稿**：分级停；**P0 过即可 AskQuestion**；P1/P2 诚实标覆盖，禁止写「已全量」。
+
+### 何时算大仓（命中任一 → 强制走分级）
+
+| # | 信号（可观察） |
+|---|----------------|
+| S1 | 业务模块/顶层包 ≥ **6** |
+| S2 | Controller/路由文件 ≥ **30** 或页面路由 ≥ **30** |
+| S3 | migration/实体表 ≥ **25** |
+| S4 | monorepo 多 `apps/`/`packages/` 且均有业务代码 |
+| S5 | 用户说「大仓 / 先扫主路径 / 先能开发某某模块」 |
+
+小仓（未命中）→ 仍可一次写满；**api-catalog 也建议写覆盖范围**，习惯统一。
+
+### 「主路径」操作定义（禁止空话）
+
+按顺序取第一个能落地的，写入 README「覆盖范围」：
+
+1. 用户本轮指定的模块/旅程（最高优先）  
+2. 否则：前端**主菜单/主路由前 5 项**对应旅程  
+3. 否则：根 README 描述的**第一条**用户故事  
+4. 再否则：包名含 `order|user|auth|core|main` 等主干模块  
+
+### P0 · 必扫（不过 → **禁止** AskQuestion 确认 init）
+
+| # | AI 做什么 | 停条件（够用即停） | 落盘 |
+|---|-----------|-------------------|------|
+| P0-1 | 主路径旅程 + 实体↔功能（主路径表） | ≥1 条旅程；对照表 ≥3 行或注明表很少 | `p0-business`（可短） |
+| P0-2 | 技术栈版本 | 来自 pom/package.json | `p1-tech-stack` |
+| P0-3 | 模块依赖（主干） | mermaid **只含主路径相关模块**，不必全站 | `p1-architecture` |
+| P0-4 | **本端资产索引** | FE：组件/hooks **Top 8～15**（按 import 频次或目录+引用）；BE：Util/基类/鉴权/统一响应 **Top 8～15**；路径可复制；无则写「已扫：无」 | `p1-frontend` / `p1-backend` **资产索引靠前** |
+| P0-5 | 主路径 API + 核心表 | API **只主路径**（建议 ≤20 行起步）；核心 entities 业务用途 | `api-catalog`（主路径节）+ 少量 `entities` |
+| P0-6 | 覆盖声明 | 文首固定块（见下） | `README` + `api-catalog` + 本端 codebase |
+
+**P0 刻意不做**：全量 API、全量实体 E1～E7、全站序列图、全量错误码、边缘后台。
+
+### P1 · 主路径加深（推荐；可与确认同轮或下一轮 refresh）
+
+| # | AI 做什么 | 停条件 |
+|---|-----------|--------|
+| P1-1 | FE 金牌：1 表单页 + 1 列表页 → §三模板 | 各 1 个 path:行号 + 代码块 |
+| P1-2 | BE 金牌：1 个完整 CRUD/主写接口 → §三 | 同上 |
+| P1-3 | 主链路序列图 | **2～4** 条，对照源码 |
+| P1-4 | 主域公式 / 主路径错误码 | 有才写；摘源码 |
+| P1-5 | §二规范摘要 | W/F **摘主路径真实类**，勿空谈最佳实践 |
+
+### P2 · 延后（默认不扫；文档标未覆盖）
+
+冷门模块 API、运营后台、报表、废弃包、低频组件、全量测试矩阵、全量 glossary。  
+→ 写进覆盖声明「未扫」；用户点名或 `init: refresh` 再补。
+
+### 覆盖声明（固定字面量 · 每份相关文档文首）
+
+```markdown
+## 覆盖范围（init）
+- 级别：P0 | P0+P1 | 小仓尽量全
+- 主路径：{一句话}
+- 已扫模块：…
+- 未扫（P2）：…
+- 资产索引：TopN={n}；扫描目录={…}
+- api-catalog：主路径 | 未全量
+```
+
+**禁止**：无此块却写「已完整盘点 / 全量 API」。
+
+### AI 最小动作链（大仓）
+
+```
+1. 判定大仓？→ 是则只攻 P0
+2. 定主路径（四选一操作定义）→ 写入覆盖范围
+3. 扫 P0-1…P0-6 → 自检 P0 全勾
+4. AskQuestion 确认（可注明「P1 待补」）
+5. 有余力或用户要抄写模板 → 补 P1
+6. 开发进新模块 → init: refresh 只补该模块（P0/P1 局部）
+```
+
+### 对抗正误
+
+**✅** 大仓 P0 过线就确认；catalog 写「未全量」  
+**✅** 资产 TopN + 路径；开发复用盘点打得开  
+**❌** 为过旧「自检每一项」硬扫 200 个 API  
+**❌** 覆盖写「全量」实际只扫了订单  
+**❌** 无主路径定义却写「核心模块」
 
 ---
 
@@ -60,9 +150,23 @@ M1 规则总览≥2 · M2 公式来自源码 · M3 依赖+缺则 · M4 易误解
 
 ---
 
-## 步骤 6 · codebase/p1-{端}.md
+## 步骤 6 · codebase/p1-{frontend|backend}.md
+
+> **端分离**：有 FE 写 `p1-frontend.md`；有 BE 写 `p1-backend.md`；**禁止**揉成一个大杂烩。  
+> **AI 省力**：文首「开发速查」后立即「**资产索引**」（路径可复制 + 参考页），再写 §一~§五。权威结构 → [code-conventions](code-conventions.md)。
+
+可选：`codebase/README.md` 仅写 FE/BE 各读哪个文件。
 
 §一 目录树+入口（模块→architecture，不重复）
+
+**资产索引（靠前 · 必写）**
+
+| 端 | 扫什么 | 表 |
+|----|--------|-----|
+| FE | `components/` `hooks/` import TopN；`utils`/`services` 公共封装 | 组件与 hooks；公共方法；列：**路径 + 参考页** |
+| BE | 共用 Service/Util/基类、`ApiResponse`、鉴权入口 | 服务与基类；公共方法；列：**路径.方法 + 参考调用** |
+
+无封装 → 表下写「已扫 …：无」，禁止省略整章。
 
 **§二 后端 W1~W12**（逐项摘录真实类名/路径）：
 
@@ -76,17 +180,17 @@ M1 规则总览≥2 · M2 公式来自源码 · M3 依赖+缺则 · M4 易误解
 
 **§二 前端 F1~F6**（有则写）：UI 库、request import、Hook、样式命名、types、页面目录
 
-**§三** 每模板：参考 path:行号 · 适用 · 禁止偏离 · 真实代码块（禁止 npm 文档腔）
+**§三** 每模板：参考 path:行号 · 适用 · 禁止偏离 · 真实代码块（禁止 npm 文档腔）；FE 各 1 金牌表单页/列表页
 
-**§四**（有 REST）：2~4 条 sequenceDiagram，与 architecture 一致，含易误解链路
+**§四**（有 REST·BE）：2~4 条 sequenceDiagram，与 architecture 一致
 
-**§五**：≥6 条项目特定自检
+**§五**：≥6 条项目特定自检（**须含**：已查资产索引；复用盘点已填）
 
 ---
 
 ## 步骤 7 · data/
 
-**api-catalog**：每 API 一行含碰表，与 p0-business 页面↔API 一致
+**api-catalog**：**大仓先主路径**（见 [大仓分级](#大仓分级p0p1p2--ai-省力--对抗定稿)）；每行含碰表；文首「覆盖范围」。禁止无覆盖声明称全量。
 
 **schema-overview**：ER 图、migration 演进、唯一约束→行为
 
@@ -103,37 +207,52 @@ M1 规则总览≥2 · M2 公式来自源码 · M3 依赖+缺则 · M4 易误解
 
 ---
 
-## init 落盘自检（AskQuestion 前须全 ✅）
+## init 落盘自检（AskQuestion 前）
+
+### A. P0 必过（大仓/小仓均强制 · 不过不得确认）
 
 ```
-[ ] README：三大闭环（含想知道→直达）+ 30min 路线
-[ ] LAYERS：每层「读完应能回答」+ 按任务跳转
-[ ] p0-business：实体对照表 + 旅程（或无前端说明）
-[ ] p0-domain-math：公式来自源码（有计算时）
-[ ] p1-architecture：依赖 mermaid + 跨模块表
+[ ] README：含「## 覆盖范围（init）」+ 沙盘入口（可短）
+[ ] p0-business：主路径旅程 + 实体对照（或无前端说明）
 [ ] p1-tech-stack：版本来自依赖文件
-[ ] codebase §二 W1~W12（有 FE 则 F1~F6）
-[ ] codebase §三：每模板 path:行号 + 真实代码
-[ ] codebase §四：2~4 序列图与源码一致（有 REST）
-[ ] codebase §五：≥6 条自检
-[ ] api-catalog：每行含碰表（有 REST）
-[ ] data/README：场景碰表 + 实体索引一致
-[ ] entities：E1~E7 齐全
-[ ] 无 conventions/（除非模式 A）
-[ ] README/LAYERS 索引与磁盘一致
+[ ] p1-architecture：主路径相关依赖 mermaid（**不含**组件清单）
+[ ] 有 FE → p1-frontend：开发速查 + **资产索引靠前**（Top8～15 或显式无）
+[ ] 有 BE → p1-backend：同上
+[ ] 有 REST → api-catalog：**主路径**行含碰表 + 文首覆盖范围（允许未全量）
+[ ] 无平行 components-catalog
+[ ] 未把「未全量」写成「已全量」
 ```
 
-**任一项未 ✅ → 不得 AskQuestion。**
+### B. P1 推荐（有则勾；无则覆盖范围写「P1 未做」）
+
+```
+[ ] 本端 §三：至少 1～2 个金牌模板 path:行号
+[ ] BE §四：2～4 序列图（有 REST）
+[ ] §二 W/F 有真实类名摘录
+[ ] 有计算 → p0-domain-math；有主路径错误码 → p1-errors 摘要
+```
+
+### C. P2 / 小仓加深（不阻塞确认）
+
+```
+[ ] LAYERS、全量 entities E1～E7、全量 glossary、p1-testing …
+[ ] api-catalog 扩到非主路径（refresh 时做）
+```
+
+**规则**：仅 **A 全 ✅** 即可 AskQuestion。大仓 **禁止**为勾 C 而拖死首轮 init。  
+小仓可在同轮尽量做完 B；仍须有覆盖范围块。
 
 ---
 
 ## 扫描优先读（后端）
 
-模块 inject · Calculator/Util · ApiResponse/ExceptionHandler · SecurityConfig · 最完整 Controller+Service · 跨模块聚合 API · migration+Entity · Ac*Test · BizException
+模块 inject · Calculator/Util · ApiResponse/ExceptionHandler · SecurityConfig · 最完整 Controller+Service · 跨模块聚合 API · migration+Entity · Ac*Test · BizException  
+→ 写入 **p1-backend 资产索引** + §三模板参考
 
 ## 扫描优先读（前端）
 
-列表页 index.tsx · service.ts · typings · 路由/菜单
+`components/**` import 频次 · hooks · request/store · 列表页 index · 表单页 · service.ts · 路由  
+→ 写入 **p1-frontend 资产索引** + §三金牌参考页
 
 ---
 

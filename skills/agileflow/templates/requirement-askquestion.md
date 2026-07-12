@@ -82,9 +82,10 @@ questions:
       - { id: "other", label: "其他（下轮文字补充）" }
 
   - id: "ui_confirm"
-    prompt: "界面描述（UID）是否准确？\n\n（列出已生成的 UID-xxx 或「本项目无 UI」）\n\n注：此处只确认结构与交互；视觉样式由你后续决定。"
+    prompt: "界面描述（UID）是否准确？\n\n（列出已生成的 UID-xxx 或「本项目无 UI」）\n\n每个有 UI 的 UID 须含：区域表 + ASCII 布局线条图（§2.2）。纯文字/纯表不合格。\n注：此处只确认结构与交互；视觉样式由你后续决定。"
     options:
-      - { id: "ui_ok", label: "界面描述 OK / 无 UI 无需描述" }
+      - { id: "ui_ok", label: "界面描述 OK（含线条图）/ 无 UI" }
+      - { id: "ui_wire", label: "缺线条图，先补再确认" }
       - { id: "ui_add", label: "还要补充页面或交互" }
       - { id: "ui_revise", label: "界面描述需要大改" }
 ```

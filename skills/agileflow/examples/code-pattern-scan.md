@@ -1,6 +1,6 @@
 # 写法锚点 · 工作流示例
 
-> 默认 **模式 B**：`p1-architecture`（模块依赖）+ `codebase` 五段式，**不建** `atlas/conventions/`。  
+> 默认 **模式 B**：`p1-architecture` + **`p1-frontend` / `p1-backend`（资产索引靠前）**，**不建**平行 catalog。  
 > 完整规则 → [code-conventions.md](../templates/code-conventions.md)
 
 ---
@@ -10,18 +10,24 @@
 ```
 init:
   扫描源码
-  → p0-business（实体↔功能）+ p0-domain-math（公式）
-  → p1-architecture.md（模块依赖 mermaid）
-  → init/codebase/p1-backend.md（§二规范 · §三模板 · §四序列图 · §五自检）
-  → data/api-catalog + LAYERS.md + README 业务沙盘
+  → p1-architecture.md（仅模块依赖）
+  → codebase/README（可选：FE/BE 读谁）
+  → p1-frontend.md：速查 →【资产索引】→ §一~§五
+  → p1-backend.md：同上（服务/Util + 参考调用）
   → init-scan-checklist 落盘自检全 ✅ → AskQuestion
 ```
 
 ```
-dev: T-002 新接口
-  ① dev 七：codebase 对齐 p1-backend.md §3.3
-  ② 复制 §3.3 结构写码
-  ③ test/ac 全绿
+dev: T-002 [BE] 新接口
+  ① Read p1-backend 资产索引 → 填「复用盘点（BE）」→ 按需 Read §3.3
+  ② 复用路径写入 5.x；禁止平行造轮子
+  ③ test/ac 全绿；若新建 Util → refresh 资产索引一行
+```
+
+```
+dev: T-011 [FE] 表单页
+  ① 原型/3.1 → 控件类型 → Read p1-frontend 资产索引 →「复用盘点（FE）」
+  ② 打开一个参考页抄结构；键名对齐 3.2
 ```
 
 ---
@@ -29,47 +35,25 @@ dev: T-002 新接口
 ## greenfield（从零 · sol: + dev:）
 
 ```
-sol: 定 Spring Boot + React
-  → architecture.md（栈与模块）
-  → solution/code-patterns-backend.md 🌱（§三待补充）
-  → 不建 init/、不建 conventions/
-```
+sol:
+  → code-patterns-frontend.md / code-patterns-backend.md 🌱
+     （速查 + 资产「待建设」+ §一§二；§三待补）
 
-```
-dev: T-001 首个用户 CRUD ③ ✅
-  → 从源码摘录 Form/Controller 片段
-  → refresh code-patterns-backend.md §三 → 📝
-
-dev: T-002 订单模块
-  → 对齐 §3.x 模板
+dev: 首个表单/CRUD ③ ✅
+  → refresh 本端资产索引 + §三 → 📝
 ```
 
 ---
 
-## 模式 A（仅用户明确要求全栈分开维护）
+## AI 最小链（省力）
 
 ```
-init/codebase/p1-frontend.md     # 仅 §一目录
-atlas/conventions/frontend-patterns.md   # §2 模板
-dev 七：conventions 对齐 frontend §2.2
+T 头 [FE]|[BE]
+  → Read 本端一个锚点文件
+  → 只用「资产索引」填复用盘点
+  → 需要抄时再 Read「一个」§3.x +「一个」参考页
+  → 写码
 ```
 
----
-
-## AI 决策树
-
-```
-dev ② 要写码？
-  ├─ brownfield + init/codebase/？ → Read §三，dev 七 引用 §3.x
-  ├─ 跨模块 bug？ → Read p1-architecture + codebase §四
-  ├─ 业务计算？ → Read p0-domain-math
-  ├─ greenfield + solution/code-patterns/？ → Read §三
-  ├─ 模式 A + conventions/？ → Read §2
-  └─ 都没有？ → sol 应先建 code-patterns 🌱；brownfield 应先 init
-```
-
----
-
-## dev 速查
-
-一步定位 → [dev-quickstart.md](../templates/dev-quickstart.md)
+**❌** 每个 T 读双端全书 · 资产藏文末 · 另起 catalog  
+**✅** 路径可复制 · 库存靠前 · 按需二次 Read

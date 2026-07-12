@@ -10,7 +10,7 @@
 |------|--------|
 | 用户用自然语言描述要做啥（具体业务由用户说） | 纯解释、答疑、概念问题 |
 | `@agileflow`、`继续 agileflow` | 单文件 ≤20 行、hotfix、明确说不走流程 |
-| 前缀 `init:` `req:` `mod:` `sol:` `dev:` `tests:` | code review |
+| 前缀 `init:` `req:` `mod:` `sol:` `dev:` `tests:` / `test:`（含分层） | code review |
 
 首条回复：`📍 Agileflow …` + AskQuestion（决策权或需求澄清）→ **停止**。细则见各 phase，本章不重复列动词/形态清单。
 
@@ -27,15 +27,40 @@
 | `mod:` | `atlas/model/` | 2 建模（按需） |
 | `sol:` | `atlas/solution/` | 3 方案 |
 | `dev:` | `atlas/dev/` | 4 开发 |
-| `tests:` | `atlas/tests/` | 5 验收 |
+| `tests:` | `atlas/tests/` | 5 验收（全量） |
+| `test:` | `atlas/tests/` + 分层子命令 | 5 验收 **或** 指定层（见下） |
 
-兼容：`test:`→`tests:`，`model:`→`mod:`（旧写法，不必记）。
+兼容：`model:`→`mod:`（旧写法，不必记）。  
+**`test:` 分层**：裸 `test:` / `tests:` = 全量阶段 5；`test:smoke` / `test:smoke-be` / `test:unit` 等 = **只跑该层**（见 [test: 分层](#test-分层可指定层--单端)）。
 
 **格式**：`sol: 设计退款` → 进 solution/ 方案设计。
 
 带前缀即启用 Agileflow；每阶段结束 AskQuestion → 停止。
 
-**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①**，再主 Agent 逐项构思落盘→开发→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须每 T 已有合规①）。
+### `test:` 分层（可指定层 / 单端）
+
+> **记法**：`test:` + 层名。可全量、可分层、可单端。权威执行 → [05-testing](05-testing.md#test-分层入口) · [l1-l5-pipeline](../templates/l1-l5-pipeline.md#test-分层命令)。
+
+| 用户写 | Agent 跑什么 | 产出 / 证据 |
+|--------|--------------|-------------|
+| **`tests:`** / **`test:`**（无后缀） | **全量阶段 5**：5-0 → 5A → 5B | `atlas/tests/` 报告 |
+| **`test:unit`** / **`test:l3`** | **单测 / AC 自动化**（阶段 4 ③ 已有的 `test/ac` 等）；不强制出验收报告 | 终端绿 + 可选记入 `atlas/logs/` |
+| **`test:l1`** / **`test:lint`** | 仅 L1 lint/type | 终端 |
+| **`test:l2`** / **`test:build`** | 仅 L2 build | 终端 |
+| **`test:smoke`** | **两端冒烟**（存在端）：= `smoke-be` +（有 FE 时）`smoke-fe`；对齐 5-0 G3 | `atlas/logs/*smoke*` + 摘要 |
+| **`test:smoke-be`** | **仅 BE 冒烟**：启动/health + 主路径 API happy path（不 500） | `atlas/logs/be-smoke.*` 或终端记录 |
+| **`test:smoke-fe`** | **仅 FE 冒烟**：通用 Playwright（Web 正常启；小程序仅 H5） | `atlas/logs/fe-smoke.*` |
+| **`test:5-0`** | 仅入场门禁 G1→G2→G3 | 写入 tests README 或 logs |
+| **`test:5a`** / **`test:5b`** | 仅 5A 归档 / 仅 5B 回归（须已过 5-0） | 验收报告 / README |
+
+**规则**：
+
+1. 分层命令 **不自动**跑完整 5A/5B，除非用户写的是裸 `test:` / `tests:`  
+2. `test:smoke` = 有啥跑啥（无 BE 跳过 be；无 FE 跳过 fe），**禁止**对不存在的端硬跑  
+3. 分层跑完：证据落盘；**AskQuestion** 是否继续全量 `tests:` / 修失败 / 暂停 → 停  
+4. 闸门 C / 演示前仍可用 `test:smoke` / `test:smoke-be` / `test:smoke-fe` 点名复验
+
+**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→闸门C→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡且每 T 已有合规①）。
 
 ## §atlas/ 结构
 
@@ -112,6 +137,20 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 - 仍遵守 ① 构思落盘 → ② 按 **五** 写码 → ③ 对照 REQ 验收 AC（② 可精简但 **五** 仍须逐步）；纯 refactor 无 AC 变更可豁免 ③
 - **禁止**在正式目录用 `TEMP-` 前缀命名（统一用 `temp/` 子目录）
 
+### temp / 快速通道硬禁（堵「自称小改动」）
+
+命中**任一** → **禁止** `dev/temp/`、**禁止**快速通道豁免，必须走正式 req→sol→`### T`+①②③：
+
+| 禁入条件 |
+|----------|
+| 用户已启用 Agileflow / `@agileflow` / 正在交付 MVP·新系统 |
+| 涉及 API / DB / 权限 / 支付 / 多模块 / 跨 ≥2 文件 / 预估 >20 行 |
+| `atlas/todo` 已有正式开发任务或已确认 solution |
+| 用户说「只看成品 / 直接全开发」但 scope 是产品功能（非单行 typo） |
+
+**灰色地带**（Agent 想自称微型改动但不确定）→ **必须 AskQuestion**：「走完整流程 / 确认属微型豁免」；禁止自行判豁免后开写。  
+`temp/` 文件 **不计入** `dev/T-*.md` 与 T 头等式；**禁止**用 temp 顶替正式①后标「开发实现 ✅」。
+
 ---
 
 ## §建模按需判定（阶段 2 非必经）
@@ -123,6 +162,17 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 - **不改变**实体间关系（基数、归属、外键）
 - **不新增/修改**领域规则、状态机、存储结构
 
+**跳过时必须落盘「建模判定」**（禁止空喊跳过）：
+
+```markdown
+📋 建模判定：跳过
+- 已确认 model：atlas/model/README.md（v{x}）
+- 覆盖依据：{本次改动点} → 已由 {domain-model.md §x / entity-relations §y / …} 覆盖
+- 自检四项：无新实体 ✅ / 无关系变更 ✅ / 无新规则 ✅ / 无存储结构变更 ✅
+```
+
+缺「覆盖依据」或四项未勾 → **禁止跳过**，须进阶段 2（增量或全量）。
+
 **必须进入或增量更新 model/**，当**任一**命中：
 
 - 新实体或新聚合根
@@ -130,6 +180,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 - 新业务规则/状态机/不变量
 - 持久化层结构变化（新表、改字段、改索引）
 - 首个 REQ 且尚无 model/（首次需完整建模）
+- **greenfield 且有 DB/持久化**（禁止「无 model 就跳过」）
 
 **增量更新**：只改受影响的 `domain-model.md` / `entity-relations.md` 等章节，不必重写全套；改完 AskQuestion 确认 → 停止。
 
@@ -152,14 +203,19 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 豁免类型 | 触发条件 | 执行方式 | AskQuestion |
 |----------|----------|----------|-------------|
 | **纯问答** | 仅解释，无代码/文档变更 | 直接回答 | ❌ |
-| **微型改动** | 单文件 ≤20 行；无 API/DB/权限/支付变更 | 改代码 → **L1+L3** → 更新 todo | ❌ |
-| **Hotfix** | 用户说 hotfix / 紧急修复 | **L1+L3**；核心路径 **L1–L3+L5 冒烟** | ❌ |
-| **快速通道** | 用户说快速改 / 不走流程 | 微型改动 + 不写 REQ/model/solution | ❌ |
+| **微型改动** | **同时**满足：单文件 ≤20 行；无 API/DB/权限/支付；**且**未命中下方「豁免边界」 | 改代码 → **L1+L3** → 更新 todo | 灰色地带须 AskQuestion |
+| **Hotfix** | 用户**原话**含 hotfix / 紧急修复（Agent 不得自行贴标签） | **L1+L3**；核心路径 **L1–L3+L5 冒烟** | ❌ |
+| **快速通道** | 用户说快速改 / 不走流程 **且** 确属微型改动 | 微型改动 + 不写 REQ/model/solution | 灰色地带须 AskQuestion |
 
-**快速通道边界**：「不走流程」仅微型改动。MVP/多模块/API·DB → **禁止** temp/快速通道。  
-「可压缩」**仅指** AskQuestion 次数与快速模式下二四六七可省略，**不指**把五压成摘要或空壳标题。
+**快速通道边界**：「不走流程」仅微型改动。MVP/多模块/API·DB / 已启用 Agileflow 交付 → **禁止** temp/快速通道（见 [temp 硬禁](#temp--快速通道硬禁堵自称小改动)）。  
+「可压缩」**仅指** AskQuestion 次数与快速模式下二四六七可省略，**不指**跳阶段、**不指**把 todo/五压成摘要或空壳标题。
 
-**豁免边界（任一命中走完整流程）**：API/DB/权限、支付/敏感数据、多模块、用户要求完整流程、跨 2+ 文件或 >20 行、**用户说只看成品/直接开发但 scope 为新系统 MVP**。
+> **「快速模式」≠「快速通道」**：快速模式仍按序 req→mod→sol→dev，todo 仍详细。  
+> 「用户不用管」→ **AI 自主**，不是快速通道、也不是跳阶段。
+
+**豁免边界（任一命中走完整流程）**：API/DB/权限、支付/敏感数据、多模块、用户要求完整流程、跨 2+ 文件或 >20 行、**用户说只看成品/直接开发但 scope 为新系统 MVP**、`@agileflow` / 已有正式 solution·todo。
+
+**禁止**：Agent 把 MVP 功能拆成「多次 ≤20 行」连环豁免。
 
 豁免只更新 `atlas/todo.md`；不生成 REQ/model/solution 文档。L1–L5 见 [l1-l5-pipeline.md](../templates/l1-l5-pipeline.md)。
 
@@ -167,9 +223,10 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## 模式判定（快速 / 严谨）
 
-**权威** → [flow-modes.md](../templates/flow-modes.md)（多模块/DB/权限 → **强制严谨**；「全部做」只催进度不切模式）。
+**权威** → [flow-modes.md](../templates/flow-modes.md)（**快速仍按序走完阶段、todo 仍详细**；多模块/DB/权限 → **强制严谨**；「全部做」只催进度不切模式）。
 
-进入阶段后首行声明 `模式：快速|严谨` 与 `决策：用户|AI自主`；无法判断 → AskQuestion。
+进入阶段后首行声明 `模式：快速|严谨` 与 `决策：用户|AI自主`；无法判断 → AskQuestion。  
+「后面都你定 / 不用问我」→ **决策：AI自主**，**不要**解读为可跳过 req/sol。
 
 ---
 
@@ -184,7 +241,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 需求 | `atlas/requirements/REQ-*.md` | 有文件但「草稿」→ 阶段 1 未完成；「已确认」→ 可进阶段 2 |
 | 建模 | `atlas/model/README.md` | 不存在或「草稿」→ 阶段 2；「已确认」→ 可进阶段 3 |
 | 方案 | `atlas/solution/README.md` | 不存在或「草稿」→ 阶段 3；「已确认」且开发任务未清空 → 阶段 4 |
-| **写法锚点** | `init/codebase/p1-*.md` 或 `solution/code-patterns-*.md` | 模式 B 默认；dev 对齐 §三 |
+| **写法锚点** | `init/codebase/p1-frontend|backend.md` 或 `solution/code-patterns-*`（**资产索引靠前**） | 模式 B；dev 先查库存再抄 §三 |
 | 开发 | `atlas/todo.md` →「开发任务」| 有未完成任务 → 阶段 4；全部 ✅ 且测试未 ✅ → 阶段 5 |
 | 验收 | `atlas/tests/README.md` | 已有 PASS → 交付已完成，问用户要维护还是新需求 |
 
@@ -209,7 +266,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 6 | 改已确认 REQ | [change-management](change-management.md) |
 | 7 | 说不清 | AskQuestion 选阶段 |
 
-**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→③；禁止合并 todo；多模块强制严谨。
+**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→闸门C→③；禁止合并 todo；多模块强制严谨。
 
 ### 决策委派话术（→ [stage-delegation.md](../templates/stage-delegation.md)）
 
@@ -279,7 +336,11 @@ questions:
 | **`dev: 实现某功能`** | brownfield：init 已确认 + solution → 阶段 4；无 REQ → `dev/temp/` |
 | **`dev: 只写思路`** | 阶段 4 步骤 ① 构思落盘 → AskQuestion 是否进入 ② → 停止 |
 | **`sol:`** | 阶段 3 方案；建模按需 |
-| **`tests: 验收 REQ-001`** | 阶段 5 |
+| **`tests: 验收 REQ-001`** / **`test:`**（无后缀） | 全量阶段 5 |
+| **`test:smoke`** | 两端冒烟（G3）；有 FE 含 Playwright |
+| **`test:smoke-be`** | 仅 BE 冒烟 |
+| **`test:smoke-fe`** | 仅 FE Playwright 冒烟 |
+| **`test:unit`** / **`test:l3`** | 仅单测 / AC 自动化 |
 | 纯解释、无交付物 | 豁免，不启用阶段 |
 | 改一行 bug | 豁免 L1+L3 |
 | 新项目 **greenfield** / 用户发需求 | 阶段 1 → AskQuestion → **用户答后下条回复写 REQ** |
@@ -302,11 +363,11 @@ questions:
 
 1. 输出阶段声明行（含 `模式` + `决策`；见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
 2. **阶段入口**：`todo` 未设全局 AI自主 → 决策权卡；**已全局 AI自主 → 跳过**，直接落盘（[stage-delegation](../templates/stage-delegation.md)）
-3. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`）
+3. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`；开发 → `04-development.md`）
 4. **允许共读**：该 phase 文内显式链接的 `templates/*`
-5. 阶段 4 额外共读 [dev-quickstart.md](../templates/dev-quickstart.md)
+5. **阶段 4 必读共读**（与 [SKILL 加载表](../SKILL.md#加载) 一致）：[dev-quickstart.md](../templates/dev-quickstart.md) + [04-development.md](04-development.md) + exemplar（按端）+ [todo.md TodoWrite](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)；F/MVP 切片齐时另读 [askquestion-gate 阶段性卡](../templates/askquestion-gate.md#阶段性确认卡阶段-4-内--mvp--f-xxx-切片强制)
 6. **阶段 0/1–4 产出完成** → user_decide：阶段闸门；ai_decide：审阅闸门 → **停止**
-7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)
+7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡）
 
 ## 正误示例
 

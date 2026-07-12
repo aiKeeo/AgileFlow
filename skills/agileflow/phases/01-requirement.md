@@ -62,7 +62,8 @@
 3. 生成 `atlas/requirements/README.md`、初始化 `atlas/todo.md`、`atlas/humanTodo.md`（若无）
 4. **UI 设计描述（按需）**：
    - AskQuestion `ui_scope` 选「有界面」→ 评估页面/流程 → 新建 `atlas/requirements/ui/UID-xxx-名称.md`（见 [req-ui-design.md](../templates/req-ui-design.md)）
-   - **只写结构与交互**（布局区块、组件、状态、跳转）；**视觉样式标「待定」**，由用户后续决定
+   - **只写结构与交互**；布局节须 **区域表 + ASCII 布局线条图**（强制，见 [req-ui-design](../templates/req-ui-design.md)）；**视觉样式标「待定」**
+   - 落盘后过 UID 自检 U1–U5；不过禁止标已确认
    - 无 UI → REQ「界面描述」节写「无 UI」，不建 UID
    - 维护 `atlas/requirements/ui/README.md` 索引；REQ 头部链对应 UID
 5. 需求中需人类确认/提供的事项 → **追加 humanTodo**（含「提供视觉参考稿/定样式」若用户尚未给）
@@ -112,8 +113,8 @@ REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 hum
 ## 核心规则
 
 - 一个需求 → 一个文档；BDD Given-When-Then；AC 表见 [ac-guide.md](../templates/ac-guide.md)
-- **有 UI 时**：REQ 链 **UID**（`requirements/ui/`）描述页面与交互；**不在 REQ 定视觉样式**
-- **UID ≠ UI-xxx**：UID 属 REQ；`solution/contracts/UI-xxx` 属阶段 3 技术契约
+- **有 UI 时**：REQ 链 **UID**；每个 UID **§2 须含布局线条图**（区域表 alone 不合格）
+- **UID ≠ UI-xxx**：UID 属 REQ；`solution/contracts/UI-xxx` 属阶段 3 技术契约（须保留/转写线条图）
 - 状态：草稿 → 已确认 → 已实现 → 已废弃
 - 未「已确认」不能进入阶段 2
 

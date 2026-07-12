@@ -57,6 +57,14 @@
 
 对齐 [API-003](../solution/contracts/API-003-体重记录.md)。
 
+### 复用盘点（BE）
+
+| 能力 | 资产路径.方法（抄自索引，无则「无」） | 决策 |
+|------|----------------------------------------|------|
+| 取当前用户 | `AuthContext.requireUserId`（示例） | 复用 |
+| 体重 CRUD | 无 | 新建 `WeightRecordService` |
+| 统一响应 | `ApiResponse`（示例） | 复用 |
+
 ---
 
 ## 四、状态机

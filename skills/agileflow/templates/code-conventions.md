@@ -1,8 +1,19 @@
 # 写法锚点（AI 写码规范）
 
-> **目的**：让 AI **按项目既有写法**写码，而不是凭训练数据即兴发挥。  
-> **默认模式 B**：结构 + 规范 + 模板 **一个文件**，**不建** `atlas/conventions/`。  
-> living document：可先 🌱 种子，首个典型功能完成后从源码补充 §三。
+> **目的**：让 AI **少读、抄路径、少造轮子**——按项目既有写法与**可复用资产**写码。  
+> **默认模式 B**：**FE / BE 分文件**；每文件内 **资产索引靠前**（AI 第一眼用得上）。**不建**平行 catalog。  
+> living document：可先 🌱；③ 后 refresh 模板 + 资产行。
+
+---
+
+## 对抗式要点（为何这样排）
+
+| 风险 | 定稿 |
+|------|------|
+| 资产藏文末 | AI 读不全 → **资产索引必须紧接「开发速查」之后** |
+| 多文件货架 | 不知道读谁 → **每端一文件**；可选 `codebase/README` 两行指路 |
+| FE/BE 揉表 | 搜错 → **`p1-frontend` ≠ `p1-backend`** |
+| 每次读全书 | 成本高被跳过 → **先资产表 → 按需只读一个模板小节 + 一个参考页** |
 
 ---
 
@@ -10,134 +21,188 @@
 
 | | **模式 B（默认）** | **模式 A（显式选用）** |
 |---|-------------------|------------------------|
-| **文件** | 单文件五段式（有 REST 时） | `atlas/conventions/` 目录 |
-| **brownfield** | `init/codebase/p1-{端}.md` | `init/codebase/` 仅结构 + `conventions/*-patterns.md` |
-| **greenfield** | `solution/code-patterns-{端}.md` | `conventions/` 🌱 种子 |
-| **何时用** | 单端仓库、monorepo 单服务、**减冗余** | 全栈多端、前后端独立 refresh、用户明确要求 |
-| **dev 七** | `codebase §3.x` 或 `code-patterns §3.x` | `conventions §2.x` |
+| **文件** | 每端一文件（见下） | `atlas/conventions/frontend|backend-patterns.md` |
+| **brownfield** | `init/codebase/p1-frontend.md` + `p1-backend.md`（有则建；单端可只建一端） | codebase 仅 §一 + conventions |
+| **greenfield** | `solution/code-patterns-frontend.md` + `code-patterns-backend.md` | conventions 🌱 |
+| **dev 七** | 本端锚点：`资产索引`行 + `§3.x` 参考页 | `conventions §2.x` |
 
-**禁止**：同一项目同时维护完整 `conventions/` 与 `codebase/p1-*.md` §二§三。
+**禁止**：另建 `components-catalog.md` / `utils-catalog.md`；**禁止**把组件清单写进 `p1-architecture`。
+
+### 目录（清晰分层）
+
+```
+atlas/init/codebase/
+├── README.md              # 可选·极短：FE读谁 / BE读谁 / 写码顺序
+├── p1-frontend.md         # 仅前端
+└── p1-backend.md          # 仅后端
+# 小程序可另 p1-weapp.md（同前端章结构），勿与 backend 合并
+
+atlas/solution/            # greenfield 无 init
+├── code-patterns-frontend.md
+└── code-patterns-backend.md
+```
 
 ---
 
-## 单文件五段式（模式 B · brownfield 有 REST 时）
+## 单文件结构（模式 B · AI 阅读顺序）
+
+> **两端同构**，表头按端区分。旧「纯五段式」升级为本结构：速查 + **资产靠前** + 一～五。
 
 ```markdown
-# {端}代码（目录 + 怎么写）
+# {前端|后端}写法锚点
+
+## 开发速查（AI 写码 · 30 秒 · 勿跳过）
+| 我要 | 只看 |
+|------|------|
+| 有没有现成积木 | **下方「资产索引」** |
+| 怎么抄一种页/接口 | 「三、代码模板」**对应一小节** |
+| 目录 | 「一、目录结构」 |
+| 命名/分层 | 「二、写法规范」（必要时） |
+
+## 资产索引（库存 · 新建前必查 · 本文件最有用）
+### 6.1 …（见下方 FE/BE 表头；标题可用「组件与 hooks」或「服务与基类」）
+### 6.2 公共方法
+> 扫描范围：… TopN：… 无则写「无」，禁止空章装样子。
 
 ## 一、目录结构
-{树、入口、配置、测试路径}
-
 ## 二、写法规范
-{分层、命名、注解、响应、校验、禁止项}
-
-## 三、代码模板（从现有代码摘录，含 path:行号）
-### 3.1 分页列表 / 表单 / …
-### 3.2 …
-
-## 四、典型请求链路剖析（mermaid sequenceDiagram，2~4 条，须对照源码）
-### 4.1 跨模块聚合读
-### 4.2 写操作 + 跨模块前置
-
+## 三、代码模板（按需只读一节；含 参考 path:行号 + 真实代码块）
+## 四、典型链路（BE 常要 2~4 条 mermaid；FE 可短/可无）
 ## 五、新功能自检
-- [ ] …
+- [ ] 已查「资产索引」
+- [ ] 本 T「复用盘点」已填
+- [ ] 若抄写：已打开模板参考页/类
 ```
 
-> 无 REST：可四段式（跳过 §四，§五→§四）。
+### FE 资产索引表头
 
-### 前后端四类模板
+**`### 组件与 hooks`**
+
+| 资产 | 控件类型 | 路径（可复制） | 参考页 | 适用/禁止 |
+|------|----------|----------------|--------|-----------|
+
+**`### 公共方法`**
+
+| 方法 | 路径 | 参考页 | 能力 |
+|------|------|--------|------|
+
+### BE 资产索引表头
+
+**`### 服务与基类`**
+
+| 资产 | 能力标签 | 路径.方法 | 参考调用 | 适用/禁止 |
+|------|----------|-----------|----------|-----------|
+
+**`### 公共方法 / 支撑`**
+
+| 方法 | 路径 | 参考调用 | 能力 |
+|------|------|----------|------|
+
+### 前后端 §三 四类模板（按需读一节）
 
 | 前端 §三 | 后端 §三 |
 |----------|----------|
-| 3.1 表单（校验/提交/重置） | 3.1 分页列表 |
-| 3.2 表格（分页/搜索/操作列） | 3.2 详情 |
+| 3.1 表单 | 3.1 分页列表 |
+| 3.2 表格/列表 | 3.2 详情 |
 | 3.3 弹窗/抽屉 | 3.3 创建/更新 |
-| 3.4 请求 service + hook | 3.4 幂等/状态变更（有则写） |
+| 3.4 request/service | 3.4 幂等/状态变更（有则写） |
 
-每条模板须含：`参考：{path}:{行号}` · `适用` · `禁止偏离`（2~3 条）
+每条须含：`参考：{path}:{行号}` · `适用` · `禁止偏离`（2~3 条）· **真实代码块**
 
 ---
 
-## 文档状态（模式 B 写在 init/README 或 solution/README）
+## 文档状态
 
 | 状态 | 含义 | dev ② 行为 |
 |------|------|------------|
-| 🌱 | §二有约定，§三待补充 | 按 architecture + §二；**③ 后 refresh §三** |
-| 📝 | 部分 §三 已有 | 有模板的对齐；缺的按 §二 |
-| ✅ | 四类 §三 齐 | 严格对齐，只改字段 |
+| 🌱 | §二有；资产可「待建设」；§三待补 | 按 architecture+§二；**③ 后 refresh 资产+§三** |
+| 📝 | 资产或 §三 部分有 | 有则对齐；缺的按 §二 |
+| ✅ | 资产可用 + 四类 §三 齐 | 严格对齐路径与模板 |
 
 ---
 
 ## 生命周期
 
 ```
-brownfield init:  扫描源码 → p1-architecture（模块依赖）
-                  → 写满 init/codebase/p1-{端}.md（§一~§五，含 §四 序列图）
-                  → p0-domain-math.md 集中公式
-                  → LAYERS.md + README 业务沙盘
-greenfield sol:   定栈 → 建 solution/code-patterns-{端}.md 🌱（§三待补充）
-dev 首个 CRUD:    ③ ✅ → 从源码摘录 refresh §三 → 📝
-init: refresh codebase / 新模块新写法 → 增量更新 §三§四
+brownfield init:  判定大仓？→ 定主路径 + 覆盖范围
+                  → **P0**（business短 + architecture主干 + 资产TopN + 主路径API）
+                  → 自检 A 过 → AskQuestion（可注明 P1 待补）
+                  → 有余力/要抄写 → **P1**；其余 **P2** refresh
+greenfield sol:   code-patterns-frontend|backend 🌱
+                  （资产写「待建设」；§三待补）
+dev ①:            Read 本端锚点资产索引 → 填复用盘点 → 按需 Read §3.x
+dev ③ 后:         新建可复用组件/Util → 追加资产索引一行；典型功能 refresh §三
+init: refresh codebase → 更新资产 + §三§四
 ```
 
 ### brownfield · init 步骤 6
 
-**逐步勾选** → [init-scan-checklist.md](init-scan-checklist.md)（含取长补短表、W/E 逐项、落盘自检）。
+→ [init-scan-checklist.md](init-scan-checklist.md)
 
-摘要：
+1. 有 FE → 写满 `p1-frontend.md`（**资产索引靠前** + §一~§五）  
+2. 有 BE → 写满 `p1-backend.md`（同上）  
+3. 资产：路径可复制 + 参考页/参考调用；TopN；显式「无」亦可  
+4. §三每模板 path:行号 + 真实代码；BE §四序列图对照源码  
 
-1. `p1-architecture.md` 写 **模块依赖**；`codebase` 写 §一~§五
-2. §二 **逐项摘录**真实类名/路径，禁止「遵循规范」
-3. §三 每模板 **path:行号 + 真实代码块**；§四 **对照源码**序列图
+### greenfield · sol
 
-### greenfield · sol 步骤 6b
+建 `code-patterns-frontend|backend.md` 🌱：速查 + 资产「待建设」+ §一§二；**不建** `atlas/init/`。
 
-1. 技术栈 AskQuestion 确认后
-2. 建 `solution/code-patterns-{backend|frontend}.md` 🌱：§一目录约定（来自 architecture）+ §二命名 + §三待补充
-3. **不建** `atlas/init/`；**默认不建** `conventions/`
+### dev 首个典型功能后
 
-### dev 首个典型功能后（greenfield 必做）
+③ ✅ 且为首个列表/表单/CRUD → refresh **本端**资产索引 + §三 + README 记录。
 
-某 T-xxx **③ ✅** 且为首个列表/CRUD/API → 从源码更新 `code-patterns-*.md` §三 + README 刷新记录
+---
+
+## AI 最小动作链（省力 · 强制）
+
+```
+1. 看 T 头 [FE]|[BE] → Read 本端 p1-* 或 code-patterns-*（一份）
+2. 只用「资产索引」填 dev「### 复用盘点（FE|BE）」
+3. 复用 → 路径写入 5.x；必要时再 Read「一个」参考页
+   新建 → Read「一个」§3.x → 写 5.x（须在复用盘点写理由）
+4. 禁止表写复用却平行实现
+```
+
+**刻意不做**：每个 T 通读 architecture + 双端锚点 + 全部模板。
 
 ---
 
 ## dev 硬规则
 
+**① 构思**：有 UI 的 FE / 有 API 的 BE → 必须有 `### 复用盘点（FE）` 或 `### 复用盘点（BE）`（见 [dev-rationale](dev-rationale.md)）。
+
 **② 写码前**：
 
-1. Read 写法锚点（见 [dev-quickstart.md](dev-quickstart.md) 定位表）
-2. dev **七**：引用具体 `§3.x`
-3. dev **五**：写「对齐 `{参考 path:行号}`」
+1. 已 Read **本端**锚点（至少含资产索引）  
+2. dev **七**：写 `资产索引：…` + `§3.x 参考：path`（适用时）  
+3. 五的 5.x：复用则写清路径；新建须盘点表有理由  
 
 **禁止**：
 
-- ❌ 有锚点文件却不读就写码（W8）
-- ❌ 引入 architecture/§二 未列出的库或分层
-- ❌ brownfield 扫描编造模板或序列图
-- ❌ greenfield 首个功能完成后不 refresh（永远 🌱）
-- ❌ 锚点文件里写 REQ/AC/todo（那些属于 requirements/solution/dev）
+- ❌ 有本端锚点却不读就写码  
+- ❌ 资产索引无路径（只有「有公共组件」）  
+- ❌ 另起 catalog 与 p1 双维护  
+- ❌ 把资产表只放在文末  
+- ❌ greenfield 首功能后永不 refresh  
+- ❌ 锚点里写 REQ/AC/todo  
 
 ---
 
 ## init 内分工
 
-init 各文件写什么/不写什么 → [init-doc.md §文件分工](init-doc.md#l0l6-分层模型)（**不在此重复**）。
-
-> greenfield to-be → `solution/architecture.md`，与 init 无关。
+→ [init-doc.md](init-doc.md)。greenfield to-be → `solution/architecture.md`。
 
 ---
 
-## 模式 A 附录（仅显式选用时）
+## 模式 A 附录（仅显式选用）
 
 ```
 atlas/conventions/
-├── README.md          # 状态 🌱|📝|✅
-├── frontend-patterns.md   # §1 高频 §2 模板 §3 自检
+├── README.md
+├── frontend-patterns.md   # 同：速查+资产靠前+模板
 └── backend-patterns.md
 ```
 
-init `codebase/p1-*.md` 只保留 §一目录，链到 `../../conventions/`。  
-greenfield sol 建 `conventions/` 🌱 种子。dev 七 引用 `conventions §2.x`。
-
+init `codebase/p1-*` 仅 §一目录，链到 conventions。  
 格式示例 → [code-pattern-scan.md](../examples/code-pattern-scan.md)

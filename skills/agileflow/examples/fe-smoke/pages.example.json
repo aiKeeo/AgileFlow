@@ -1,0 +1,28 @@
+{
+  "comment": "复制为项目 scripts/fe-smoke.pages.json。Web/后台用 history；小程序 H5 常用 hash。baseUrl/tokenKey 可写在此，免设 env。",
+  "routerMode": "history",
+  "basePath": "",
+  "baseUrl": "http://127.0.0.1:5173",
+  "tokenKey": "token",
+  "userKey": "user",
+  "pages": [
+    {
+      "id": "home",
+      "path": "/",
+      "readySelector": "body",
+      "needsAuth": false
+    },
+    {
+      "id": "login",
+      "path": "/login",
+      "readySelector": "body",
+      "needsAuth": false
+    },
+    {
+      "id": "dashboard",
+      "path": "/dashboard",
+      "readySelector": "body",
+      "needsAuth": true
+    }
+  ]
+}

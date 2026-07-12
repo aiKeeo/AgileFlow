@@ -91,7 +91,7 @@ atlas/solution/
 - 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
 - greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
 - `architecture.md` 全项目**只维护一份**；Write architecture 前须 AskQuestion 技术栈
-- 任务只写 `todo.md`
+- 任务只写 `todo.md`；**必须** `### T-xxx` + ①②③（含 dev 路径）；禁止扁平 `- [ ] T-001` 一行完事
 
 ## 产出
 
@@ -100,6 +100,7 @@ atlas/solution/
 | `features/F-xxx-*.md` | 功能 + §边界 |
 | `contracts/*` | 契约（按需） |
 | `architecture.md` | 全局架构（唯一） |
-| `todo.md` | 开发任务（有序列表） |
+| `todo.md` | 开发任务：**每个 `### T-xxx` + ①②③ 三步**（见 [solution-architecture 开发任务](../templates/solution-architecture.md#开发任务写入-todomd阶段-3-第-8-步)） |
 
-`README.md` 未「已确认」→ 禁止进阶段 4。
+`README.md` 未「已确认」→ 禁止进阶段 4。  
+**todo 未过 S1–S4 / S2b（无三段式或无①质量门槛）→ 禁止标方案已确认、禁止进阶段 4。**

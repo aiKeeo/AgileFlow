@@ -83,6 +83,14 @@ atlas/init/
 
 > {为谁解决什么问题}（`{仓库路径}`）
 
+## 覆盖范围（init）
+- 级别：P0 | P0+P1 | 小仓尽量全
+- 主路径：{一句话}
+- 已扫模块：…
+- 未扫（P2）：…
+- 资产索引：TopN={n}；扫描目录={…}
+- api-catalog：主路径 | 未全量
+
 ## 一句话
 {…}
 
@@ -111,7 +119,7 @@ atlas/init/
 | 有哪些 API | api-catalog |
 | 报 400 | p1-errors |
 | 怎么跑 | p0-environment |
-| 怎么写码 | codebase §三 |
+| 怎么写码 | **p1-frontend / p1-backend**（先资产索引） |
 
 → [LAYERS.md](LAYERS.md)
 
@@ -246,34 +254,37 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 
 ---
 
-## codebase/p1-{端}.md（模式 B · 五段式）
+## codebase/p1-frontend.md · p1-backend.md（模式 B · 资产靠前）
 
-> §二 逐项要求 → [init-scan-checklist §codebase](init-scan-checklist.md#步骤-6--codebasep1-端md)  
-> dev 生命周期 → [code-conventions.md](code-conventions.md)
+> 权威结构与 AI 省力链 → [code-conventions.md](code-conventions.md)  
+> 扫描勾选 → [init-scan-checklist §codebase](init-scan-checklist.md#步骤-6--codebasep1frontendbackendmd)
+
+**分端**：FE → `p1-frontend.md`；BE → `p1-backend.md`。可选 `codebase/README.md` 两行指路。
 
 ```markdown
-> **L5** · {端}代码 · 最后验证：{{日期}}
+> **L5** · {前端|后端} · 最后验证：{{日期}}
 
-# {端}代码
+# {前端|后端}写法锚点
+
+## 开发速查（AI · 30 秒）
+| 我要 | 只看 |
+| 有没有现成积木 | 下方「资产索引」 |
+| 怎么抄 | 「三、代码模板」一小节 |
+
+## 资产索引（库存 · 靠前 · 路径可复制）
+### 组件与 hooks  /  服务与基类     ← 按端选一
+| … | 路径 | 参考页或参考调用 | …
+### 公共方法
+| … |
 
 ## 一、目录结构
-{树、入口、测试路径；模块职责 → p1-architecture}
-
 ## 二、写法规范
-### 2.1 分层与命名 · 2.2 响应与异常 · 2.3 校验/鉴权/分页/事务
-### 2.4 HTTP 与主键 · 2.5 模块参考（path:行号）· 2.6 前端（有则写）
-
-## 三、代码模板
-每节：参考 path:行号 · 适用 · 禁止偏离 · **真实代码块**
-### 3.1 列表 · 3.2 详情 · 3.3 创建/更新 · 3.4 幂等/状态（无则标暂无）
-
-## 四、典型请求链路（有 REST · 2~4 条 mermaid · 对照源码）
-### 4.1 跨模块聚合 · 4.2 易误解链路
-
-## 五、新功能自检（≥6 条项目特定）
+## 三、代码模板（参考 path:行号 · 真实代码块）
+## 四、典型链路（BE 常要；FE 可短）
+## 五、新功能自检（含：已查资产索引）
 ```
 
-无 REST → 四段式（跳过 §四，§五→§四）。模式 A → §一目录 + `atlas/conventions/`。
+无 REST 的 BE 可弱化 §四。模式 A → §一目录 + `atlas/conventions/`。
 
 ---
 
