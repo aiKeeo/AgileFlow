@@ -1,4 +1,4 @@
-﻿# 阶段 0：项目盘点（init — 仅 brownfield）
+# 阶段 0：项目盘点（init — 仅 brownfield）
 
 > 文档模板：[templates/init-doc.md](../templates/init-doc.md)  
 > 扫描与验收：[templates/init-scan-checklist.md](../templates/init-scan-checklist.md)  
@@ -9,7 +9,7 @@
 对 **已有代码 / 可运行应用** 的仓库做 **as-is 盘点**，落盘 `atlas/init/`。  
 回答：**业务给谁用、核心规则怎么算、怎么跑、API/模块/表/代码各长什么样**。
 
-**分层阅读** → [init-doc.md §分层模型](../templates/init-doc.md#分层模型brownfield-init-推荐)
+**分层阅读** → [init-doc.md §盘点层模型](../templates/init-doc.md#盘点层模型init-阅读导航--非测试层)
 
 **不回答**：本次任务、AC、接口设计、改动决策（分别在 requirements / solution / dev）。
 
@@ -31,9 +31,9 @@
 ```
 atlas/init/
 ├── README.md                 # 必有：业务沙盘（三大闭环）+ 30min 路线；技术入口 → LAYERS.md
-├── LAYERS.md                 # 推荐：L0–L6 分层导航 + 按任务跳转
+├── LAYERS.md                 # 推荐：盘点层导航 + 按任务跳转
 ├── p0-business.md            # brownfield 必建：旅程、页面↔API、实体↔功能对照
-├── p0-domain-math.md         # 推荐必建：领域计算公式/规则（补 L0↔L4 断层）
+├── p0-domain-math.md         # 推荐必建：领域计算公式/规则（补 业务↔数据断层）
 ├── p0-environment.md         # 有运行时/依赖
 ├── p0-integrations.md        # 有外部集成（OAuth/JWT/第三方 API/Mock）
 ├── p0-repository.md          # 有 git
@@ -46,8 +46,8 @@ atlas/init/
 ├── codebase/
 │   └── p1-frontend.md / p1-backend.md  # 速查→资产索引靠前→§一~§五（见 code-conventions）
 └── data/                     # 有持久化
-    ├── README.md             # 场景→碰表清单（L4 入口）
-    ├── api-catalog.md        # 有 REST：全量 API 速查（L3）
+    ├── README.md             # 场景→碰表清单（盘点·数据入口）
+    ├── api-catalog.md        # 有 REST：全量 API 速查（盘点·接口）
     ├── schema-overview.md    # ER 图 + migration 演进
     ├── entities/             # ⭐ 业务用途 + 关键字段 + 碰表
     ├── relations/            # 联查路径；复杂场景独立文
@@ -112,13 +112,13 @@ atlas/init/
 - 数据：Entity 名、核心表 — 辅助理解领域，**须写清业务用途**
 - **术语**：docs 词汇表、代码 Enum/常量注释、字段 comment、内部 wiki 缩写表
 
-**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](templates/init-scan-checklist.md#步骤-5--p1-architecturemd) **A1~A4** 写满。
+**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](../templates/init-scan-checklist.md#步骤-5--p1-architecturemd) **总体形态/模块依赖/跨模块调用/模块一览** 写满。
 
 **步骤 6 · codebase** → [大仓分级](../templates/init-scan-checklist.md#大仓分级p0p1p2--ai-省力--对抗定稿) + [§codebase](../templates/init-scan-checklist.md#步骤-6--codebasep1frontendbackendmd)：P0 先资产索引；P1 再金牌模板/序列图。
 
-**步骤 7 · 实体** → 按 [init-scan-checklist §实体](templates/init-scan-checklist.md#步骤-7--data-实体文档) **E1~E7** 逐实体写满。
+**步骤 7 · 实体** → 按 [init-scan-checklist §实体](../templates/init-scan-checklist.md#步骤-7--data-实体文档) **业务用途～字段与约束等** 逐实体写满。
 
-**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](templates/init-scan-checklist.md#步骤-7d--p0-domain-mathmd) **M1~M5** 写满。
+**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](../templates/init-scan-checklist.md#步骤-7d--p0-domain-mathmd) **规则总览/公式/依赖/易误解/交叉链** 写满。
 
 **术语落盘判定**：
 
@@ -145,7 +145,7 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 ### ③ 落盘
 
 - 严格按 [init-doc.md](../templates/init-doc.md) 写模板正文
-- 每个文件首行：`> **L0** · …` / `> **P0** · …` / `> **P1** · …`（见分层模型）
+- 每个文件首行：`> **盘点·业务** · …` / `> **P0** · …` / `> **P1** · …`（见分层模型）
 - `README.md` 状态先标 **草稿**
 
 ### ④ 落盘自检
@@ -169,7 +169,7 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 **时机**（满足 **任一** 后 AskQuestion，不自动静默改 init）：
 
 1. 该 REQ 关联 **全部** 开发任务步骤 **③ ✅**（`atlas/todo.md`）
-2. 阶段 5 **5A** 该 REQ 验收报告完成且 REQ 标 **已实现**
+2. 阶段 5 **AC 验收归档** 该 REQ 验收报告完成且 REQ 标 **已实现**
 
 **前提**：本次实现已改变 as-is（新表/新实体/新目录/环境变更等）。仅改文案/UI 样式且无结构变化 → 可 AskQuestion 后选「跳过」。
 

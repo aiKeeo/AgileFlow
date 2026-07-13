@@ -1,4 +1,4 @@
-﻿# 任务跟踪（贯穿各阶段）
+# 任务跟踪（贯穿各阶段）
 
 > todo 模板：[templates/todo.md](../templates/todo.md)
 > humanTodo / 阻塞检查：[templates/human-todo.md](../templates/human-todo.md)
@@ -10,8 +10,8 @@
 ## 执行时机
 
 1. 项目初始化：创建 todo + humanTodo 模板
-2. 阶段 3（sol:）：拆解开发任务 + **功能依赖表**写入 `atlas/todo.md`；用户显式并行出方案时走 [parallel-orchestration.md](parallel-orchestration.md) 批次 A
-3. 阶段 4：**默认主 Agent 串行** — **先 `TodoWrite` 为每个 T 展开①②③三条** → 取首个 **① 未勾** 的 T-xxx → 严格 **①→②→闸门C→③**（见 [todo.md TodoWrite 强制展开](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)）→ 父任务 ✅ → 下一任务。**Write 业务源码前**：TodoWrite 已展开 **且** 过闸门 A/B。「全部开发」**≠** 可启 Task 批量写码，**必须先展开清单**。用户显式「并行/subagent」时读 [parallel-orchestration](parallel-orchestration.md)（须开闸卡）。**仅主 Agent** 更新 todo / 勾 ✅；标「开发实现 ✅」前须 **R16 全过**
+2. 阶段 3（sol:）：拆解开发任务 + **功能依赖表**写入 `atlas/todo.md`；用户显式并行出方案时走 [parallel-orchestration.md](parallel-orchestration.md) 方案齐批
+3. 阶段 4：**默认主 Agent 串行** — **先 `TodoWrite` 为每个 T 展开①②③三条** → 取首个 **① 未勾** 的 T-xxx → 严格 **①→②→可运行闸门→③**（见 [todo.md TodoWrite 强制展开](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)）→ 父任务 ✅ → 下一任务。**Write 业务源码前**：TodoWrite 已展开 **且** 过构思闸门/写码闸门。「全部开发」**≠** 可启 Task 批量写码，**必须先展开清单**。用户显式「并行/subagent」时读 [parallel-orchestration](parallel-orchestration.md)（须开闸卡）。**仅主 Agent** 更新 todo / 勾 ✅；标「开发实现 ✅」前须 **开发完成格式门槛 全过**
 4. 各阶段：**识别人类依赖 → 当次追加 humanTodo**（见 [human-todo 沉淀铁律](../templates/human-todo.md#沉淀铁律易忘)）；阶段 4 写 dev 时同步检查
 5. **阶段 4 开始前、阶段 5 开始前**：humanTodo 阻塞检查
 6. 阶段 5 完成：testing 更新 README；本模块更新 todo 状态

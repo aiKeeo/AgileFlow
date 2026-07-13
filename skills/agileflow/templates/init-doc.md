@@ -9,7 +9,7 @@
 
 | 文件 | 只管什么 | 不管什么 |
 |------|----------|----------|
-| **本文件 init-doc** | 各 init 文档 **正文模板**（写满什么节） | 扫描步骤、W1~W12 逐项、合格/不合格 |
+| **本文件 init-doc** | 各 init 文档 **正文模板**（写满什么节） | 扫描步骤、写法规范逐项、合格/不合格 |
 | **init-scan-checklist** | **怎么扫**、codebase W/F/E 逐项、**AskQuestion 前自检** | 重复贴模板正文 |
 | **code-conventions** | codebase **五段式结构**、init/dev **写法锚点生命周期** | 业务沙盘、实体业务用途 |
 
@@ -21,7 +21,7 @@
 |------|------|
 | **P0** | 开工前：业务、环境、仓库 |
 | **P1** | 写码前：栈、架构、代码、数据 |
-| **L0~L6** | 分层标签；文内首行 `> **L0.5 · …** · 最后验证：{{日期}}` |
+| **盘点层** | init 阅读分层（**勿与测试层混淆**）；文内首行 `> **盘点·业务** · 最后验证：{{日期}}`（兼容旧标 `L0`/`L5`） |
 
 - **没有就不建**（不写 N/A、不建空目录）
 - 术语 ≤8 → `p0-business`；>8 或跨域 → `glossary/p0-{域}.md`（**禁止**一词一文件）
@@ -29,20 +29,21 @@
 
 ---
 
-## L0–L6 分层模型
+## 盘点层模型（init 阅读导航 · 非测试层）
 
-> **痛点**：L0 业务 + L4 实体 → 新人读 15 个文件才拼出「怎么算」。  
-> **解法**：L0.5 领域规则 + L3 API/排错 + L2 模块依赖 + L5 序列图。
+> **痛点**：只读业务沙盘 + 实体表 → 新人拼不出「怎么算」。  
+> **解法**：补领域规则 + 接口/排错 + 模块依赖 + 代码序列图。  
+> **消歧**：此处是 **init 盘点层**；测试流水线叫 **静态检查/构建/AC单测/集成/冒烟**（见 [l1-l5-pipeline](l1-l5-pipeline.md)），**禁止**把两边都叫 L1/L3。
 
 ```
-L0   业务     README 沙盘、p0-business
-L0.5 领域规则 p0-domain-math ★
-L1   运行     p0-environment、p0-integrations
-L2   架构     p1-tech-stack、p1-architecture
-L3   接口     api-catalog、p1-errors
-L4   数据     schema-overview、data/README、entities/、relations/
-L5   代码     codebase/p1-*（§二~§四）
-L6   验证     p1-testing
+盘点·业务     README 沙盘、p0-business
+盘点·领域     p0-domain-math ★
+盘点·运行     p0-environment、p0-integrations
+盘点·架构     p1-tech-stack、p1-architecture
+盘点·接口     api-catalog、p1-errors
+盘点·数据     schema-overview、data/README、entities/、relations/
+盘点·代码     codebase/p1-*（§二~§四）
+盘点·验证     p1-testing
 ```
 
 导航：**`LAYERS.md`** · 入口：**`README.md` 业务沙盘**（非纯文件索引）
@@ -137,24 +138,24 @@ atlas/init/
 ```markdown
 > **分层导航** · 最后验证：{{日期}}
 
-# init 分层（L0 → L0.5 → L6）
+# init 分层（盘点·业务 → 盘点·验证）
 
 \`\`\`
-L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据 · L5 代码 · L6 验证
+盘点·业务 · 盘点·领域 ★ · 盘点·运行 · 盘点·架构 · 盘点·接口 · 盘点·数据 · 盘点·代码 · 盘点·验证
 \`\`\`
 
 **15 分钟速览**：README → p0-domain-math → architecture → api-catalog → codebase §四
 
-## L0 · 业务层
+## 盘点·业务
 | 文档 | 内容 |
 | README · p0-business | 沙盘、旅程、页面↔API |
 **读完应能回答**：用户主路径是什么？
 
-## L0.5 · 领域规则 ★
+## 盘点·领域 ★
 | p0-domain-math | 公式+边界+代码入口 |
 **读完应能回答**：{核心指标}怎么算？缺什么会报错？
 
-## L1 ~ L6
+## 盘点·运行 ~ 盘点·验证
 （每层：文档表 + **读完应能回答** 一句）
 
 ## 按任务跳转
@@ -202,11 +203,11 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 > **从源码** Util/Service 摘录；禁止凭常识。
 
 ```markdown
-> **L0.5** · 领域规则 · 最后验证：{{日期}}
+> **盘点·领域** · 领域规则 · 最后验证：{{日期}}
 
 # 核心业务规则手册
 
-> L0=用户怎么用 · L4=表怎么存 · **本文件=算出来的值怎么来**
+> 盘点·业务=用户怎么用 · 盘点·数据=表怎么存 · **本文件=算出来的值怎么来**
 
 ## 规则总览
 | 业务概念 | 一句话 | 代码入口 |
@@ -238,7 +239,7 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 ## p1-architecture.md
 
 ```markdown
-> **L2** · 架构与模块 · 最后验证：{{日期}}
+> **盘点·架构** · 架构与模块 · 最后验证：{{日期}}
 
 # 架构与模块
 
@@ -262,7 +263,7 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 **分端**：FE → `p1-frontend.md`；BE → `p1-backend.md`。可选 `codebase/README.md` 两行指路。
 
 ```markdown
-> **L5** · {前端|后端} · 最后验证：{{日期}}
+> **盘点·代码** · {前端|后端} · 最后验证：{{日期}}
 
 # {前端|后端}写法锚点
 
@@ -293,7 +294,7 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 **data/README**：
 
 ```markdown
-> **L4** · 数据层入口 · 最后验证：{{日期}}
+> **盘点·数据** · 数据层入口 · 最后验证：{{日期}}
 
 ## 本层文档（schema · api-catalog · entities · relations）
 ## 表一览
@@ -333,16 +334,16 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 
 ## data/entities/p1-{名}.md（融合模板）
 
-> 验收 E1~E7 → [init-scan-checklist](init-scan-checklist.md#每份实体文档完成度)
+> 实体完成度 → [init-scan-checklist](init-scan-checklist.md#每份实体文档完成度)
 
 ```markdown
 > **P1** · 实体 · {Entity} · 来源：{migration/Entity} · 最后验证：{{日期}}
 
 # {Entity}（{table}）
 
-## 业务用途（E1）
-## 用户 / 界面里怎么用（E2）
-## 相关 API（E3）
+## 业务用途
+## 用户 / 界面里怎么用
+## 相关 API
 ## 表定位（与 p0-business 对照一致）
 
 ## 字段清单
@@ -353,7 +354,7 @@ L0 业务 · L0.5 领域 ★ · L1 运行 · L2 架构 · L3 接口 · L4 数据
 ## 碰表场景
 ## 跨模块只读本表
 ## 关联 → relations/
-## 推断依据（E5）· 代码映射 Entity+Service（E7）
+## 推断依据 · 代码映射 Entity+Service
 ```
 
 **禁止**：只有字段表、无业务用途。

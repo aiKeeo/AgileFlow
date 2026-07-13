@@ -1,10 +1,10 @@
-﻿# 阶段 3：方案设计（sol:）
+# 阶段 3：方案设计（sol:）
 
 > **本阶段完成 = `atlas/solution/` + `atlas/todo.md` 开发任务已写出**。
 > 用户阶段闸门选「是，继续」后，下条回复进入 dev 须写 `atlas/dev/T-xxx.md`。
 > **用户前缀**：`sol:` = `atlas/solution/`
 > 模板：[templates/solution-core.md](../templates/solution-core.md)  
-> **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 批次 A。
+> **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 方案齐批。
 
 ## 方案设计四要素
 
@@ -69,9 +69,9 @@ atlas/solution/
 | ❌ 催进度跳过结束闸门 | 不豁免 |
 | ❌ 文字问「开始开发吗？」 | 须用 AskQuestion |
 
-并行批次 A：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
+并行方案齐批：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
 
-## 批次 A（可选 — 仅用户显式要求并行出方案）
+## 方案齐批（可选 — 仅用户显式要求并行出方案）
 
 > 用户说「并行出方案 / 多 subagent 写 features」且功能 ≥2 或全栈 FE+BE 时启用。
 
@@ -103,4 +103,4 @@ atlas/solution/
 | `todo.md` | 开发任务：**每个 `### T-xxx` + ①②③ 三步**（见 [solution-architecture 开发任务](../templates/solution-architecture.md#开发任务写入-todomd阶段-3-第-8-步)） |
 
 `README.md` 未「已确认」→ 禁止进阶段 4。  
-**todo 未过 S1–S4 / S2b（无三段式或无①质量门槛）→ 禁止标方案已确认、禁止进阶段 4。**
+**todo 未过阶段 3 自检（无三段式或无①质量门槛）→ 禁止标方案已确认、禁止进阶段 4。**

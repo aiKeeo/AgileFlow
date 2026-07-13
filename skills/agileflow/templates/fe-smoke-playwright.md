@@ -2,7 +2,7 @@
 
 > **用途**：对**任意可在浏览器打开的前端**做页面冒烟——逐路由打开、收集 `console.error` / `pageerror`、确认能渲染（非白屏）。  
 > **金标准脚本**：[examples/fe-smoke/fe-smoke.mjs](../examples/fe-smoke/fe-smoke.mjs)  
-> **不替代**：闸门 C 编译/启动、BE 接口冒烟、阶段 5 细 AC、微信开发者工具真机。
+> **不替代**：可运行闸门 编译/启动、BE 接口冒烟、阶段 5 细 AC、微信开发者工具真机。
 
 ---
 
@@ -34,7 +34,8 @@
 | 镜像是否永远可用 | ⚠️ Playwright≥1.58 Chromium 走 CfT 路径；优先 `cdn.npmmirror.com/binaries/playwright`；失败再回退官方 |
 | 装全套浏览器 | ❌ **只装 chromium**；勿 `install` 无参 |
 
-**结论：可实现且应做成通用能力。** 可选增强；AskQuestion 决定是否跑。**安装浏览器时镜像优先，否则影响体验。**
+**结论：可实现且应做成通用能力。** 可选增强；AskQuestion 决定是否跑。**安装浏览器时镜像优先，否则影响体验。**  
+**有强制原型时**：另须 [fe-pixel-compare](fe-pixel-compare.md)（`test:pixel-fe`）。
 
 ---
 
@@ -86,8 +87,8 @@ unset PLAYWRIGHT_DOWNLOAD_HOST && npx playwright install chromium
 
 命中**任一**且 architecture / todo 存在 **FE**（含 Web / 小程序-H5）：
 
-1. **F-xxx / MVP 切片** 闸门 C 过线后、阶段性确认卡之前或之中  
-2. **阶段 5 · 5-0 G3** 功能冒烟时  
+1. **F-xxx / MVP 切片** 可运行闸门 过线后、阶段性确认卡之前或之中  
+2. **阶段 5 · 测试入场 · 功能冒烟时**
 3. 用户说「给用户看 / 演示 / 页面测一下」  
 4. 用户前缀 **`test:smoke-fe`** / **`test:smoke`**（有 FE）→ **直接跑**，可跳过本卡
 
@@ -173,7 +174,7 @@ questions:
 | 规则 | 说明 |
 |------|------|
 | **无报告 = 未跑** | 必须存在并 **Read** 过 `atlas/logs/fe-smoke-report.json`；仅口头「跑过了」无效 |
-| **summary.ok !== true** | 不得标闸门 C / 5-0 FE 冒烟通过 |
+| **summary.ok !== true** | 不得标可运行闸门 / 测试入场 FE 冒烟通过 |
 | **H5 ≠ weapp** | 本脚本只测浏览器 URL。微信开发者工具里的 `env: …,mp` 报错 **不在覆盖范围**；不得用 H5 PASS 声称「小程序控制台无错」 |
 | **Chromium 未装成功** | install 失败/超时 → 冒烟未执行 → **FAIL/未跑**，禁止跳过装浏览器仍标 PASS |
 
@@ -191,7 +192,7 @@ questions:
 5. pages.json 写对 baseUrl + routerMode（Web=history；小程序 H5=hash）
 6. node scripts/fe-smoke.mjs
 7. Read atlas/logs/fe-smoke-report.json
-8. FAIL → 修 → 重跑；PASS → 写入闸门 C / 5-0 证据
+8. FAIL → 修 → 重跑；PASS → 写入可运行闸门 / 测试入场证据
 ```
 
 ---

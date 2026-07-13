@@ -39,28 +39,29 @@
 
 ### `test:` 分层（可指定层 / 单端）
 
-> **记法**：`test:` + 层名。可全量、可分层、可单端。权威执行 → [05-testing](05-testing.md#test-分层入口) · [l1-l5-pipeline](../templates/l1-l5-pipeline.md#test-分层命令)。
+> **记法**：`test:` + 层名。可全量、可分层、可单端。权威执行 → [05-testing](05-testing.md#test-分层入口) · [测试流水线 CLI 对照](../templates/l1-l5-pipeline.md#cli-短名--中文全称)。
 
 | 用户写 | Agent 跑什么 | 产出 / 证据 |
 |--------|--------------|-------------|
-| **`tests:`** / **`test:`**（无后缀） | **全量阶段 5**：5-0 → 5A → 5B | `atlas/tests/` 报告 |
-| **`test:unit`** / **`test:l3`** | **单测 / AC 自动化**（阶段 4 ③ 已有的 `test/ac` 等）；不强制出验收报告 | 终端绿 + 可选记入 `atlas/logs/` |
-| **`test:l1`** / **`test:lint`** | 仅 L1 lint/type | 终端 |
-| **`test:l2`** / **`test:build`** | 仅 L2 build | 终端 |
-| **`test:smoke`** | **两端冒烟**（存在端）：= `smoke-be` +（有 FE 时）`smoke-fe`；对齐 5-0 G3 | `atlas/logs/*smoke*` + 摘要 |
-| **`test:smoke-be`** | **仅 BE 冒烟**：启动/health + 主路径 API happy path（不 500） | `atlas/logs/be-smoke.*` 或终端记录 |
-| **`test:smoke-fe`** | **仅 FE 冒烟**：通用 Playwright（Web 正常启；小程序仅 H5） | `atlas/logs/fe-smoke.*` |
-| **`test:5-0`** | 仅入场门禁 G1→G2→G3 | 写入 tests README 或 logs |
-| **`test:5a`** / **`test:5b`** | 仅 5A 归档 / 仅 5B 回归（须已过 5-0） | 验收报告 / README |
+| **`tests:`** / **`test:`**（无后缀） | **全量阶段 5**：测试入场门禁 → AC验收归档 → 全量回归 | `atlas/tests/` 报告 |
+| **`test:unit`** / **`test:l3`** | **AC 单测**（阶段 4 ③ 已有的 `test/ac` 等） | 终端绿 + 可选记入 `atlas/logs/` |
+| **`test:l1`** / **`test:lint`** | 仅静态检查 | 终端 |
+| **`test:l2`** / **`test:build`** | 仅构建 | 终端 |
+| **`test:smoke`** | **两端功能冒烟**（存在端）：= `smoke-be` +（有 FE 时）`smoke-fe` | `atlas/logs/*smoke*` + 摘要 |
+| **`test:smoke-be`** | **仅 BE 冒烟**：启动/health + 主路径 API | `atlas/logs/be-smoke.*` 或终端记录 |
+| **`test:smoke-fe`** | **仅 FE 冒烟**：通用 Playwright | `atlas/logs/fe-smoke.*` |
+| **`test:pixel-fe`** | **FE 像素对比**（有原型图时）：截图 vs 原型 | `atlas/tests/fe-pixel/report.json` |
+| **`test:5-0`** | 仅测试入场门禁（CLI 短名） | 写入 tests README 或 logs |
+| **`test:5a`** / **`test:5b`** | 仅 AC验收归档 / 仅全量回归（须已过测试入场） | 验收报告 / README |
 
 **规则**：
 
-1. 分层命令 **不自动**跑完整 5A/5B，除非用户写的是裸 `test:` / `tests:`  
+1. 分层命令 **不自动**跑完整 AC验收/全量回归，除非用户写的是裸 `test:` / `tests:`  
 2. `test:smoke` = 有啥跑啥（无 BE 跳过 be；无 FE 跳过 fe），**禁止**对不存在的端硬跑  
 3. 分层跑完：证据落盘；**AskQuestion** 是否继续全量 `tests:` / 修失败 / 暂停 → 停  
-4. 闸门 C / 演示前仍可用 `test:smoke` / `test:smoke-be` / `test:smoke-fe` 点名复验
+4. 可运行闸门 / 演示前可用 `test:smoke*` / `test:pixel-fe`（有原型）点名复验
 
-**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→闸门C→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡且每 T 已有合规①）。
+**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→可运行闸门→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡且每 T 已有合规①）。
 
 ## §atlas/ 结构
 
@@ -75,7 +76,15 @@ atlas/
 │   ├── architecture.md
 │   └── code-patterns-{端}.md  # greenfield 模式 B 🌱
 ├── conventions/               # 模式 A 可选；默认不建
-├── requirements/ … model/ … dev/ … tests/
+├── requirements/ … model/ … dev/ …
+├── tests/
+│   ├── README.md · REQ-*-验收报告.md
+│   └── fe-pixel/              # 像素对比（配置+结果）
+│       ├── pages.json
+│       ├── report.json
+│       ├── summary.md
+│       └── artifacts/
+├── logs/                      # 其它冒烟日志等
 ├── todo.md · humanTodo.md · active-edits.md（按需）
 ```
 
@@ -86,12 +95,16 @@ atlas/
 
 ## init 判定（brownfield / greenfield）
 
-> 细则：[00-project-init.md](00-project-init.md)
+> 细则：[00-project-init.md](00-project-init.md)  
+> **脚本权威**：`scripts/validate-atlas/lib/brownfield.mjs`（看**源码文件**，不看空目录名）
 
 | 类型 | 判定（任一） | init |
 |------|--------------|------|
-| **brownfield** | 已有业务源码 / migration / 可运行应用；用户说接手、二次开发 | **须 init** |
-| **greenfield** | 从零、新系统、脚手架、完整交付（无既有业务代码）；空仓库新建 | **禁止 init** |
+| **brownfield** | `src/apps/…` 等目录下**已有** `.ts/.java/…` 业务文件；或已有 `atlas/init/`；用户说接手、二次开发 | **须 init** |
+| **greenfield** | 空仓 / 仅空脚手架目录（空 `packages/`、空 `src/` **不算** brownfield）；从零新建 | **禁止 init** |
+
+**顺序铁律**：**先扫仓库判 brownfield/greenfield，再读 `atlas/`。**  
+**禁止**把「没有 `atlas/`」当成 greenfield——老仓无 atlas 仍是 brownfield，须阶段 0。
 
 **greenfield** → 跳过阶段 0，从阶段 1 `req:` 开始。  
 **brownfield 且 `atlas/init/` 不存在或未确认** → 进 `dev:`/`sol:` 前先 **init:** 或自动进入阶段 0。
@@ -203,12 +216,17 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 豁免类型 | 触发条件 | 执行方式 | AskQuestion |
 |----------|----------|----------|-------------|
 | **纯问答** | 仅解释，无代码/文档变更 | 直接回答 | ❌ |
-| **微型改动** | **同时**满足：单文件 ≤20 行；无 API/DB/权限/支付；**且**未命中下方「豁免边界」 | 改代码 → **L1+L3** → 更新 todo | 灰色地带须 AskQuestion |
-| **Hotfix** | 用户**原话**含 hotfix / 紧急修复（Agent 不得自行贴标签） | **L1+L3**；核心路径 **L1–L3+L5 冒烟** | ❌ |
+| **微型改动** | **同时**满足：单文件 ≤20 行；无 API/DB/权限/支付；**且**未命中下方「豁免边界」 | 改代码 → **静态检查+AC单测** → 更新 todo | 灰色地带须 AskQuestion |
+| **Hotfix** | 用户**原话**含 hotfix / 紧急修复（Agent 不得自行贴标签） | **静态检查+AC单测**；核心路径再加 **冒烟** | ❌ |
 | **快速通道** | 用户说快速改 / 不走流程 **且** 确属微型改动 | 微型改动 + 不写 REQ/model/solution | 灰色地带须 AskQuestion |
 
+### 豁免声明（强制 · 堵静默逃逸）
+
+走豁免时，**本回复首行**必须含：`豁免：问答` / `豁免：微型` / `豁免：hotfix` / `豁免：快速通道`。  
+**禁止**不声明就当豁免开写。灰区（想自称微型但不确定）→ **必须 AskQuestion**，禁止自行判豁免。
+
 **快速通道边界**：「不走流程」仅微型改动。MVP/多模块/API·DB / 已启用 Agileflow 交付 → **禁止** temp/快速通道（见 [temp 硬禁](#temp--快速通道硬禁堵自称小改动)）。  
-「可压缩」**仅指** AskQuestion 次数与快速模式下二四六七可省略，**不指**跳阶段、**不指**把 todo/五压成摘要或空壳标题。
+「可压缩」**仅指** AskQuestion 次数与快速模式下二/四/六/七可写 **待补齐**（标题仍须全齐），**不指**跳阶段、**不指**省略标题、**不指**把 todo/五压成摘要或空壳。
 
 > **「快速模式」≠「快速通道」**：快速模式仍按序 req→mod→sol→dev，todo 仍详细。  
 > 「用户不用管」→ **AI 自主**，不是快速通道、也不是跳阶段。
@@ -217,7 +235,8 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 **禁止**：Agent 把 MVP 功能拆成「多次 ≤20 行」连环豁免。
 
-豁免只更新 `atlas/todo.md`；不生成 REQ/model/solution 文档。L1–L5 见 [l1-l5-pipeline.md](../templates/l1-l5-pipeline.md)。
+豁免只更新 `atlas/todo.md`；不生成 REQ/model/solution 文档。测试层见 [l1-l5-pipeline.md](../templates/l1-l5-pipeline.md)。  
+> 豁免声明 = **C 档纪律**（脚本不扫聊天）；不声明仍属违规。
 
 ---
 
@@ -232,11 +251,21 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## ② 读取项目状态（判断「当前在哪」）
 
-按顺序检查仓库与 `atlas/`（不存在则视为**全新项目**）：
+**必须按下面顺序**（先仓后 atlas）：
+
+### 2.0 仓库类型（先做）
+
+1. 扫业务根是否有源码文件 → **brownfield** 或 **greenfield**（规则见上节；空目录 ≠ brownfield）  
+2. **仅当** greenfield **且** 无 `atlas/` → 可称「全新交付起点」→ 建议阶段 1  
+3. **brownfield 且无 `atlas/init`（或未确认）** → 建议阶段 **0**（即使完全没有 `atlas/`）  
+4. 再进入下表读 atlas 进度
+
+### 2.1 atlas 进度（后做）
 
 | 检查项 | 路径 | 状态含义 |
 |--------|------|----------|
-| **项目盘点** | `atlas/init/README.md` | 不存在 → brownfield 须阶段 0；greenfield 忽略；「已确认」→ 可进后续 |
+| **会话续作 checkpoint** | `atlas/todo.md` →「## 进行中」/ checkpoint 行 | **跨会话权威**：当前 T + ①/②/③；新聊天先读此处再 TodoWrite |
+| **项目盘点** | `atlas/init/README.md` | brownfield 不存在/未确认 → 阶段 0；greenfield 忽略；「已确认」→ 可进后续 |
 | 流程进度 | `atlas/todo.md` →「流程进度」区 | 哪几阶段已 ✅ |
 | 需求 | `atlas/requirements/REQ-*.md` | 有文件但「草稿」→ 阶段 1 未完成；「已确认」→ 可进阶段 2 |
 | 建模 | `atlas/model/README.md` | 不存在或「草稿」→ 阶段 2；「已确认」→ 可进阶段 3 |
@@ -245,7 +274,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 开发 | `atlas/todo.md` →「开发任务」| 有未完成任务 → 阶段 4；全部 ✅ 且测试未 ✅ → 阶段 5 |
 | 验收 | `atlas/tests/README.md` | 已有 PASS → 交付已完成，问用户要维护还是新需求 |
 
-**推导「建议阶段」** = 第一个未完成的前置阶段（流水线顺序 1→2→3→4→5）。
+**推导「建议阶段」** = 2.0 定类型后，取第一个未完成的前置阶段（0→1→2→3→4→5）。
 
 示例：
 - 有已确认 REQ、model 未确认 → 建议阶段 **2**
@@ -266,7 +295,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 6 | 改已确认 REQ | [change-management](change-management.md) |
 | 7 | 说不清 | AskQuestion 选阶段 |
 
-**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→闸门C→③；禁止合并 todo；多模块强制严谨。
+**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→可运行闸门→③；禁止合并 todo；多模块强制严谨。
 
 ### 决策委派话术（→ [stage-delegation.md](../templates/stage-delegation.md)）
 
@@ -340,9 +369,10 @@ questions:
 | **`test:smoke`** | 两端冒烟（G3）；有 FE 含 Playwright |
 | **`test:smoke-be`** | 仅 BE 冒烟 |
 | **`test:smoke-fe`** | 仅 FE Playwright 冒烟 |
+| **`test:pixel-fe`** | FE 像素对比（有原型；见 [fe-pixel-compare](../templates/fe-pixel-compare.md)） |
 | **`test:unit`** / **`test:l3`** | 仅单测 / AC 自动化 |
 | 纯解释、无交付物 | 豁免，不启用阶段 |
-| 改一行 bug | 豁免 L1+L3 |
+| 改一行 bug | 豁免：静态检查+AC单测 |
 | 新项目 **greenfield** / 用户发需求 | 阶段 1 → AskQuestion → **用户答后下条回复写 REQ** |
 | 阶段闸门选「是，继续」 | **下条回复**落盘下一阶段（model/solution/dev） |
 | 接手 **brownfield** / 无 atlas/init | 阶段 0 → init 落盘 → AskQuestion → 停止 |

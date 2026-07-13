@@ -1,4 +1,4 @@
-﻿# 方案设计核心模板（atlas/solution/）
+# 方案设计核心模板（atlas/solution/）
 
 > **格式模板**：示例域名（订单/登录等）仅演示章节结构，落盘时替换为当前项目。  
 > **四要素**：① 功能（含边界） ② **契约/接口文档**（按需，集中放 `contracts/`） ③ 架构（全局一份） ④ 任务（todo.md）
@@ -32,7 +32,7 @@ atlas/solution/
 │   ├── API-001-创建订单.md
 │   ├── UI-001-下单页.md
 │   └── JOB-001-日终对账.md
-├── architecture.md        # 【全局唯一】技术栈、模块一览、L1–L5（不写代码模板）
+├── architecture.md        # 【全局唯一】技术栈、模块一览、测试层命令（不写代码模板）
 └── code-patterns-{端}.md    # greenfield 模式 B 🌱：§一~§四（见 code-conventions.md）
 ```
 
@@ -223,9 +223,9 @@ atlas/solution/
 ## 技术栈
 ## 模块划分 / 架构图
 ## 目录结构
-## test/ac/ 与 L1–L5
+## test/ac/ 与测试层
 ## 可观测性
-## L1–L5 验证命令
+## 测试层验证命令
 ```
 
 ## AskQuestion 确认方案

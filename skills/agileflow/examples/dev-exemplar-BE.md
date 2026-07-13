@@ -43,7 +43,7 @@
 | | recordedAt | TIMESTAMP | 测量时间 |
 | | createdAt | TIMESTAMP | 入库时间 |
 
-表已在 V1；本任务补 Entity + Repository 查询方法。
+表已在初版 schema；本任务补 Entity + Repository 查询方法。
 
 ---
 
@@ -181,7 +181,7 @@
 
 ## 九、实现结果
 
-| AC ID | test/ac 方法 | L3 | 终端证据 |
+| AC ID | test/ac 方法 | AC单测 | 终端证据 |
 |-------|--------------|-----|----------|
 | AC-002-01 | ac002_01_createWeight | ⬜ | |
 | AC-002-02 | ac002_02_listWeight | ⬜ | |

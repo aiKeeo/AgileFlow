@@ -48,9 +48,13 @@ atlas/requirements/
 - 关联 REQ：[REQ-001](../REQ-001-用户登录.md)
 - 平台：Web | 小程序 | App（与 REQ 一致）
 - 状态：草稿 | 已确认
-- **样式状态**：⬜ 待定（用户后续决定）
+- **样式状态**：⬜ 待定（用户后续决定） | ✅ 已有原型图
+- **原型图**：`atlas/requirements/ui/prototypes/UID-001-login.png`  # 有则必填；无则删本行
+- **路由**：`/login`  # 有原型时建议填，供 fe-pixel 打开
+- **截图选择器**：`.login-card`  # 可选；默认 body
 
-> **用途**：描述页面结构与交互，供生成 UI 实现参考。**不含**最终视觉样式。
+> **用途**：描述页面结构与交互，供生成 UI 实现参考。**不含**最终视觉样式（除非已附原型图）。  
+> **有强制原型**（UID「原型图」或 `atlas/tests/fe-pixel/pages.json`）→ FE 勾③须 [fe-pixel-compare](fe-pixel-compare.md) PASS。散图未声明不挡门。
 
 ---
 
@@ -136,7 +140,8 @@ atlas/requirements/
 | 组件库 / 设计系统 | **待定** | **用户** | sol: 技术栈卡片 |
 | 参考稿 / Figma | 无则留空 | **用户** | humanTodo 提供链接 |
 
-> 若用户已有参考：在 humanTodo 追加「提供 UID-001 视觉参考稿」；**仍不在 REQ 擅自定样式**。
+> 若用户已有参考：在 humanTodo 追加「提供 UID-001 视觉参考稿」；**仍不在 REQ 擅自定样式**。  
+> 用户给出可导出图 → 拷到 `prototypes/` **且** UID 填「原型图」（仅放目录不声明 = 不挡门、不强制比）。
 
 ---
 

@@ -72,7 +72,7 @@ questions:
 | **1 req** | 需求澄清卡、草稿确认卡 | 用户/平台/MVP/功能拆分/UID 范围 | REQ+AC+README；**AI 决策记录** |
 | **2 mod** | 建模确认卡 | 实体/关系/规则/表结构（或 model-overview） | model/ 落盘 |
 | **3 sol** | 技术栈卡、方案确认卡 | 技术栈、features、contracts、architecture、todo | solution/ 落盘 |
-| **4 dev** | **仅**可选「构思审阅」（白名单）；**不可**跳过 F/MVP 阶段性确认 | 完整模板；逐 T 过闸门 A/B/**C**；F/MVP 切片完发**阶段性确认卡** | ①②③；闸门 C；阶段性 AskQuestion；禁批量① |
+| **4 dev** | **仅**可选「构思审阅」（白名单）；**不可**跳过 F/MVP 阶段性确认 | 完整模板；逐 T 过构思闸门/写码闸门/可运行闸门；F/MVP 切片完发**阶段性确认卡** | ①②③；可运行闸门；阶段性 AskQuestion；禁批量① |
 
 **禁止 AI 自主时跳过**：阶段顺序（req→mod→sol→dev）、`atlas/` 落盘、**详细** `atlas/todo`（每 T ①②③）、dev ① 构思文件、AC 只引用 REQ、humanTodo 沉淀（密钥/参考稿仍须列出）。
 

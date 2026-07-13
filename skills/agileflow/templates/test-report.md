@@ -25,9 +25,9 @@
 - 日志路径、检索命令、抽样（event + traceId）
 
 ## 3. 流水线结果
-| 层 | 命令 | 结果 |
-|----|------|------|
-| L3 | `cd backend && mvn test` | BUILD SUCCESS |
+| 测试层 | 命令 | 结果 |
+|--------|------|------|
+| AC单测 | `cd backend && mvn test` | BUILD SUCCESS |
 
 ## 4. 遗留问题
 - ⚠️ FE 人工 AC 列表及点验说明

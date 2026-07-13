@@ -100,7 +100,7 @@ questions:
 
 1. 将选型结果写入 `architecture.md`「技术栈」表（语言 / 框架 / 数据库 / 日志框架等）
 2. 日志框架、测试命令须与所选栈一致（见 [observability-logging.md](observability-logging.md)）
-3. 继续编写架构图、文件结构、追溯矩阵、测试依赖、L1–L5 命令
+3. 继续编写架构图、文件结构、追溯矩阵、测试依赖、测试层命令
 
 ## 正误示例
 

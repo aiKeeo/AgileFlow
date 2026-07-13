@@ -1,0 +1,16 @@
+{
+  "summary": "PASS",
+  "pass": 1,
+  "fail": 0,
+  "finishedAt": "2026-07-14T00:00:00.000Z",
+  "baseUrl": "http://127.0.0.1:5173",
+  "results": [
+    {
+      "id": "UID-001",
+      "status": "PASS",
+      "prototype": "atlas/requirements/ui/prototypes/UID-001.png",
+      "diffCount": 0,
+      "diffRatio": 0
+    }
+  ]
+}

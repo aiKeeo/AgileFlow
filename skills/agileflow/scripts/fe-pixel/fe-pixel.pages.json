@@ -1,0 +1,12 @@
+{
+  "routerMode": "history",
+  "basePath": "",
+  "baseUrl": "http://127.0.0.1:5173",
+  "viewport": { "width": 1280, "height": 720 },
+  "settleMs": 400,
+  "threshold": 0.1,
+  "maxDiffRatio": 0.02,
+  "maxDiffPixels": 0,
+  "maxAspectDelta": 0.05,
+  "pages": []
+}
