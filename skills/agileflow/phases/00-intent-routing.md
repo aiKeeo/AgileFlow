@@ -398,13 +398,3 @@ questions:
 5. **阶段 4 必读共读**（与 [SKILL 加载表](../SKILL.md#加载) 一致）：[dev-quickstart.md](../templates/dev-quickstart.md) + [04-development.md](04-development.md) + exemplar（按端）+ [todo.md TodoWrite](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)；F/MVP 切片齐时另读 [askquestion-gate 阶段性卡](../templates/askquestion-gate.md#阶段性确认卡阶段-4-内--mvp--f-xxx-切片强制)
 6. **阶段 0/1–4 产出完成** → user_decide：阶段闸门；ai_decide：审阅闸门 → **停止**
 7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)（须并行启动卡）
-
-## 正误示例
-
-**✅ 用户**：「继续 agileflow」→ todo 方案 ⬜ → 建议阶段 3 → 读 03-solution-design.md
-
-**❌ 用户**：提出**新建产品**需求 → Agent **直接写业务源码**（须启用 Agileflow：决策权/需求 AskQuestion → 落盘 REQ → 禁止先写码）
-
-**❌ 用户**：发来 PRD/长需求 → 未 AskQuestion 直接写 REQ（须先决策权或澄清卡 → 停止）
-
-**❌ 用户**：方案设计写完 → 直接写业务源码（须结束闸门 → 用户选继续 → 下条回复再进阶段 4）

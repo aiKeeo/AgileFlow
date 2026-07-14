@@ -37,6 +37,7 @@
 | `atlas/dev/` | 功能实现思路（阶段 4） |
 | `atlas/tests/REQ-*-验收报告.md` | 每 REQ 一份（**阶段 5** 产出） |
 | `atlas/tests/README.md` | 索引 + 交付汇总 |
+| `atlas/debt.md` | 技术债看板（待回溯/事后补写/质疑；阶段 5 须清零） |
 | `atlas/active-edits.md` | 并行改文件锁（阶段 4 并行时） |
 
 ## 项目初始化

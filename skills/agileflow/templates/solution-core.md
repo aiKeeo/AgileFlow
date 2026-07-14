@@ -240,10 +240,3 @@ questions:
   - id: "confirm_architecture"
     prompt: "全局 architecture.md 是否认可？"
 ```
-
-## 正误示例
-
-**✅** 边界写在 F-001 的 `## 边界`  
-**✅** 全项目一份 architecture.md  
-**❌ 单独建 boundaries.md**  
-**❌ 每个 F 一份 architecture-xxx.md**

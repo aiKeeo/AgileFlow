@@ -67,15 +67,3 @@ subagent 发现目标文件已被占用
   → 回报主 Agent：{路径} 被 {占用者} 占用
   → 主 Agent：换任务 / 等释放 / 重新拆批次
 ```
-
-## 正误示例
-
-**✅**：BE subagent 写 `OrderService.ts` 前登记 → 写完释放
-
-**✅**：批量出方案 三域 subagent 各写 `F-001.md`、`F-002.md`、`F-003.md`，无重叠
-
-**❌**：两个 subagent 同时改 `contracts/API-001-xxx.md`
-
-**❌**：subagent 自行更新 `active-edits.md` 或 `todo.md`
-
-**❌**：批次结束未释放，表中残留大量「进行中」

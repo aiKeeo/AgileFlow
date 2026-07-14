@@ -24,7 +24,7 @@
 | **文件** | 每端一文件（见下） | `atlas/conventions/frontend|backend-patterns.md` |
 | **brownfield** | `init/codebase/p1-frontend.md` + `p1-backend.md`（有则建；单端可只建一端） | codebase 仅 §一 + conventions |
 | **greenfield** | `solution/code-patterns-frontend.md` + `code-patterns-backend.md` | conventions 🌱 |
-| **dev 七** | 本端锚点：`资产索引`行 + `§3.x` 参考页 | `conventions §2.x` |
+| **dev ## 契约 → ### 复用** | 本端锚点：`资产索引`行 + `§3.x` 参考页 | `conventions §2.x` |
 
 **禁止**：另建 `components-catalog.md` / `utils-catalog.md`；**禁止**把组件清单写进 `p1-architecture`。
 
@@ -159,8 +159,8 @@ init: refresh codebase → 更新资产 + §三§四
 ```
 1. 看 T 头 [FE]|[BE] → Read 本端 p1-* 或 code-patterns-*（一份）
 2. 只用「资产索引」填 dev「### 复用盘点（FE|BE）」
-3. 复用 → 路径写入 5.x；必要时再 Read「一个」参考页
-   新建 → Read「一个」§3.x → 写 5.x（须在复用盘点写理由）
+3. 复用 → 路径写入 `## 做法` 步骤；必要时再 Read「一个」参考页
+   新建 → Read「一个」§3.x → 写 `## 做法` 步骤（须在复用盘点写理由）
 4. 禁止表写复用却平行实现
 ```
 

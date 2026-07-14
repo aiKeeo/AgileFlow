@@ -34,7 +34,7 @@
 | 上一步 | 用户动作 | **本回复 Agent 必须做** |
 |--------|----------|-------------------------|
 | 第 1 步需求卡片 | 点选/回复 | **第 2 步**：写 `atlas/requirements/REQ-*.md` 草稿 + README + todo（禁止空回复） |
-| 第 3 步确认卡片 | 选「确认」 | 标 REQ **已确认** → **第 4 步**阶段构思闸门skQuestion → 停止 |
+| 第 3 步确认卡片 | 选「确认」 | 标 REQ **已确认** → **第 4 步**阶段闸门 AskQuestion → 停止 |
 | 阶段闸门 | 选「是，继续」 | **下条回复**进入阶段 2 或 3，**写 model/ 或 solution/**（禁止只说不写） |
 
 ---
@@ -67,6 +67,7 @@
    - 无 UI → REQ「界面描述」节写「无 UI」，不建 UID
    - 维护 `atlas/requirements/ui/README.md` 索引；REQ 头部链对应 UID
 5. 需求中需人类确认/提供的事项 → **追加 humanTodo**（含「提供视觉参考稿/定样式」若用户尚未给）
+6. **术语扫描**：从 REQ 标题/BDD 场景中提取业务名词 → 追加到 `atlas/glossary.md`（标 `<!-- auto -->`）；无 glossary.md 且术语 ≤8 → 写 `p0-business.md`
 
 #### 第 2 步 · AI 自主（ai_decide 下条回复执行）
 
@@ -91,22 +92,11 @@
 
 → [change-management.md](change-management.md)，不重复第 1/3 步普通确认。
 
-### 第 4 步：阶段收尾 — **强制 AskQuestion 阶段闸门**（仅 user_decide）
+### 第 4 步：阶段收尾 — **阶段闸门**（仅 user_decide）
 
-> **AI 自主**：由 [审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属) 一步完成确认与是否继续，**不走本步**。
+> **AI 自主**：由 [审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属) 一步完成，**不走本步**。
 
-REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 humanTodo** 后，本阶段视为完成。**必须**：
-
-1. **调用 `AskQuestion` 工具**，弹出 [阶段闸门小卡片](../templates/askquestion-gate.md#阶段闸门模板)
-2. prompt：`需求澄清已完成。是否继续进入【数据建模】阶段？`（按需跳过建模时下一阶段写「方案设计」）
-3. 选项须含 **「是，继续」** 与 **「否，暂停」**
-4. **调用后立即停止生成**——禁止同回复进入阶段 2/3/4
-
-| 禁止 | 说明 |
-|------|------|
-| ❌ 聊天问「是否继续？」 | 必须用 AskQuestion 小卡片 |
-| ❌ REQ 确认后直接写 model/solution | 须等用户在小卡片选「是，继续」 |
-| ❌ 假设用户要继续 | 每阶段结束各问一次 |
+REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 humanTodo** 后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`需求澄清已完成。是否继续进入【数据建模】阶段？`）→ **停止**。
 
 ---
 
@@ -127,10 +117,3 @@ REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 hum
 | `atlas/requirements/ui/README.md` | UID 索引 |
 | `atlas/requirements/README.md` | 索引 |
 | `atlas/todo.md` / `atlas/humanTodo.md` | 进度与人类依赖 |
-
-## 正误示例
-
-**✅ 用户**：用原话描述要做的东西（任意具体业务）  
-→ 首行声明 → **AskQuestion** → **停止** → 下条写 REQ → 结束闸门 → **停止**
-
-**❌ 用户发需求后直接写 REQ 或直接写码**

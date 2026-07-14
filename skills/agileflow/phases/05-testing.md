@@ -94,7 +94,8 @@
 | `atlas/tests/README.md` | 索引 + 交付汇总（含测试入场门禁证据） |
 | `atlas/logs/be-smoke.*` / `fe-smoke.*` | 分层冒烟证据 |
 
-humanTodo 未清 → **禁止**标 PASS。
+humanTodo 未清 → **禁止**标 PASS。  
+**技术债未清零** → **禁止**标 PASS（[debt.md](../templates/debt.md) 中待回溯/事后补写/质疑待处理须清零或用户确认接受）。
 
 ## init 刷新（AC 验收归档完成后）
 

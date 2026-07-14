@@ -83,11 +83,3 @@ questions:
 ```
 
 ---
-
-## 正误示例
-
-**✅**：改 REQ → 输出摘要 → 影响分析 AskQuestion → 停 → 改 model+solution → 是否实现 AskQuestion → 停
-
-**❌**：一张卡片同时问「改不改 model」和「要不要开发」
-
-**❌**：用户只说改需求，AI 自动改完全部 model/solution 不询问

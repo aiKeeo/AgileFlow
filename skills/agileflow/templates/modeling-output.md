@@ -149,9 +149,3 @@ questions:
       - { id: "complete", label: "完整，确认领域规则" }
       - { id: "missing", label: "有遗漏，我补充说明" }
 ```
-
-## 正误示例
-
-**✅ 正确**：分文档写入 model/ → AskQuestion 确认 → README 标已确认 → 阶段闸门
-
-**❌ 错误**：全写进一个文件；在 model/ 里写 API；草稿未确认就标「已确认」

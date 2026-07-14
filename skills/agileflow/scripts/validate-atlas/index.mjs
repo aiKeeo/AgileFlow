@@ -12,6 +12,7 @@ import { validateTests } from './lib/rules/tests.mjs';
 import { validateRunnable } from './lib/rules/runnable.mjs';
 import { validateSmokeEntry } from './lib/rules/smoke.mjs';
 import { validatePixelCompare } from './lib/rules/pixel.mjs';
+import { validateReqTrace } from './lib/rules/trace.mjs';
 
 /**
  * @typedef {Object} ValidateOptions
@@ -137,6 +138,9 @@ export function validateAtlas(options = {}) {
   }
   if (shouldRun('pixel') && (phase === 'all' || phase === '4' || phase === '5')) {
     validatePixelCompare(projectRoot, reporter);
+  }
+  if (shouldRun('trace') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
+    validateReqTrace(projectRoot, reporter);
   }
 
   reporter.add({

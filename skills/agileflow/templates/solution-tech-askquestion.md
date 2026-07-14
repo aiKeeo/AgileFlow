@@ -101,10 +101,3 @@ questions:
 1. 将选型结果写入 `architecture.md`「技术栈」表（语言 / 框架 / 数据库 / 日志框架等）
 2. 日志框架、测试命令须与所选栈一致（见 [observability-logging.md](observability-logging.md)）
 3. 继续编写架构图、文件结构、追溯矩阵、测试依赖、测试层命令
-
-## 正误示例
-
-**✅ 正确**：features → **AskQuestion 技术栈** → **落盘** architecture+todo → 方案确认（快速可与继续合并）→ 闸门  
-**❌ 错误**：未问技术栈直接写栈；**未落盘就确认方案**  
-**❌ 严谨**：技术栈与方案确认合并为一步  
-**✅ 快速**：技术栈单独（或与决策权合并）→ 落盘 → 确认+继续合并卡（flow-modes）

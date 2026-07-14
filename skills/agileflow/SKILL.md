@@ -25,7 +25,7 @@ version: 9.9.0
 |----|------|--------|
 | **A** | 不过 → 禁止勾 ✅ / 进阶 | `validate-atlas --gate …` exit 0 |
 | **B** | 可继续，知债 | JS warn |
-| **C** | 脚本管不到（AskQuestion / 停止 / TodoWrite / 并行开闸） | 纪律 |
+| **C** | 脚本管不到（AskQuestion / 停止 / TodoWrite / 并行启动卡） | 纪律 |
 
 脚本只核验**落盘证据**，不替你编译；可运行须 Agent **实际运行**。
 

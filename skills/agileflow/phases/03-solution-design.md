@@ -51,25 +51,12 @@ atlas/solution/
 6. 写 `architecture.md` + `code-patterns-*.md` + features/contracts + `todo` + **AI 决策记录**
 7. **审阅闸门** → 停止（用户可选「不审继续」→ 下条进 dev）
 
-### 阶段收尾 — **结束闸门**（仅 user_decide · 严谨）
+### 阶段收尾 — **阶段闸门**（仅 user_decide · 严谨）
 
 > **AI 自主**：审阅闸门已含「继续下一阶段」，**不走本步**。  
 > **快速**：若确认卡已含「是，继续」→ **不走本步**（见 flow-modes）。
 
-`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀** 后，本阶段完成。**严谨 + user_decide 必须**：
-
-1. **调用 `AskQuestion` 工具**，弹出 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)
-2. prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`
-3. **调用后立即停止**——禁止同回复写 `atlas/dev/` 或业务源码
-
-| 禁止 | 说明 |
-|------|------|
-| ❌ 未写 architecture 就发方案确认 | 先落盘再确认 |
-| ❌ 方案确认后直接写码 | 须等「是，继续」 |
-| ❌ 催进度跳过结束闸门 | 不豁免 |
-| ❌ 文字问「开始开发吗？」 | 须用 AskQuestion |
-
-并行批量出方案：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
+`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀** 后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`）→ **停止**。
 
 ## 批量出方案（可选 — 仅用户显式要求并行出方案）
 

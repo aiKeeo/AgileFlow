@@ -123,14 +123,3 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 | 按需更新的 model/、solution/、dev/ | 用户勾选范围 |
 | `atlas/todo.md` | 任务增删 + 变更历史 |
 | 可选：阶段 4 代码 | 用户确认「要实现」后 |
-
-## 正误示例
-
-**✅ 用户**：「REQ-001 要加退款场景」
-→ 改 REQ → 影响摘要 → AskQuestion 勾选 model+solution → 改文档 → AskQuestion 是否实现 → 停止
-
-**❌ 用户改 REQ 后直接写退款代码**
-→ 跳过影响分析和 solution 更新（禁止）
-
-**❌ 影响分析后自动进入开发**
-→ 未 AskQuestion「是否实现」（禁止）

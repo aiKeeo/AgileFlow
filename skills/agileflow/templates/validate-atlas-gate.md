@@ -10,7 +10,7 @@
 |----|-----------|----------|
 | **A** | `dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture+REQ已确认)、todo 三段式 | exit ≠ 0 → 禁止勾 ✅ / 进阶 |
 | **B** | BDD、契约命名等 warn | 可继续 |
-| **C** | AskQuestion、停止、TodoWrite、并行开闸 | 靠纪律 |
+| **C** | AskQuestion、停止、TodoWrite、并行启动卡 | 靠纪律 |
 
 ## 如何找到脚本（可移植）
 
@@ -42,6 +42,7 @@ cd <skill> && npm run validate:sol
 | **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
 | **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS） |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
+| **验收归档前** | `req-trace` | 检查 REQ→F→T→AC→报告 链完整性（B 档：warn 不阻塞） |
 
 列出：`--list-gates` · 旧名 `dev-a7` ≡ `dev-step1-literal`
 

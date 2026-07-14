@@ -125,7 +125,9 @@ atlas/init/
 | 数量/情况 | 落盘位置 |
 |-----------|----------|
 | ≤8 个 | 全部写在 `p0-business.md`「核心术语」表 |
-| >8 或跨订单/支付/库存等多域 | `p0-business` 只留 3~5 个总览词 + 建 `glossary/p0-{域}.md` |
+| >8 或跨订单/支付/库存等多域 | 建 `atlas/glossary.md`（模板见 [glossary.md](../templates/glossary.md)），`p0-business` 只留 3~5 个总览词 |
+
+> **自动维护**：init refresh / REQ 新增时自动扫描新术语，追加到 glossary.md 并标 `<!-- auto -->`。扫描规则见 [glossary.md §自动扫描规则](../templates/glossary.md#自动扫描规则)。
 
 **仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全（**含易混淆的内部术语**）。
 

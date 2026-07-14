@@ -89,9 +89,3 @@ questions:
       - { id: "ui_add", label: "还要补充页面或交互" }
       - { id: "ui_revise", label: "界面描述需要大改" }
 ```
-
-## 正误示例
-
-**✅ 正确**：AskQuestion 收集 → 草稿 → AskQuestion 确认 → 标已确认 → 阶段闸门（askquestion-gate.md）
-
-**❌ 错误**：未 AskQuestion 就写 REQ；一句话直接写 5 个 REQ；AskQuestion 后同回复继续写文档；正文聊天追问平台

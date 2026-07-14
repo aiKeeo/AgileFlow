@@ -140,4 +140,11 @@ export const AI_GATES = {
     blocking: true,
     extra: '同会话增量 / 跨会话全量；强制原型须 fe-pixel PASS',
   },
+  'req-trace': {
+    phase: '5',
+    modules: ['trace'],
+    when: '阶段 5 · 验收归档前 · 检查需求追溯链完整性',
+    blocking: false,
+    extra: 'REQ→F→T→AC→验收报告 链路检查；warn 不阻塞但须确认',
+  },
 };
