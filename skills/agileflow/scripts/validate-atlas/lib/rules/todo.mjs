@@ -59,10 +59,11 @@ function countDevFiles(devRoot) {
  * 校验 atlas/todo.md（开发完成格式门槛 + 三段式）
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
- * @param {{ tier?: string }} [opts]
+ * @param {{ tier?: string, phase?: string }} [opts]
  */
 export function validateTodo(projectRoot, reporter, opts = {}) {
   const tier = opts.tier ?? 'standard';
+  const phase = opts.phase ?? 'all';
   const todoPath = path.join(projectRoot, 'atlas', 'todo.md');
   if (!exists(todoPath)) {
     reporter.add({
@@ -181,15 +182,17 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
     }
   }
 
+  // 开发完成格式：dev 文件数=T 头数 —— 仅阶段 4/5（阶段 3 sol-confirm 尚未写 atlas/dev/）
   const devRoot = path.join(projectRoot, 'atlas', 'dev');
-  if (headers.length > 0) {
+  const checkDevCount = phase === '4' || phase === '5';
+  if (checkDevCount && headers.length > 0) {
     const devCount = countDevFiles(devRoot);
     if (devCount !== headers.length) {
       reporter.add({
         severity: 'error',
         rule: 'TODO-FORMAT-dev数不符',
         file: relPath,
-        message: `dev 文件数(${devCount}) ≠ T 头数(${headers.length})。`,
+        message: `dev 文件数(${devCount}) ≠ T 头数(${headers.length})（仅 AF_PHASE/gate phase 为 4|5 时检查）。`,
       });
     }
   }

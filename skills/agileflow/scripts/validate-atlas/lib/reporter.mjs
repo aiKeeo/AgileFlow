@@ -43,11 +43,6 @@ export class Reporter {
     return this.#issues.filter((i) => i.severity === 'error').length;
   }
 
-  /** @returns {number} */
-  warnCount() {
-    return this.#issues.filter((i) => i.severity === 'warn').length;
-  }
-
   /** @returns {boolean} */
   passed() {
     return this.errorCount() === 0;

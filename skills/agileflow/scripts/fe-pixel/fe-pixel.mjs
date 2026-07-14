@@ -89,7 +89,6 @@ function findRepoRoot(startDir, explicitRoot) {
       const hasReq = fs.existsSync(path.join(atlas, 'requirements'));
       const hasLogs = fs.existsSync(path.join(atlas, 'logs'));
       if (hasTodo || hasReq || hasLogs || i === 0) return dir;
-      return dir;
     }
     const parent = path.dirname(dir);
     if (parent === dir) break;

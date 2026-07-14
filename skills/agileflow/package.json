@@ -1,6 +1,6 @@
 {
   "name": "agileflow-validate",
-  "version": "9.9.0",
+  "version": "9.9.3",
   "private": true,
   "description": "Agileflow atlas 校验（fe-pixel 去冗余）",
   "type": "module",
@@ -15,6 +15,7 @@
     "validate:test": "node scripts/validate-atlas.mjs --gate test-entry",
     "print:skill-root": "node scripts/validate-atlas.mjs --print-skill-root",
     "fe-pixel": "node scripts/fe-pixel/fe-pixel.mjs",
-    "test:validate": "node scripts/validate-atlas/test-fixtures.mjs"
+    "test:validate": "node scripts/validate-atlas/test-fixtures.mjs && node scripts/validate-atlas/test-af-env.mjs",
+    "test:af-env": "node scripts/validate-atlas/test-af-env.mjs"
   }
 }

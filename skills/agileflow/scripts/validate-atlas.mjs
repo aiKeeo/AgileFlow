@@ -38,7 +38,7 @@ function parseArgs(argv) {
   return args;
 }
 
-/** 解析 dev 文件路径（--dev-file 优先，--a7 为旧名兼容） */
+/** 解析 dev 文件路径（--dev-file 优先，其次 --a7） */
 function resolveDevFilePath(args) {
   const raw = args['dev-file'] ?? args.a7;
   return raw ? path.resolve(String(raw)) : null;

@@ -8,8 +8,9 @@
 
 ---
 
-## 大仓分级（P0/P1/P2 · AI 省力 · 对抗定稿）
+## 大仓分级
 
+> P0/P1/P2 分级 · AI 省力 · 对抗定稿  
 > **问题**：大仓一次「全扫」→ 文档巨厚 → AI/人都不读 → init 作废。  
 > **定稿**：分级停；**P0 过即可 AskQuestion**；P1/P2 诚实标覆盖，禁止写「已全量」。
 
@@ -112,7 +113,7 @@
 
 ---
 
-## 步骤 1 · p0-business.md
+## 步骤 1 p0-business
 
 | 检查项 | 必写节 | 最低要求 | 不合格 |
 |--------|--------|----------|--------|
@@ -127,13 +128,13 @@
 
 ---
 
-## 步骤 4 · p1-tech-stack.md
+## 步骤 4 p1-tech-stack
 
 精确版本 · 框架 · ORM/迁移 · 测试框架 · 来源路径（来自 pom/package.json，非猜测）
 
 ---
 
-## 步骤 5 · p1-architecture.md
+## 步骤 5 p1-architecture
 
 | 检查项 | 必写 | 不合格 |
 |--------|------|--------|
@@ -144,14 +145,15 @@
 
 ---
 
-## 步骤 7d · p0-domain-math.md（有计算则建）
+## 步骤 7d p0-domain-math
 
-规则总览≥2 · 公式来自源码 · 依赖+缺则 · 易误解≥1 · 链 relations/errors
+> 有计算则建。规则总览≥2 · 公式来自源码 · 依赖+缺则 · 易误解≥1 · 链 relations/errors
 
 ---
 
-## 步骤 6 · codebase/p1-{frontend|backend}.md
+## 步骤 6 codebase
 
+> 文件名：`p1-frontend.md` / `p1-backend.md`。  
 > **端分离**：有 FE 写 `p1-frontend.md`；有 BE 写 `p1-backend.md`；**禁止**揉成一个大杂烩。  
 > **AI 省力**：文首「开发速查」后立即「**资产索引**」（路径可复制 + 参考页），再写 §一~§五。权威结构 → [code-conventions](code-conventions.md)。
 
@@ -188,9 +190,9 @@
 
 ---
 
-## 步骤 7 · data/
+## 步骤 7 data
 
-**api-catalog**：**大仓先主路径**（见 [大仓分级](#大仓分级p0p1p2--ai-省力--对抗定稿)）；每行含碰表；文首「覆盖范围」。禁止无覆盖声明称全量。
+**api-catalog**：**大仓先主路径**（见 [大仓分级](#大仓分级)）；每行含碰表；文首「覆盖范围」。禁止无覆盖声明称全量。
 
 **schema-overview**：ER 图、migration 演进、唯一约束→行为
 
@@ -209,7 +211,9 @@
 
 ---
 
-## init 落盘自检（AskQuestion 前）
+## init 落盘自检
+
+> AskQuestion 前须全 ✅（大仓/小仓均强制）
 
 ### A. P0 必过（大仓/小仓均强制 · 不过不得确认）
 

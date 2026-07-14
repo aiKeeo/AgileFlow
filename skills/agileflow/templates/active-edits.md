@@ -57,7 +57,7 @@ atlas/active-edits.md    # 运行时锁表（项目初始化时创建）
 | 写码执行批（②） | Subagent 只改**业务源码** | 按该 T「## 做法」涉及路径登记 `active-edits`；**禁止**两 subagent 同路径；**禁止**改 `atlas/**` |
 | 合并文件 | 仅主 Agent | `architecture.md`、`README.md`、`todo.md`、`active-edits.md` |
 
-> **① 归属**：与 [parallel-orchestration](../phases/parallel-orchestration.md) 一致——Subagent **不得**写 `atlas/dev/T-xxx*.md`。旧写法 `dev/F-xxx-*-FE.md` **作废**，一律 `T-xxx`。
+> **① 归属**：与 [parallel-orchestration](../phases/parallel-orchestration.md) 一致——Subagent **不得**写 `atlas/dev/T-xxx*.md`。构思文件命名：`T-xxx-*-{FE|BE}.md`。
 
 ### 冲突处理
 

@@ -8,9 +8,32 @@
 
 | 档 | 闸门/规则 | 失败效果 |
 |----|-----------|----------|
-| **A** | `dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture+REQ已确认)、todo 三段式 | exit ≠ 0 → 禁止勾 ✅ / 进阶 |
+| **A** | `atlas/agileflow.env`、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture+REQ已确认+决策/栈来源)、todo 三段式 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
 | **B** | BDD、契约命名等 warn | 可继续 |
-| **C** | AskQuestion、停止、TodoWrite、并行启动卡 | 靠纪律 |
+| **C** | AskQuestion 工具调用本身、停止、TodoWrite、并行启动卡 | 靠纪律；**但** user 模式未问栈会以 A 档 `AF-STACK-USER` 卡住 |
+
+## 脚本不可用时的降级（必读）
+
+当 `node` 命令不存在、脚本路径探测失败、或脚本运行时抛出异常时（exit ≠ 0 但非校验失败）：
+
+1. Agent 须在回复首行标注：`⚠️ validate-atlas 不可用（原因：{node未安装/路径未找到/运行时错误}）`
+2. 降级为 B 档人工校验：Agent 须逐项声明检查结果（段标题/字面量/证据），格式同脚本输出
+3. 降级模式下勾①/✅ 须额外标注 `（人工降级·脚本不可用）`
+4. **禁止因脚本不可用而跳过校验项本身——只降级校验手段，不降级校验标准**
+
+## 字面量校验完整清单
+
+| 检查项 | 要求 | 不过规则 |
+|--------|------|---------|
+| 段标题 | 精简：`## 范围` `## 做法` `## 结果`；标准·完整：+ `## 契约` `## AC` | DEV-SEC-* |
+| 步骤 | `#### ` 至少 1 个 | DEV-LIT-步骤 |
+| 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` `` / `` `pkg.func` ``；路径型→`` `path/` `` | DEV-LIT-代码落点 |
+| 禁形旧标题 | 禁 `## 一、目标` `## 五、可执行方案` | DEV-BAN-* |
+| 禁形构思章 | 禁 `## ① 构思` `## ② 关键实现点` | DEV-BAN-* |
+| FE 布局 | `### 布局` + ASCII 线条图（含 `┌│+--` 等） | DEV-LIT-FE布局 |
+| FE 映射 | `### 映射` | DEV-LIT-FE映射 |
+| 文档长度 | 去空格后 ≥ {精简 280 / 标准 450 / 完整 700} 字 | DEV-FAKE-过短 |
+| 假标题 | 纯文本"范围/做法"无 `##` | DEV-FAKE-标题 |
 
 ## 如何找到脚本（可移植）
 
@@ -31,6 +54,20 @@ cd <skill> && npm run validate:sol
 
 探测顺序：`AGILEFLOW_SKILL_ROOT` → 本脚本所在 skill → 项目 `.cursor/skills/agileflow` → `~/.cursor/skills/agileflow`。
 
+## agileflow.env（流程状态 · AI 维护）
+
+路径：`atlas/agileflow.env`（模板 `templates/agileflow.env`）。**不是密钥**，须进库。
+
+| 键 | 用途 |
+|----|------|
+| `AF_PHASE` | 当前阶段；须与产物推断一致，否则 `AF-ENV-PHASE` |
+| `AF_FLOW` | `fast` / `strict` / `pending`（`pending` → `AF-ENV-BOOT`） |
+| `AF_DECIDE` | `ai` / `user` / `pending`（`pending` → `AF-ENV-BOOT`；`user` 决定技术栈要不要先问） |
+| `AF_TIER` | `lite` / `standard` / `full` |
+| `AF_STACK_SOURCE` | `pending` / `ai_record` / `askquestion` / `user_said` / `repo` |
+
+进阶或改决策后**先改 env 再跑闸门**；报错信息含修复动作。
+
 ## Agent 必须执行的命令
 
 | 时机 | 闸门 | 不过 → |
@@ -38,21 +75,21 @@ cd <skill> && npm run validate:sol
 | init 落盘 · AskQuestion 前 | `init-confirm` | 禁止 init 确认 |
 | REQ 落盘 · 确认卡前 | `req-confirm` | 禁止 REQ 确认 |
 | model 落盘 · 确认前 | `mod-confirm` | 禁止进 sol |
-| 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** architecture + REQ 已确认） |
+| 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** env + architecture + REQ 已确认 + 栈来源按决策权落地） |
 | **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
 | **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS） |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
 | **验收归档前** | `req-trace` | 检查 REQ→F→T→AC→报告 链完整性（B 档：warn 不阻塞） |
 
-列出：`--list-gates` · 旧名 `dev-a7` ≡ `dev-step1-literal`
+列出：`--list-gates`
 
 ## 可运行证据（A · runnable）
 
 写入每个 T 的 **## 结果**，须同时可 grep 到：
 
-1. **编译**：`编译` / `build` / `package` / `mvn` / …  
-2. **启或冒烟**：`启动` / `health` / `冒烟` / `curl` / …  
-3. **结果**：`exit 0` / `✅` / `通过` / `PASS` / `UP`
+1. **编译**：`编译` / `build` / `package` / `mvn` / `gradle` / `cargo` / `go build` / `dotnet` / `make` / `cmake` / `webpack` / `构建` / …  
+2. **启或冒烟**：`启动` / `health` / `冒烟` / `curl` / `serve` / `dev server` / `docker` / `运行` / …  
+3. **结果**：`exit 0` / `✅` / `通过` / `PASS` / `UP` / `BUILD SUCCESS` / `成功` / `完成`
 
 禁止空表或只写「③ 验收后填写」。
 

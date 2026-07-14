@@ -27,6 +27,11 @@ const cases = [
     fail: true,
   },
   {
+    name: 'good-runnable → dev 多文件应通过（防 filePath 回归）',
+    args: ['--root', path.join(fixtures, 'good-runnable'), '--only', 'dev'],
+    fail: false,
+  },
+  {
     name: 'good-dev 字面量+段结构',
     args: ['--dev-file', path.join(fixtures, 'good-dev/atlas/dev/T-001-login-BE.md')],
     fail: false,
@@ -72,6 +77,11 @@ const cases = [
     fail: false,
   },
   {
+    name: 'good-pixel → ui/README 索引不误判为 UID',
+    args: ['--root', path.join(fixtures, 'good-pixel'), '--only', 'req'],
+    fail: false,
+  },
+  {
     name: 'bad-stale-pixel → 未覆盖全部强制原型应失败',
     args: ['--root', path.join(fixtures, 'bad-stale-pixel'), '--only', 'pixel'],
     fail: true,
@@ -79,6 +89,21 @@ const cases = [
   {
     name: 'orphan-proto-only → 目录散图不阻塞闸门',
     args: ['--root', path.join(fixtures, 'orphan-proto-only'), '--only', 'pixel'],
+    fail: false,
+  },
+  {
+    name: 'good-sol-confirm → 阶段3有T无dev 应通过',
+    args: ['--root', path.join(fixtures, 'good-sol-confirm'), '--gate', 'sol-confirm'],
+    fail: false,
+  },
+  {
+    name: 'bad-sol-user-pending → user未问栈应失败',
+    args: ['--root', path.join(fixtures, 'bad-sol-user-pending'), '--gate', 'sol-confirm'],
+    fail: true,
+  },
+  {
+    name: 'good-sol-confirm → 仅 af-env 应通过',
+    args: ['--root', path.join(fixtures, 'good-sol-confirm'), '--only', 'af-env', '--phase', '3'],
     fail: false,
   },
 ];
@@ -119,6 +144,13 @@ try {
   fs.mkdirSync(path.join(tmp, 'packages'), { recursive: true });
   check('空 packages/ → greenfield', detectBrownfield(tmp) === false);
 
+  fs.mkdirSync(path.join(tmp, 'atlas', 'init'), { recursive: true });
+  check('空 atlas/init/ → greenfield', detectBrownfield(tmp) === false);
+
+  fs.writeFileSync(path.join(tmp, 'atlas', 'init', 'README.md'), '# init\n');
+  check('有 atlas/init/README.md → brownfield', detectBrownfield(tmp) === true);
+
+  fs.rmSync(path.join(tmp, 'atlas'), { recursive: true, force: true });
   fs.writeFileSync(path.join(tmp, 'packages', 'app.ts'), 'export {}\n');
   check('packages 内有 .ts → brownfield', detectBrownfield(tmp) === true);
 } finally {

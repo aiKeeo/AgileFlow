@@ -47,13 +47,20 @@ function dirHasBusinessCode(dir, depth = 0) {
 }
 
 /**
- * 探测是否 brownfield：须有业务源码文件，或已有 atlas/init
- * 空 packages/、空 src/ 脚手架 → greenfield（勿仅看目录名）
+ * 探测是否 brownfield：须有业务源码文件，或已有实质 init（README）
+ * 空 packages/、空 src/、空 atlas/init/ → greenfield（勿仅看目录名）
  * @param {string} projectRoot
  * @returns {boolean}
  */
 export function detectBrownfield(projectRoot) {
-  if (exists(path.join(projectRoot, 'atlas', 'init'))) return true;
+  const initReadme = path.join(projectRoot, 'atlas', 'init', 'README.md');
+  if (exists(initReadme)) {
+    try {
+      if (fs.statSync(initReadme).size > 0) return true;
+    } catch {
+      /* fall through */
+    }
+  }
 
   for (const name of CANDIDATE_DIRS) {
     if (dirHasBusinessCode(path.join(projectRoot, name))) return true;

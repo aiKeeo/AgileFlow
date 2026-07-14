@@ -5,7 +5,7 @@ import { Reporter } from './reporter.mjs';
 import { readText } from './fs-utils.mjs';
 import { formatPortableGateCommand } from './skill-path.mjs';
 
-/** 旧闸门 ID → 新 ID（兼容） */
+/** 闸门 ID 别名 */
 const GATE_ALIASES = {
   'dev-a7': 'dev-step1-literal',
 };
@@ -18,7 +18,7 @@ export function listGates() {
 }
 
 /**
- * 解析闸门 ID（含旧名兼容）
+ * 解析闸门 ID
  * @param {string} gateId
  */
 function resolveGateId(gateId) {
@@ -52,7 +52,6 @@ export function runGate(gateId, opts = {}) {
     if (!opts.devFile) {
       throw new Error('dev-step1-literal 闸门须指定 devFile（atlas/dev/T-xxx-*.md）');
     }
-    const projectRoot = opts.projectRoot ?? process.cwd();
     const todoContent = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
     const tier = opts.tier ?? resolveRiskTier(todoContent);
     const literal = runDevLiteralCheck(opts.devFile, { mode: opts.mode, tier });

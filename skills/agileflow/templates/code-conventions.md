@@ -1,7 +1,10 @@
 # 写法锚点（AI 写码规范）
 
 > **目的**：让 AI **少读、抄路径、少造轮子**——按项目既有写法与**可复用资产**写码。  
-> **默认模式 B**：**FE / BE 分文件**；每文件内 **资产索引靠前**（AI 第一眼用得上）。**不建**平行 catalog。  
+> **模式 B / 模式 A**：首次 init **须 AskQuestion** 选定（见 [00-project-init](../phases/00-project-init.md) / [init-askquestion](init-askquestion.md)）；**禁止**静默默认 B。已写入 `init/README`「写法锚点模式」或目录已定型后不再问。
+>
+> **模式 B（常用）**：**FE / BE 分文件**；每文件内 **资产索引靠前**（AI 第一眼用得上）。**不建**平行 catalog。
+> **模式 A**：另建 `atlas/conventions/`。
 > living document：可先 🌱；③ 后 refresh 模板 + 资产行。
 
 ---
@@ -19,7 +22,7 @@
 
 ## 两种落盘模式（二选一，禁止双份）
 
-| | **模式 B（默认）** | **模式 A（显式选用）** |
+| | **模式 B** | **模式 A** |
 |---|-------------------|------------------------|
 | **文件** | 每端一文件（见下） | `atlas/conventions/frontend|backend-patterns.md` |
 | **brownfield** | `init/codebase/p1-frontend.md` + `p1-backend.md`（有则建；单端可只建一端） | codebase 仅 §一 + conventions |

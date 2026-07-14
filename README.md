@@ -4,7 +4,7 @@
 
 > Turn ideas into **runnable, testable, handoff-ready** software with a five-stage agile pipeline and **BDD→DDD→SDD→TDD**. Simple projects ship in **~1 hour**; MVPs in **half a day**.
 
-[![Version](https://img.shields.io/badge/version-9.9.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.9.3-blue.svg)](skills/agileflow/SKILL.md)
 [![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#why-ship-in-1-hour)
 
 ---

@@ -38,12 +38,11 @@ atlas/init/
 ├── p0-integrations.md        # 有外部集成（OAuth/JWT/第三方 API/Mock）
 ├── p0-repository.md          # 有 git
 ├── p0-quickstart.md          # 可选：手把手 curl/联调（小白 onboarding）
-├── glossary/                 # 术语 >8 或跨域时按需建
 ├── p1-tech-stack.md
 ├── p1-architecture.md        # 模块一览 + 模块依赖图（mermaid）+ 跨模块调用表
 ├── p1-errors.md              # 有 REST：错误码 + 业务前置自检表
 ├── p1-testing.md             # 有集成测试：Ac* ↔ 模块 ↔ API 索引
-├── codebase/
+├── codebase/                 # 写法锚点唯一位置（勿把 p1-* 散落在 init 根下）
 │   └── p1-frontend.md / p1-backend.md  # 速查→资产索引靠前→§一~§五（见 code-conventions）
 └── data/                     # 有持久化
     ├── README.md             # 场景→碰表清单（盘点·数据入口）
@@ -54,15 +53,18 @@ atlas/init/
     └── state-machines/       # 无状态机则不存在
 ```
 
-命名与文内标签 → [init-doc.md](../templates/init-doc.md)。
+命名与文内标签 → [init-doc.md](../templates/init-doc.md)。  
+术语 → 项目根 **`atlas/glossary.md`**（**勿**在 `init/` 再建 `glossary/`）。
 
 ---
 
 ## 执行流程
 
 ```
-① brownfield 判定 → ② 扫描仓库（由外到内）→ ③ 按模板落盘 → ④ 落盘自检 → ⑤ AskQuestion 确认 → 停止
+① brownfield 判定 → ② 扫描仓库 → ②b 写法锚点模式卡（首次须问 A/B）→ ③ 按模板落盘 → ④ 落盘自检 → ⑤ AskQuestion 确认 → 停止
 ```
+
+> **②b**：首次全量且模式未记录 → AskQuestion（[init-askquestion](../templates/init-askquestion.md#init-写法锚点模式首次全量--落盘-codebase-前)）→ **停**；用户选定后下条再 ③。可跳过条件见下方「写法锚点」。
 
 ### ① brownfield 判定
 
@@ -82,18 +84,18 @@ atlas/init/
 
 ### ② 扫描仓库（读清楚，固定顺序）
 
-> **大仓**：先按 [init-scan-checklist 大仓分级 P0/P1/P2](../templates/init-scan-checklist.md#大仓分级p0p1p2--ai-省力--对抗定稿) 执行；**P0 过即可确认**。小仓可同轮加深到 P1。
+> **大仓**：先按 [init-scan-checklist 大仓分级 P0/P1/P2](../templates/init-scan-checklist.md#大仓分级) 执行；**P0 过即可确认**。小仓可同轮加深到 P1。
 
 | 顺序 | 读什么 | 提取什么 | 落盘 |
 |------|--------|----------|------|
 | 0 | （大仓）定主路径 + 写覆盖范围 | 用户指定 / 主菜单前5 / README 首故事 | `README` 覆盖范围块 |
-| 1 | 根 **README**、`docs/`、REQ、前端路由/菜单、Entity/Enum | 业务、旅程、术语、**实体↔功能** | **`p0-business.md`** + `glossary/`（按需） |
+| 1 | 根 **README**、`docs/`、REQ、前端路由/菜单、Entity/Enum | 业务、旅程、术语、**实体↔功能** | **`p0-business.md`** + **`atlas/glossary.md`** |
 | 2 | `git remote`、分支 | 仓库策略 | `p0-repository.md`（无 git 跳过） |
 | 3 | docker-compose、`.env.example`、启动脚本 | 启动命令、依赖 | `p0-environment.md` |
 | 3b | 外部集成配置、Mock 开关、鉴权 | JWT/OAuth/第三方 | **`p0-integrations.md`**（有则建） |
 | 4 | package.json / pom.xml 等 | 技术栈 | `p1-tech-stack.md` |
 | 5 | 模块划分 + **Service 跨模块 inject**（大仓：主路径模块） | 模块一览 + 依赖 | **`p1-architecture.md`** |
-| 6 | 高频组件/Util **Top8～15** + 典型页/Controller | **资产索引** + 模板 | `p1-frontend` / `p1-backend` |
+| 6 | 高频组件/Util **Top8～15** + 典型页/Controller | **资产索引** + 模板 | `codebase/p1-frontend.md` / `codebase/p1-backend.md` |
 | 6b | 典型 API **内部调用链**（P1；2～4 条） | mermaid | **codebase §四** |
 | 7 | migration、Entity（大仓：主路径核心表） | 表、FK、业务用途 | `data/entities/` … |
 | 7b | Controller 路由（大仓：**主路径 API**，非全站硬扫） | 方法、鉴权、碰表 | **`data/api-catalog.md`** |
@@ -112,37 +114,56 @@ atlas/init/
 - 数据：Entity 名、核心表 — 辅助理解领域，**须写清业务用途**
 - **术语**：docs 词汇表、代码 Enum/常量注释、字段 comment、内部 wiki 缩写表
 
-**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](../templates/init-scan-checklist.md#步骤-5--p1-architecturemd) **总体形态/模块依赖/跨模块调用/模块一览** 写满。
+**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](../templates/init-scan-checklist.md#步骤-5-p1-architecture) **总体形态/模块依赖/跨模块调用/模块一览** 写满。
 
-**步骤 6 · codebase** → [大仓分级](../templates/init-scan-checklist.md#大仓分级p0p1p2--ai-省力--对抗定稿) + [§codebase](../templates/init-scan-checklist.md#步骤-6--codebasep1frontendbackendmd)：P0 先资产索引；P1 再金牌模板/序列图。
+**步骤 6 · codebase** → [大仓分级](../templates/init-scan-checklist.md#大仓分级) + [§codebase](../templates/init-scan-checklist.md#步骤-6-codebase)：P0 先资产索引；P1 再金牌模板/序列图。
 
-**步骤 7 · 实体** → 按 [init-scan-checklist §实体](../templates/init-scan-checklist.md#步骤-7--data-实体文档) **业务用途～字段与约束等** 逐实体写满。
+**步骤 7 · 实体** → 按 [init-scan-checklist §实体](../templates/init-scan-checklist.md#步骤-7-data) **业务用途～字段与约束等** 逐实体写满。
 
-**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](../templates/init-scan-checklist.md#步骤-7d--p0-domain-mathmd) **规则总览/公式/依赖/易误解/交叉链** 写满。
+**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](../templates/init-scan-checklist.md#步骤-7d-p0-domain-math) **规则总览/公式/依赖/易误解/交叉链** 写满。
 
-**术语落盘判定**：
+**术语落盘**（与 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准) 一致）：
 
-| 数量/情况 | 落盘位置 |
-|-----------|----------|
-| ≤8 个 | 全部写在 `p0-business.md`「核心术语」表 |
-| >8 或跨订单/支付/库存等多域 | 建 `atlas/glossary.md`（模板见 [glossary.md](../templates/glossary.md)），`p0-business` 只留 3~5 个总览词 |
+| 内容 | 落盘位置 |
+|------|----------|
+| 完整术语表 | **`atlas/glossary.md`**（唯一权威） |
+| `p0-business`「核心术语」 | 仅 3~5 个总览词 + 链接 glossary；**禁止**只写 p0 不写 glossary |
 
-> **自动维护**：init refresh / REQ 新增时自动扫描新术语，追加到 glossary.md 并标 `<!-- auto -->`。扫描规则见 [glossary.md §自动扫描规则](../templates/glossary.md#自动扫描规则)。
+> **自动维护**：init refresh / REQ 新增时扫描新术语 → 追加 `atlas/glossary.md`（`<!-- auto -->`）。见 [glossary.md](../templates/glossary.md#自动扫描规则)。
 
 **仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全（**含易混淆的内部术语**）。
 
-**写法锚点（步骤 6/6b，默认模式 B）**：
+**写法锚点（步骤 6/6b · 模式须先问）**：
 
-> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。
+> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。  
+> **禁止**静默默认模式 B。首次全量 init（尚无 `init/README` 中「写法锚点模式」记录，且无 `atlas/conventions/`）→ **落盘 codebase 前**须 AskQuestion → **停**。
 
-1. **默认模式 B**：`p1-architecture.md` 写模块依赖；`p1-frontend.md` / `p1-backend.md` 写 **速查+资产索引靠前+§一~§五**；**不建** `atlas/conventions/`；**不建**平行 catalog
-2. 从真实代码摘录 §三、§四；标注 `path:行号`；**序列图须与源码一致**
-3. **`p0-domain-math.md`**：集中领域公式，避免新人读 15 个 entity 拼逻辑
-4. 用户明确要求「独立 conventions / 全栈分开维护」→ 模式 A
+```yaml
+title: "init 写法锚点模式"
+questions:
+  - id: init_anchor_mode
+    prompt: "写法锚点文档怎么组织？（影响 atlas/init 目录结构，确认后按所选落盘）"
+    options:
+      - id: mode_b
+        label: "模式 B（推荐）：FE/BE 分文件 codebase/p1-*，资产索引靠前；不建 conventions/"
+      - id: mode_a
+        label: "模式 A：另建 atlas/conventions/ 独立维护约定"
+```
 
-greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`。
+| 选项 | 落盘 |
+|------|------|
+| mode_b | `p1-architecture` + `codebase/p1-frontend|backend`（§一~§五）；**不建** `conventions/`；**禁止**把 p1-frontend\|backend 写在 init 根下 |
+| mode_a | 建 `atlas/conventions/`；codebase 可精简，约定进 conventions |
 
-示例 → [code-pattern-scan.md](../examples/code-pattern-scan.md)
+**可跳过本卡**：`init/README` 已写「写法锚点模式：A|B」；或已存在 `atlas/conventions/`（视为 A）/ 已有 `codebase/p1-*`（视为 B）；或用户原话已点明。
+
+落盘时在 `init/README.md` 写：`写法锚点模式：B|A`。
+
+其余规则：
+
+1. 从真实代码摘录 §三、§四；标注 `path:行号`；**序列图须与源码一致**
+2. **`p0-domain-math.md`**：集中领域公式，避免新人读 15 个 entity 拼逻辑
+3. greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 
 ### ③ 落盘
 
@@ -152,7 +173,7 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 
 ### ④ 落盘自检
 
-[init-scan-checklist 落盘自检](../templates/init-scan-checklist.md#init-落盘自检askquestion-前)：**P0（A 组）全 ✅** 即可确认；大仓不要求 P2 齐。覆盖范围块必有。
+[init-scan-checklist 落盘自检](../templates/init-scan-checklist.md#init-落盘自检)：**P0（A 组）全 ✅** 即可确认；大仓不要求 P2 齐。覆盖范围块必有。
 
 ### ⑤ AskQuestion 确认
 
@@ -179,7 +200,7 @@ greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
 
 | 用户 / 选项 | 动作 |
 |-------------|------|
-| `init: refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`p0-domain-math.md`、`glossary/` + README |
+| `init: refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`p0-domain-math.md`、`atlas/glossary.md` + README |
 | `init: refresh data` | 重扫 migration + Entity，增删改 `data/**`（含 api-catalog 碰表列） |
 | `init: refresh codebase` | 更新本端 `p1-frontend|backend`（资产 + §三）；**大仓只补当前模块/主路径**，扩覆盖范围声明 |
 | `init: refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |

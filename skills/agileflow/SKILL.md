@@ -3,7 +3,7 @@ name: agileflow
 description: >-
   规范交付：按序把需求/方案/任务/构思写入 atlas/，再写码与验收。
   触发：用户要做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init: 前缀。
-version: 9.9.0
+version: 9.9.3
 ---
 # Agileflow
 
@@ -12,12 +12,34 @@ version: 9.9.0
 | 议题 | 裁决 |
 |------|------|
 | **dev 文档厚度** | **只看风险档位**：精简=范围/做法/结果；标准·完整=+契约+AC（完整另字面量严检）。**无一二三编号、无强制段数** |
-| **快速 vs 严谨** | 只控：AskQuestion 合并次数、model 单文件 vs 五件套、覆盖率是否卡阈值 |
+| **快速 vs 严谨** | 只控：AskQuestion 停点、model 单文件 vs 五件套、覆盖率阈值；**不**改 todo ①②③、**不**改 AI自主 |
 | **「用户不用管」** | = **AI 自主**，≠ 快速、≠ 跳阶段、≠ 薄 todo |
+| **首启契约（最高）** | 无 `atlas/agileflow.env`，或 `AF_FLOW`/`AF_DECIDE` 为 `pending` → **必须**先发[流程启动卡](templates/stage-delegation.md#流程启动卡首启强制)（模式+决策权）→ **停**。**禁止**静默写成 `fast`/`ai` 后落盘。用户原话已同时点明两边（如「快速+你定」）才可跳过 |
+| **建模跳过** | 建议跳过时须 AskQuestion 确认（或用户原话已点明）；禁止静默进 sol |
+| **决策权已确认后** | `AF_DECIDE=ai`：跳过阶段内澄清卡 → 落盘 → **审阅闸门** → 停。`AF_DECIDE=user`：须澄清/确认卡。**禁止**把「首启启动卡」当成可跳过的过程审批 |
+| **流程状态文件** | **`atlas/agileflow.env`**（AI 维护）：`AF_PHASE` / `AF_FLOW` / `AF_DECIDE` / `AF_TIER` / `AF_STACK_SOURCE`。闸门必读；`pending` 或与产物不一致 → **A 档报错卡住**。模板 → [agileflow.env](templates/agileflow.env) |
+| **user_decide** | 须阶段内澄清/确认卡；严谨默认**分步停**；快速默认可合并确认+闸门；`AF_DECIDE=user` 时技术栈未问清（`AF_STACK_SOURCE=pending`）→ **sol-confirm 必挡** |
 | **阶段结束（AI自主）** | 落盘 → **审阅闸门** → **停**。禁止同回复写下一阶段 |
-| **阶段结束（user_decide）** | 落盘 → **阶段闸门**（可与确认合并 1 卡）→ **停** |
-| **未设决策委派** | **默认 AI自主**（跳过入口决策权卡）；用户说「这阶段我来」才 user_decide |
+| **阶段结束（user_decide）** | 落盘 → **阶段闸门**（快速可与确认合并）→ **停** |
+| **术语落盘** | **唯一** `atlas/glossary.md`；greenfield **禁止**写 `atlas/init/**` |
+| **REQ 拆分** | 每个可独立验收功能 **一个** `REQ-*.md`；MVP 是范围标签，不是合并文件理由 |
+| **写法锚点路径** | brownfield：`atlas/init/codebase/p1-{端}.md`；greenfield：`atlas/solution/code-patterns-{端}.md` |
+| **测试入场** | 以 [05-testing 合并验证](phases/05-testing.md#测试入场门禁与阶段-4③-合并验证) 为准（同会话增量 / 跨会话全量） |
 | **A 档闸门全集** | 以 [validate-atlas-gate](templates/validate-atlas-gate.md) 为准（含 init/req/mod/sol/dev/test） |
+
+### 反模式（催进度时仍禁止）
+
+| ❌ | ✅ |
+|----|----|
+| 首启未问模式/决策权就写 env 或落盘 | 流程启动卡 → 停 → 下条再落盘 |
+| 旧项目想改模式却让用户手改 env | 契约重选（pending + 启动卡） |
+| 建模建议跳过却不问人直接进 sol | 建模判定确认卡 → 停 |
+| 首次 init 静默落盘模式 B | 写法锚点模式卡 → 再落盘 |
+| 已确认 AI自主却只发卡不写文件 | 直接落盘 → 审阅闸门 |
+| 把多功能揉成一份「MVP 总览 REQ」 | 一功能一 REQ；README 做索引 |
+| 向用户解释「旧名/历史迁移/为什么集中」 | 只陈述当前目录约定 |
+| 把「快速模式」当「跳阶段/薄 todo」 | 快速只少停、model 可单文件 |
+| 同回复跨阶段写下一阶段文档 | 结束闸门 → 停 → 下条再写 |
 
 ## 闸门分档
 
@@ -35,7 +57,7 @@ version: 9.9.0
 req → REQ(+UID) → 闸门
 mod → model/ → 闸门（可跳须写建模判定）
 sol → solution/+todo → 闸门
-dev → TodoWrite①②③ → ①→②→可运行→③ → 闸门
+dev → TodoWrite①②③ → ①→②→可运行闸门→③ → 闸门
 tests → 入场 → AC归档 → 回归
 ```
 
@@ -73,12 +95,23 @@ tests → 入场 → AC归档 → 回归
 
 禁止预读无关 phase。跨切规则以**本文裁决表**为准，他处复述冲突时作废。
 
+### 文件关键性分级
+
+| 级别 | 文件 | 缺失时 |
+|------|------|--------|
+| **关键** | SKILL.md, phases/00-intent-routing.md | Skill 不可用，提示重新安装 |
+| **阶段关键** | phases/01~05-*.md | 对应阶段不可用，其他阶段正常 |
+| **模板** | templates/*.md | 降级：Agent 按记忆中的格式写，标注 `⚠️ 模板缺失` |
+| **脚本** | scripts/validate-atlas.mjs | 降级为人工校验（见 [validate-atlas-gate §降级](templates/validate-atlas-gate.md#脚本不可用时的降级必读)） |
+| **范例** | examples/dev-exemplar-*.md | 降级：跳过 exemplar Read，标注 `⚠️ exemplar 缺失` |
+
 ## 术语
 
 | 说法 | 意思 |
 |------|------|
+| atlas/ | 流程文档根容器；子目录分阶段隔离（req/model/sol/dev/tests），**禁止**跨阶段混写或「揉成一份」 |
 | ①②③ | 构思→写码→验 AC（每个开发任务 T 的三步） |
-| 落盘 | 写入 atlas/ 文件（不是聊天里说说，是写到磁盘文件） |
+| 落盘 | 写入 atlas/ **对应阶段子目录**的文件（不是聊天里说说，也不是把多阶段塞进一个文件） |
 | 勾① / 勾② / 勾③ | 在 todo.md 中勾选对应步骤的 checkbox |
 | 假段标题 | 纯文本「范围/做法」无 `##` 标记 |
 | 可运行证据 | **## 结果** 含编译 + 启/冒烟 + exit0/✅/PASS |
@@ -88,5 +121,5 @@ tests → 入场 → AC归档 → 回归
 
 ## 首行声明
 
-`📍 Agileflow | 模式：{快速/严谨} | 决策：{用户/AI自主} | 阶段：{N} | …`  
+`📍 Agileflow | 模式：{AF_FLOW} | 决策：{AF_DECIDE} | 阶段：{AF_PHASE} | …`（值读自 `atlas/agileflow.env`）  
 豁免：`📍 Agileflow | 豁免：{类型} | …`

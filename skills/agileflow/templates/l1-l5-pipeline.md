@@ -19,7 +19,7 @@
 | `test:smoke-be` | **功能冒烟·BE** | health + 主路径 API |
 | `test:smoke-fe` | **功能冒烟·FE** | Playwright |
 
-开发勾①：`--gate dev-step1-literal --dev-file atlas/dev/T-xxx-*.md`（旧名 `dev-a7`/`--a7` 仍兼容）。
+开发勾①：`--gate dev-step1-literal --dev-file atlas/dev/T-xxx-*.md`。
 
 ## 流水线顺序
 
@@ -33,7 +33,7 @@
 ```
 
 步骤 0 详见 [human-todo.md](human-todo.md)。  
-测试入场门禁细则见 [05-testing.md](../phases/05-testing.md#测试入场门禁强制)。
+测试入场门禁细则见 [05-testing.md](../phases/05-testing.md#测试入场门禁与阶段-4③-合并验证)。
 
 ---
 
@@ -66,19 +66,25 @@
 
 ## 测试入场门禁
 
-进入 **AC 验收归档之前**必须通过（快速/严谨均强制）：
+> **权威场景表** → [05-testing 合并验证](../phases/05-testing.md#测试入场门禁与阶段-4③-合并验证)。  
+> 同会话：增量（变更模块集成冒烟）；跨会话 / 证据缺失：全量重验。下文为**全量重验**时的步骤清单。
 
-| 步骤 | 做什么 | 通过 | 不过 → |
+进入 **AC 验收归档之前**必须通过入场门禁（快速/严谨均强制）：
+
+| 场景 | 做什么 |
+|------|--------|
+| **同会话增量** | 变更模块集成冒烟 + 增量 build 无错 + 已验证端探针仍 UP（**不**重跑已过的单 T 全量编译启动） |
+| **跨会话 / 证据缺失（全量）** | 下表三步（存在端） |
+
+| 步骤（全量） | 做什么 | 通过 | 不过 → |
 |------|--------|------|--------|
-| **编译构建** | **architecture 中存在的端** 编译/构建 | 各存在端：静态检查（lint/type 无 error）+ 构建成功 | 修编译，禁止 AC 验收归档 |
-| **启动探针** | **仅存在的可启动端** | BE 若存在：可启动且 health/等价探针 UP；FE/小程序若存在：可启动或开发者工具可开 | 修启动/配置，禁止 AC 验收归档 |
-| **功能冒烟** | **功能冒烟清单** | 每条主功能 happy path 不报错（不 500、关键页可开、核心写操作可完成） | 回阶段 4 修功能，禁止 AC 验收归档 |
-| **像素对比**（有强制原型） | [fe-pixel-compare](fe-pixel-compare.md) | `atlas/tests/fe-pixel/report.json` PASS | 修 UI |
+| **编译构建** | **architecture 中存在的端** 编译/构建 | 静态检查无 error + 构建成功 | 修编译，禁止 AC 归档 |
+| **启动探针** | **仅存在的可启动端** | BE health UP；FE 可启 | 修启动，禁止 AC 归档 |
+| **功能冒烟** | 冒烟清单 happy path | 不 500、主路径可完成 | 回阶段 4 |
+| **像素对比**（有强制原型） | [fe-pixel-compare](fe-pixel-compare.md) | `report.json` PASS | 修 UI |
 
-**有 FE**：冒烟见 [fe-smoke-playwright](fe-smoke-playwright.md)。**有强制原型**：像素对比只认 [fe-pixel-compare](fe-pixel-compare.md)（UID∪pages.json，目录散图不阻塞闸门）。
-用户前缀已是 `test:smoke` / `test:smoke-fe` → 直接跑，可不再问。
-
-**端范围**：以 `architecture.md` 技术栈为准——只有 BE → 只跑 BE；只有 FE → 只跑 FE；全栈 → 两端都跑。**禁止**对不存在的端要求编译。
+**有 FE**：冒烟见 [fe-smoke-playwright](fe-smoke-playwright.md)。用户前缀已是 `test:smoke*` → 直接跑。  
+**端范围**：以 `architecture.md` 为准；**禁止**对不存在的端要求编译。
 
 ### 功能冒烟 vs AC 单测
 
@@ -103,7 +109,7 @@
 | **集成/E2E** | 覆盖率报告 | **出报告即可**（不卡阈值） | 变更模块 **≥80%** |
 | **冒烟** | 冒烟/E2E（architecture.md 测试依赖 + humanTodo 资源） | 未齐不得标 pass | 核心不得无故 skip |
 
-**说明**：阶段 4 **每 T** 的可运行闸门（编译+能启+冒烟）与阶段 5 开头的 **功能冒烟** 同族；可运行闸门在开发中拦「交不能跑的码」，测试入场门禁在进 tests 前全量再验。**禁止**用「等测试入场门禁」豁免阶段 4 可运行闸门。
+**说明**：阶段 4 **每 T** 可运行闸门拦「交不能跑的码」；阶段 5 入场按上表做增量或全量，**不是**无脑全量重跑每一 T。**禁止**用「等测试入场」豁免阶段 4 可运行闸门。
 
 ## 豁免（微型改动 / Hotfix）
 

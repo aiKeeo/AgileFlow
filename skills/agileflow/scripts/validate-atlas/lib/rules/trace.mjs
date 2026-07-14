@@ -15,7 +15,10 @@ export function validateReqTrace(projectRoot, reporter) {
   if (!exists(reqRoot)) return;
 
   const reqFiles = collectFiles(reqRoot, '.md').filter(
-    (f) => !path.basename(f).startsWith('README') && !f.includes('/ui/') && !f.includes('/temp/')
+    (f) =>
+      !path.basename(f).startsWith('README') &&
+      !f.includes(`${path.sep}ui${path.sep}`) &&
+      !f.includes(`${path.sep}temp${path.sep}`)
   );
 
   if (reqFiles.length === 0) return;
@@ -54,7 +57,6 @@ export function validateReqTrace(projectRoot, reporter) {
       });
     }
 
-    const hasTask = todoContent.includes(reqId) || /\bF-\d+\b/.test(todoContent);
     const hasTaskForReq = featureContents.some((f) => {
       const fIdMatch = f.content.match(/F-(\d+)/);
       if (!fIdMatch) return false;

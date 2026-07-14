@@ -78,17 +78,6 @@ export function findLine(content, pattern) {
 }
 
 /**
- * 检查内容是否包含模式
- * @param {string} content
- * @param {RegExp | string} pattern
- * @returns {boolean}
- */
-export function hasPattern(content, pattern) {
-  if (typeof pattern === 'string') return content.includes(pattern);
-  return pattern.test(content);
-}
-
-/**
  * 相对路径格式化
  * @param {string} root
  * @param {string} filePath

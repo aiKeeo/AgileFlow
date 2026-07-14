@@ -1,8 +1,10 @@
 # 需求澄清 AskQuestion 模板
 
-> **入口铁律**：进入阶段 1 后**第一件事**就是本卡片；用户已发长需求也**不可跳过**——用本卡片做确认/补充，而非直接写 REQ。
+> **适用范围：仅 `user_decide`**。  
+> **AI自主** → **不发本卡**，直接按 [01-requirement 第 2 步 AI 自主](../phases/01-requirement.md) 落盘 → 审阅闸门。  
+> user_decide 下：进入阶段 1 后先发本卡做确认/补充，**不可**用聊天追问代替；快速+完整 PRD 例外见 flow-modes。
 
-## 第 1 步：澄清/确认（进入阶段 1 后必须先做）
+## 第 1 步：澄清/确认（仅 user_decide）
 
 根据用户**已述内容**生成选项（把用户提到的功能写进 `core_features`，勿留空占位）：
 
@@ -32,10 +34,10 @@ questions:
       - { id: "other", label: "还有其他要补充" }
 
   - id: "priority"
-    prompt: "第一版 MVP 最优先解决什么？"
+    prompt: "本批要落盘的功能里，哪个最先做？（每个功能仍各自一份 REQ，本题只定优先级）"
     options:
-      - { id: "mvp_a", label: "（根据上下文填入）" }
-      - { id: "all", label: "第一版就要全部功能" }
+      - { id: "mvp_a", label: "（根据上下文填入优先功能）" }
+      - { id: "all", label: "本批列出的功能都要（仍一功能一 REQ）" }
 
   - id: "ui_scope"
     prompt: "项目是否涉及用户可见界面（Web/App/小程序）？"

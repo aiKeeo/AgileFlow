@@ -30,7 +30,7 @@ atlas/solution/
 
 ## 标准流程（默认）
 
-0. **决策权**：入口 AskQuestion 或读 todo 全局委派 → [stage-delegation.md](../templates/stage-delegation.md)
+0. **契约/决策权**：无 env 或 pending → [流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → 停；已确认则按 `AF_DECIDE` 分支（见 [stage-delegation](../templates/stage-delegation.md)）
 1. 读已确认 REQ +（按需）model/ + **有 UID 时读 `requirements/ui/`**
 2. 初始化 `solution/`：README、features/、contracts/（目录即可）
 3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**、验收要点
@@ -45,11 +45,11 @@ atlas/solution/
    - **严谨**：方案确认卡 → 停止 → 再 **阶段闸门** → 停止  
 8. 确认后 README **已确认**
 
-**ai_decide 分支**（跳过技术栈/确认/闸门用户卡）：
+**ai_decide 分支**（须 `AF_DECIDE=ai` 已由启动卡/用户原话确认；跳过技术栈/确认用户卡）：
 
-5. Agent **自行选定**技术栈（写入决策记录）
+5. Agent **自行选定**技术栈（写入决策记录）；更新 `atlas/agileflow.env`：`AF_PHASE=3`、`AF_STACK_SOURCE=ai_record`（**禁止**把 `AF_DECIDE` 从 user 改成 ai）
 6. 写 `architecture.md` + `code-patterns-*.md` + features/contracts + `todo` + **AI 决策记录**
-7. **审阅闸门** → 停止（用户可选「不审继续」→ 下条进 dev）
+7. 跑 `validate-atlas --gate sol-confirm`（不过 → 按报错改 env/落盘）→ **审阅闸门** → 停止（用户可选「不审继续」→ 下条进 dev，并把 `AF_PHASE=4`）
 
 ### 阶段收尾 — **阶段闸门**（仅 user_decide · 严谨）
 
@@ -66,7 +66,8 @@ atlas/solution/
 |----|----------|----------|
 | 1 | 读 REQ + model | — |
 | 2 | AskQuestion 技术栈 → 停 | — |
-| 3 | 拆片启 Task | 各写 `features/F-xxx`（含 §边界）+ 按需 `contracts/*` |
+| 2.5 | **AskQuestion 并行启动卡**（确认并行出方案 + 本批功能数 ≤3）→ 停 | — |
+| 3 | 拆片启 Task（路径无冲突） | 各写 `features/F-xxx`（含 §边界）+ 按需 `contracts/*` |
 | 4 | 合并 README 索引、去重 ID | — |
 | 5 | 写/更新 **architecture.md** + todo + 功能依赖 | — |
 | 6 | AskQuestion 方案审阅 → 停 | — |
@@ -77,7 +78,7 @@ atlas/solution/
 - 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`
 - 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
 - greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
-- `architecture.md` 全项目**只维护一份**；Write architecture 前须 AskQuestion 技术栈
+- `architecture.md` 全项目**只维护一份**；**user_decide** 时 Write 前须 AskQuestion 技术栈；**ai_decide** 跳过卡片但须落盘选型依据
 - 任务只写 `todo.md`；**必须** `### T-xxx` + ①②③（含 dev 路径）；禁止扁平 `- [ ] T-001` 一行完事
 
 ## 产出

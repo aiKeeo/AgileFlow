@@ -1,7 +1,23 @@
 ﻿# init AskQuestion 卡片
 
 > 阶段流程：[00-project-init.md](../phases/00-project-init.md)  
-> **前置**： [init-scan-checklist 落盘自检](init-scan-checklist.md#init-落盘自检askquestion-前须全-) 全 ✅
+> **前置（收尾卡）**： [init-scan-checklist 落盘自检](init-scan-checklist.md#init-落盘自检) 全 ✅
+
+## init 写法锚点模式（首次全量 · 落盘 codebase 前）
+
+> 权威时机 → [00-project-init 写法锚点](../phases/00-project-init.md)。已有模式记录可跳过。
+
+```
+title: "init 写法锚点模式"
+questions:
+  - id: "init_anchor_mode"
+    prompt: "写法锚点文档怎么组织？（影响 atlas/init 目录结构）"
+    options:
+      - id: "mode_b"
+        label: "模式 B（推荐）：FE/BE 分文件 codebase/p1-*，不建 conventions/"
+      - id: "mode_a"
+        label: "模式 A：另建 atlas/conventions/ 独立维护约定"
+```
 
 ## init 确认（阶段 0 收尾）
 

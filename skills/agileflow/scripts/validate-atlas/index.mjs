@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { readText } from './lib/fs-utils.mjs';
 import { detectBrownfield } from './lib/brownfield.mjs';import { Reporter } from './lib/reporter.mjs';
+import { loadAfEnv, validateAfEnv } from './lib/af-env.mjs';
 import { validateDirectory } from './lib/rules/directory.mjs';
 import { validateInit } from './lib/rules/init.mjs';
 import { validateRequirements, validateReqConfirmed } from './lib/rules/requirements.mjs';
@@ -53,7 +54,7 @@ export function resolveRiskTier(todo) {
     if (devDocMatch) {
       const val = devDocMatch[1].toLowerCase();
       if (/lite|精简|3段?/.test(val)) return 'lite';
-      if (/full|完整|9段?/.test(val)) return 'full';
+      if (/full|完整/.test(val)) return 'full';
       if (/standard|标准|5段?/.test(val)) return 'standard';
     }
   }
@@ -73,18 +74,32 @@ export function resolveRiskTier(todo) {
 }
 
 /**
- * 解析模式：full 档 → strict；其余 → fast（除非显式）
+ * 解析模式：agileflow.env 优先 → full 档 → todo 字样 → 默认 fast
  * @param {string} projectRoot
  * @param {'fast'|'strict'|'auto'|undefined} requested
  * @param {'lite'|'standard'|'full'} [tier]
+ * @param {{ flow?: 'fast'|'strict' } | null} [afState]
  */
-function resolveMode(projectRoot, requested, tier) {
+function resolveMode(projectRoot, requested, tier, afState) {
+  if (requested && requested !== 'auto') return requested;
+  if (afState?.flow && afState.flow !== 'pending') return afState.flow;
   if (tier === 'full') return 'strict';
   const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-  if (requested && requested !== 'auto') return requested;
   if (/模式：.*严谨|强制严谨/.test(todo)) return 'strict';
   if (/模式：.*快速/.test(todo)) return 'fast';
   return 'fast';
+}
+
+/**
+ * 解析档位：显式 options → env AF_TIER → todo 推断
+ * @param {string | undefined} requested
+ * @param {string} todoContent
+ * @param {{ tier?: string } | null} afState
+ */
+function resolveTier(requested, todoContent, afState) {
+  if (requested) return requested;
+  if (afState?.tier) return afState.tier;
+  return resolveRiskTier(todoContent);
 }
 
 export function validateAtlas(options = {}) {
@@ -95,13 +110,32 @@ export function validateAtlas(options = {}) {
       ? detectBrownfield(projectRoot)
       : options.brownfield;
   const todoContent = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-  const tier = options.tier ?? resolveRiskTier(todoContent);
-  const mode = resolveMode(projectRoot, options.mode, tier);
 
   const reporter = new Reporter();
   const only = options.only ?? null;
   const shouldRun = (name) => !only || only.includes(name);
+
+  /** @type {import('./lib/af-env.mjs').AfState | null} */
+  let afState = null;
+  if (shouldRun('af-env')) {
+    afState = validateAfEnv(projectRoot, reporter, {
+      brownfield,
+      gatePhase: phase,
+      requireEnv: true,
+    });
+  } else {
+    const loaded = loadAfEnv(projectRoot);
+    if (loaded.ok) afState = loaded.state;
+  }
+
+  const tier = resolveTier(options.tier, todoContent, afState);
+  const mode = resolveMode(projectRoot, options.mode, tier, afState);
   const devOpts = { mode, tier };
+  // todo phase：完成闸门(4|5)以闸门为准（防 AF_PHASE=3 混过 dev-complete 跳过 dev 数核对）
+  const todoPhase =
+    phase === '4' || phase === '5'
+      ? phase
+      : afState?.phase ?? (phase !== 'all' ? phase : 'all');
 
   if (shouldRun('dir')) {
     validateDirectory(projectRoot, reporter, { phase, brownfield });
@@ -122,7 +156,7 @@ export function validateAtlas(options = {}) {
     validateSolution(projectRoot, reporter);
   }
   if (shouldRun('todo') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
-    validateTodo(projectRoot, reporter, { tier });
+    validateTodo(projectRoot, reporter, { tier, phase: todoPhase });
   }
   if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
     validateDev(projectRoot, reporter, devOpts);
@@ -143,18 +177,20 @@ export function validateAtlas(options = {}) {
     validateReqTrace(projectRoot, reporter);
   }
 
+  const decide = afState?.decide ?? '—';
   reporter.add({
     severity: 'info',
     rule: 'RUN-OK',
-    message: `校验完成 phase=${phase} mode=${mode} tier=${tier} brownfield=${brownfield}`,
+    message: `校验完成 phase=${phase} mode=${mode} tier=${tier} decide=${decide} brownfield=${brownfield}`,
   });
 
-  return { passed: reporter.passed(), reporter, mode, tier, brownfield };
+  return { passed: reporter.passed(), reporter, mode, tier, brownfield, afState };
 }
 
 export { detectBrownfield } from './lib/brownfield.mjs';
+export { loadAfEnv, validateAfEnv, inferPhaseFromArtifacts } from './lib/af-env.mjs';
 export { resolveSkillRoot, resolveValidateScript, formatPortableGateCommand } from './lib/skill-path.mjs';
 export { runDevLiteralCheck, runA7Grep } from './lib/rules/dev.mjs';
 export { Reporter } from './lib/reporter.mjs';
 export { runGate, listGates, getGate, formatGateCommand } from './lib/workflow.mjs';
-export { AI_GATES, PHASE_DIRS, DEV_NINE_SECTIONS, RISK_TIERS } from './lib/phase-spec.mjs';
+export { AI_GATES, PHASE_DIRS, RISK_TIERS } from './lib/phase-spec.mjs';

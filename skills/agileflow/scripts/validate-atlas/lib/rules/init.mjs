@@ -1,8 +1,8 @@
 import path from 'node:path';
 import { collectFiles, exists, findLine, readText, rel } from '../fs-utils.mjs';
 
-/** init 文档首行分层标签（盘点·* 优先；兼容旧 L0–L6 / P0 / P1） */
-const LAYER_TAG = /^>\s*\*\*(盘点·[^|*]+|L\d(?:\.\d)?|P0|P1|分层导航)\*\*/;
+/** init 文档首行分层标签（盘点·* / P0 / P1；亦接受 L0–L6） */
+const LAYER_TAG = /^>\s*\*\*(盘点·[^|*]+|L\d(?:\.\d)?|P0|P1|分层导航)\*\*/m;
 
 /** 覆盖范围固定块标题 */
 const COVERAGE_HEADING = '## 覆盖范围（init）';
@@ -26,7 +26,7 @@ function validateInitFile(projectRoot, filePath, content, reporter) {
       rule: 'INIT-F001',
       file: relPath,
       line: 1,
-      message: '文首缺少分层标签，应为 `> **盘点·业务** · …` 或 `> **P0** · …`（兼容旧 `L0`/`L5`）。',
+      message: '文首缺少分层标签，应为 `> **盘点·业务** · …` 或 `> **P0** · …`。',
     });
   }
 

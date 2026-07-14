@@ -36,7 +36,7 @@ export function validateTests(projectRoot, reporter) {
     if (!content) continue;
     const relPath = rel(projectRoot, file);
 
-    if (!/AC|验收|PASS|FAIL|BLOCKED/.test(content)) {
+    if (!/\bAC\b|验收|PASS|FAIL|BLOCKED/.test(content)) {
       reporter.add({
         severity: 'warn',
         rule: 'TST-F001',

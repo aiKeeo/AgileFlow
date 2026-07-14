@@ -69,15 +69,3 @@ export function formatPortableGateCommand(gateId, ctx = {}) {
   }
   return `node ${scriptArg} --gate ${gateId} --root ${projectRoot === process.cwd() ? '.' : projectRoot}`;
 }
-
-/**
- * 是否为本 skill 安装探测自检
- */
-export function skillRootOk(projectRoot) {
-  return exists(resolveValidateScript(projectRoot));
-}
-
-/** 供测试：bundled 根 */
-export function getBundledSkillRoot() {
-  return BUNDLED_SKILL_ROOT;
-}

@@ -35,6 +35,11 @@
 | model 新增/变更 | 聚合根名、实体名、值对象名 | 同上 |
 | solution 新增 feature | feature 标题中的业务名词 | 同上 |
 
-**阈值**：≤8 个术语 → 全部写在 `p0-business.md`「核心术语」表（init 阶段）；>8 或跨域 → 建本文件。
+**权威路径**：全项目术语**只**维护本文件 `atlas/glossary.md`（阶段 1 / model / solution / init refresh 都写这里）。
+
+| 场景 | 动作 |
+|------|------|
+| greenfield / 阶段 1 | 术语再少也写本文件；**禁止**建 `atlas/init/` |
+| brownfield init | `p0-business.md` 可留 3~5 个总览词并**链到本文件**；完整表在本文件 |
 
 **人工补充**：扫描只提取术语名和来源；释义须人工填写（或 AI 自主推断后标记）。

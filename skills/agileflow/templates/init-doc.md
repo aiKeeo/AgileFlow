@@ -21,10 +21,10 @@
 |------|------|
 | **P0** | 开工前：业务、环境、仓库 |
 | **P1** | 写码前：栈、架构、代码、数据 |
-| **盘点层** | init 阅读分层（**勿与测试层混淆**）；文内首行 `> **盘点·业务** · 最后验证：{{日期}}`（兼容旧标 `L0`/`L5`） |
+| **盘点层** | init 阅读分层（**勿与测试层混淆**）；文内首行 `> **盘点·业务** · 最后验证：{{日期}}`（或 `> **P0** · …`） |
 
 - **没有就不建**（不写 N/A、不建空目录）
-- 术语 ≤8 → `p0-business`；>8 或跨域 → `glossary/p0-{域}.md`（**禁止**一词一文件）
+- 术语 → 项目根 **`atlas/glossary.md`**（唯一）；`p0-business` 仅 3~5 个总览词+链接（**禁止**再建 `init/glossary/`）
 - 多实体/关系/状态机 → 多个 `p1-*.md`，禁止合并后硬拆
 
 ---
@@ -67,7 +67,7 @@ atlas/init/
 ├── README.md · LAYERS.md
 ├── p0-business.md（必建）· p0-domain-math.md（有计算则建）
 ├── p0-environment.md · p0-integrations.md · p0-repository.md · p0-quickstart.md（可选）
-├── glossary/ · p1-tech-stack.md · p1-architecture.md
+├── p1-tech-stack.md · p1-architecture.md
 ├── p1-errors.md · p1-testing.md
 ├── codebase/p1-{端}.md
 └── data/
@@ -191,7 +191,7 @@ atlas/init/
 ## 页面 ↔ API（有前端）
 | 页面 | 路径 | 主要 API |
 
-## 核心术语（≤8）
+## 核心术语（3~5 总览 · 完整表 → ../glossary.md）
 ## 信息来源（勾选实际读过的）
 ## 未找到 / 待补充
 ```
@@ -258,7 +258,7 @@ atlas/init/
 ## codebase/p1-frontend.md · p1-backend.md（模式 B · 资产靠前）
 
 > 权威结构与 AI 省力链 → [code-conventions.md](code-conventions.md)  
-> 扫描勾选 → [init-scan-checklist §codebase](init-scan-checklist.md#步骤-6--codebasep1frontendbackendmd)
+> 扫描勾选 → [init-scan-checklist §codebase](init-scan-checklist.md#步骤-6-codebase)
 
 **分端**：FE → `p1-frontend.md`；BE → `p1-backend.md`。可选 `codebase/README.md` 两行指路。
 
@@ -332,9 +332,9 @@ atlas/init/
 
 ---
 
-## data/entities/p1-{名}.md（融合模板）
+## data/entities/p1-{名}.md（实体模板）
 
-> 实体完成度 → [init-scan-checklist](init-scan-checklist.md#每份实体文档完成度)
+> 实体完成度 → [init-scan-checklist §实体](init-scan-checklist.md#步骤-7-data)
 
 ```markdown
 > **P1** · 实体 · {Entity} · 来源：{migration/Entity} · 最后验证：{{日期}}
@@ -389,12 +389,12 @@ atlas/init/
 
 ---
 
-## glossary/p0-{域}.md
+## 术语（勿在 init 建 glossary/）
 
-按域一个文件：术语|含义|代码/表对应|易混淆。
+完整表 → [`atlas/glossary.md`](../glossary.md)。`p0-business`「核心术语」只作索引。
 
 ---
 
 ## AskQuestion 前
 
-[init-scan-checklist 落盘自检](init-scan-checklist.md#init-落盘自检askquestion-前须全-) **全 ✅** → [init-askquestion.md](init-askquestion.md)
+[init-scan-checklist 落盘自检](init-scan-checklist.md#init-落盘自检) **全 ✅** → [init-askquestion.md](init-askquestion.md)

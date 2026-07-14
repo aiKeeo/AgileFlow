@@ -11,14 +11,14 @@ function extractSectionResult(content) {
 
 function hasRunnableEvidence(body) {
   if (!body || body.replace(/\s/g, '').length < 30) return false;
-  if (/③\s*验收后填写/.test(body) && !/exit\s*0|✅|通过|PASS|UP|成功/i.test(body)) {
+  if (/③\s*验收后填写/.test(body) && !/exit\s*0|✅|通过|PASS|\bUP\b|成功/i.test(body)) {
     return false;
   }
 
-  const hasBuild = /编译|build|package|mvn|gradle|tsc|npm run build|vite build/i.test(body);
+  const hasBuild = /编译|build|package|mvn|gradle|tsc|npm run|yarn|pnpm|vite|cargo|go build|dotnet|make|cmake|webpack|rollup|esbuild|swc|构建/i.test(body);
   const hasStartOrSmoke =
-    /启动|能启|health|listening|Started|冒烟|smoke|主路径|HTTP\s*200|curl|探针/i.test(body);
-  const hasResult = /exit\s*0|✅|通过|PASS|UP|成功|ok\b/i.test(body);
+    /启动|能启|health|listening|Started|冒烟|smoke|主路径|HTTP\s*200|curl|探针|serve|dev server|launch|docker|运行/i.test(body);
+  const hasResult = /exit\s*0|✅|通过|PASS|\bUP\b|成功|ok\b|BUILD SUCCESS|完成/i.test(body);
 
   return hasBuild && hasStartOrSmoke && hasResult;
 }

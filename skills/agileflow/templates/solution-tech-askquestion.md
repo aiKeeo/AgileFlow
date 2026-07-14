@@ -1,9 +1,10 @@
 # 技术栈 / 框架选型 AskQuestion 模板
 
-> 阶段 3 专用：**编写 `architecture.md` 之前必须执行**。
-> 禁止 AI 自行假设 NestJS / Spring / React 等默认栈；须先 AskQuestion，**调用后立即停止**。
+> 阶段 3 专用（**仅 `AF_DECIDE=user`**）：编写 `architecture.md` 之前发本卡 → **停**。  
+> **AI自主（`AF_DECIDE=ai`）**：跳过本卡；自行选定技术栈，须在 **AI 决策记录** + `architecture.md` 写明依据（仓库实测 / 用户原话 / REQ 约束），**禁止**无依据默认为 NestJS/Spring/React；并设 `AF_STACK_SOURCE=ai_record`。  
+> **闸门**：`sol-confirm` 读 `atlas/agileflow.env`——`user`+`pending` 或 `ai` 无决策记录 → **exit ≠ 0**。
 
-## 模式差异
+## 模式差异（user_decide）
 
 | 模式 | 技术栈卡与方案确认 |
 |------|-------------------|
@@ -14,10 +15,11 @@
 
 | 条件 | 动作 |
 |------|------|
-| 首次进入阶段 3，尚未写 `architecture.md` | ✅ 必须 AskQuestion |
-| 用户已在对话中**明确指定**完整技术栈（语言+框架+数据库） | 可跳过初次卡片，但须在回复首行声明依据；**方案确认**卡片仍须含架构确认题 |
-| 已有 `architecture.md` 草稿，用户要求改栈 | 重新 AskQuestion 技术栈卡片 → 改 architecture → **方案确认** |
-| 仓库已有成熟技术栈（package.json / pom.xml 等） | 首题优先提供「沿用现有仓库技术栈」选项 |
+| **ai_decide** | ❌ 不发本卡；落盘时写清选型依据 |
+| user_decide · 首次进阶段 3、尚无 `architecture.md` | ✅ 必须 AskQuestion |
+| user_decide · 用户已明确指定完整技术栈 | 可跳过本卡，首行声明依据；方案确认仍须含架构题 |
+| user_decide · 改栈 | 重新 AskQuestion → 改 architecture → 方案确认 |
+| 仓库已有成熟技术栈 | 首题优先「沿用现有仓库技术栈」 |
 
 ## 第 1 步：技术栈选型（写 architecture.md 前）
 

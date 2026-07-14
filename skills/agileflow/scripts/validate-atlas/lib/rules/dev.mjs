@@ -44,7 +44,13 @@ function isFeWithUi(content) {
 }
 
 function hasCodeAnchor(content) {
-  return /`[^`]*\.[^`]*`/.test(content) || /pages\//.test(content) || /services\//.test(content);
+  return (
+    /`[^`]*\.[^`]*`/.test(content) ||   // OOP: `Class.method` / `package.function`
+    /`[^`]+\([^)]*\)`/.test(content) || // 函数式: `func_name()`
+    /`[^`]+\/[^`]+`/.test(content) ||   // 路径型: `path/to/file`
+    /pages\//.test(content) ||
+    /services\//.test(content)
+  );
 }
 
 function hasFeLayoutDiagram(content) {
@@ -56,49 +62,6 @@ function checkFakeHeadings(content) {
   const hasMd = /^## (范围|契约|做法|AC|结果)/m.test(content);
   const hasPlain = /^(范围|契约|做法)[：:\s]/m.test(content);
   return !hasMd && hasPlain;
-}
-
-function validateSections(filePath, content, reporter, tier = 'standard') {
-  const relPath = rel(path.dirname(path.dirname(path.dirname(filePath))), filePath);
-  // when called with absolute path, prefer shorter rel via project root guess
-  const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
-
-  for (const sec of DEV_SECTIONS) {
-    if (!tierDef.sections.includes(sec.id)) continue;
-    if (!headingRegex(sec.heading).test(content)) {
-      reporter.add({
-        severity: 'error',
-        rule: `DEV-SEC-${sec.id}`,
-        file: relPath,
-        message: `缺少「${sec.heading}」。`,
-      });
-      continue;
-    }
-
-    if (sec.id === 'scope') {
-      const body = extractSectionBody(content, sec.heading);
-      if (body && !/不做|范围外|不做：/.test(body)) {
-        reporter.add({
-          severity: 'warn',
-          rule: 'DEV-SCOPE-不做',
-          file: relPath,
-          message: '「## 范围」建议含「明确不做」≥1 条。',
-        });
-      }
-    }
-
-    if (sec.id === 'contract' && !isFeDev(filePath, content)) {
-      const body = extractSectionBody(content, sec.heading);
-      if (body && body.length > 400 && !/\]\([^)]+\)/.test(body)) {
-        reporter.add({
-          severity: 'warn',
-          rule: 'DEV-CONTRACT-宜链',
-          file: relPath,
-          message: '「## 契约」BE 宜链 contracts/，勿大段抄 API。',
-        });
-      }
-    }
-  }
 }
 
 function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'standard') {
@@ -136,7 +99,7 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
       severity: 'error',
       rule: 'DEV-LIT-代码落点',
       file: relPath,
-      message: '缺少 Class.method / pages/ / services/。',
+      message: '缺少代码落点（OOP: `Class.method` / 函数式: `func()` / 路径型: `path/to`）。',
     });
   }
 
@@ -171,21 +134,6 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
       message: '文档过短且无 #### 步骤，可能是过短文档。',
     });
   }
-}
-
-function validateDevFile(projectRoot, filePath, content, reporter, mode, tier = 'standard') {
-  const relPath = rel(projectRoot, filePath);
-  const baseName = path.basename(filePath);
-  if (baseName === 'README.md' || baseName.startsWith('temp')) return;
-
-  if (/顺序：⚠️ 先码后文档/.test(content)) {
-    reporter.add({ severity: 'error', rule: 'DEV-A005', file: relPath, message: '事后补写文档无效。' });
-  }
-
-  validateSections(filePath, content, reporter, tier);
-  // fix relPath for validateSections messages — re-run with project-relative via reporter already using guessed path
-  // Overwrite: call section check with proper rel
-  runDevLiteralChecks(filePath, content, reporter, relPath, tier);
 }
 
 export function validateDev(projectRoot, reporter, opts = {}) {
@@ -226,7 +174,7 @@ export function validateDev(projectRoot, reporter, opts = {}) {
         }
       }
     }
-    runDevLiteralChecks(filePath, content, reporter, relPath, tier);
+    runDevLiteralChecks(file, content, reporter, relPath, tier);
   }
 }
 

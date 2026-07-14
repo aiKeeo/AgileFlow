@@ -11,7 +11,7 @@ const SMOKE_NAME = /smoke|compile|probe|test-entry|fe-smoke|be-smoke/i;
  * @returns {boolean}
  */
 function hasPassMarker(content) {
-  return /exit\s*0|✅|通过|PASS|UP|成功|ok\b|listening|Started/i.test(content);
+  return /exit\s*0|✅|通过|PASS|\bUP\b|成功|ok\b|listening|Started/i.test(content);
 }
 
 /**

@@ -64,9 +64,6 @@ export const DEV_SECTIONS = [
   { id: 'result', heading: '## 结果', tiers: ['lite', 'standard', 'full'] },
 ];
 
-/** @deprecated 兼容旧名 */
-export const DEV_NINE_SECTIONS = DEV_SECTIONS;
-
 export const RISK_TIERS = {
   lite: {
     label: '精简档',
@@ -91,33 +88,34 @@ export const RISK_TIERS = {
   },
 };
 
-export const PENDING_MARKERS = ['待补齐', 'TODO：', '（待补齐）', '→ 见', '→ ['];
-
 export const AI_GATES = {
   'init-confirm': {
     phase: '0',
-    modules: ['dir', 'init'],
+    modules: ['af-env', 'dir', 'init'],
     when: 'init 落盘完成 · AskQuestion 确认前',
     blocking: true,
+    extra: '须维护 atlas/agileflow.env（AF_PHASE=0）',
   },
   'req-confirm': {
     phase: '1',
-    modules: ['dir', 'req'],
+    modules: ['af-env', 'dir', 'req'],
     when: 'REQ 落盘 · 需求确认卡前',
     blocking: true,
+    extra: '须 AF_PHASE=1；与产物推断一致',
   },
   'mod-confirm': {
     phase: '2',
-    modules: ['dir', 'model'],
+    modules: ['af-env', 'dir', 'model'],
     when: 'model 落盘 · 建模确认前',
     blocking: true,
   },
   'sol-confirm': {
     phase: '3',
-    modules: ['dir', 'sol', 'todo', 'req-confirmed'],
+    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed'],
     when: '方案+todo 落盘 · 方案确认/阶段闸门前',
     blocking: true,
-    extra: 'A档：architecture 必存在；至少 1 份 REQ 状态=已确认/已实现',
+    extra:
+      'A档：agileflow.env + architecture + REQ已确认；AF_DECIDE=user 须栈来源已问；=ai 须 AI决策记录；dev 文件数不在本闸门检查',
   },
   'dev-step1-literal': {
     phase: '4',
@@ -128,17 +126,17 @@ export const AI_GATES = {
   },
   'dev-complete': {
     phase: '4',
-    modules: ['dir', 'todo', 'dev', 'runnable', 'pixel'],
+    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel'],
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
     blocking: true,
-    extra: '## 结果 须含可运行证据；强制原型须 fe-pixel PASS',
+    extra: 'AF_PHASE=4；dev 文件数=T 头数；## 结果可运行证据；强制原型须 fe-pixel PASS',
   },
   'test-entry': {
     phase: '5',
-    modules: ['dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel'],
+    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel'],
     when: '进入阶段 5 · 测试入场门禁前',
     blocking: true,
-    extra: '同会话增量 / 跨会话全量；强制原型须 fe-pixel PASS',
+    extra: 'AF_PHASE=5；同会话增量 / 跨会话全量；强制原型须 fe-pixel PASS',
   },
   'req-trace': {
     phase: '5',

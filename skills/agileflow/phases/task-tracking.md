@@ -49,7 +49,8 @@ atlas/
 ├── README.md
 ├── todo.md
 ├── humanTodo.md
-├── active-edits.md         # 并行改文件锁（阶段 4 并行前启用）
+├── glossary.md             # 阶段 1 首个 REQ 时建（术语唯一权威）
+├── debt.md                 # 阶段 4 首次记待回溯/事后补写时建（阶段 5 须清零）
 ├── requirements/
 │   ├── README.md
 │   └── ui/README.md        # UID 索引（有界面时阶段 1 填充）
@@ -57,7 +58,7 @@ atlas/
 └── tests/README.md
 ```
 
-阶段 2 初始化 `atlas/model/`；阶段 3 初始化 `atlas/solution/`；阶段 4 初始化 `atlas/dev/`。
+阶段 2 初始化 `atlas/model/`；阶段 3 初始化 `atlas/solution/`；阶段 4 初始化 `atlas/dev/`。`active-edits.md` **仅并行启用时**创建（串行模式不建）。
 
 模板见 [templates/todo.md](../templates/todo.md)、[templates/human-todo.md](../templates/human-todo.md)、[templates/active-edits.md](../templates/active-edits.md)。
 
@@ -65,11 +66,12 @@ atlas/
 
 | 时机 | 文件 |
 |------|------|
-| 初始化 | todo.md, humanTodo.md, active-edits.md（空表） |
-| 阶段 1 | REQ + **ui/UID**（有界面时） |
+| 初始化 | todo.md, humanTodo.md |
+| 阶段 1 | REQ + **ui/UID**（有界面时）+ glossary.md（首个 REQ 时建） |
 | 阶段 2 | model/ 目录 |
 | 阶段 3 | solution/ 目录 + todo.md 开发任务 |
-| 阶段 4 | dev/ 功能思路 + 代码 |
+| 阶段 4 | dev/ 功能思路 + 代码 + debt.md（首次记待回溯/事后补写时建） |
+| 并行启用 | active-edits.md |
 | 状态变化 | todo.md |
-| 追加/更新 | humanTodo.md |
-| 全流程结束 | tests/README.md（阶段 5 生成）+ todo 状态 |
+| 追加/更新 | humanTodo.md · glossary.md（新术语） |
+| 全流程结束 | tests/README.md（阶段 5 生成）+ todo 状态 + debt.md 清零 |

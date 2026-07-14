@@ -67,9 +67,21 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
 }
 
 /**
+ * 是否为需校验的 UID 文档（跳过索引/草稿，与 REQ 侧一致）
+ * @param {string} filePath
+ */
+function isUidDoc(filePath) {
+  const base = path.basename(filePath);
+  if (base === 'README.md' || base.startsWith('_')) return false;
+  return true;
+}
+
+/**
  * 校验 UID 文档格式
  */
 function validateUidFile(projectRoot, filePath, content, reporter) {
+  if (!isUidDoc(filePath)) return;
+
   const relPath = rel(projectRoot, filePath);
 
   if (!/^#\s*\[UID-\d+\]/m.test(content)) {
@@ -92,9 +104,9 @@ function validateUidFile(projectRoot, filePath, content, reporter) {
     });
   }
 
-  // 声明了原型图 → 文件须存在
-  const protoMatch = content.match(/原型图[：:]\s*`?([^`\n\s]+\.(?:png|jpe?g|webp|gif))`?/i);
-  if (protoMatch) {
+  // 声明了原型图 → 文件须存在（一个 UID 可声明多张，逐张校验）
+  const protoMatches = [...content.matchAll(/原型图[：:]\s*`?([^`\n\s]+\.(?:png|jpe?g|webp|gif))`?/gi)];
+  for (const protoMatch of protoMatches) {
     const protoRel = protoMatch[1].trim();
     const protoAbs = path.isAbsolute(protoRel)
       ? protoRel
