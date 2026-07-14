@@ -45,7 +45,7 @@ function resolveDevFilePath(args) {
 }
 
 function printLiteralCheckResult(filePath, result) {
-  console.log(`\n字面量校验 + 九段：${filePath}`);
+  console.log(`\n字面量校验 + 段结构：${filePath}`);
   if (result.passed) {
     console.log('✅ 通过（可勾 ①）');
     return;
@@ -95,7 +95,7 @@ function main() {
   }
 
   if (devFilePath && !args.gate) {
-    const result = runDevLiteralCheck(devFilePath, { mode: args.mode ? String(args.mode) : 'auto' });
+    const result = runDevLiteralCheck(devFilePath, { mode: args.mode ? String(args.mode) : 'auto', tier: args.tier ? String(args.tier) : undefined });
     if (args.json) {
       console.log(JSON.stringify({ file: devFilePath, ...result }, null, 2));
     } else {
@@ -111,6 +111,8 @@ function main() {
       projectRoot: root,
       devFile: devFilePath ?? undefined,
       mode: args.mode ? String(args.mode) : 'auto',
+      tier: args.tier ? String(args.tier) : undefined,
+      incremental: Boolean(args.incremental),
       brownfield: args.greenfield ? false : args.brownfield ? true : 'auto',
       verbose: Boolean(args.verbose),
     });
@@ -127,6 +129,8 @@ function main() {
     projectRoot: root,
     phase: args.phase ?? 'all',
     mode: args.mode ? String(args.mode) : 'auto',
+    tier: args.tier ? String(args.tier) : undefined,
+    incremental: Boolean(args.incremental),
     verbose: Boolean(args.verbose),
   };
   if (args.greenfield) options.brownfield = false;
@@ -135,8 +139,8 @@ function main() {
   if (args.only) options.only = String(args.only).split(',').map((s) => s.trim());
 
   console.log('🔍 Agileflow Atlas 校验');
-  const { passed, reporter, mode, brownfield } = validateAtlas(options);
-  console.log(`   根目录: ${root} | 阶段: ${options.phase} | 模式: ${mode} | brownfield: ${brownfield}`);
+  const { passed, reporter, mode, tier, brownfield } = validateAtlas(options);
+  console.log(`   根目录: ${root} | 阶段: ${options.phase} | 模式: ${mode} | 档位: ${tier ?? 'auto'} | brownfield: ${brownfield}`);
 
   if (args.json) {
     console.log(JSON.stringify({

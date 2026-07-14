@@ -35,7 +35,7 @@
 |--------|----------|-------------------------|
 | 第 1 步需求卡片 | 点选/回复 | **第 2 步**：写 `atlas/requirements/REQ-*.md` 草稿 + README + todo（禁止空回复） |
 | 第 3 步确认卡片 | 选「确认」 | 标 REQ **已确认** → **第 4 步**阶段构思闸门skQuestion → 停止 |
-| 阶段闸门 | 选「是，继续」 | **下条回复**进入阶段 2 或 3，**写 model/ 或 solution/**（禁止只寒暄） |
+| 阶段闸门 | 选「是，继续」 | **下条回复**进入阶段 2 或 3，**写 model/ 或 solution/**（禁止只说不写） |
 
 ---
 
@@ -43,8 +43,8 @@
 
 ### 第 0 步：决策权（阶段入口）
 
-1. 读 `atlas/todo.md`「决策委派」；**全局 AI自主** → **跳过本卡**，默认 **ai_decide**
-2. 否则 AskQuestion [决策权卡](../templates/stage-delegation.md#阶段入口决策权-askquestion)（可与模式判定合并）
+1. 读 `atlas/todo.md`「决策委派」；**未设置或全局 AI自主** → **跳过本卡**，默认 **ai_decide**
+2. 仅当用户显式「这阶段我来 / 逐步问我」→ AskQuestion [决策权卡](../templates/stage-delegation.md#阶段入口决策权-askquestion) 或直接设 user_decide
 3. **ai_decide** → 跳至 [第 2 步 AI 自主分支](#第-2-步-ai-自主仅-ai_decide)（跳过第 1、3 步用户决策卡）
 
 ### 第 1 步：AskQuestion 澄清（仅 user_decide）

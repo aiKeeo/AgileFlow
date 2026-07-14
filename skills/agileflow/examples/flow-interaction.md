@@ -39,7 +39,7 @@
 **用户**：阶段闸门已选「是，继续」→ 进入 T-000
 
 → **①** `atlas/dev/T-000-BE.md` → 构思闸门 → 勾 todo ① → 写码闸门 → ②
-→ **②** 按 **五** 写码 → 勾 todo ②  
+→ **②** 按 **## 做法** 写码 → 勾 todo ②
 → **③** test/ac 全绿 → T-000 ✅
 
 ---
@@ -67,6 +67,6 @@
 - ❌ 用户描述需求 → Agent **直接写业务源码**（须先 AskQuestion → 落盘 REQ）  
 - ❌ 没 ① dev 构思就写码  
 - ❌ AI 自主但不写 atlas/  
-- ❌ 用户选「不审继续」后只寒暄
+- ❌ 用户选「不审继续」后只说不写
 
 更多 → [dev-quickstart.md](../templates/dev-quickstart.md)

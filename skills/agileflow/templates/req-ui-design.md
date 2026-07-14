@@ -54,7 +54,7 @@ atlas/requirements/
 - **截图选择器**：`.login-card`  # 可选；默认 body
 
 > **用途**：描述页面结构与交互，供生成 UI 实现参考。**不含**最终视觉样式（除非已附原型图）。  
-> **有强制原型**（UID「原型图」或 `atlas/tests/fe-pixel/pages.json`）→ FE 勾③须 [fe-pixel-compare](fe-pixel-compare.md) PASS。散图未声明不挡门。
+> **有强制原型**（UID「原型图」或 `atlas/tests/fe-pixel/pages.json`）→ FE 勾③须 [fe-pixel-compare](fe-pixel-compare.md) PASS。散图未声明不阻塞闸门。
 
 ---
 
@@ -141,7 +141,7 @@ atlas/requirements/
 | 参考稿 / Figma | 无则留空 | **用户** | humanTodo 提供链接 |
 
 > 若用户已有参考：在 humanTodo 追加「提供 UID-001 视觉参考稿」；**仍不在 REQ 擅自定样式**。  
-> 用户给出可导出图 → 拷到 `prototypes/` **且** UID 填「原型图」（仅放目录不声明 = 不挡门、不强制比）。
+> 用户给出可导出图 → 拷到 `prototypes/` **且** UID 填「原型图」（仅放目录不声明 = 不阻塞闸门、不强制比）。
 
 ---
 

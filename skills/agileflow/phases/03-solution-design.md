@@ -4,7 +4,7 @@
 > 用户阶段闸门选「是，继续」后，下条回复进入 dev 须写 `atlas/dev/T-xxx.md`。
 > **用户前缀**：`sol:` = `atlas/solution/`
 > 模板：[templates/solution-core.md](../templates/solution-core.md)  
-> **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 方案齐批。
+> **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 批量出方案。
 
 ## 方案设计四要素
 
@@ -69,9 +69,9 @@ atlas/solution/
 | ❌ 催进度跳过结束闸门 | 不豁免 |
 | ❌ 文字问「开始开发吗？」 | 须用 AskQuestion |
 
-并行方案齐批：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
+并行批量出方案：方案审阅之后，严谨仍须再发**阶段闸门** → 停止。
 
-## 方案齐批（可选 — 仅用户显式要求并行出方案）
+## 批量出方案（可选 — 仅用户显式要求并行出方案）
 
 > 用户说「并行出方案 / 多 subagent 写 features」且功能 ≥2 或全栈 FE+BE 时启用。
 

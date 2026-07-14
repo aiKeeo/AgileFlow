@@ -6,7 +6,7 @@ import { exists, listFiles, readText, rel } from '../fs-utils.mjs';
 const SMOKE_NAME = /smoke|compile|probe|test-entry|fe-smoke|be-smoke/i;
 
 /**
- * 文件是否含过线痕迹
+ * 文件是否含通过痕迹
  * @param {string} content
  * @returns {boolean}
  */
@@ -17,10 +17,15 @@ function hasPassMarker(content) {
 /**
  * 测试入场门禁：要求 atlas/logs/ 存在冒烟/编译/探针证据文件
  * A 档闸门 test-entry 专用（不替真实跑命令，只挡「无痕迹声称入场」）
+ *
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {{ incremental?: boolean }} [opts]
+ *   - incremental=true：同会话已验，只须增量证据（接受任何日志文件含通过标记）
+ *   - incremental=false（默认）：跨会话，须全量证据（文件名须含 smoke|compile|probe 等）
  */
-export function validateSmokeEntry(projectRoot, reporter) {
+export function validateSmokeEntry(projectRoot, reporter, opts = {}) {
+  const incremental = opts.incremental ?? false;
   const logsDir = path.join(projectRoot, 'atlas', 'logs');
 
   if (!exists(logsDir)) {
@@ -33,9 +38,13 @@ export function validateSmokeEntry(projectRoot, reporter) {
     return;
   }
 
+  // 增量模式：接受任何日志文件（同会话 dev-complete 已全量验过）
+  // 全量模式：文件名须含 smoke|compile|probe|test-entry|fe-smoke|be-smoke
   const candidates = listFiles(logsDir).filter((f) => {
     try {
-      return fs.statSync(f).isFile() && SMOKE_NAME.test(path.basename(f));
+      if (!fs.statSync(f).isFile()) return false;
+      if (incremental) return true;
+      return SMOKE_NAME.test(path.basename(f));
     } catch {
       return false;
     }
@@ -46,8 +55,9 @@ export function validateSmokeEntry(projectRoot, reporter) {
       severity: 'error',
       rule: 'SMOKE-L002',
       file: 'atlas/logs/',
-      message:
-        'atlas/logs/ 无冒烟/编译/探针文件（文件名须含 smoke|compile|probe|test-entry|fe-smoke|be-smoke）。',
+      message: incremental
+        ? 'atlas/logs/ 无任何日志文件（同会话增量模式：接受任意日志含通过标记）。'
+        : 'atlas/logs/ 无冒烟/编译/探针文件（文件名须含 smoke|compile|probe|test-entry|fe-smoke|be-smoke）。',
     });
     return;
   }
@@ -67,7 +77,14 @@ export function validateSmokeEntry(projectRoot, reporter) {
       severity: 'error',
       rule: 'SMOKE-L003',
       file: sample,
-      message: '入场日志存在但无过线痕迹（须含 exit 0 / ✅ / 通过 / PASS / UP 等）。禁止空文件充数。',
+      message: '入场日志存在但无通过痕迹（须含 exit 0 / ✅ / 通过 / PASS / UP 等）。禁止空文件凑数。',
+    });
+  } else if (incremental) {
+    reporter.add({
+      severity: 'info',
+      rule: 'SMOKE-INCREMENTAL',
+      file: 'atlas/logs/',
+      message: '同会话增量模式：dev-complete 已全量验过，此为增量确认。',
     });
   }
 }

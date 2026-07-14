@@ -4,15 +4,17 @@
 
 > Turn ideas into **runnable, testable, handoff-ready** software with a five-stage agile pipeline and **BDD→DDD→SDD→TDD**. Simple projects ship in **~1 hour**; MVPs in **half a day**.
 
-[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.9.0-blue.svg)](skills/agileflow/SKILL.md)
 [![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#why-ship-in-1-hour)
 
 ---
 
 ## One-liner
 
-**Agileflow** encodes software engineering best practices into an AI-executable Skill: **BDD** for requirements, **DDD** for modeling, **SDD** for design, **TDD** for code — with human confirmation gates at every stage and a full `specs/` documentation trail.  
+**Agileflow** encodes software engineering best practices into an AI-executable Skill: **BDD** for requirements, **DDD** for modeling, **SDD** for design, **TDD** for code — with human confirmation gates at every stage and a full `atlas/` documentation trail.  
 Tell your AI *"run agileflow"* — from zero to deployable in **as little as 1 hour**, usually an MVP within half a day.
+
+> **Fast mode ≠ skip stages.** Fast still walks req→mod→sol→dev→tests; it only merges AskQuestions and thins docs by **risk tier** (lite/standard/full).
 
 ---
 
@@ -41,12 +43,12 @@ Agileflow: **compress the pipeline without dropping structure**.
 | Audience | Pain Point | How Agileflow Helps |
 |----------|------------|---------------------|
 | **Indie devs / founders** | Ideas sit for weeks before a demo | Fast mode: **deployable demo in ~1 hour** |
-| **Freelancers** | No docs at handoff, hard to close projects | Full `specs/` + REQ ↔ acceptance report mapping |
+| **Freelancers** | No docs at handoff, hard to close projects | Full `atlas/` + REQ ↔ acceptance report mapping |
 | **Tech leads (small teams)** | AI output hard to review or hand off | Five-stage artifacts: divisible, auditable |
 | **Backend / full-stack engineers** | Schema and API drift apart | DDD first — confirm DDL & API before coding |
 | **Users afraid AI goes off-track** | AI codes silently, wrong direction = full rewrite | **Stage gates + requirement cards** — you approve each step |
 | **Users stuck mid-flow** | Missing keys/env, AI pretends it's done | **humanTodo** lists what *you* must do; incomplete = `BLOCKED-HUMAN` |
-| **Users who lose visibility** | Close chat, lose all progress | **`specs/todo.md` live progress** + resume with *"continue agileflow"* |
+| **Users who lose visibility** | Close chat, lose all progress | **`atlas/todo.md` live progress** + resume with *"continue agileflow"* |
 | **Compliance-minded teams** | Req → impl → test not traceable | BDD scenarios → tests → per-REQ acceptance reports |
 
 ---
@@ -96,7 +98,7 @@ AI doesn't bulldoze through — **key decisions and external resources require h
 | **Stage gate** | End of stages 1–4 | Click *"Yes, continue"* to proceed; *"No, pause"* anytime |
 | **humanTodo** | Any stage with external deps | Provide API keys, merchant IDs, `.env`, business sign-off, ops resources |
 
-**humanTodo example** (AI writes to `specs/humanTodo.md` automatically):
+**humanTodo example** (AI writes to `atlas/humanTodo.md` automatically):
 
 | Item | Source Stage | Status |
 |------|--------------|--------|
@@ -114,7 +116,7 @@ AI doesn't bulldoze through — **key decisions and external resources require h
 
 ### 📊 Full Progress Visibility — always know where AI is
 
-Open the `specs/` folder — **see exactly where the project stands**:
+Open the `atlas/` folder — **see exactly where the project stands**:
 
 **① Stage declaration** — first line of every AI reply:
 
@@ -122,7 +124,7 @@ Open the `specs/` folder — **see exactly where the project stands**:
 📍 Agileflow | Mode: Fast | Stage: 3-Solution Design | Basis: next incomplete stage in todo
 ```
 
-**② `specs/todo.md`** — AI tasks + pipeline progress + change history:
+**② `atlas/todo.md`** — AI tasks + pipeline progress + change history:
 
 ```markdown
 ## Pipeline Progress
@@ -169,18 +171,19 @@ On failure, AI retries up to 3 rounds; still failing → back to Stage 4. **Neve
 
 ---
 
-### 📁 specs/ Documentation — fast delivery, still handoff-ready
+### 📁 atlas/ Documentation — fast delivery, still handoff-ready
 
 Auto-generated throughout — **reviewable, divisible, auditable**:
 
 ```
-specs/
-├── requirements/REQ-001-xxx.md   # BDD requirements (Given-When-Then)
-├── 002-data-model.md             # DDD domain model + DDL
-├── 003-solution.md               # SDD architecture + API + task list
-├── tests/REQ-001-acceptance.md   # Per-REQ acceptance evidence
-├── todo.md                       # AI progress (open anytime)
-└── humanTodo.md                  # What needs your help (open anytime)
+atlas/
+├── requirements/REQ-001-xxx.md   # BDD + optional ui/UID-*
+├── model/                        # DDD (or model-overview in fast mode)
+├── solution/architecture.md      # SDD + features/contracts + todo tasks
+├── dev/T-xxx-*.md                # ① design notes per task
+├── tests/REQ-*-验收报告.md        # Per-REQ acceptance
+├── todo.md                       # Progress + ①②③
+└── humanTodo.md                  # What needs you
 ```
 
 ---
@@ -191,7 +194,7 @@ specs/
 |----------|------|
 | One-line bugfix, Q&A, hotfix | Exempt from five stages, L1+L3 in **minutes** |
 | API / DB / auth / multi-module changes | Full five-stage pipeline |
-| User says *"fast track / skip pipeline"* | Micro-change path, no REQ/002/003 |
+| User says *"fast track / skip pipeline"* | Micro-change **exemption** only if truly tiny (no API/DB/MVP) |
 
 AI won't pull "explain this line" into five stages — **fast when it should be, strict when it must be**.
 
@@ -233,7 +236,7 @@ Run agileflow — I need a todo-list API shipped today
 ```
 
 ```
-Continue agileflow                 # Resume from specs/todo.md breakpoint
+Continue agileflow                 # Resume from atlas/todo.md breakpoint
 Full pipeline, fast mode, deliver in 1 hour
 ```
 
@@ -254,12 +257,12 @@ AI stage declaration example:
 | Time | Stage | AI Output |
 |------|-------|-----------|
 | 0:05 | Requirements | REQ-001.md |
-| 0:10 | Modeling | 002-data-model.md + init.sql |
-| 0:20 | Solution | 003-solution.md + dev tasks |
-| 0:50 | Development | Business code + L3 tests |
+| 0:10 | Modeling | `atlas/model/` + DDL |
+| 0:20 | Solution | `architecture.md` + detailed todo |
+| 0:50 | Development | Business code + L3 tests（按风险档位写①） |
 | 1:00 | Testing | L1+L3 PASS, acceptance report |
 
-**Result**: Runnable code + `specs/` docs + acceptance report — deploy or demo immediately.
+**Result**: Runnable code + `atlas/` docs + acceptance report — deploy or demo immediately.
 
 ---
 
@@ -297,13 +300,13 @@ AgileFlow/
 |--------|---------|
 | Run agileflow / full pipeline / ship today | Pure Q&A, explanations |
 | Build from scratch, MVP, demo | Code review, read code |
-| Have `specs/` and say *"continue agileflow"* | Single-file tweak, one-line bugfix |
+| Have `atlas/` and say *"continue agileflow"* | Single-file tweak, one-line bugfix |
 
 ---
 
 ## Version
 
-**v4.2.0** — see [SKILL.md](skills/agileflow/SKILL.md)
+**v9.9.0** — see [SKILL.md](skills/agileflow/SKILL.md)
 
 ---
 

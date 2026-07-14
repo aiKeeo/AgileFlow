@@ -52,9 +52,9 @@ atlas/active-edits.md    # 运行时锁表（项目初始化时创建）
 
 | 场景 | 谁写 | 原则 |
 |------|------|------|
-| 方案齐批 | Subagent 可写 feature/contract | 每 subagent 只写 `features/F-xxx.md` + 按需 `contracts/*`；`architecture`/`todo` **仅主 Agent** |
-| **构思齐批（①）** | **仅主 Agent** | 主 Agent 写 `atlas/dev/T-xxx-*-{FE\|BE}.md`（**禁止** Subagent 创建/改①）；锁表一般不登记 atlas/dev |
-| 写码执行批（②） | Subagent 只改**业务源码** | 按该 T「五」涉及路径登记 `active-edits`；**禁止**两 subagent 同路径；**禁止**改 `atlas/**` |
+| 批量出方案 | Subagent 可写 feature/contract | 每 subagent 只写 `features/F-xxx.md` + 按需 `contracts/*`；`architecture`/`todo` **仅主 Agent** |
+| **批量构思（①）** | **仅主 Agent** | 主 Agent 写 `atlas/dev/T-xxx-*-{FE\|BE}.md`（**禁止** Subagent 创建/改①）；锁表一般不登记 atlas/dev |
+| 写码执行批（②） | Subagent 只改**业务源码** | 按该 T「## 做法」涉及路径登记 `active-edits`；**禁止**两 subagent 同路径；**禁止**改 `atlas/**` |
 | 合并文件 | 仅主 Agent | `architecture.md`、`README.md`、`todo.md`、`active-edits.md` |
 
 > **① 归属**：与 [parallel-orchestration](../phases/parallel-orchestration.md) 一致——Subagent **不得**写 `atlas/dev/T-xxx*.md`。旧写法 `dev/F-xxx-*-FE.md` **作废**，一律 `T-xxx`。
@@ -72,7 +72,7 @@ subagent 发现目标文件已被占用
 
 **✅**：BE subagent 写 `OrderService.ts` 前登记 → 写完释放
 
-**✅**：方案齐批 三域 subagent 各写 `F-001.md`、`F-002.md`、`F-003.md`，无重叠
+**✅**：批量出方案 三域 subagent 各写 `F-001.md`、`F-002.md`、`F-003.md`，无重叠
 
 **❌**：两个 subagent 同时改 `contracts/API-001-xxx.md`
 

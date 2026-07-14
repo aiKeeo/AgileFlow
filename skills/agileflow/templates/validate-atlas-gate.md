@@ -1,7 +1,7 @@
 # Atlas 校验（AI 流程闸门）
 
 > **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`  
-> **诚实边界**：JS 只挡 **A 档**（结构 + 落盘证据）。AskQuestion / TodoWrite / 真编译 = **C 档**，脚本管不到。  
+> **诚实边界**：JS 只挡 **A 档**（结构 + 落盘证据）。AskQuestion / TodoWrite / 实际编译 = **C 档**，脚本管不到。  
 > **路径**：勿写死 `.cursor/skills/agileflow`。用下方探测或 `AGILEFLOW_SKILL_ROOT`。
 
 ## 分档
@@ -40,14 +40,14 @@ cd <skill> && npm run validate:sol
 | model 落盘 · 确认前 | `mod-confirm` | 禁止进 sol |
 | 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** architecture + REQ 已确认） |
 | **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
-| **开发✅前** | `dev-complete` | 禁止 ✅（**须**九段可运行证据；**有原型须** fe-pixel PASS） |
+| **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS） |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
 
 列出：`--list-gates` · 旧名 `dev-a7` ≡ `dev-step1-literal`
 
 ## 可运行证据（A · runnable）
 
-写入每个 T 的 **## 九、实现结果**，须同时可 grep 到：
+写入每个 T 的 **## 结果**，须同时可 grep 到：
 
 1. **编译**：`编译` / `build` / `package` / `mvn` / …  
 2. **启或冒烟**：`启动` / `health` / `冒烟` / `curl` / …  
@@ -57,7 +57,7 @@ cd <skill> && npm run validate:sol
 
 ## 入场日志（A · smoke）
 
-`atlas/logs/` 下至少一个文件名含 `smoke|compile|probe|test-entry|fe-smoke|be-smoke`，正文含过线痕迹。
+`atlas/logs/` 下至少一个文件名含 `smoke|compile|probe|test-entry|fe-smoke|be-smoke`，正文含通过痕迹。
 
 ## 像素对比（A · 有强制原型时）
 
@@ -67,7 +67,7 @@ cd <skill> && npm run validate:sol
 ## 回复格式（勾①时）
 
 ```
-字面量校验：一段/五段/目的/需要什么/怎么做/步骤/代码落点 已命中
+字面量校验：## 范围 · ## 做法 · #### 步骤 · 代码落点 已命中
 validate: exit 0 — <print-cmd 给出的命令>
 ```
 

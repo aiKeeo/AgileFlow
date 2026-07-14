@@ -4,15 +4,17 @@
 
 > 用敏捷五阶段 + **BDD→DDD→SDD→TDD**，把「想法」变成「可运行、可验收、可交接」的成品。简单项目 **~1 小时上线**，MVP **当天可交付**。
 
-[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.9.0-blue.svg)](skills/agileflow/SKILL.md)
 [![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#为什么能-1-小时上线)
 
 ---
 
 ## 一句话介绍
 
-**Agileflow** 把软件工程最佳实践写成 AI 可执行的 Skill：**BDD** 写需求、**DDD** 建模型、**SDD** 定方案、**TDD** 写代码，每阶段有人类确认闸门，全程产出 `specs/` 文档。  
+**Agileflow** 把软件工程最佳实践写成 AI 可执行的 Skill：**BDD** 写需求、**DDD** 建模型、**SDD** 定方案、**TDD** 写代码，每阶段有人类确认闸门，全程产出 `atlas/` 文档。  
 对 AI 说「走 agileflow」—— 从 0 到可部署，**最快 1 小时，通常半天内完成 MVP**。
+
+> **快速模式 ≠ 跳阶段。** 仍按 req→mod→sol→dev→tests；只少问、按**风险档位**（精简/标准/完整）控制文档厚度。
 
 ---
 
@@ -41,12 +43,12 @@ Agileflow 的做法：**流程压缩，但不牺牲结构**。
 | 人群 | 常见痛点 | Agileflow 怎么帮 |
 |------|----------|------------------|
 | **独立开发者 / 创业者** | 有想法但 weeks 才出 Demo | 快速模式：**~1 小时**出可部署 Demo |
-| **接外包 / 副业开发者** | 交付无文档难收尾 | specs/ 全套 + REQ ↔ 验收报告一一对应 |
+| **接外包 / 副业开发者** | 交付无文档难收尾 | atlas/ 全套 + REQ ↔ 验收报告一一对应 |
 | **小团队 Tech Lead** | AI 产出难 Review、难交接 | 五阶段产出可分工、可审计 |
 | **后端 / 全栈工程师** | 表结构和 API 对不上 | DDD 前置，DDL 和 API 先确认再写码 |
 | **怕 AI 跑偏的用户** | AI 闷头写，方向错了全推翻 | **阶段闸门 + 需求确认卡片**，每步等你点头 |
 | **AI 干一半就卡死的用户** | 缺密钥、缺环境，AI 假装完成 | **humanTodo** 明确列出需要你帮忙的事，未齐则 `BLOCKED-HUMAN` |
-| **不知道 AI 在干嘛的用户** | 对话关了进度全丢 | **`specs/todo.md` 实时进度** + 断点续跑「继续 agileflow」 |
+| **不知道 AI 在干嘛的用户** | 对话关了进度全丢 | **`atlas/todo.md` 实时进度** + 断点续跑「继续 agileflow」 |
 | **需要合规的团队** | 需求→实现→测试无法追溯 | BDD 场景 → 测试 → 独立验收报告，全程留痕 |
 
 ---
@@ -96,7 +98,7 @@ AI 不是闷头干到底，**关键决策和外部资源必须人类参与**：
 | **阶段闸门** | 阶段 1–4 每阶段结束 | 点「是，继续」才进入下一阶段；点「否，暂停」随时停 |
 | **humanTodo 人类待办** | 任何阶段识别到外部依赖 | 提供 API 密钥、商户号、`.env`、业务拍板、运维资源等 |
 
-**humanTodo 示例**（AI 自动写入 `specs/humanTodo.md`）：
+**humanTodo 示例**（AI 自动写入 `atlas/humanTodo.md`）：
 
 | 事项 | 来源 | 状态 |
 |------|------|------|
@@ -114,7 +116,7 @@ AI 不是闷头干到底，**关键决策和外部资源必须人类参与**：
 
 ### 📊 进度全程可见 — 随时知道 AI 卡在哪
 
-打开 `specs/` 文件夹，**一眼看清项目走到哪、还剩什么**：
+打开 `atlas/` 文件夹，**一眼看清项目走到哪、还剩什么**：
 
 **① 阶段声明行** — 每次 AI 回复首行告诉你当前状态：
 
@@ -122,7 +124,7 @@ AI 不是闷头干到底，**关键决策和外部资源必须人类参与**：
 📍 Agileflow | 模式：快速 | 阶段：3-技术方案 | 依据：todo 下一未完成阶段
 ```
 
-**② `specs/todo.md`** — AI 任务 + 流程进度 + 变更历史：
+**② `atlas/todo.md`** — AI 任务 + 流程进度 + 变更历史：
 
 ```markdown
 ## 流程进度
@@ -169,18 +171,19 @@ AI 不是闷头干到底，**关键决策和外部资源必须人类参与**：
 
 ---
 
-### 📁 specs/ 文档体系 — 快交付也能交接
+### 📁 atlas/ 文档体系 — 快交付也能交接
 
 全程自动生成，**可 Review、可分工、可审计**：
 
 ```
-specs/
-├── requirements/REQ-001-xxx.md   # BDD 需求（Given-When-Then）
-├── 002-data-model.md             # DDD 领域模型 + DDL
-├── 003-solution.md               # SDD 架构 + API + 任务清单
-├── tests/REQ-001-验收报告.md       # 逐 REQ 验收证据
-├── todo.md                       # AI 进度（你随时打开看）
-└── humanTodo.md                  # 需要你帮忙的事（你随时打开做）
+atlas/
+├── requirements/REQ-001-xxx.md   # BDD + 可选 ui/UID-*
+├── model/                        # DDD（快速可用 model-overview）
+├── solution/architecture.md      # SDD + features/contracts
+├── dev/T-xxx-*.md                # 每任务①构思
+├── tests/REQ-*-验收报告.md        # 逐 REQ 验收
+├── todo.md                       # 进度 + ①②③
+└── humanTodo.md                  # 需要你帮忙的事
 ```
 
 ---
@@ -191,7 +194,7 @@ specs/
 |------|--------|
 | 改一行 bug、纯答疑、hotfix | 豁免五阶段，L1+L3 **几分钟** |
 | API / DB / 权限 / 多模块变更 | 强制完整五阶段 |
-| 用户说「快速通道 / 不走流程」 | 微型改动通道，不写 REQ/002/003 |
+| 用户说「快速通道 / 不走流程」 | 仅微型豁免（无 API/DB/MVP）；≠ 快速模式跳阶段 |
 
 AI 不会把「解释这行代码」也拉进五阶段，**该快则快，该重则重**。
 
@@ -233,7 +236,7 @@ cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.trae/skills/
 ```
 
 ```
-继续 agileflow                    # 从 specs/todo.md 断点续跑
+继续 agileflow                    # 从 atlas/todo.md 断点续跑
 走完整流程，快速模式，1 小时内交付
 ```
 
@@ -254,12 +257,12 @@ AI 首行声明示例：
 | 时间 | 阶段 | AI 产出 |
 |------|------|---------|
 | 0:05 | 需求澄清 | REQ-001.md |
-| 0:10 | 数据建模 | 002-data-model.md + init.sql |
-| 0:20 | 技术方案 | 003-solution.md + 开发任务 |
-| 0:50 | 开发实现 | 业务代码 + L3 测试 |
+| 0:10 | 数据建模 | `atlas/model/` + DDL |
+| 0:20 | 技术方案 | `architecture.md` + 详细 todo |
+| 0:50 | 开发实现 | 业务代码 + L3（按风险档位写①） |
 | 1:00 | 测试验收 | L1+L3 PASS，验收报告 |
 
-**结果**：可运行代码 + specs/ 文档 + 验收报告，直接部署或演示。
+**结果**：可运行代码 + atlas/ 文档 + 验收报告，直接部署或演示。
 
 ---
 
@@ -297,13 +300,13 @@ AgileFlow/
 |--------|--------|
 | 走 agileflow / 完整流程 / 今天上线 | 纯解释、答疑 |
 | 从零做系统、MVP、Demo | Code Review、读代码 |
-| 已有 specs/ 说「继续 agileflow」 | 单文件小改、改一行 bug |
+| 已有 atlas/ 说「继续 agileflow」 | 单文件小改、改一行 bug |
 
 ---
 
 ## 版本
 
-**v4.2.0** — 详见 [SKILL.md](skills/agileflow/SKILL.md)
+**v9.9.0** — 详见 [SKILL.md](skills/agileflow/SKILL.md)
 
 ---
 

@@ -1,27 +1,16 @@
 import path from 'node:path';
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
 
-/**
- * 从 markdown 抽出「## 九、实现结果」段正文
- * @param {string} content
- * @returns {string | null}
- */
-function extractSectionNine(content) {
-  const match = content.match(/^## 九、实现结果[^\n]*/m);
+function extractSectionResult(content) {
+  const match = content.match(/^## 结果[^\n]*/m);
   if (!match || match.index === undefined) return null;
   const rest = content.slice(match.index + match[0].length);
   const next = rest.search(/^## /m);
   return (next === -1 ? rest : rest.slice(0, next)).trim();
 }
 
-/**
- * 判定九段是否含可运行证据（编译 + 启/冒烟 + 结果标记）
- * @param {string} body
- * @returns {boolean}
- */
 function hasRunnableEvidence(body) {
   if (!body || body.replace(/\s/g, '').length < 30) return false;
-  // 仅占位表、未填结果 → 不合格
   if (/③\s*验收后填写/.test(body) && !/exit\s*0|✅|通过|PASS|UP|成功/i.test(body)) {
     return false;
   }
@@ -34,12 +23,6 @@ function hasRunnableEvidence(body) {
   return hasBuild && hasStartOrSmoke && hasResult;
 }
 
-/**
- * 校验全部非 README/temp 的 dev 文件九段可运行证据
- * 用于 A 档闸门：dev-complete / test-entry
- * @param {string} projectRoot
- * @param {import('../reporter.mjs').Reporter} reporter
- */
 export function validateRunnable(projectRoot, reporter) {
   const devRoot = path.join(projectRoot, 'atlas', 'dev');
   if (!exists(devRoot)) {
@@ -71,14 +54,14 @@ export function validateRunnable(projectRoot, reporter) {
     const content = readText(file);
     if (!content) continue;
     const relPath = rel(projectRoot, file);
-    const body = extractSectionNine(content);
+    const body = extractSectionResult(content);
 
     if (body === null) {
       reporter.add({
         severity: 'error',
-        rule: 'RUN-S9-MISSING',
+        rule: 'RUN-RESULT-MISSING',
         file: relPath,
-        message: '缺少「## 九、实现结果」，dev-complete 须有可运行证据。',
+        message: '缺少「## 结果」段，无法核验可运行证据。',
       });
       continue;
     }
@@ -86,10 +69,10 @@ export function validateRunnable(projectRoot, reporter) {
     if (!hasRunnableEvidence(body)) {
       reporter.add({
         severity: 'error',
-        rule: 'RUN-S9-EVIDENCE',
+        rule: 'RUN-RESULT-EVIDENCE',
         file: relPath,
         message:
-          '九、缺少可运行证据：须含「编译/build」+「启动或冒烟」+「结果标记」(exit 0/✅/通过/PASS/UP)。禁止只写「测过了」或空表。',
+          '「## 结果」须含编译/build + 启动或冒烟 + exit0/✅/PASS（须实际运行后写入）。',
       });
     }
   }

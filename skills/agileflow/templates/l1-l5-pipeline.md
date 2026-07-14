@@ -66,16 +66,16 @@
 
 ## 测试入场门禁
 
-进入 **AC 验收归档之前**必须过线（快速/严谨均强制）：
+进入 **AC 验收归档之前**必须通过（快速/严谨均强制）：
 
-| 步骤 | 做什么 | 过线 | 不过 → |
+| 步骤 | 做什么 | 通过 | 不过 → |
 |------|--------|------|--------|
 | **编译构建** | **architecture 中存在的端** 编译/构建 | 各存在端：静态检查（lint/type 无 error）+ 构建成功 | 修编译，禁止 AC 验收归档 |
 | **启动探针** | **仅存在的可启动端** | BE 若存在：可启动且 health/等价探针 UP；FE/小程序若存在：可启动或开发者工具可开 | 修启动/配置，禁止 AC 验收归档 |
 | **功能冒烟** | **功能冒烟清单** | 每条主功能 happy path 不报错（不 500、关键页可开、核心写操作可完成） | 回阶段 4 修功能，禁止 AC 验收归档 |
 | **像素对比**（有强制原型） | [fe-pixel-compare](fe-pixel-compare.md) | `atlas/tests/fe-pixel/report.json` PASS | 修 UI |
 
-**有 FE**：冒烟见 [fe-smoke-playwright](fe-smoke-playwright.md)。**有强制原型**：像素对比只认 [fe-pixel-compare](fe-pixel-compare.md)（UID∪pages.json，目录散图不挡门）。
+**有 FE**：冒烟见 [fe-smoke-playwright](fe-smoke-playwright.md)。**有强制原型**：像素对比只认 [fe-pixel-compare](fe-pixel-compare.md)（UID∪pages.json，目录散图不阻塞闸门）。
 用户前缀已是 `test:smoke` / `test:smoke-fe` → 直接跑，可不再问。
 
 **端范围**：以 `architecture.md` 技术栈为准——只有 BE → 只跑 BE；只有 FE → 只跑 FE；全栈 → 两端都跑。**禁止**对不存在的端要求编译。

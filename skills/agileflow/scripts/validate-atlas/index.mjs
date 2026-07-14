@@ -23,34 +23,63 @@ import { validatePixelCompare } from './lib/rules/pixel.mjs';
  * @property {string[]} [only]
  */
 
-/**
- * 统计 todo 中合法 T 头数量
- * @param {string} todo
- */
-function countTHeaders(todo) {
-  return (todo.match(/^#{3,4}\s+T-\d+/gm) || []).length;
-}
+/** 风险维度关键词 → 命中即完整档 */
+const RISK_DIMENSIONS = [
+  /支付|payment|alipay|微信支付|交易退款/i,
+  /权限|permission|auth\b|RBAC|角色管理|鉴权/i,
+  /DB\s*schema|数据库迁移|migration\b|DDL\b|ALTER\sTABLE|CREATE\sTABLE/i,
+  /多模块|跨模块|microservice/i,
+];
 
 /**
- * T≥3 或同时出现 BE+FE 任务 → 强制严谨（文档铁律）
+ * 风险分档：精简 / 标准 / 完整
+ * 替代原 T≥3 强制严谨——分档由风险维度决定，不由 T 数量决定
  * @param {string} todo
+ * @returns {'lite'|'standard'|'full'}
  */
-function shouldForceStrict(todo) {
-  if (!todo) return false;
-  if (countTHeaders(todo) >= 3) return true;
+export function resolveRiskTier(todo) {
+  if (!todo) return 'standard';
+
+  // 1. 显式标注 [精简|标准|完整]
+  if (/\[精简\]|\[lite\]/i.test(todo)) return 'lite';
+  if (/\[完整\]|\[full\]/i.test(todo)) return 'full';
+  if (/\[标准\]|\[standard\]/i.test(todo)) return 'standard';
+
+  // 2. 模块配置区 dev-doc 字段
+  const moduleConfig = todo.match(/##\s*模块配置[\s\S]*?(?=\n##\s|$)/);
+  if (moduleConfig) {
+    const devDocMatch = moduleConfig[0].match(/dev-doc:\s*(\S+)/i);
+    if (devDocMatch) {
+      const val = devDocMatch[1].toLowerCase();
+      if (/lite|精简|3段?/.test(val)) return 'lite';
+      if (/full|完整|9段?/.test(val)) return 'full';
+      if (/standard|标准|5段?/.test(val)) return 'standard';
+    }
+  }
+
+  // 3. 风险维度自动检测 → full
+  for (const pattern of RISK_DIMENSIONS) {
+    if (pattern.test(todo)) return 'full';
+  }
+
+  // 4. BE+FE → standard
   const hasBe = /T-\d+[^\n]*BE|-BE\.md|端：\*\*BE\*\*|【BE】/i.test(todo);
   const hasFe = /T-\d+[^\n]*FE|-FE\.md|端：\*\*FE\*\*|【FE】/i.test(todo);
-  return hasBe && hasFe;
+  if (hasBe && hasFe) return 'standard';
+
+  // 5. 默认 standard（不再用 T≥3 强制）
+  return 'standard';
 }
 
 /**
- * 解析模式：显式严谨优先；T≥3/BE+FE 强制严谨；否则尊重快速；默认 fast
+ * 解析模式：full 档 → strict；其余 → fast（除非显式）
  * @param {string} projectRoot
  * @param {'fast'|'strict'|'auto'|undefined} requested
+ * @param {'lite'|'standard'|'full'} [tier]
  */
-function resolveMode(projectRoot, requested) {
+function resolveMode(projectRoot, requested, tier) {
+  if (tier === 'full') return 'strict';
   const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-  if (shouldForceStrict(todo)) return 'strict';
   if (requested && requested !== 'auto') return requested;
   if (/模式：.*严谨|强制严谨/.test(todo)) return 'strict';
   if (/模式：.*快速/.test(todo)) return 'fast';
@@ -64,12 +93,14 @@ export function validateAtlas(options = {}) {
     options.brownfield === 'auto' || options.brownfield === undefined
       ? detectBrownfield(projectRoot)
       : options.brownfield;
-  const mode = resolveMode(projectRoot, options.mode);
+  const todoContent = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
+  const tier = options.tier ?? resolveRiskTier(todoContent);
+  const mode = resolveMode(projectRoot, options.mode, tier);
 
   const reporter = new Reporter();
   const only = options.only ?? null;
   const shouldRun = (name) => !only || only.includes(name);
-  const devOpts = { mode };
+  const devOpts = { mode, tier };
 
   if (shouldRun('dir')) {
     validateDirectory(projectRoot, reporter, { phase, brownfield });
@@ -90,7 +121,7 @@ export function validateAtlas(options = {}) {
     validateSolution(projectRoot, reporter);
   }
   if (shouldRun('todo') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
-    validateTodo(projectRoot, reporter);
+    validateTodo(projectRoot, reporter, { tier });
   }
   if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
     validateDev(projectRoot, reporter, devOpts);
@@ -102,7 +133,7 @@ export function validateAtlas(options = {}) {
     validateTests(projectRoot, reporter);
   }
   if (shouldRun('smoke') && (phase === 'all' || phase === '5')) {
-    validateSmokeEntry(projectRoot, reporter);
+    validateSmokeEntry(projectRoot, reporter, { incremental: options.incremental });
   }
   if (shouldRun('pixel') && (phase === 'all' || phase === '4' || phase === '5')) {
     validatePixelCompare(projectRoot, reporter);
@@ -111,10 +142,10 @@ export function validateAtlas(options = {}) {
   reporter.add({
     severity: 'info',
     rule: 'RUN-OK',
-    message: `校验完成 phase=${phase} mode=${mode} brownfield=${brownfield}`,
+    message: `校验完成 phase=${phase} mode=${mode} tier=${tier} brownfield=${brownfield}`,
   });
 
-  return { passed: reporter.passed(), reporter, mode, brownfield };
+  return { passed: reporter.passed(), reporter, mode, tier, brownfield };
 }
 
 export { detectBrownfield } from './lib/brownfield.mjs';
@@ -122,4 +153,4 @@ export { resolveSkillRoot, resolveValidateScript, formatPortableGateCommand } fr
 export { runDevLiteralCheck, runA7Grep } from './lib/rules/dev.mjs';
 export { Reporter } from './lib/reporter.mjs';
 export { runGate, listGates, getGate, formatGateCommand } from './lib/workflow.mjs';
-export { AI_GATES, PHASE_DIRS, DEV_NINE_SECTIONS } from './lib/phase-spec.mjs';
+export { AI_GATES, PHASE_DIRS, DEV_NINE_SECTIONS, RISK_TIERS } from './lib/phase-spec.mjs';

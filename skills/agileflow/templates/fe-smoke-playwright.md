@@ -1,7 +1,7 @@
 # 前端 Playwright 冒烟（通用 · 页面可展示）
 
 > **用途**：对**任意可在浏览器打开的前端**做页面冒烟——逐路由打开、收集 `console.error` / `pageerror`、确认能渲染（非白屏）。  
-> **金标准脚本**：[examples/fe-smoke/fe-smoke.mjs](../examples/fe-smoke/fe-smoke.mjs)  
+> **范例脚本**：[examples/fe-smoke/fe-smoke.mjs](../examples/fe-smoke/fe-smoke.mjs)  
 > **不替代**：可运行闸门 编译/启动、BE 接口冒烟、阶段 5 细 AC、微信开发者工具真机。
 
 ---
@@ -30,7 +30,7 @@
 | 无 FE 服务 | ❌ 须先启动；脚本不替你起服务 |
 | 登录态 | ✅ 可选 API 登录 + 注入 localStorage（键名可配） |
 | 替代全量 E2E | ❌ 只验「能开、不炸」 |
-| **浏览器二进制下载** | ✅ **必须走镜像优先**（见下）；官方 CDN 国内极慢/超时，会卡死体验 |
+| **浏览器二进制下载** | ✅ **必须走镜像优先**（见下）；官方 CDN 国内极慢/超时，会硬性门槛体验 |
 | 镜像是否永远可用 | ⚠️ Playwright≥1.58 Chromium 走 CfT 路径；优先 `cdn.npmmirror.com/binaries/playwright`；失败再回退官方 |
 | 装全套浏览器 | ❌ **只装 chromium**；勿 `install` 无参 |
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 安装 Chromium（镜像优先 · 防卡死）
+## 安装 Chromium（镜像优先 · 防硬性门槛）
 
 > **权威仅此节**。其他文件只链到这里，禁止再抄一套命令。  
 > npm 包镜像 ≠ 浏览器二进制；`registry.npmmirror.com` **不解** `playwright install` 慢的问题。
@@ -77,7 +77,7 @@ unset PLAYWRIGHT_DOWNLOAD_HOST && npx playwright install chromium
 "smoke:fe:install": "node scripts/fe-smoke-install.mjs"
 ```
 
-金标准安装包装：[examples/fe-smoke/fe-smoke-install.mjs](../examples/fe-smoke/fe-smoke-install.mjs)（内置镜像 → 失败回退官方）。
+范例安装包装：[examples/fe-smoke/fe-smoke-install.mjs](../examples/fe-smoke/fe-smoke-install.mjs)（内置镜像 → 失败回退官方）。
 
 备用镜像（主镜像 404 时可试）：`https://npmmirror.com/mirrors/playwright`。
 
@@ -87,7 +87,7 @@ unset PLAYWRIGHT_DOWNLOAD_HOST && npx playwright install chromium
 
 命中**任一**且 architecture / todo 存在 **FE**（含 Web / 小程序-H5）：
 
-1. **F-xxx / MVP 切片** 可运行闸门 过线后、阶段性确认卡之前或之中  
+1. **F-xxx / MVP 切片** 可运行闸门 通过后、阶段性确认卡之前或之中  
 2. **阶段 5 · 测试入场 · 功能冒烟时**
 3. 用户说「给用户看 / 演示 / 页面测一下」  
 4. 用户前缀 **`test:smoke-fe`** / **`test:smoke`**（有 FE）→ **直接跑**，可跳过本卡
@@ -165,7 +165,7 @@ questions:
 | `FE_SMOKE_TOKEN_KEY` / `USER_KEY` | json 或 `token` / `user` | localStorage 键 |
 | `FE_SMOKE_IGNORE` | React DevTools 提示 | console 忽略子串，`\|` 分隔 |
 
-### 过线（PASS）
+### 通过（PASS）
 
 每页：导航成功 + 无 `pageerror` + 无未忽略 `console.error` + `readySelector` 可见。
 

@@ -1,6 +1,8 @@
-import { validateAtlas, runDevLiteralCheck } from '../index.mjs';
+import path from 'node:path';
+import { validateAtlas, runDevLiteralCheck, resolveRiskTier } from '../index.mjs';
 import { AI_GATES } from './phase-spec.mjs';
 import { Reporter } from './reporter.mjs';
+import { readText } from './fs-utils.mjs';
 import { formatPortableGateCommand } from './skill-path.mjs';
 
 /** 旧闸门 ID → 新 ID（兼容） */
@@ -50,7 +52,10 @@ export function runGate(gateId, opts = {}) {
     if (!opts.devFile) {
       throw new Error('dev-step1-literal 闸门须指定 devFile（atlas/dev/T-xxx-*.md）');
     }
-    const literal = runDevLiteralCheck(opts.devFile, { mode: opts.mode });
+    const projectRoot = opts.projectRoot ?? process.cwd();
+    const todoContent = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
+    const tier = opts.tier ?? resolveRiskTier(todoContent);
+    const literal = runDevLiteralCheck(opts.devFile, { mode: opts.mode, tier });
     const reporter = new Reporter();
     if (!literal.passed) {
       for (const issue of literal.issues) {
@@ -73,6 +78,8 @@ export function runGate(gateId, opts = {}) {
     brownfield: opts.brownfield ?? 'auto',
     only: gate.modules,
     mode: opts.mode,
+    tier: opts.tier,
+    incremental: opts.incremental,
     verbose: opts.verbose,
   });
 

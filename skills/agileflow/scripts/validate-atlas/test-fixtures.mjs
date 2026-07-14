@@ -27,12 +27,12 @@ const cases = [
     fail: true,
   },
   {
-    name: 'good-dev 字面量+九段',
+    name: 'good-dev 字面量+段结构',
     args: ['--dev-file', path.join(fixtures, 'good-dev/atlas/dev/T-001-login-BE.md')],
     fail: false,
   },
   {
-    name: 'good-dev 空九 → runnable 应失败',
+    name: 'good-dev 空结果 → runnable 应失败',
     args: ['--root', path.join(fixtures, 'good-dev'), '--only', 'runnable'],
     fail: true,
   },
@@ -77,7 +77,7 @@ const cases = [
     fail: true,
   },
   {
-    name: 'orphan-proto-only → 目录散图不挡门',
+    name: 'orphan-proto-only → 目录散图不阻塞闸门',
     args: ['--root', path.join(fixtures, 'orphan-proto-only'), '--only', 'pixel'],
     fail: false,
   },

@@ -15,12 +15,12 @@ atlas/tests/fe-pixel/
 
 ## 强制清单（与闸门一致 · 勿冲突）
 
-**计入挡门 / 须对比** =  
+**计入阻塞闸门 / 须对比** =  
 
 1. UID 写了 `原型图：…png`，或  
 2. `atlas/tests/fe-pixel/pages.json` 的 `pages[]`  
 
-**不计入**：`prototypes/` 里未在 UID/json 声明的散图（可当草稿，不挡门）。
+**不计入**：`prototypes/` 里未在 UID/json 声明的散图（可当草稿，不阻塞闸门）。
 
 脚本与 validate **同一规则**：并集；同一路径以 `pages.json` 覆盖 UID 的 path/selector。
 

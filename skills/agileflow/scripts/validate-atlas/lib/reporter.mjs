@@ -7,7 +7,7 @@
 /**
  * @typedef {Object} ValidationIssue
  * @property {Severity} severity
- * @property {string} rule - 规则编号，如 开发完成格式门槛、DEV-LIT-一段
+ * @property {string} rule - 规则编号，如 开发完成格式门槛、DEV-LIT-范围
  * @property {string} message
  * @property {string} [file] - 相对路径
  * @property {number} [line] - 行号（1-based）

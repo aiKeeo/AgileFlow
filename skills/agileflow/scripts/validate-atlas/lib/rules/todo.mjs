@@ -36,7 +36,7 @@ function checkThreeSteps(content, startLine) {
 
   return {
     has1: /①.*构思/.test(block) && /atlas\/dev\/T-\d+/.test(block),
-    has2: /②/.test(block) && /写码|按.*五/.test(block),
+    has2: /②/.test(block) && /写码|按.*(?:五|做法)/.test(block),
     has3: /③/.test(block) && /AC|验收/.test(block),
   };
 }
@@ -57,8 +57,12 @@ function countDevFiles(devRoot) {
 
 /**
  * 校验 atlas/todo.md（开发完成格式门槛 + 三段式）
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {{ tier?: string }} [opts]
  */
-export function validateTodo(projectRoot, reporter) {
+export function validateTodo(projectRoot, reporter, opts = {}) {
+  const tier = opts.tier ?? 'standard';
   const todoPath = path.join(projectRoot, 'atlas', 'todo.md');
   if (!exists(todoPath)) {
     reporter.add({
@@ -101,11 +105,14 @@ export function validateTodo(projectRoot, reporter) {
       message: 'todo 缺少「① 质量门槛（冻结区）」。',
     });
   } else if (!/机械 grep/.test(content)) {
+    // 完整档须有 grep 表；精简/标准档降为 warn（字面量校验仅完整档强制）
     reporter.add({
-      severity: 'error',
+      severity: tier === 'full' ? 'error' : 'warn',
       rule: 'TODO-QUALITY-缺grep表',
       file: relPath,
-      message: '质量门槛区缺少「机械 grep」表。',
+      message: tier === 'full'
+        ? '质量门槛区缺少「机械 grep」表（完整档强制）。'
+        : '质量门槛区建议含「机械 grep」表（完整档强制，当前档位可选）。',
     });
   }
 
@@ -133,6 +140,17 @@ export function validateTodo(projectRoot, reporter) {
 
   const headers = extractTaskHeaders(content);
   for (const header of headers) {
+    // A 档：每个 T 头须标注风险档位
+    if (!/\[精简\]|\[标准\]|\[完整\]/.test(header.raw)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'TODO-FORMAT-缺档位',
+        file: relPath,
+        line: header.line,
+        message: `${header.id} 头须含档位标注 [精简|标准|完整]（例：### T-001：[BE] … — F-001 [标准]）。`,
+      });
+    }
+
     const steps = checkThreeSteps(content, header.line);
     if (!steps.has1) {
       reporter.add({

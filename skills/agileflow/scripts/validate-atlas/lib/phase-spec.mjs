@@ -1,13 +1,9 @@
 /**
- * Agileflow 各阶段目录/文件规范（单一来源，供 directory + workflow 共用）
+ * Agileflow 各阶段目录/文件规范（单一来源）
  */
 
 /** @typedef {'0'|'1'|'2'|'3'|'4'|'5'|'all'} PhaseId */
 
-/**
- * 阶段目录规范
- * @type {Record<string, { id: string, dirs: { path: string, required: boolean, brownfieldOnly?: boolean }[], files: { path: string, required: boolean }[] }>}
- */
 export const PHASE_DIRS = {
   '0': {
     id: 'init',
@@ -24,16 +20,12 @@ export const PHASE_DIRS = {
   '1': {
     id: 'req',
     dirs: [{ path: 'requirements', required: true }],
-    files: [
-      { path: 'requirements/README.md', required: true },
-    ],
+    files: [{ path: 'requirements/README.md', required: true }],
   },
   '2': {
     id: 'mod',
     dirs: [{ path: 'model', required: true }],
-    files: [
-      { path: 'model/README.md', required: true },
-    ],
+    files: [{ path: 'model/README.md', required: true }],
   },
   '3': {
     id: 'sol',
@@ -61,27 +53,46 @@ export const PHASE_DIRS = {
 };
 
 /**
- * dev 九段标题（快速/严谨均须存在）
+ * dev 必填段（语义标题，无一二三编号）
+ * lite: 范围/做法/结果 · standard|full: +契约 +AC
  */
-export const DEV_NINE_SECTIONS = [
-  { num: '一', title: '需求理解', key: 'sec1', compressible: false },
-  { num: '二', title: '数据模型', key: 'sec2', compressible: true },
-  { num: '三', title: null, key: 'sec3', compressible: false, altTitles: ['接口契约', 'UI 布局与 API 字段映射'] },
-  { num: '四', title: '状态机', key: 'sec4', compressible: true },
-  { num: '五', title: '核心流程', key: 'sec5', compressible: false },
-  { num: '六', title: '异常与边界', key: 'sec6', compressible: true },
-  { num: '七', title: '技术选型与依赖', key: 'sec7', compressible: true },
-  { num: '八', title: 'REQ 验收对照', key: 'sec8', compressible: false },
-  { num: '九', title: '实现结果', key: 'sec9', compressible: false, emptyBodyOkAtStep1: true },
+export const DEV_SECTIONS = [
+  { id: 'scope', heading: '## 范围', tiers: ['lite', 'standard', 'full'] },
+  { id: 'contract', heading: '## 契约', tiers: ['standard', 'full'] },
+  { id: 'steps', heading: '## 做法', tiers: ['lite', 'standard', 'full'] },
+  { id: 'ac', heading: '## AC', tiers: ['standard', 'full'] },
+  { id: 'result', heading: '## 结果', tiers: ['lite', 'standard', 'full'] },
 ];
 
-/** 待补齐标记（快速模式可压缩段） */
+/** @deprecated 兼容旧名 */
+export const DEV_NINE_SECTIONS = DEV_SECTIONS;
+
+export const RISK_TIERS = {
+  lite: {
+    label: '精简档',
+    sections: ['scope', 'steps', 'result'],
+    literalCheck: false,
+    fakeHeadingCheck: false,
+    minDocLength: 280,
+  },
+  standard: {
+    label: '标准档',
+    sections: ['scope', 'contract', 'steps', 'ac', 'result'],
+    literalCheck: false,
+    fakeHeadingCheck: false,
+    minDocLength: 450,
+  },
+  full: {
+    label: '完整档',
+    sections: ['scope', 'contract', 'steps', 'ac', 'result'],
+    literalCheck: true,
+    fakeHeadingCheck: true,
+    minDocLength: 700,
+  },
+};
+
 export const PENDING_MARKERS = ['待补齐', 'TODO：', '（待补齐）', '→ 见', '→ ['];
 
-/**
- * AI 流程闸门：落盘后 / AskQuestion 前 / 勾①前 必须跑的校验
- * @type {Record<string, { phase: PhaseId, modules: string[], when: string, blocking: boolean, extra?: string }>}
- */
 export const AI_GATES = {
   'init-confirm': {
     phase: '0',
@@ -111,22 +122,22 @@ export const AI_GATES = {
   'dev-step1-literal': {
     phase: '4',
     modules: ['dev-step1-literal'],
-    when: '单个 T 的 dev ① 落盘 · 勾 todo ① / TodoWrite ① completed 前',
+    when: '单个 T 的 dev ① 落盘 · 勾 todo ① 前',
     blocking: true,
-    extra: '须对具体文件：--dev-file atlas/dev/T-xxx-*.md（① 时九可空；③ 前须 runnable）',
+    extra: '按档位：精简=范围/做法/结果；标准·完整=+契约+AC；完整另字面量严检',
   },
   'dev-complete': {
     phase: '4',
     modules: ['dir', 'todo', 'dev', 'runnable', 'pixel'],
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
     blocking: true,
-    extra: 'A档：九段可运行；强制原型须 fe-pixel report PASS',
+    extra: '## 结果 须含可运行证据；强制原型须 fe-pixel PASS',
   },
   'test-entry': {
     phase: '5',
     modules: ['dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel'],
-    when: '进入阶段 5 · 测试入场门禁前（须 dev-complete 已过）',
+    when: '进入阶段 5 · 测试入场门禁前',
     blocking: true,
-    extra: 'A档：smoke logs；强制原型须 fe-pixel report PASS',
+    extra: '同会话增量 / 跨会话全量；强制原型须 fe-pixel PASS',
   },
 };

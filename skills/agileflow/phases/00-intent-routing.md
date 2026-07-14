@@ -12,7 +12,7 @@
 | `@agileflow`、`继续 agileflow` | 单文件 ≤20 行、hotfix、明确说不走流程 |
 | 前缀 `init:` `req:` `mod:` `sol:` `dev:` `tests:` / `test:`（含分层） | code review |
 
-首条回复：`📍 Agileflow …` + AskQuestion（决策权或需求澄清）→ **停止**。细则见各 phase，本章不重复列动词/形态清单。
+首条回复：`📍 Agileflow …`；**默认 AI自主** → 可直接按阶段落盘，末尾 **审阅闸门 → 停**（见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)）。user_decide 或需求不清时才 AskQuestion 决策权/澄清卡 → 停。
 
 ---
 
@@ -61,7 +61,7 @@
 3. 分层跑完：证据落盘；**AskQuestion** 是否继续全量 `tests:` / 修失败 / 暂停 → 停  
 4. 可运行闸门 / 演示前可用 `test:smoke*` / `test:pixel-fe`（有原型）点名复验
 
-**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→可运行闸门→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡且每 T 已有合规①）。
+**任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→可运行闸门→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须并行启动卡且每 T 已有合规①）。
 
 ## §atlas/ 结构
 
@@ -147,10 +147,10 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 **规则**：
 - NNN 三位递增；各 `temp/README.md`（或父目录 README §临时区）登记序号与说明
 - 状态标 **临时**；转正 → 移出 `temp/` 合并进正式 REQ/F/dev，或删除
-- 仍遵守 ① 构思落盘 → ② 按 **五** 写码 → ③ 对照 REQ 验收 AC（② 可精简但 **五** 仍须逐步）；纯 refactor 无 AC 变更可豁免 ③
+- 仍遵守 ① 构思落盘 → ② 按 **## 做法** 写码 → ③ 对照 REQ 验收 AC（② 可精简但 **## 做法** 仍须逐步）；纯 refactor 无 AC 变更可豁免 ③
 - **禁止**在正式目录用 `TEMP-` 前缀命名（统一用 `temp/` 子目录）
 
-### temp / 快速通道硬禁（堵「自称小改动」）
+### temp / 快速通道硬禁（防止「自称小改动」）
 
 命中**任一** → **禁止** `dev/temp/`、**禁止**快速通道豁免，必须走正式 req→sol→`### T`+①②③：
 
@@ -175,7 +175,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 - **不改变**实体间关系（基数、归属、外键）
 - **不新增/修改**领域规则、状态机、存储结构
 
-**跳过时必须落盘「建模判定」**（禁止空喊跳过）：
+**跳过时必须落盘「建模判定」**（禁止口头跳过）：
 
 ```markdown
 📋 建模判定：跳过
@@ -242,7 +242,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## 模式判定（快速 / 严谨）
 
-**权威** → [flow-modes.md](../templates/flow-modes.md)（**快速仍按序走完阶段、todo 仍详细**；多模块/DB/权限 → **强制严谨**；「全部做」只催进度不切模式）。
+**权威** → [flow-modes.md](../templates/flow-modes.md)（**快速仍按序走完阶段、todo 仍详细**；风险维度→分档：精简/标准/完整；「全部做」只催进度不切模式）。
 
 进入阶段后首行声明 `模式：快速|严谨` 与 `决策：用户|AI自主`；无法判断 → AskQuestion。  
 「后面都你定 / 不用问我」→ **决策：AI自主**，**不要**解读为可跳过 req/sol。
@@ -291,11 +291,11 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 2 | 用户指定阶段（「写需求」「别开发只出方案」） | 该阶段 |
 | 3 | 有 `atlas/` 且说继续/下一步 | ② 建议阶段 |
 | 4 | **用户描述要做的东西**（任何具体业务表述） | **阶段 1** |
-| 5 | 说写码/实现但无 REQ/solution | 退回阶段 3 或 `dev/temp/` |
+| 5 | 说写码/实现但无 REQ/solution | **产品功能** → 退回阶段 1 或 3（禁止 temp）；**探活/单文件重构** → `dev/temp/`；灰区 AskQuestion |
 | 6 | 改已确认 REQ | [change-management](change-management.md) |
 | 7 | 说不清 | AskQuestion 选阶段 |
 
-**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→可运行闸门→③；禁止合并 todo；多模块强制严谨。
+**催进度** ≠ 跳过流程：详见 [SKILL 反模式表](../SKILL.md)。仍逐 T ①→②→可运行闸门→③；禁止合并 todo；高风险任务走完整档。
 
 ### 决策委派话术（→ [stage-delegation.md](../templates/stage-delegation.md)）
 
@@ -392,12 +392,12 @@ questions:
 ## 进入阶段后的行为
 
 1. 输出阶段声明行（含 `模式` + `决策`；见 [SKILL.md 首行声明](../SKILL.md#首行声明)）
-2. **阶段入口**：`todo` 未设全局 AI自主 → 决策权卡；**已全局 AI自主 → 跳过**，直接落盘（[stage-delegation](../templates/stage-delegation.md)）
+2. **阶段入口**：默认 AI自主（未设置或全局已设）→ 跳过决策权卡直接落盘 → 审阅闸门；仅 user_decide 时走决策权卡（[stage-delegation](../templates/stage-delegation.md)）
 3. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`；开发 → `04-development.md`）
 4. **允许共读**：该 phase 文内显式链接的 `templates/*`
 5. **阶段 4 必读共读**（与 [SKILL 加载表](../SKILL.md#加载) 一致）：[dev-quickstart.md](../templates/dev-quickstart.md) + [04-development.md](04-development.md) + exemplar（按端）+ [todo.md TodoWrite](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)；F/MVP 切片齐时另读 [askquestion-gate 阶段性卡](../templates/askquestion-gate.md#阶段性确认卡阶段-4-内--mvp--f-xxx-切片强制)
 6. **阶段 0/1–4 产出完成** → user_decide：阶段闸门；ai_decide：审阅闸门 → **停止**
-7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)（须开闸卡）
+7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)（须并行启动卡）
 
 ## 正误示例
 

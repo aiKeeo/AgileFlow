@@ -14,7 +14,7 @@ function normProto(p) {
 
 /**
  * 从 UID / pages.json 收集「强制对比」原型清单
- * 注意：prototypes/ 目录散图不单独挡门（须 UID 声明或写入 pages.json）
+ * 注意：prototypes/ 目录散图不单独阻塞闸门（须 UID 声明或写入 pages.json）
  * @param {string} projectRoot
  * @returns {{ hasProto: boolean, sources: string[], expectedProtos: string[] }}
  */
@@ -132,7 +132,7 @@ export function validatePixelCompare(projectRoot, reporter) {
       severity: 'error',
       rule: 'PIXEL-R004',
       file: report.path,
-      message: 'results 为空，禁止 summary 充数。',
+      message: 'results 为空，禁止 summary 凑数。',
     });
     return;
   }

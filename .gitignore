@@ -1,0 +1,7 @@
+# WorkBuddy local state
+.workbuddy/
+
+# Local adversarial review notes (not part of the skill)
+对抗式审查报告.md
+对抗式审查报告-*.md
+*对抗式审查*.md
