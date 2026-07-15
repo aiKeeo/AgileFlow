@@ -56,12 +56,12 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
     });
   }
 
-  if (!/^## BDD 验收场景/m.test(content)) {
+  if (/^## BDD 验收场景/m.test(content)) {
     reporter.add({
       severity: 'warn',
       rule: 'REQ-F006',
       file: relPath,
-      message: '建议含「## BDD 验收场景」与 AC 对照。',
+      message: '请合并进 AC 表，勿双写「## BDD 验收场景」（AC 表即 BDD）。',
     });
   }
 }
@@ -177,6 +177,39 @@ export function validateReqConfirmed(projectRoot, reporter) {
 }
 
 /**
+ * 索引 README 状态 vs 子文件状态（状态权威 = README）
+ */
+function validateReqIndexStatusConsistency(projectRoot, reporter) {
+  const indexPath = path.join(projectRoot, 'atlas', 'requirements', 'README.md');
+  if (!exists(indexPath)) return;
+  const index = readText(indexPath) || '';
+  const rowRe = /\|\s*(REQ-\d+)\s*\|[^|]*\|[^|]*\|\s*([^|]+)\s*\|/g;
+  let match;
+  while ((match = rowRe.exec(index)) !== null) {
+    const reqId = match[1];
+    const indexStatus = match[2].trim();
+    if (!/草稿|已确认|变更中|已实现|已废弃/.test(indexStatus)) continue;
+    const files = collectFiles(path.join(projectRoot, 'atlas', 'requirements'), '.md').filter(
+      (f) => path.basename(f).startsWith(reqId) && isBusinessReq(f),
+    );
+    for (const file of files) {
+      const content = readText(file) || '';
+      const m = content.match(/状态：\s*(\S+)/);
+      if (!m) continue;
+      const fileStatus = m[1].trim();
+      if (fileStatus !== indexStatus && !indexStatus.includes(fileStatus)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'REQ-STATUS-INDEX',
+          file: rel(projectRoot, file),
+          message: `状态与 requirements/README 不一致：文件「${fileStatus}」vs 索引「${indexStatus}」。以索引为准并同步。`,
+        });
+      }
+    }
+  }
+}
+
+/**
  * 校验 atlas/requirements/
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
@@ -195,4 +228,5 @@ export function validateRequirements(projectRoot, reporter) {
       validateReqFile(projectRoot, file, content, reporter);
     }
   }
+  validateReqIndexStatusConsistency(projectRoot, reporter);
 }

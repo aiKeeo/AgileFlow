@@ -24,25 +24,13 @@
 
 ## 验收标准（AC）
 
-> AC 规则见 [ac-guide.md](ac-guide.md)。
+> **本表即 BDD**（Given/When/Then）。禁止再写独立「BDD 验收场景」节。规则见 [ac-guide.md](ac-guide.md)。
 
 | AC ID | 场景 | Given | When | Then（可断言） | AC 测试方法 | 状态 |
 |-------|------|-------|------|----------------|--------------|------|
 | AC-XXX-01 | 正常流程 | … | … | HTTP 200、code=0 | `acxxx_01_…` | ⬜ |
 | AC-XXX-02 | 异常流程 | … | … | HTTP 400、VALIDATION_ERROR | `acxxx_02_…` | ⬜ |
 | AC-XXX-03 | UI 展示 | … | … | 页面展示 X | — | ⚠️ FE 人工 |
-
-## BDD 验收场景（与 AC 对照）
-
-### 场景1：正常流程 → AC-XXX-01
-**Given** …
-**When** …
-**Then** …
-
-### 场景2：异常流程 → AC-XXX-02
-**Given** …
-**When** …
-**Then** …
 
 ## 界面描述（可选 — 有 UI 时填写）
 
@@ -71,12 +59,12 @@
 ```markdown
 # 需求索引
 
-> AC 规范见 [_AC-GUIDE.md](./_AC-GUIDE.md) · UI 描述见 [ui/README.md](ui/README.md)
+> **本表状态为权威**；各 REQ 文件头「状态」须与本表一致。UI 见 [ui/README.md](ui/README.md)
 
 | 编号 | 名称 | 版本 | 状态 | UI | 文件 |
 |------|------|------|------|-----|------|
 | REQ-001 | 用户登录 | 1.0 | 已确认 | UID-001 | REQ-001-用户登录.md |
-| REQ-002 | 商品浏览 | 1.0 | 已确认 | — | REQ-002-商品浏览.md |
+| REQ-002 | 商品浏览 | 1.0 | 草稿 | — | REQ-002-商品浏览.md |
 ```
 
 ## todo.md 更新示例

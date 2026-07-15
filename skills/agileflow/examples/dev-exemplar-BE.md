@@ -1,12 +1,27 @@
 # dev 构思范例（BE）
 
-> ① 照此结构写；细节链到 REQ/API/model，**禁止抄全文**。
+> ① 照此结构写；细节链到 REQ/API/model，**禁止抄全文**。每步须有 **目的：**。
 
 # [T-004] 体重记录 API — 构思 [BE]
 
 - 任务：**T-004** · 端：**BE** · 档位：**标准**
 - → [REQ-002](../requirements/REQ-002-健康记录与可视化.md) · [F-002](../solution/features/F-002-健康记录与可视化.md) · [API-003](../solution/contracts/API-003-体重记录.md)
 - depends_on：T-002 · 写法：`code-patterns-backend` 资产索引
+
+## 前置
+
+- depends_on：T-002（鉴权与 `AuthContext` 须先可用，本 T 不重复造登录）
+- 运行条件：本地可启 BE；测试库可写 `weight_records`
+- 前提假设：用户表与 JWT 中间件已按 F-001 落地；本 T 无 schema 迁移
+
+## 必读（只链，打开即用）
+
+| 用途 | 链接 | 本 T 用到什么 |
+|------|------|---------------|
+| 验收 | [REQ-002](../requirements/REQ-002-健康记录与可视化.md) | AC-002-01/02/07 |
+| 功能边界 | [F-002](../solution/features/F-002-健康记录与可视化.md) | 暴露面 API-003 |
+| 接口 | [API-003](../solution/contracts/API-003-体重记录.md) | POST/GET/DELETE 形状与错误码 |
+| 模型 | [domain-model](../model/domain-model.md) | WeightRecord 字段；无本 T schema 变更 |
 
 ## 范围
 
@@ -29,24 +44,23 @@
 
 ## 做法
 
-#### 新增 `AC-002-01`
+#### 新增记录 — 目的：落库并返回可追溯 id `WeightRecordController.create`
 
-1. `WeightRecordController.create` + `@Valid`
-2. Service 填 `userId` → `weightRecordRepository.save`
-3. 返回 201 + `WeightRecordResponse`
+- 引用：API-003 §请求 POST · AC-002-01
+- 做：`@Valid` 入参 → Service 填 `userId` → `weightRecordRepository.save` → 201 + `WeightRecordResponse`
+- 完成标志：AC-002-01 单测绿；响应含非空 id
 
-#### 列表 `AC-002-02`
+#### 区间列表 — 目的：按时间升序返回本人记录 `WeightRecordService.list`
 
-1. `list(from,to)` → `findByUserIdAndRecordedAtBetweenOrderByRecordedAtAsc`
-2. 转 `items[]` 升序返回
+- 引用：API-003 GET · AC-002-02
+- 做：`list(from,to)` → `findByUserIdAndRecordedAtBetweenOrderByRecordedAtAsc` → 转 `items[]`
+- 完成标志：列表 `recordedAt` 非降序
 
-#### 删除
+#### 删除与校验 — 目的：仅本人可删且拦截非法体重 `WeightRecordService.delete`
 
-1. `findById` → 非己/不存在 404 → `delete`
-
-#### 非法值 `AC-002-07`
-
-1. Controller `@Valid` 拦 value≤0，Service 不执行
+- 引用：API-003 DELETE · AC-002-07
+- 做：`findById` 非己/不存在→404；`@Valid` 拦 value≤0，Service 不执行
+- 完成标志：他户 404；value≤0 → 400
 
 ## AC
 

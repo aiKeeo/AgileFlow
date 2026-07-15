@@ -56,8 +56,7 @@ atlas/solution/
 > **AI 自主**：审阅闸门已含「继续下一阶段」，**不走本步**。  
 > **快速**：若确认卡已含「是，继续」→ **不走本步**（见 flow-modes）。
 
-`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀** 后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`）→ **停止**。
-
+`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀**（**已决事项须从 humanTodo 删除**；用户原话/本阶段已答清的项禁止留在 humanTodo；禁止与 `architecture` 已选栈矛盾）、**`atlas/README.md` 已更新**（已拍板栈 / 现在 / 未决）后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`）→ **停止**。
 ## 批量出方案（可选 — 仅用户显式要求并行出方案）
 
 > 用户说「并行出方案 / 多 subagent 写 features」且功能 ≥2 或全栈 FE+BE 时启用。
@@ -85,10 +84,11 @@ atlas/solution/
 
 | 文件 | 说明 |
 |------|------|
-| `features/F-xxx-*.md` | 功能 + §边界 |
-| `contracts/*` | 契约（按需） |
+| `atlas/README.md` | 人类驾驶舱（栈已拍板 / 现在 / 未决） |
+| `features/F-xxx-*.md` | 功能 + §边界（短；禁复述用户故事） |
+| `contracts/*` | 契约（按需；UI 只链 UID） |
 | `architecture.md` | 全局架构（唯一） |
-| `todo.md` | 开发任务：**每个 `### T-xxx` + ①②③ 三步**（见 [solution-architecture 开发任务](../templates/solution-architecture.md#开发任务写入-todomd阶段-3-第-8-步)） |
+| `todo.md` | 开发任务：**每个 `### T-xxx` + ①②③ 三步**（见 [todo](../templates/todo.md)） |
 
 `README.md` 未「已确认」→ 禁止进阶段 4。  
-**todo 未过阶段 3 自检（无三段式或无①质量门槛）→ 禁止标方案已确认、禁止进阶段 4。**
+**todo 未过阶段 3 自检（无三段式）→ 禁止标方案已确认、禁止进阶段 4。**

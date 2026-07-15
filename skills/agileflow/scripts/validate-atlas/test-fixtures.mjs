@@ -37,6 +37,16 @@ const cases = [
     fail: false,
   },
   {
+    name: 'bad-dev-no-purpose → 步骤无目的应失败',
+    args: ['--dev-file', path.join(fixtures, 'bad-dev-no-purpose/atlas/dev/T-001-login-BE.md')],
+    fail: true,
+  },
+  {
+    name: 'bad-dev-paste-api → 契约粘贴 JSON 应失败',
+    args: ['--dev-file', path.join(fixtures, 'bad-dev-paste-api/atlas/dev/T-001-login-BE.md')],
+    fail: true,
+  },
+  {
     name: 'good-dev 空结果 → runnable 应失败',
     args: ['--root', path.join(fixtures, 'good-dev'), '--only', 'runnable'],
     fail: true,

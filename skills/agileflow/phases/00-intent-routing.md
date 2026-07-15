@@ -1,4 +1,4 @@
-﻿# 入口意图识别与阶段路由
+# 入口意图识别与阶段路由
 
 > **启用 Agileflow 时**，必须先执行本章，再读取**一个**对应 `phases/xx.md` + 该 phase **显式链接**的 `templates/*`。禁止预读其他 phase；禁止跳过识别直接写代码或写文档。
 
@@ -14,7 +14,27 @@
 
 首条回复：`📍 Agileflow …`。  
 **无 env / `AF_FLOW`·`AF_DECIDE` 为 pending** → 先发[流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → **停**（禁止本条落盘）。  
-契约已确认且 `AF_DECIDE=ai` → 按阶段落盘 → **审阅闸门 → 停**。`user_decide` 或需求不清 → 澄清卡 → 停。详见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)。
+契约已确认且 `AF_DECIDE=ai` → 按阶段落盘 → **审阅闸门 → 停**。`user_decide`：信息充分则少问/跳过澄清，否则缺口卡 → 停。详见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)。
+
+## 识别顺序（固定 4 步）
+
+```
+① 豁免判定 → ② 读取项目状态 → ③ 解析用户意图 → ④ 前置校验 & 确认 → 进入目标阶段
+```
+
+### 纠偏话术（路由）
+
+> 权威阶梯 → [change-management §纠偏阶梯](change-management.md#纠偏阶梯全阶段)。命中下表 → **先纠偏**，禁止假装继续写码。
+
+| 用户原话（例） | 优先判定 |
+|----------------|----------|
+| 需求不对 / 改 REQ / 场景要变 / AC 错了 | **L2**（已确认 REQ）或阶段 1（草稿） |
+| 方案重来 / 推倒重做方案 / 栈选错了 | **L3** → 回阶段 3（或 L2 若仅改局部 feature） |
+| 回建模 / 模型不对 / 表结构错了 | **L2** 或 **L3** → 回阶段 2（整体错用 L3） |
+| 这块设计错了 / 做法要换 | 开发中 → **L0**（细节）或回 ①（根本）或 **L1/L2**（动 model/sol/AC） |
+| 平台不对（如小程序改 App） | **L3** → 回阶段 1 |
+
+本回复首行：`纠偏：L{n} → {目标}`；L2/L3 更新 `atlas/README.md`。
 
 ---
 
@@ -45,27 +65,10 @@
 
 ### `test:` 分层（可指定层 / 单端）
 
-> **记法**：`test:` + 层名。可全量、可分层、可单端。权威执行 → [05-testing](05-testing.md#test-分层入口) · [测试流水线 CLI 对照](../templates/l1-l5-pipeline.md#cli-短名--中文全称)。
-
-| 用户写 | Agent 跑什么 | 产出 / 证据 |
-|--------|--------------|-------------|
-| **`tests:`** / **`test:`**（无后缀） | **全量阶段 5**：测试入场门禁 → AC验收归档 → 全量回归 | `atlas/tests/` 报告 |
-| **`test:unit`** / **`test:l3`** | **AC 单测**（阶段 4 ③ 已有的 `test/ac` 等） | 终端绿 + 可选记入 `atlas/logs/` |
-| **`test:l1`** / **`test:lint`** | 仅静态检查 | 终端 |
-| **`test:l2`** / **`test:build`** | 仅构建 | 终端 |
-| **`test:smoke`** | **两端功能冒烟**（存在端）：= `smoke-be` +（有 FE 时）`smoke-fe` | `atlas/logs/*smoke*` + 摘要 |
-| **`test:smoke-be`** | **仅 BE 冒烟**：启动/health + 主路径 API | `atlas/logs/be-smoke.*` 或终端记录 |
-| **`test:smoke-fe`** | **仅 FE 冒烟**：通用 Playwright | `atlas/logs/fe-smoke.*` |
-| **`test:pixel-fe`** | **FE 像素对比**（有原型图时）：截图 vs 原型 | `atlas/tests/fe-pixel/report.json` |
-| **`test:5-0`** | 仅测试入场门禁（CLI 短名） | 写入 tests README 或 logs |
-| **`test:5a`** / **`test:5b`** | 仅 AC验收归档 / 仅全量回归（须已过测试入场） | 验收报告 / README |
-
-**规则**：
-
-1. 分层命令 **不自动**跑完整 AC验收/全量回归，除非用户写的是裸 `test:` / `tests:`  
-2. `test:smoke` = 有啥跑啥（无 BE 跳过 be；无 FE 跳过 fe），**禁止**对不存在的端硬跑  
-3. 分层跑完：证据落盘；**AskQuestion** 是否继续全量 `tests:` / 修失败 / 暂停 → 停  
-4. 可运行闸门 / 演示前可用 `test:smoke*` / `test:pixel-fe`（有原型）点名复验
+> **记法**：`test:` + 层名。可全量、可分层、可单端。
+> 完整分层对照表 → [05-testing §test 分层入口](05-testing.md#test-分层入口) · [CLI 对照](../templates/l1-l5-pipeline.md#cli-短名--中文全称)。
+> 路由侧仅记：裸 `test:` / `tests:` = 全量阶段 5；`test:smoke*` / `test:unit` / `test:l1-l4` = 只跑该层。
+> 分层跑完须 AskQuestion 是否继续全量；禁止对不存在的端硬跑。
 
 **任务编排（默认串行）**：阶段 3 写 todo 开发任务 + 功能依赖表；阶段 4 **先 TodoWrite 展开每个 T 的①②③**，再主 Agent 逐项构思落盘→开发→可运行闸门→AC验收。「全部开发」= 展开清单后串行连做，**≠** 启 Task/Subagent 批量写码。用户显式「并行开发 / 同时开发 FE+BE / 多 subagent」时 → [parallel-orchestration.md](parallel-orchestration.md)（须并行启动卡且每 T 已有合规①）。
 
@@ -77,8 +80,9 @@
 
 ```
 atlas/
+├── README.md                  # 人类驾驶舱（强制；见 templates/atlas-readme.md）
 ├── init/                      # init: 仅 brownfield
-│   ├── codebase/p1-{端}.md    # 模式 B：§一~§四（首次 init 须问 A/B）
+│   ├── codebase/p1-{端}.md
 │   ├── p0-business.md … data/
 ├── requirements/              # req: 需求 REQ + 按需 ui/UID
 ├── model/                     # mod: 数据建模（与 REQ 分文件）
@@ -89,20 +93,18 @@ atlas/
 ├── dev/                       # dev: 每任务一份构思 T-xxx（不放业务源码）
 ├── tests/
 │   ├── README.md · REQ-*-验收报告.md
-│   └── fe-pixel/              # 像素对比（配置+结果）
-│       ├── pages.json
-│       ├── report.json
-│       ├── summary.md
-│       └── artifacts/
-├── logs/                      # 冒烟/编译等运行证据
-├── glossary.md                # 术语唯一权威（req/init refresh 追加；见裁决表）
-├── debt.md                    # 技术债看板（阶段 4 首次记待回溯/事后补写时建；阶段 5 须清零）
-├── todo.md · humanTodo.md · active-edits.md（按需；active-edits 仅并行启用时建）
+│   └── fe-pixel/
+├── logs/
+├── glossary.md
+├── debt.md
+├── todo.md · humanTodo.md · active-edits.md（按需）
 ```
 
+- **`atlas/README.md`**：人先读；每阶段结束更新（[atlas-readme](../templates/atlas-readme.md)）
 - 各目录下 `temp/` 放临时稿（见 §TEMP）
 - 无独立前缀：`todo.md` / `humanTodo.md` / `active-edits.md` 随 req/sol/dev 阶段更新
 - **业务源码**写在工程正常位置（如 `src/`、`miniprogram/`），**不**塞进 `atlas/`
+- **只链不抄**：验收/线框/API 各有唯一权威，见 SKILL 裁决表
 
 ---
 
@@ -189,76 +191,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## §建模按需判定（阶段 2 非必经）
 
-Agent 先按条件表**建议**「跳过 / 增量 / 全量」，再按下方规则问人或落盘。**禁止**自行静默跳过。
-
-### 建议「跳过」的条件（须**全部**满足）
-
-- 已有 `atlas/model/README.md` 为 **已确认**
-- 本次工作**不引入**新聚合根/实体/值对象
-- **不改变**实体间关系（基数、归属、外键）
-- **不新增/修改**领域规则、状态机、存储结构
-
-### 跳过须用户确认（堵静默）
-
-建议跳过时，**落盘前**必须 AskQuestion → **停**（除非用户本轮原话已含「跳过建模 / 不用建模 / 模型不用改」）：
-
-```yaml
-title: "建模判定确认"
-questions:
-  - id: modeling_action
-    prompt: |
-      建议【跳过】阶段 2（自检：无新实体/无关系变更/无新规则/无存储结构变更）。
-      覆盖依据预览：{文件路径 §章节}
-      请确认：
-    options:
-      - id: skip_confirm
-        label: "确认跳过（写建模判定，进方案）"
-      - id: do_incremental
-        label: "仍要增量建模"
-      - id: do_full
-        label: "仍要全量建模"
-```
-
-| 选项 | 下条动作 |
-|------|----------|
-| skip_confirm | 落盘「建模判定：跳过」+ todo `⏭️` → 可进阶段 3 |
-| do_incremental / do_full | 进阶段 2 对应路径 |
-
-**跳过确认后必须落盘「建模判定」**（禁止只口头跳过）：
-
-```markdown
-📋 建模判定：跳过
-- 已确认 model：atlas/model/README.md（v{x}）
-- 覆盖依据：{本次改动点} → 已由 {实际存在的文件：model-overview.md §x 或 domain-model.md §x / …} 覆盖
-- 自检四项：无新实体 ✅ / 无关系变更 ✅ / 无新规则 ✅ / 无存储结构变更 ✅
-- 用户确认：AskQuestion skip_confirm | 原话「{摘录}」
-```
-
-缺「覆盖依据」、四项未勾、或**无用户确认** → **禁止跳过**，须进阶段 2（增量或全量）。
-
-> **覆盖依据校验（Agent 自检）**：写入覆盖依据前，Agent 须先 Read 引用的文件路径，确认文件存在且引用的章节存在。引用不存在的文件/章节 = 跳过判定无效，须进阶段 2。
-
-**必须进入或增量更新 model/**（**不问「能否跳过」**，直接进阶段 2），当**任一**命中：
-
-- 新实体或新聚合根
-- 实体关系变化（1:N→N:M、新增外键、拆分表）
-- 新业务规则/状态机/不变量
-- 持久化层结构变化（新表、改字段、改索引）
-- 首个 REQ 且尚无 model/（首次需完整建模）
-- **greenfield 且有 DB/持久化**（禁止「无 model 就跳过」）
-- **model/README.md 状态为「草稿」**（须完成确认或更新后才能跳过）
-
-**增量更新**：只改**实际存在**的文件章节（快速→`model-overview.md`；严谨→对应五件套）；改完结束闸门 → 停止。
-
-**阶段前缀 `mod:`**（=`model:`）：强制进入阶段 2；AskQuestion 提供跳过/增量/全量。
-
----
-
-## 识别顺序（固定 4 步）
-
-```
-① 豁免判定 → ② 读取项目状态 → ③ 解析用户意图 → ④ 前置校验 & 确认 → 进入目标阶段
-```
+> 建模跳过/增量/全量的条件判定与确认卡 → [02-modeling §建模按需判定](02-modeling.md#建模按需判定)。路由侧仅记：跳过须用户确认 + 落盘建模判定，禁止静默跳过。
 
 ---
 
@@ -297,14 +230,7 @@ questions:
 
 **权威** → [flow-modes.md](../templates/flow-modes.md)（**快速仍按序走完阶段、todo 仍详细**；风险维度→分档：精简/标准/完整；「全部做」只催进度不切模式）。
 
-| 条件 | 动作 |
-|------|------|
-| 无 env / `AF_FLOW=pending` / `AF_DECIDE=pending` | **流程启动卡**（模式+决策权）→ 停；见 [stage-delegation](../templates/stage-delegation.md#流程启动卡首启强制) |
-| 用户原话已同时点明两边 | 写入 env 后进阶段；首行声明依据 |
-| 仅点明一边 | 仍发启动卡；已点明项可预填 |
-| env 已是 `fast`/`strict` + `ai`/`user` | 首行声明；**禁止**再静默改模式 |
-
-「后面都你定 / 不用问我」→ **决策：AI自主**，**不要**解读为可跳过 req/sol；若模式仍 pending → 启动卡只问模式或合并问清。
+路由侧仅记：pending → 启动卡；已确认 → 首行声明，禁止静默改模式。「后面都你定」→ AI自主（不跳阶段），详见 [flow-modes.md](../templates/flow-modes.md)。
 
 ---
 
@@ -369,13 +295,8 @@ questions:
 
 用户**用原话**说要做啥 → **阶段 1**（须先过流程契约）：
 
-| 状态 | 本回复做什么 |
-|------|--------------|
-| **契约未确认**（无 env / pending） | **流程启动卡** → 停。**禁止**落盘 REQ |
-| **`AF_DECIDE=ai`（已确认）** | **直接落盘** REQ(+UID) + README + todo → **审阅闸门** → 停 |
-| **`AF_DECIDE=user`** | 需求澄清卡（快速+完整 PRD 可跳过）→ 停 → 下条写 REQ |
-
-**禁止**：契约未确认就落盘；已确认 AI自主却只问不写；user_decide 用聊天追问代替卡片；同回复写码。
+> 契约未确认 → 启动卡 → 停；`ai` → 落盘 REQ + 审阅闸门 → 停；`user` → 需求澄清卡 → 停。
+> **禁止**：契约未确认就落盘；AI自主只问不写；user_decide 用聊天追问代替卡片；同回复写码。详见 [01-requirement](01-requirement.md)。
 
 ### 硬规则：不可跳阶段（豁免与前缀单阶段模式除外）
 
@@ -384,11 +305,11 @@ questions:
 | **0 init** | brownfield 判定 | greenfield → 跳过，进阶段 1 |
 | 1 需求 | greenfield **或** brownfield 且 init 已确认（或本轮将完成 init） | brownfield → 阶段 0 |
 | 2 建模 | ≥1 个 REQ「已确认」 | 退回阶段 1 或 AskQuestion |
-| 3 方案 | model **已确认或按需跳过**（见 [建模按需判定](#建模按需判定阶段-2-非必经)） | 无 model 且需建模 → 阶段 2；否则 AskQuestion |
+| 3 方案 | model **已确认或按需跳过**（见 [建模按需判定](02-modeling.md#建模按需判定)） | 无 model 且需建模 → 阶段 2；否则 AskQuestion |
 | 4 开发 | solution 已确认 **且** brownfield 时 init 已确认 **或** TEMP/dev 快速通道 | 退回阶段 3 / init / TEMP |
 | 5 测试 | 开发任务已完成（或用户明确只验部分） | 提示先开发或 AskQuestion |
 
-**按需跳过建模**：建议跳过时须 [用户确认](#跳过须用户确认堵静默)（卡或原话）；阶段 3 前置不要求 model 已确认，但首行须标注 `建模：跳过/增量/全量` 且跳过须有确认留痕。
+**按需跳过建模**：建议跳过时须 [用户确认](02-modeling.md#建模按需判定)（卡或原话）；阶段 3 前置不要求 model 已确认，但首行须标注 `建模：跳过/增量/全量` 且跳过须有确认留痕。
 
 用户**明确要求跳过**（如「快速通道 / 不要文档直接写」）→ 走 [① 豁免判定](#①-豁免判定最先做)，不算跳阶段。
 
@@ -466,6 +387,6 @@ questions:
 2. **契约检查**：无 env / pending → [流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → 停。已确认后：`ai` → 跳过阶段决策权卡直接落盘 → 审阅闸门；`user` → 澄清卡链（[stage-delegation](../templates/stage-delegation.md)）
 3. **只读一个 phase 文件**（init → `00-project-init.md`；变更 → `change-management.md`；开发 → `04-development.md`）
 4. **允许共读**：该 phase 文内显式链接的 `templates/*`
-5. **阶段 4 必读共读**（与 [SKILL 加载表](../SKILL.md#加载) 一致）：[dev-quickstart.md](../templates/dev-quickstart.md) + [04-development.md](04-development.md) + exemplar（按端）+ [todo.md TodoWrite](../templates/todo.md#todowrite-强制展开防漏①--最高优先级)；F/MVP 切片齐时另读 [askquestion-gate 阶段性卡](../templates/askquestion-gate.md#阶段性确认卡阶段-4-内--mvp--f-xxx-切片强制)
+5. **阶段 4 必读共读**（与 [SKILL 加载表](../SKILL.md#加载) 一致）：[dev-quickstart.md](../templates/dev-quickstart.md) + [04-development.md](04-development.md) + exemplar（按端）+ [todo.md TodoWrite](../templates/todo.md#todowrite-强制展开)；F/MVP 切片齐时另读 [askquestion-gate 阶段性卡](../templates/askquestion-gate.md#阶段性确认卡阶段-4-内--mvp--f-xxx-切片)
 6. **阶段 0/1–4 产出完成** → user_decide：阶段闸门；ai_decide：审阅闸门 → **停止**
 7. 并行仅显式要求时读 [parallel-orchestration.md](parallel-orchestration.md)（须并行启动卡）

@@ -175,16 +175,18 @@ questions:
 
 [init-scan-checklist 落盘自检](../templates/init-scan-checklist.md#init-落盘自检)：**P0（A 组）全 ✅** 即可确认；大仓不要求 P2 齐。覆盖范围块必有。
 
-### ⑤ AskQuestion 确认
+### ⑤ 结束闸门（按决策权）
 
-弹出 [init 确认卡片](../templates/init-askquestion.md#init-确认阶段-0-收尾) → **停止**。
+| 决策权 | 动作 |
+|--------|------|
+| **`user_decide`** / 契约未确认 | 弹出 [init 确认卡片](../templates/init-askquestion.md#init-确认阶段-0-收尾) → **停止** |
+| **`AF_DECIDE=ai` 已确认** | 落盘 AI 决策记录（扫描范围摘要）→ **[审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)** → **停止**（**禁止**再发 init 确认卡） |
 
-- 用户选「已确认」→ `README.md` 状态改 **已确认**
+- 用户选「已确认」/审阅继续 → `README.md` 状态改 **已确认**
 - 选「保持草稿」→ 维持草稿，不进入后续 dev
 - 选「部分 refresh」→ 下轮按范围重扫
 
-**init 不是 Agileflow 主阶段 1–4**，但完成时 **必须 AskQuestion**，禁止同回复进入 `req:` / `dev:` 写码。
-
+**init 不是 Agileflow 主阶段 1–4**，但完成时 **必须停**（确认卡或审阅闸门），禁止同回复进入 `req:` / `dev:` 写码。
 ---
 
 ## 增量 refresh（REQ 开发完毕后）

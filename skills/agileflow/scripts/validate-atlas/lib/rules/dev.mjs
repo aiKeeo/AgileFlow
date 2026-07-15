@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
-import { DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
+import { DEV_MIN_PURPOSE_STEPS, DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
 import { Reporter } from '../reporter.mjs';
 
 /** 完整档字面量 */
@@ -20,7 +20,6 @@ const LITERAL_FORBIDDEN = [
 
 function headingRegex(heading) {
   const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // CJK 后无 \b；允许行尾或空白/标点
   return new RegExp(`^${esc}(?:\\s|$|#|[（(：:])`, 'm');
 }
 
@@ -45,23 +44,125 @@ function isFeWithUi(content) {
 
 function hasCodeAnchor(content) {
   return (
-    /`[^`]*\.[^`]*`/.test(content) ||   // OOP: `Class.method` / `package.function`
-    /`[^`]+\([^)]*\)`/.test(content) || // 函数式: `func_name()`
-    /`[^`]+\/[^`]+`/.test(content) ||   // 路径型: `path/to/file`
+    /`[^`]*\.[^`]*`/.test(content) ||
+    /`[^`]+\([^)]*\)`/.test(content) ||
+    /`[^`]+\/[^`]+`/.test(content) ||
     /pages\//.test(content) ||
     /services\//.test(content)
   );
 }
 
-function hasFeLayoutDiagram(content) {
-  return content.includes('### 布局') && /[┌│+--]/.test(content);
+/** FE 布局：链 UID 或「布局差量」含 ASCII */
+function hasValidFeLayout(content) {
+  if (!content.includes('### 布局')) return false;
+  const layoutMatch = content.match(/### 布局[\s\S]*?(?=### |## |$)/);
+  const body = layoutMatch ? layoutMatch[0] : '';
+  const linksUid =
+    /UID-\d+/i.test(body) ||
+    /requirements\/ui\//i.test(body) ||
+    /\]\([^)]*UID[^)]*\)/i.test(body);
+  const hasDelta = /布局差量/.test(content) && /[┌│+--]/.test(content);
+  const hasAsciiInLayout = /[┌│+--]/.test(body);
+  return linksUid || hasDelta || hasAsciiInLayout;
 }
 
-/** 假标题：有「范围/做法」纯文本却无 ## */
 function checkFakeHeadings(content) {
-  const hasMd = /^## (范围|契约|做法|AC|结果)/m.test(content);
+  const hasMd = /^## (前置|必读|范围|契约|做法|AC|结果)/m.test(content);
   const hasPlain = /^(范围|契约|做法)[：:\s]/m.test(content);
   return !hasMd && hasPlain;
+}
+
+function collectStepHeadings(content) {
+  return [...content.matchAll(/^#### .+$/gm)].map((m) => m[0]);
+}
+
+function hasMustReadLink(mustReadBody) {
+  if (!mustReadBody) return false;
+  return (
+    /requirements\//i.test(mustReadBody) ||
+    /solution\/contracts\//i.test(mustReadBody) ||
+    /\]\([^)]*REQ-\d+/i.test(mustReadBody) ||
+    /\]\([^)]*API-\d+/i.test(mustReadBody) ||
+    /\]\([^)]*UID-\d+/i.test(mustReadBody)
+  );
+}
+
+/** 契约体内大段 JSON 代码块 */
+function hasLargeJsonInContract(contractBody) {
+  if (!contractBody) return false;
+  const blocks = [...contractBody.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/gi)];
+  for (const block of blocks) {
+    const body = block[1] || '';
+    if (body.includes('{') && body.includes('}') && body.length >= 80) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** 大 ASCII 线框且未标布局差量 */
+function hasUnlabeledWireframeCopy(content) {
+  if (/布局差量/.test(content)) return false;
+  const boxLines = (content.match(/^[│┌└├┤┐┘]/gm) || []).length;
+  return boxLines >= 6;
+}
+
+function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard') {
+  const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
+  const minSteps = DEV_MIN_PURPOSE_STEPS[tier] ?? DEV_MIN_PURPOSE_STEPS.standard;
+
+  const steps = collectStepHeadings(content);
+  if (steps.length > 0) {
+    for (const line of steps) {
+      if (!/目的[：:]/.test(line)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-目的',
+          file: relPath,
+          message: `步骤标题缺「目的：」：${line.slice(0, 80)}`,
+        });
+      }
+    }
+  }
+  if (steps.length < minSteps) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-STEP-最少',
+      file: relPath,
+      message: `${tierDef.label}须至少 ${minSteps} 个带「目的：」的 #### 步骤（当前 ${steps.length}）。`,
+    });
+  }
+
+  if (tierDef.requireMustRead) {
+    const mustRead = extractSectionBody(content, '## 必读');
+    if (!mustRead || !hasMustReadLink(mustRead)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'DEV-PRE-必读',
+        file: relPath,
+        message: '标准+须「## 必读」且含指向 requirements/ 或 solution/contracts/（或 REQ/API/UID）的链接。',
+      });
+    }
+  }
+
+  const contractBody = extractSectionBody(content, '## 契约');
+  if (hasLargeJsonInContract(contractBody)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-COPY-API表',
+      file: relPath,
+      message: '「## 契约」内勿粘贴大段 JSON；请链 contracts/API。',
+    });
+  }
+
+  if (hasUnlabeledWireframeCopy(content)) {
+    reporter.add({
+      severity: 'warn',
+      rule: 'DEV-COPY-线框',
+      file: relPath,
+      message: '检测到大段 ASCII 线框且未标「布局差量」；线框权威在 UID，请改为链接。',
+    });
+  }
 }
 
 function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'standard') {
@@ -103,15 +204,14 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
     });
   }
 
-  // FE+UI：标准/完整有契约时检查布局
   if (isFeDev(filePath, content) && (isFeWithUi(content) || tierDef.sections.includes('contract'))) {
     if (tierDef.sections.includes('contract')) {
-      if (!hasFeLayoutDiagram(content)) {
+      if (!hasValidFeLayout(content)) {
         reporter.add({
           severity: 'error',
           rule: 'DEV-LIT-FE布局',
           file: relPath,
-          message: 'FE 须「### 布局」含 ASCII 线条图。',
+          message: 'FE 须「### 布局」且（链 UID 或「布局差量」含 ASCII）。',
         });
       }
       if (!content.includes('### 映射')) {
@@ -134,6 +234,8 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
       message: '文档过短且无 #### 步骤，可能是过短文档。',
     });
   }
+
+  runQualityChecks(filePath, content, reporter, relPath, tier);
 }
 
 export function validateDev(projectRoot, reporter, opts = {}) {
@@ -185,9 +287,9 @@ export function runDevLiteralCheck(filePath, opts = {}) {
   const reporter = new Reporter();
   const tier = opts.tier ?? 'standard';
   const relPath = filePath;
-  const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
 
   for (const sec of DEV_SECTIONS) {
+    const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
     if (!tierDef.sections.includes(sec.id)) continue;
     if (!headingRegex(sec.heading).test(content)) {
       reporter.add({

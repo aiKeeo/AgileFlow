@@ -31,7 +31,7 @@
 | 场景 | 扫描来源 | 动作 |
 |------|----------|------|
 | init 落盘 / refresh | README、docs/、代码 Enum/常量注释、字段 comment | 提取候选术语 → 写入本表（标 `<!-- auto -->`） |
-| REQ 新增 | REQ 标题、BDD 场景中的业务名词、model 实体名 | 同上 |
+| REQ 新增 | REQ 标题、AC 表中的业务名词、model 实体名 | 同上 |
 | model 新增/变更 | 聚合根名、实体名、值对象名 | 同上 |
 | solution 新增 feature | feature 标题中的业务名词 | 同上 |
 

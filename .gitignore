@@ -1,10 +1,9 @@
 # WorkBuddy local state
 .workbuddy/
 
-# Local adversarial review notes (not part of the skill)
-对抗式审查报告.md
-对抗式审查报告-*.md
-*对抗式审查*.md
-agileflow-skill-audit-report.md
-agileflow-skill-fix*.md
-agileflow-skill-review*.md
+# Root-level local notes / plans (keep the two READMEs)
+/*.yaml
+/*.yml
+/*.md
+!/README.md
+!/README.zh-CN.md

@@ -9,7 +9,7 @@
 | 档 | 闸门/规则 | 失败效果 |
 |----|-----------|----------|
 | **A** | `atlas/agileflow.env`、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture+REQ已确认+决策/栈来源)、todo 三段式 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
-| **B** | BDD、契约命名等 warn | 可继续 |
+| **B** | 残留 BDD 专节、契约命名等 warn | 可继续 |
 | **C** | AskQuestion 工具调用本身、停止、TodoWrite、并行启动卡 | 靠纪律；**但** user 模式未问栈会以 A 档 `AF-STACK-USER` 卡住 |
 
 ## 脚本不可用时的降级（必读）
@@ -25,13 +25,16 @@
 
 | 检查项 | 要求 | 不过规则 |
 |--------|------|---------|
-| 段标题 | 精简：`## 范围` `## 做法` `## 结果`；标准·完整：+ `## 契约` `## AC` | DEV-SEC-* |
-| 步骤 | `#### ` 至少 1 个 | DEV-LIT-步骤 |
+| 段标题 | 精简：`## 范围` `## 做法` `## 结果`；标准·完整：+ `## 前置` `## 必读` `## 契约` `## AC` | DEV-SEC-* |
+| 必读链接 | 标准+：`## 必读` 含 `requirements/` 或 `solution/contracts/` 链接 | DEV-PRE-必读 |
+| 步骤目的 | 每个 `####` 行含 `目的：`；精简≥1 / 标准≥2 / 完整≥3 | DEV-STEP-目的 · DEV-STEP-最少 |
 | 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` `` / `` `pkg.func` ``；路径型→`` `path/` `` | DEV-LIT-代码落点 |
 | 禁形旧标题 | 禁 `## 一、目标` `## 五、可执行方案` | DEV-BAN-* |
 | 禁形构思章 | 禁 `## ① 构思` `## ② 关键实现点` | DEV-BAN-* |
-| FE 布局 | `### 布局` + ASCII 线条图（含 `┌│+--` 等） | DEV-LIT-FE布局 |
+| FE 布局 | `### 布局` 且（链 UID **或**「布局差量」含 ASCII） | DEV-LIT-FE布局 |
 | FE 映射 | `### 映射` | DEV-LIT-FE映射 |
+| 契约复贴 | `## 契约` 内大段 JSON 代码块 → error | DEV-COPY-API表 |
+| 线框复贴 | 大 ASCII 框且未标「布局差量」→ warn | DEV-COPY-线框 |
 | 文档长度 | 去空格后 ≥ {精简 280 / 标准 450 / 完整 700} 字 | DEV-FAKE-过短 |
 | 假标题 | 纯文本"范围/做法"无 `##` | DEV-FAKE-标题 |
 

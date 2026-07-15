@@ -246,9 +246,6 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
   const todoBody = `# t
 ## 流程进度
 ## 开发任务
-### ① 质量门槛（冻结）
-### 机械 grep
-| a | b |
 ### T-001：[BE] x — F-001 [标准]
 - [ ] **① 构思落盘** → \`atlas/dev/T-001-x-BE.md\`
 - [ ] **② 按 ## 做法 写码**

@@ -1,7 +1,20 @@
 # [T-001] 登录 — 构思 [BE]
 
 - 任务：**T-001** · 端：**BE** · 档位：**标准**
-- → [REQ-001](../requirements/REQ-001-login.md) · API-001
+- → [REQ-001](../requirements/REQ-001-login.md) · [API-001](../solution/contracts/API-001-login.md)
+
+## 前置
+
+- depends_on：无
+- 运行条件：可启 BE
+- 前提假设：无
+
+## 必读（只链，打开即用）
+
+| 用途 | 链接 | 本 T 用到什么 |
+|------|------|---------------|
+| 验收 | [REQ-001](../requirements/REQ-001-login.md) | AC-001-01 |
+| 接口 | [API-001](../solution/contracts/API-001-login.md) | POST |
 
 ## 范围
 
@@ -11,7 +24,7 @@
 
 ## 契约
 
-→ API-001
+→ [API-001](../solution/contracts/API-001-login.md)
 
 ### 复用
 
@@ -21,15 +34,17 @@
 
 ## 做法
 
-#### 登录 `AC-001-01`
+#### 登录成功 — 目的：签发 token `AuthController.login`
 
-1. `AuthController.login` 收入参
-2. 校验密码
-3. 签发 token
+- 引用：API-001 · AC-001-01
+- 做：收入参 → 校验 → 签发
+- 完成标志：200
 
-#### 错误密码
+#### 错误密码 — 目的：拒绝非法登录
 
-1. 校验失败 → 401
+- 引用：AC-001-02
+- 做：401
+- 完成标志：无 token
 
 ## AC
 

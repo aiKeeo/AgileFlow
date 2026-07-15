@@ -20,12 +20,18 @@ export const PHASE_DIRS = {
   '1': {
     id: 'req',
     dirs: [{ path: 'requirements', required: true }],
-    files: [{ path: 'requirements/README.md', required: true }],
+    files: [
+      { path: 'README.md', required: true },
+      { path: 'requirements/README.md', required: true },
+    ],
   },
   '2': {
     id: 'mod',
     dirs: [{ path: 'model', required: true }],
-    files: [{ path: 'model/README.md', required: true }],
+    files: [
+      { path: 'README.md', required: true },
+      { path: 'model/README.md', required: true },
+    ],
   },
   '3': {
     id: 'sol',
@@ -35,6 +41,7 @@ export const PHASE_DIRS = {
       { path: 'solution/contracts', required: false },
     ],
     files: [
+      { path: 'README.md', required: true },
       { path: 'solution/README.md', required: true },
       { path: 'solution/architecture.md', required: true },
       { path: 'todo.md', required: true },
@@ -43,26 +50,41 @@ export const PHASE_DIRS = {
   '4': {
     id: 'dev',
     dirs: [{ path: 'dev', required: true }],
-    files: [{ path: 'todo.md', required: true }],
+    files: [
+      { path: 'README.md', required: true },
+      { path: 'todo.md', required: true },
+    ],
   },
   '5': {
     id: 'test',
     dirs: [{ path: 'tests', required: true }],
-    files: [{ path: 'tests/README.md', required: true }],
+    files: [
+      { path: 'README.md', required: true },
+      { path: 'tests/README.md', required: true },
+    ],
   },
 };
 
 /**
  * dev 必填段（语义标题，无一二三编号）
- * lite: 范围/做法/结果 · standard|full: +契约 +AC
+ * lite: 范围/做法/结果 · standard|full: +前置 +必读 +契约 +AC
  */
 export const DEV_SECTIONS = [
+  { id: 'pre', heading: '## 前置', tiers: ['standard', 'full'] },
+  { id: 'mustread', heading: '## 必读', tiers: ['standard', 'full'] },
   { id: 'scope', heading: '## 范围', tiers: ['lite', 'standard', 'full'] },
   { id: 'contract', heading: '## 契约', tiers: ['standard', 'full'] },
   { id: 'steps', heading: '## 做法', tiers: ['lite', 'standard', 'full'] },
   { id: 'ac', heading: '## AC', tiers: ['standard', 'full'] },
   { id: 'result', heading: '## 结果', tiers: ['lite', 'standard', 'full'] },
 ];
+
+/** 各档最少带「目的：」的 #### 步骤数 */
+export const DEV_MIN_PURPOSE_STEPS = {
+  lite: 1,
+  standard: 2,
+  full: 3,
+};
 
 export const RISK_TIERS = {
   lite: {
@@ -71,20 +93,23 @@ export const RISK_TIERS = {
     literalCheck: false,
     fakeHeadingCheck: false,
     minDocLength: 280,
+    requireMustRead: false,
   },
   standard: {
     label: '标准档',
-    sections: ['scope', 'contract', 'steps', 'ac', 'result'],
+    sections: ['pre', 'mustread', 'scope', 'contract', 'steps', 'ac', 'result'],
     literalCheck: false,
     fakeHeadingCheck: false,
     minDocLength: 450,
+    requireMustRead: true,
   },
   full: {
     label: '完整档',
-    sections: ['scope', 'contract', 'steps', 'ac', 'result'],
+    sections: ['pre', 'mustread', 'scope', 'contract', 'steps', 'ac', 'result'],
     literalCheck: true,
     fakeHeadingCheck: true,
     minDocLength: 700,
+    requireMustRead: true,
   },
 };
 
@@ -122,7 +147,7 @@ export const AI_GATES = {
     modules: ['dev-step1-literal'],
     when: '单个 T 的 dev ① 落盘 · 勾 todo ① 前',
     blocking: true,
-    extra: '按档位：精简=范围/做法/结果；标准·完整=+契约+AC；完整另字面量严检',
+    extra: '按档位：精简=范围/做法/结果；标准·完整=+前置+必读+契约+AC；步骤须目的：；完整另字面量严检',
   },
   'dev-complete': {
     phase: '4',

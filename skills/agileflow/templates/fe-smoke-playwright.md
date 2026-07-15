@@ -87,7 +87,7 @@ unset PLAYWRIGHT_DOWNLOAD_HOST && npx playwright install chromium
 
 命中**任一**且 architecture / todo 存在 **FE**（含 Web / 小程序-H5）：
 
-1. **F-xxx / MVP 切片** 可运行闸门 通过后、阶段性确认卡之前或之中  
+1. **F-xxx / MVP 切片** 可运行闸门 通过后：`user` 在阶段性确认卡之前或之中问；`ai` 仅在用户要演示时问  
 2. **阶段 5 · 测试入场 · 功能冒烟时**
 3. 用户说「给用户看 / 演示 / 页面测一下」  
 4. 用户前缀 **`test:smoke-fe`** / **`test:smoke`**（有 FE）→ **直接跑**，可跳过本卡

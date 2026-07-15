@@ -98,24 +98,7 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
     });
   }
 
-  if (!/① 质量门槛/.test(content)) {
-    reporter.add({
-      severity: 'error',
-      rule: 'TODO-QUALITY-缺门槛区',
-      file: relPath,
-      message: 'todo 缺少「① 质量门槛（冻结区）」。',
-    });
-  } else if (!/机械 grep/.test(content)) {
-    // 完整档须有 grep 表；精简/标准档降为 warn（字面量校验仅完整档强制）
-    reporter.add({
-      severity: tier === 'full' ? 'error' : 'warn',
-      rule: 'TODO-QUALITY-缺grep表',
-      file: relPath,
-      message: tier === 'full'
-        ? '质量门槛区缺少「机械 grep」表（完整档强制）。'
-        : '质量门槛区建议含「机械 grep」表（完整档强制，当前档位可选）。',
-    });
-  }
+  // 质量门槛纪律在 skill（dev-quickstart），不再强制写入 atlas/todo.md
 
   for (const m of content.matchAll(ILLEGAL_T_HEADER)) {
     const line = content.slice(0, m.index).split('\n').length;

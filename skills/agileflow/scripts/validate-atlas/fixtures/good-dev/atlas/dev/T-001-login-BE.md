@@ -4,6 +4,19 @@
 - → [REQ-001](../requirements/REQ-001-login.md) · [API-001](../solution/contracts/API-001-login.md)
 - 顺序：✅ 先构思后写码
 
+## 前置
+
+- depends_on：无（首个 BE 任务）
+- 运行条件：本地可启 BE；测试库可用
+- 前提假设：用户表已存在
+
+## 必读（只链，打开即用）
+
+| 用途 | 链接 | 本 T 用到什么 |
+|------|------|---------------|
+| 验收 | [REQ-001](../requirements/REQ-001-login.md) | AC-001-01/02 |
+| 接口 | [API-001](../solution/contracts/API-001-login.md) | POST 登录形状 |
+
 ## 范围
 
 - **目标**：账号密码登录拿 token
@@ -24,15 +37,17 @@
 
 ## 做法
 
-#### 登录 `AC-001-01`
+#### 登录成功 — 目的：校验凭证并签发 token `AuthController.login`
 
-1. `AuthController.login` 收 `{ username, password }`
-2. `AuthService.verifyPassword`
-3. `JwtUtil.sign(userId)` → 200 + token
+- 引用：API-001 §请求 · AC-001-01
+- 做：收 `{ username, password }` → `AuthService.verifyPassword` → `JwtUtil.sign(userId)` → 200 + token
+- 完成标志：AC-001-01 单测绿
 
-#### 错误密码 `AC-001-02`
+#### 错误密码 — 目的：拒绝非法凭证不签发 `AuthService.verifyPassword`
 
-1. 校验失败 → 401
+- 引用：AC-001-02
+- 做：校验失败 → 401
+- 完成标志：错误密码无 token
 
 ## AC
 
