@@ -37,7 +37,7 @@ const cases = [
     fail: false,
   },
   {
-    name: 'bad-dev-no-purpose → 步骤无目的应失败',
+    name: 'bad-dev-no-purpose → 步骤缺用户/系统/改应失败',
     args: ['--dev-file', path.join(fixtures, 'bad-dev-no-purpose/atlas/dev/T-001-login-BE.md')],
     fail: true,
   },
@@ -116,6 +116,49 @@ const cases = [
     args: ['--root', path.join(fixtures, 'good-sol-confirm'), '--only', 'af-env', '--phase', '3'],
     fail: false,
   },
+  {
+    name: 'bad-sol-f-card → F 联调卡应失败',
+    args: ['--root', path.join(fixtures, 'bad-sol-f-card'), '--only', 'sol'],
+    fail: true,
+  },
+  {
+    name: 'bad-sol-ui-no-bind → UI 缺字段绑定应失败',
+    args: ['--root', path.join(fixtures, 'bad-sol-ui-no-bind'), '--only', 'sol'],
+    fail: true,
+  },
+  {
+    name: 'good-template-minimal → req 应通过',
+    args: ['--root', path.join(fixtures, 'good-template-minimal'), '--only', 'req'],
+    fail: false,
+  },
+  {
+    name: 'good-template-minimal → dev 应通过',
+    args: ['--root', path.join(fixtures, 'good-template-minimal'), '--only', 'dev'],
+    fail: false,
+  },
+  {
+    name: 'good-template-minimal → dir phase3 无 features 应通过',
+    args: ['--root', path.join(fixtures, 'good-template-minimal'), '--only', 'dir', '--phase', '3'],
+    fail: false,
+  },
+  {
+    name: 'bad-dual-check → 仅 TMPL 无 legacy REQ-F',
+    args: ['--root', path.join(fixtures, 'bad-dual-check'), '--only', 'req'],
+    fail: true,
+    assertStdout: 'TMPL-AC-BULLET',
+    assertNotStdout: 'REQ-F005',
+  },
+  {
+    name: 'good-template-standard → sol 应通过',
+    args: ['--root', path.join(fixtures, 'good-template-standard'), '--only', 'sol'],
+    fail: false,
+  },
+  {
+    name: 'bad-template-dev-no-anchor → dev 缺锚点应失败',
+    args: ['--root', path.join(fixtures, 'bad-template-dev-no-anchor'), '--only', 'dev'],
+    fail: true,
+    assertStdout: 'TMPL-DEV-CHANGE',
+  },
 ];
 
 let passed = 0;
@@ -137,7 +180,10 @@ for (const c of cases) {
     cwd: skillRoot,
   });
   const exitCode = result.status ?? 1;
-  const good = c.fail ? exitCode !== 0 : exitCode === 0;
+  const out = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+  let good = c.fail ? exitCode !== 0 : exitCode === 0;
+  if (good && c.assertStdout && !out.includes(c.assertStdout)) good = false;
+  if (good && c.assertNotStdout && out.includes(c.assertNotStdout)) good = false;
   if (good) {
     console.log(`✅ ${c.name}`);
     passed++;

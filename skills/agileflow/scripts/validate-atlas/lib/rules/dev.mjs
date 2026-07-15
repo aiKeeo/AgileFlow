@@ -1,21 +1,51 @@
 import path from 'node:path';
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
-import { DEV_MIN_PURPOSE_STEPS, DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
+import { DEV_MIN_STEPS, DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
 import { Reporter } from '../reporter.mjs';
+import { resolveTemplateMode } from '../template-loader.mjs';
+import { validateDevFileFromTemplate } from './generic-doc.mjs';
+
+/**
+ * 从 dev 文件路径反推项目根（…/atlas/dev/T-xxx.md）
+ * @param {string} filePath
+ */
+function resolveProjectRootFromDevFile(filePath) {
+  const abs = path.resolve(filePath);
+  const parts = abs.split(path.sep);
+  const devIdx = parts.lastIndexOf('dev');
+  if (devIdx <= 0 || parts[devIdx - 1] !== 'atlas') return null;
+  return parts.slice(0, devIdx - 1).join(path.sep);
+}
 
 /** 完整档字面量 */
 const LITERAL_REQUIRED = [
-  { id: 'DEV-LIT-范围', pattern: '## 范围', label: '## 范围' },
-  { id: 'DEV-LIT-做法', pattern: '## 做法', label: '## 做法' },
-  { id: 'DEV-LIT-步骤', pattern: '#### ', label: '#### 步骤小节' },
+  { id: 'DEV-LIT-摘要', pattern: '## 摘要', label: '## 摘要' },
+  { id: 'DEV-LIT-步骤', pattern: '## 步骤', label: '## 步骤' },
+  { id: 'DEV-LIT-小节', pattern: '#### ', label: '#### 步骤小节' },
 ];
 
 /** 过短文档 / 旧编号禁形 */
 const LITERAL_FORBIDDEN = [
-  { pattern: '## 一、目标', rule: 'DEV-BAN-旧标题', msg: '禁形旧标题「## 一、目标」→ 用 ## 范围' },
-  { pattern: '## 五、可执行方案', rule: 'DEV-BAN-旧标题', msg: '禁形「## 五、可执行方案」→ 用 ## 做法' },
+  { pattern: '## 一、目标', rule: 'DEV-BAN-旧标题', msg: '禁形旧标题「## 一、目标」→ 用 ## 摘要' },
+  { pattern: '## 五、可执行方案', rule: 'DEV-BAN-旧标题', msg: '禁形「## 五、可执行方案」→ 用 ## 步骤' },
   { pattern: '## ① 构思', rule: 'DEV-BAN-构思章', msg: '禁形「## ① 构思」' },
   { pattern: '## ② 关键实现点', rule: 'DEV-BAN-关键实现点章', msg: '禁形「## ② 关键实现点」' },
+];
+
+/** v9.11 禁止的冗余专节 */
+const DEV_BANNED_SECTIONS = [
+  { heading: '## 范围', rule: 'DEV-BAN-范围', msg: '禁止「## 范围」→ 做/不做并入 ## 摘要' },
+  { heading: '## 异常', rule: 'DEV-BAN-异常', msg: '禁止「## 异常」→ 步骤 **系统** 引 AC-xxx' },
+  { heading: '## AC', rule: 'DEV-BAN-AC', msg: '禁止「## AC」表 → 摘要列 AC ID，步骤引 AC' },
+];
+
+/** 标准+ 摘要须含的五类 bullet */
+const SUMMARY_BULLETS = [
+  { id: '本T', pattern: /-\s*\*\*本\s*T\*\*[：:]/ },
+  { id: '做', pattern: /-\s*\*\*做\*\*[：:]/ },
+  { id: '不做', pattern: /-\s*\*\*不做\*\*[：:]/ },
+  { id: '上游', pattern: /-\s*\*\*上游\*\*[：:]/ },
+  { id: 'AC', pattern: /-\s*\*\*AC\*\*[：:]/ },
 ];
 
 function headingRegex(heading) {
@@ -38,10 +68,6 @@ function isFeDev(filePath, content) {
   return /\[FE\]/.test(content.slice(0, 600));
 }
 
-function isFeWithUi(content) {
-  return content.includes('### 布局') || content.includes('### 映射');
-}
-
 function hasCodeAnchor(content) {
   return (
     /`[^`]*\.[^`]*`/.test(content) ||
@@ -52,45 +78,36 @@ function hasCodeAnchor(content) {
   );
 }
 
-/** FE 布局：链 UID 或「布局差量」含 ASCII */
-function hasValidFeLayout(content) {
-  if (!content.includes('### 布局')) return false;
-  const layoutMatch = content.match(/### 布局[\s\S]*?(?=### |## |$)/);
-  const body = layoutMatch ? layoutMatch[0] : '';
-  const linksUid =
-    /UID-\d+/i.test(body) ||
-    /requirements\/ui\//i.test(body) ||
-    /\]\([^)]*UID[^)]*\)/i.test(body);
-  const hasDelta = /布局差量/.test(content) && /[┌│+--]/.test(content);
-  const hasAsciiInLayout = /[┌│+--]/.test(body);
-  return linksUid || hasDelta || hasAsciiInLayout;
-}
-
 function checkFakeHeadings(content) {
-  const hasMd = /^## (前置|必读|范围|契约|做法|AC|结果)/m.test(content);
-  const hasPlain = /^(范围|契约|做法)[：:\s]/m.test(content);
+  const hasMd = /^## (摘要|步骤|结果)/m.test(content);
+  const hasPlain = /^(范围|步骤|摘要)[：:\s]/m.test(content);
   return !hasMd && hasPlain;
 }
 
-function collectStepHeadings(content) {
-  return [...content.matchAll(/^#### .+$/gm)].map((m) => m[0]);
+function collectStepBlocks(content) {
+  const stepsSection = extractSectionBody(content, '## 步骤') ?? '';
+  const matches = [...stepsSection.matchAll(/^#### .+$/gm)];
+  return matches.map((m) => {
+    const start = m.index;
+    const rest = stepsSection.slice(start + m[0].length);
+    const next = rest.search(/^#### /m);
+    const body = (next === -1 ? rest : rest.slice(0, next)).trim();
+    return { heading: m[0], body };
+  });
 }
 
-function hasMustReadLink(mustReadBody) {
-  if (!mustReadBody) return false;
-  return (
-    /requirements\//i.test(mustReadBody) ||
-    /solution\/contracts\//i.test(mustReadBody) ||
-    /\]\([^)]*REQ-\d+/i.test(mustReadBody) ||
-    /\]\([^)]*API-\d+/i.test(mustReadBody) ||
-    /\]\([^)]*UID-\d+/i.test(mustReadBody)
-  );
+/** dev 内禁止大段字段映射表（应在 contracts/UI） */
+function hasDevFieldMappingTable(content) {
+  if (/字段映射|字段绑定/.test(content) && /\|[^|]+\|[^|]+\|[^|]+\|/.test(content)) {
+    if (isFeDev('', content) && /### 映射/.test(content)) return true;
+    if (/页面上|请求字段|发给后端/.test(content)) return true;
+  }
+  return false;
 }
 
-/** 契约体内大段 JSON 代码块 */
-function hasLargeJsonInContract(contractBody) {
-  if (!contractBody) return false;
-  const blocks = [...contractBody.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/gi)];
+/** 大段 JSON 粘贴 */
+function hasLargeJsonPaste(content) {
+  const blocks = [...content.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/gi)];
   for (const block of blocks) {
     const body = block[1] || '';
     if (body.includes('{') && body.includes('}') && body.length >= 80) {
@@ -100,67 +117,183 @@ function hasLargeJsonInContract(contractBody) {
   return false;
 }
 
-/** 大 ASCII 线框且未标布局差量 */
-function hasUnlabeledWireframeCopy(content) {
-  if (/布局差量/.test(content)) return false;
-  const boxLines = (content.match(/^[│┌└├┤┐┘]/gm) || []).length;
-  return boxLines >= 6;
+function hasStepTriple(body) {
+  const hasUser = /-\s*\*\*用户\*\*[：:]/.test(body);
+  const hasSystem = /-\s*\*\*系统\*\*[：:]/.test(body);
+  const hasChange = /-\s*\*\*改\*\*[：:]/.test(body);
+  return hasUser && hasSystem && hasChange;
+}
+
+function hasSummary定位(content) {
+  const summary = extractSectionBody(content, '## 摘要');
+  if (!summary) return false;
+  return /-\s*\*\*本\s*T\*\*[：:]/.test(summary) || /本\s*T\s*=/.test(summary);
+}
+
+function hasStructuredSummary(content) {
+  const summary = extractSectionBody(content, '## 摘要');
+  if (!summary) return false;
+  return SUMMARY_BULLETS.every((b) => b.pattern.test(summary));
+}
+
+function hasSolLink(content, isFe) {
+  if (isFe) {
+    return (
+      /solution\/contracts\/UI-/i.test(content) ||
+      /\[UI-\d+\]/i.test(content.slice(0, 1200)) ||
+      /solution\/features\/F-/i.test(content) ||
+      /\[F-\d+\]/i.test(content.slice(0, 800)) ||
+      /requirements\/ui\/UID-/i.test(content) ||
+      /\[UID-\d+\]/i.test(content.slice(0, 1200))
+    );
+  }
+  return (
+    /solution\/contracts\/API-/i.test(content) ||
+    /\[API-\d+\]/i.test(content.slice(0, 800))
+  );
+}
+
+function feLinksApiWithoutUi(content) {
+  if (!isFeDev('', content)) return false;
+  const hasApi =
+    /solution\/contracts\/API-/i.test(content) ||
+    /\[API-\d+\]/i.test(content.slice(0, 1200));
+  const hasUi =
+    /solution\/contracts\/UI-/i.test(content) ||
+    /\[UI-\d+\]/i.test(content.slice(0, 1200));
+  return hasApi && !hasUi;
+}
+
+function checkBannedDevSections(content, reporter, relPath) {
+  for (const ban of DEV_BANNED_SECTIONS) {
+    if (headingRegex(ban.heading).test(content)) {
+      reporter.add({ severity: 'error', rule: ban.rule, file: relPath, message: ban.msg });
+    }
+  }
 }
 
 function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard') {
   const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
-  const minSteps = DEV_MIN_PURPOSE_STEPS[tier] ?? DEV_MIN_PURPOSE_STEPS.standard;
+  const minSteps = DEV_MIN_STEPS[tier] ?? DEV_MIN_STEPS.standard;
 
-  const steps = collectStepHeadings(content);
-  if (steps.length > 0) {
-    for (const line of steps) {
-      if (!/目的[：:]/.test(line)) {
-        reporter.add({
-          severity: 'error',
-          rule: 'DEV-STEP-目的',
-          file: relPath,
-          message: `步骤标题缺「目的：」：${line.slice(0, 80)}`,
-        });
-      }
-    }
+  checkBannedDevSections(content, reporter, relPath);
+
+  if (tierDef.requireSummary && !headingRegex('## 摘要').test(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-SUMMARY',
+      file: relPath,
+      message: '须「## 摘要」。',
+    });
+  } else if (tierDef.requireSummary && !hasSummary定位(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-SUMMARY-定位',
+      file: relPath,
+      message: '「## 摘要」须含 **本 T** 定位（如：- **本 T**：F-008 后端切片…）。',
+    });
+  } else if (tierDef.requireStructuredSummary && !hasStructuredSummary(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-SUMMARY-结构',
+      file: relPath,
+      message: '标准+「## 摘要」须含 **本 T** / **做** / **不做** / **上游** / **AC** 五类 bullet。',
+    });
   }
+
+  const steps = collectStepBlocks(content);
   if (steps.length < minSteps) {
     reporter.add({
       severity: 'error',
       rule: 'DEV-STEP-最少',
       file: relPath,
-      message: `${tierDef.label}须至少 ${minSteps} 个带「目的：」的 #### 步骤（当前 ${steps.length}）。`,
+      message: `${tierDef.label}须至少 ${minSteps} 个 #### 步骤（当前 ${steps.length}）。`,
     });
   }
 
-  if (tierDef.requireMustRead) {
-    const mustRead = extractSectionBody(content, '## 必读');
-    if (!mustRead || !hasMustReadLink(mustRead)) {
+  for (const step of steps) {
+    if (!hasStepTriple(step.body)) {
       reporter.add({
         severity: 'error',
-        rule: 'DEV-PRE-必读',
+        rule: 'DEV-STEP-3',
         file: relPath,
-        message: '标准+须「## 必读」且含指向 requirements/ 或 solution/contracts/（或 REQ/API/UID）的链接。',
+        message: `步骤须含 用户/系统/改 三行：${step.heading.slice(0, 60)}`,
+      });
+    }
+    const changeLine = step.body.match(/-\s*\*\*改\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
+    if (changeLine && !/`[^`]+`/.test(changeLine[1])) {
+      reporter.add({
+        severity: 'error',
+        rule: 'DEV-STEP-改锚点',
+        file: relPath,
+        message: `「改」行须含代码落点 \`Class.method\`：${step.heading.slice(0, 50)}`,
+      });
+    }
+    const systemLine = step.body.match(/-\s*\*\*系统\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
+    if (systemLine && !/AC-\d+|AC-\d+-\d+|\b\d{3}\b|toast|401|404|201|200/.test(systemLine[1])) {
+      reporter.add({
+        severity: 'warn',
+        rule: 'DEV-STEP-系统',
+        file: relPath,
+        message: `「系统」行建议含 AC-xxx 或可验 HTTP/toast：${step.heading.slice(0, 50)}`,
       });
     }
   }
 
-  const contractBody = extractSectionBody(content, '## 契约');
-  if (hasLargeJsonInContract(contractBody)) {
+  const fe = isFeDev(filePath, content);
+  if (tier !== 'lite' && !hasSolLink(content, fe)) {
     reporter.add({
       severity: 'error',
-      rule: 'DEV-COPY-API表',
+      rule: fe ? 'DEV-LINK-UI' : 'DEV-LINK-API',
       file: relPath,
-      message: '「## 契约」内勿粘贴大段 JSON；请链 contracts/API。',
+      message: fe
+        ? 'FE dev 须链 F / UI-xxx / UID-xxx（调 API 时须 UI-xxx §字段绑定）。'
+        : 'BE dev 须链 API（solution/contracts/API-xxx 或文内 API-xxx）。',
     });
   }
 
-  if (hasUnlabeledWireframeCopy(content)) {
+  if (fe && feLinksApiWithoutUi(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-LINK-UI-API',
+      file: relPath,
+      message: 'FE dev 链了 API 须同时链 UI-xxx（字段绑定 SSOT）。',
+    });
+  }
+
+  if (/联调卡/i.test(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-BAN-联调卡',
+      file: relPath,
+      message: '禁止链 F 联调卡 → 改链 contracts/UI §字段绑定。',
+    });
+  }
+
+  if (hasDevFieldMappingTable(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-BAN-映射',
+      file: relPath,
+      message: 'dev 内禁止字段映射表；映射在 contracts/UI §字段绑定，dev 只链。',
+    });
+  }
+
+  if (hasLargeJsonPaste(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-COPY-JSON',
+      file: relPath,
+      message: 'dev 内勿粘贴大段 JSON；请链 contracts/API 或 UI。',
+    });
+  }
+
+  if (/^## 前置/m.test(content) || /^## 必读/m.test(content) || /^## 契约/m.test(content)) {
     reporter.add({
       severity: 'warn',
-      rule: 'DEV-COPY-线框',
+      rule: 'DEV-LEGACY-段',
       file: relPath,
-      message: '检测到大段 ASCII 线框且未标「布局差量」；线框权威在 UID，请改为链接。',
+      message: '检测到旧段名（前置/必读/契约）；v9.11 请用 摘要/步骤 + 链 sol。',
     });
   }
 }
@@ -200,29 +333,8 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
       severity: 'error',
       rule: 'DEV-LIT-代码落点',
       file: relPath,
-      message: '缺少代码落点（OOP: `Class.method` / 函数式: `func()` / 路径型: `path/to`）。',
+      message: '缺少代码落点（`Class.method` / `path/`）。',
     });
-  }
-
-  if (isFeDev(filePath, content) && (isFeWithUi(content) || tierDef.sections.includes('contract'))) {
-    if (tierDef.sections.includes('contract')) {
-      if (!hasValidFeLayout(content)) {
-        reporter.add({
-          severity: 'error',
-          rule: 'DEV-LIT-FE布局',
-          file: relPath,
-          message: 'FE 须「### 布局」且（链 UID 或「布局差量」含 ASCII）。',
-        });
-      }
-      if (!content.includes('### 映射')) {
-        reporter.add({
-          severity: 'error',
-          rule: 'DEV-LIT-FE映射',
-          file: relPath,
-          message: '缺 ### 映射。',
-        });
-      }
-    }
   }
 
   const stepCount = (content.match(/^#### /gm) || []).length;
@@ -231,7 +343,7 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
       severity: 'error',
       rule: 'DEV-FAKE-过短',
       file: relPath,
-      message: '文档过短且无 #### 步骤，可能是过短文档。',
+      message: '文档过短且无 #### 步骤。',
     });
   }
 
@@ -239,6 +351,7 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
 }
 
 export function validateDev(projectRoot, reporter, opts = {}) {
+  if (opts.templateMode) return;
   const devRoot = path.join(projectRoot, 'atlas', 'dev');
   if (!exists(devRoot)) return;
 
@@ -264,16 +377,6 @@ export function validateDev(projectRoot, reporter, opts = {}) {
           file: relPath,
           message: `缺少「${sec.heading}」。`,
         });
-      } else if (sec.id === 'scope') {
-        const body = extractSectionBody(content, sec.heading);
-        if (body && !/不做|范围外/.test(body)) {
-          reporter.add({
-            severity: 'warn',
-            rule: 'DEV-SCOPE-不做',
-            file: relPath,
-            message: '「## 范围」建议含「明确不做」。',
-          });
-        }
       }
     }
     runDevLiteralChecks(file, content, reporter, relPath, tier);
@@ -283,6 +386,17 @@ export function validateDev(projectRoot, reporter, opts = {}) {
 export function runDevLiteralCheck(filePath, opts = {}) {
   const content = readText(filePath);
   if (!content) return { passed: false, issues: [{ rule: 'DEV-LIT', message: '文件不存在' }] };
+
+  const projectRoot = resolveProjectRootFromDevFile(filePath);
+  if (projectRoot && resolveTemplateMode(projectRoot)) {
+    const reporter = new Reporter();
+    validateDevFileFromTemplate(projectRoot, filePath, reporter, { tier: opts.tier ?? 'standard' });
+    const blocking = reporter.getIssues().filter((i) => i.severity === 'error');
+    return {
+      passed: blocking.length === 0,
+      issues: blocking.map((i) => ({ rule: i.rule, message: i.message })),
+    };
+  }
 
   const reporter = new Reporter();
   const tier = opts.tier ?? 'standard';

@@ -1,6 +1,23 @@
 import path from 'node:path';
-import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
+import { exists, readText, rel } from '../fs-utils.mjs';
 import { PHASE_DIRS } from '../phase-spec.mjs';
+import { loadAllTemplateSpecs } from '../template-loader.mjs';
+
+/**
+ * template 模式下按 preset 推断阶段 3 必建目录（无 sol-feature 则不要求 features/）
+ * @param {string} projectRoot
+ * @param {typeof PHASE_DIRS['3']['dirs']} defaultDirs
+ * @param {boolean} templateMode
+ */
+function resolvePhase3Dirs(projectRoot, defaultDirs, templateMode) {
+  if (!templateMode) return defaultDirs;
+  const specs = loadAllTemplateSpecs(projectRoot);
+  const hasFeature = specs.some((s) => s.id === 'sol-feature');
+  return defaultDirs.filter((dir) => {
+    if (dir.path === 'solution/features' && !hasFeature) return false;
+    return true;
+  });
+}
 
 /**
  * 从 todo 判断建模是否跳过
@@ -19,6 +36,7 @@ export function validateDirectory(projectRoot, reporter, opts = {}) {
   const atlasRoot = path.join(projectRoot, 'atlas');
   const phase = opts.phase ?? 'all';
   const brownfield = opts.brownfield ?? 'auto';
+  const templateMode = opts.templateMode ?? false;
 
   if (!exists(atlasRoot)) {
     reporter.add({
@@ -46,7 +64,12 @@ export function validateDirectory(projectRoot, reporter, opts = {}) {
       continue;
     }
 
-    for (const dir of spec.dirs) {
+    const dirs =
+      ph === '3'
+        ? resolvePhase3Dirs(projectRoot, spec.dirs, templateMode)
+        : spec.dirs;
+
+    for (const dir of dirs) {
       if (dir.brownfieldOnly && brownfield === false) continue;
       const full = path.join(atlasRoot, dir.path);
       if (!exists(full)) {

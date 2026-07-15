@@ -72,14 +72,17 @@ export function validateReqTrace(projectRoot, reporter) {
     }
 
     const hasDevWithAc = devContents.some((d) => {
-      return d.content.includes(reqId) && /## AC/.test(d.content);
+      return (
+        (d.content.includes(reqId) || /AC-\d+/.test(d.content)) &&
+        (/-\s*\*\*AC\*\*[：:]/.test(d.content) || /AC-\d+/.test(d.content))
+      );
     });
     if (hasFeature && !hasDevWithAc) {
       reporter.add({
         severity: 'warn',
         rule: 'TRACE-T-AC',
         file: relReq,
-        message: `${reqId} 关联的 dev 任务中未找到含 ## AC 且引用此 REQ 的文件。`,
+        message: `${reqId} 关联的 dev 任务中未找到引用 AC ID 的文件（摘要 **AC** 或步骤内 AC-xxx）。`,
       });
     }
 

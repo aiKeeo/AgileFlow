@@ -1,7 +1,9 @@
 import path from 'node:path';
 import { readText } from './lib/fs-utils.mjs';
-import { detectBrownfield } from './lib/brownfield.mjs';import { Reporter } from './lib/reporter.mjs';
+import { detectBrownfield } from './lib/brownfield.mjs';
+import { Reporter } from './lib/reporter.mjs';
 import { loadAfEnv, validateAfEnv } from './lib/af-env.mjs';
+import { resolveTemplateMode, resolveTemplatePreset } from './lib/template-loader.mjs';
 import { validateDirectory } from './lib/rules/directory.mjs';
 import { validateInit } from './lib/rules/init.mjs';
 import { validateRequirements, validateReqConfirmed } from './lib/rules/requirements.mjs';
@@ -9,6 +11,7 @@ import { validateModel } from './lib/rules/model.mjs';
 import { validateSolution } from './lib/rules/solution.mjs';
 import { validateTodo } from './lib/rules/todo.mjs';
 import { validateDev } from './lib/rules/dev.mjs';
+import { validateGenericDocs } from './lib/rules/generic-doc.mjs';
 import { validateTests } from './lib/rules/tests.mjs';
 import { validateRunnable } from './lib/rules/runnable.mjs';
 import { validateSmokeEntry } from './lib/rules/smoke.mjs';
@@ -23,7 +26,29 @@ import { validateReqTrace } from './lib/rules/trace.mjs';
  * @property {'fast'|'strict'|'auto'} [mode]
  * @property {boolean} [verbose]
  * @property {string[]} [only]
+ * @property {boolean} [templateMode]
  */
+
+/**
+ * template 模式：按 phase 调用 generic-doc（与 legacy req/sol/dev 互斥）
+ * @param {string} projectRoot
+ * @param {import('./lib/reporter.mjs').Reporter} reporter
+ * @param {{ phase: string, tier: string, shouldRun: (name: string) => boolean }} ctx
+ */
+function runTemplateDocValidation(projectRoot, reporter, ctx) {
+  const { phase, tier, shouldRun } = ctx;
+  const docOpts = { tier };
+
+  if (shouldRun('req') && (phase === 'all' || phase === '1')) {
+    validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '1' });
+  }
+  if (shouldRun('sol') && (phase === 'all' || phase === '3')) {
+    validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '3' });
+  }
+  if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
+    validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '4' });
+  }
+}
 
 /** 风险维度关键词 → 命中即完整档 */
 const RISK_DIMENSIONS = [
@@ -130,7 +155,9 @@ export function validateAtlas(options = {}) {
 
   const tier = resolveTier(options.tier, todoContent, afState);
   const mode = resolveMode(projectRoot, options.mode, tier, afState);
-  const devOpts = { mode, tier };
+  const templateMode = options.templateMode ?? resolveTemplateMode(projectRoot);
+  const templatePreset = templateMode ? resolveTemplatePreset(projectRoot) : null;
+  const docOpts = { mode, tier, templateMode };
   // todo phase：完成闸门(4|5)以闸门为准（防 AF_PHASE=3 混过 dev-complete 跳过 dev 数核对）
   const todoPhase =
     phase === '4' || phase === '5'
@@ -138,28 +165,34 @@ export function validateAtlas(options = {}) {
       : afState?.phase ?? (phase !== 'all' ? phase : 'all');
 
   if (shouldRun('dir')) {
-    validateDirectory(projectRoot, reporter, { phase, brownfield });
+    validateDirectory(projectRoot, reporter, { phase, brownfield, templateMode });
   }
   if (shouldRun('init') && (phase === 'all' || phase === '0')) {
     validateInit(projectRoot, reporter);
   }
-  if (shouldRun('req') && (phase === 'all' || phase === '1')) {
-    validateRequirements(projectRoot, reporter);
+
+  if (templateMode) {
+    runTemplateDocValidation(projectRoot, reporter, { phase, tier, shouldRun });
+  } else {
+    if (shouldRun('req') && (phase === 'all' || phase === '1')) {
+      validateRequirements(projectRoot, reporter, docOpts);
+    }
+    if (shouldRun('sol') && (phase === 'all' || phase === '3')) {
+      validateSolution(projectRoot, reporter, docOpts);
+    }
+    if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
+      validateDev(projectRoot, reporter, docOpts);
+    }
   }
+
   if (shouldRun('req-confirmed') && (phase === 'all' || phase === '3')) {
     validateReqConfirmed(projectRoot, reporter);
   }
   if (shouldRun('model') && (phase === 'all' || phase === '2')) {
     validateModel(projectRoot, reporter);
   }
-  if (shouldRun('sol') && (phase === 'all' || phase === '3')) {
-    validateSolution(projectRoot, reporter);
-  }
   if (shouldRun('todo') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
     validateTodo(projectRoot, reporter, { tier, phase: todoPhase });
-  }
-  if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
-    validateDev(projectRoot, reporter, devOpts);
   }
   if (shouldRun('runnable') && (phase === 'all' || phase === '4' || phase === '5')) {
     validateRunnable(projectRoot, reporter);
@@ -181,12 +214,13 @@ export function validateAtlas(options = {}) {
   reporter.add({
     severity: 'info',
     rule: 'RUN-OK',
-    message: `校验完成 phase=${phase} mode=${mode} tier=${tier} decide=${decide} brownfield=${brownfield}`,
+    message: `校验完成 phase=${phase} mode=${mode} tier=${tier} decide=${decide} brownfield=${brownfield} templateMode=${templateMode}${templatePreset ? ` templatePreset=${templatePreset}` : ''}`,
   });
 
-  return { passed: reporter.passed(), reporter, mode, tier, brownfield, afState };
+  return { passed: reporter.passed(), reporter, mode, tier, brownfield, afState, templateMode, templatePreset };
 }
 
+export { resolveTemplateMode, resolveTemplatePreset } from './lib/template-loader.mjs';
 export { detectBrownfield } from './lib/brownfield.mjs';
 export { loadAfEnv, validateAfEnv, inferPhaseFromArtifacts } from './lib/af-env.mjs';
 export { resolveSkillRoot, resolveValidateScript, formatPortableGateCommand } from './lib/skill-path.mjs';

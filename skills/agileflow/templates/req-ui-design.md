@@ -190,8 +190,8 @@ atlas/requirements/
 | 阶段 | 如何使用 UID |
 |------|--------------|
 | **1 REQ** | 新建/维护 UID；**§2 必须含区域表 + 布局线条图**（线框唯一权威）；样式标「待定」 |
-| **3 sol** | 读 UID → 生成 `contracts/UI-xxx`：**只链 UID**，写路由/组件树/API 绑定；**禁止粘贴整图**；AskQuestion **样式/设计系统** |
-| **4 dev FE** | Read `UID-xxx` + `UI-xxx`；dev `### 布局` → 链 UID（偏离才写「布局差量」）；`### 映射` 英文字段；② 按 UID 与映射绑 UI |
+| **3 sol** | 读 UID → 生成 `contracts/UI-xxx`：**只链 UID**，写路由/组件树；**链 API 时须 §字段绑定**；**禁止粘贴整图** |
+| **4 dev FE** | Read `UID-xxx` + **UI-xxx §字段绑定**；dev 只链 UI，**禁止** dev 内映射表；② 按步骤写码 |
 
 ---
 
@@ -220,4 +220,4 @@ atlas/requirements/
 | 有页面却不建 UID | 评估后建 UID 或 REQ 注明「无 UI」 |
 | Agent 替用户定配色/字体 | 标待定 + humanTodo 或 sol AskQuestion |
 | FE/UI 契约再贴一份 UID 整图 | `### 布局` 链 UID；仅差量可画短 ASCII |
-| FE dev 映射表写中文「体重」 | 写 API 英文字段 ``value`` / ``recordedAt`` |
+| FE 字段映射写在 dev | 写在 **contracts/UI §字段绑定**；dev 只链 |

@@ -1,77 +1,40 @@
 # dev 构思范例（BE）
 
-> ① 照此结构写；细节链到 REQ/API/model，**禁止抄全文**。每步须有 **目的：**。
+> ① 照此结构写；接口链 API-003；**禁止**在 dev 内写字段映射表。
 
-# [T-004] 体重记录 API — 构思 [BE]
+# [T-008-BE] 通知已读 API — 构思 [BE]
 
-- 任务：**T-004** · 端：**BE** · 档位：**标准**
-- → [REQ-002](../requirements/REQ-002-健康记录与可视化.md) · [F-002](../solution/features/F-002-健康记录与可视化.md) · [API-003](../solution/contracts/API-003-体重记录.md)
-- depends_on：T-002 · 写法：`code-patterns-backend` 资产索引
+- 档位：**标准** · depends_on：T-002
+- → [F-008](../solution/features/F-008-通知已读.md) · [API-008](../solution/contracts/API-008-通知已读.md) · 写法：code-patterns-backend
 
-## 前置
+## 摘要
 
-- depends_on：T-002（鉴权与 `AuthContext` 须先可用，本 T 不重复造登录）
-- 运行条件：本地可启 BE；测试库可写 `weight_records`
-- 前提假设：用户表与 JWT 中间件已按 F-001 落地；本 T 无 schema 迁移
+- **本 T**：F-008 的后端切片（T-008-BE）；落地 [API-008](../solution/contracts/API-008-通知已读.md) 单条通知标记已读接口。
+- **做**：入口 → 查库 → 校验本人 → 写 isRead；已读再 PATCH 仍 200（幂等）；非本人/不存在返回 404。
+- **不做**：通知列表 GET、推送下发、批量已读、小程序页面与角标逻辑。
+- **上游**：[F-008](../solution/features/F-008-通知已读.md) · [API-008](../solution/contracts/API-008-通知已读.md) · depends_on [T-002](../dev/T-002-login-BE.md) 登录鉴权（401 走全局过滤器）。
+- **AC**：AC-008-01（标记成功 200）、AC-008-03（幂等）、AC-008-04（404）、AC-008-05（401 由鉴权层）。
 
-## 必读（只链，打开即用）
+## 步骤
 
-| 用途 | 链接 | 本 T 用到什么 |
-|------|------|---------------|
-| 验收 | [REQ-002](../requirements/REQ-002-健康记录与可视化.md) | AC-002-01/02/07 |
-| 功能边界 | [F-002](../solution/features/F-002-健康记录与可视化.md) | 暴露面 API-003 |
-| 接口 | [API-003](../solution/contracts/API-003-体重记录.md) | POST/GET/DELETE 形状与错误码 |
-| 模型 | [domain-model](../model/domain-model.md) | WeightRecord 字段；无本 T schema 变更 |
+#### 1. 写接口入口
 
-## 范围
+- **涉及改动**：`NotificationController.markRead()` — 未登录→401
 
-- **目标**：已登录用户新增 / 按区间查 / 删自己的体重记录
-- **必须**：POST→201+id；GET 升序；DELETE 仅自己；value≤0→400
-- **不做**：饮食/运动、仪表盘聚合、单位换算 UI
+#### 2. 按 id 查通知
 
-## 契约
+- **涉及改动**：`NotificationRepository.findById(id)` — 空→404
 
-→ 权威 [API-003](../solution/contracts/API-003-体重记录.md)（勿重贴入参出参表）  
-→ 表结构 [model](../model/)（本 T 无 schema 变更，只补 Entity/Repo）
+#### 3. 校验是不是本人
 
-### 复用
+- **涉及改动**：`NotificationService.assertOwner(n, userId)` — 非本人→404
 
-| 能力 | 资产 | 决策 |
-|------|------|------|
-| 当前用户 | `AuthContext.requireUserId` | 复用 |
-| 统一响应 | `ApiResponse` | 复用 |
-| 体重 CRUD | 无 | 新建 `WeightRecordService` |
+#### 4. 把通知改成已读
 
-## 做法
-
-#### 新增记录 — 目的：落库并返回可追溯 id `WeightRecordController.create`
-
-- 引用：API-003 §请求 POST · AC-002-01
-- 做：`@Valid` 入参 → Service 填 `userId` → `weightRecordRepository.save` → 201 + `WeightRecordResponse`
-- 完成标志：AC-002-01 单测绿；响应含非空 id
-
-#### 区间列表 — 目的：按时间升序返回本人记录 `WeightRecordService.list`
-
-- 引用：API-003 GET · AC-002-02
-- 做：`list(from,to)` → `findByUserIdAndRecordedAtBetweenOrderByRecordedAtAsc` → 转 `items[]`
-- 完成标志：列表 `recordedAt` 非降序
-
-#### 删除与校验 — 目的：仅本人可删且拦截非法体重 `WeightRecordService.delete`
-
-- 引用：API-003 DELETE · AC-002-07
-- 做：`findById` 非己/不存在→404；`@Valid` 拦 value≤0，Service 不执行
-- 完成标志：他户 404；value≤0 → 400
-
-## AC
-
-| AC | Then | test/ac |
-|----|------|---------|
-| AC-002-01 | 201 + id | `ac002_01_createWeight` |
-| AC-002-02 | 升序列表 | `ac002_02_listWeight` |
-| AC-002-07 | 400 | `ac002_07_invalidWeight` |
+- **涉及改动**：`NotificationService.markRead(n)` — 已读重复 PATCH 仍 200
 
 ## 结果
 
-| AC | AC单测 | 可运行证据 |
-|----|--------|------------|
-| … | ⬜ | ①可空表；③填：编译命令+启/冒烟+PASS |
+| 项 | 证据 |
+|----|------|
+| 编译/启/冒烟 | ③ mvn package ✅ · curl PATCH 未读→200 ✅ · 重复 PATCH→200 ✅ · 他人 id→404 ✅ |

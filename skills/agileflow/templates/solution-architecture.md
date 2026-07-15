@@ -95,6 +95,7 @@ src/modules/payment/
 |--------|----------|
 | `features/` 覆盖所有已确认 REQ | 退回阶段 1 |
 | 每个 feature 有 `## 边界` | 补边界节 |
+| 有暴露面的 feature **禁止** `## 联调卡`；UI 链 API 须有 `## 字段绑定` | 删 F 联调卡，改写 contracts/UI |
 | 有暴露面的功能有对应 `contracts/` 文件 | 补契约或改暴露面为「无」 |
 | `architecture.md`（全局唯一）含测试依赖 + 测试层命令（静态检查→构建→…） | 禁止进阶段 4 |
 | `architecture.md` 技术栈与用户 AskQuestion 一致 | 退回重问或改 architecture |
@@ -109,12 +110,12 @@ src/modules/payment/
 
 ### T-001：[BE] 创建 orders 表（30min）— F-001
 - [ ] **① 构思落盘** → `atlas/dev/T-001-orders表-BE.md`
-- [ ] **② 按 ## 做法 写码**
+- [ ] **② 按 ## 步骤 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 
 ### T-002：[BE] 实现创建订单 API（2h）— F-001 / API-001
 - [ ] **① 构思落盘** → `atlas/dev/T-002-创建订单API-BE.md`
-- [ ] **② 按 ## 做法 写码**
+- [ ] **② 按 ## 步骤 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 ```
 

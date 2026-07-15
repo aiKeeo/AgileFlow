@@ -213,8 +213,10 @@ function validateReqIndexStatusConsistency(projectRoot, reporter) {
  * 校验 atlas/requirements/
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {{ templateMode?: boolean }} [opts]
  */
-export function validateRequirements(projectRoot, reporter) {
+export function validateRequirements(projectRoot, reporter, opts = {}) {
+  if (opts.templateMode) return;
   const reqRoot = path.join(projectRoot, 'atlas', 'requirements');
   if (!exists(reqRoot)) return;
 

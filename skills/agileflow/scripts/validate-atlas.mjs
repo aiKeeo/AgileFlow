@@ -17,6 +17,8 @@ import {
   resolveSkillRoot,
   formatPortableGateCommand,
 } from './validate-atlas/index.mjs';
+import { bootstrapTemplateTree } from './validate-atlas/lib/template-loader.mjs';
+import { exists } from './validate-atlas/lib/fs-utils.mjs';
 
 function parseArgs(argv) {
   const args = { _: [] };
@@ -81,6 +83,23 @@ function main() {
   if (args['print-skill-root']) {
     const skillRoot = resolveSkillRoot(root);
     console.log(skillRoot);
+    process.exit(0);
+  }
+
+  if (args['bootstrap-template']) {
+    const presetRaw = args['bootstrap-template'] === true ? 'standard' : String(args['bootstrap-template']);
+    if (!['minimal', 'standard'].includes(presetRaw)) {
+      console.error('❌ --bootstrap-template 须为 minimal 或 standard');
+      process.exit(1);
+    }
+    const envPath = path.join(root, 'atlas', 'agileflow.env');
+    if (!exists(envPath)) {
+      console.error('❌ bootstrap 须先有 atlas/agileflow.env（先完成 init / 首启）');
+      process.exit(1);
+    }
+    const dest = bootstrapTemplateTree(root, /** @type {'minimal'|'standard'} */ (presetRaw));
+    console.log(`✅ 已复制 presets/${presetRaw}/template → ${path.relative(root, dest) || 'atlas/template/'}`);
+    console.log('   AF_TEMPLATE=yes · AF_TEMPLATE_PRESET=' + presetRaw);
     process.exit(0);
   }
 

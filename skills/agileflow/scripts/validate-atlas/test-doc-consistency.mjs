@@ -69,6 +69,11 @@ mustInclude('phases/00-project-init.md', '禁止**再发 init 确认卡');
 // —— flow-modes 不再自称 AskQuestion 全局权威 ——
 mustNotInclude('templates/flow-modes.md', 'AskQuestion 次数、dev 段数、建模粒度均以本文件为准');
 
+// —— template 双模式 ——
+mustInclude('SKILL.md', 'AF_TEMPLATE', 'AF_TEMPLATE 双模式');
+mustInclude('SKILL.md', 'atlas/template/', 'atlas/template 路径');
+mustInclude('SKILL.md', '双模式', '双模式 SSOT');
+
 if (failed) {
   console.error(`\n${failed} consistency check(s) failed`);
   process.exit(1);

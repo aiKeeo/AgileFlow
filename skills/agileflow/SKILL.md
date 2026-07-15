@@ -3,7 +3,7 @@ name: agileflow
 description: >-
   规范交付：按序把需求/方案/任务/构思写入 atlas/，再写码与验收。
   触发：用户要做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init: 前缀。
-version: 9.9.7
+version: 9.12.1
 ---
 # Agileflow
 
@@ -19,7 +19,7 @@ version: 9.9.7
 | **阶段结束（user_decide）** | 落盘 → **阶段闸门**（快速可与确认合并）→ **停** |
 | **术语落盘** | **唯一** `atlas/glossary.md`；greenfield **禁止**写 `atlas/init/**` |
 | **REQ 拆分** | 每个可独立验收功能 **一个** `REQ-*.md`；MVP 是范围标签，不是合并文件理由 |
-| **只链不抄（SSOT）** | 验收=REQ AC 表；线框=UID；API 形状=contracts/API；边界=features/F；栈=architecture。下游**只链不粘贴**。合法增量：UI 契约的路由/组件树/API 绑定；dev 字段映射（英文键）；相对 UID 的「布局差量」≤10 行 |
+| **只链不抄（SSOT）** | 验收=REQ AC；线框=UID；API 形状=contracts/API；**FE 接线=contracts/UI §字段绑定**；边界=features/F。下游只链不粘贴。dev **禁止**字段映射表 |
 | **AC = BDD** | REQ **禁止**再写独立「BDD 验收场景」节；AC 表 Given/When/Then 即 BDD |
 | **人类驾驶舱** | **强制** `atlas/README.md`（产品一句话/现在卡点/已拍板/未决/导读）；每阶段结束更新。模板 → [atlas-readme](templates/atlas-readme.md) |
 | **信息充分少问** | `user_decide` 阶段内澄清卡：用户原话已覆盖的字段**禁止复问**；REQ 四项充分 → 跳过第 1 步整卡（**快速·严谨共用**）。**不**豁免首启启动卡、结束/审阅闸门、并行启动卡。权威清单 → [flow-modes §REQ 信息充分例外](templates/flow-modes.md#req-信息充分例外快速严谨共用)。同类：技术栈已指定可跳 sol 技术栈卡；init 写法锚点已记录可跳 |
@@ -29,8 +29,8 @@ version: 9.9.7
 
 | 议题 | 裁决 |
 |------|------|
-| **dev 文档厚度** | **只看风险档位**：精简=范围/做法/结果；标准·完整=+契约+AC+前置+必读（完整另字面量严检）。做法每 `####` 步须含 `目的：`。**无一二三编号** |
-| **dev 必读+步骤目的** | 标准+须 `## 前置` + `## 必读`（链 REQ/API/UID/model，禁粘贴正文）；`#### … — 目的：…`；标准≥2 步 / 完整≥3 步 / 精简≥1 步。权威 → [dev-rationale](templates/dev-rationale.md) |
+| **sol F 极简** | F 只留 **边界+暴露面**；**禁止** F 联调卡/字段绑定/验收要点。UI 链 API 时 **§字段绑定** 在 contracts/UI |
+| **dev 文档** | 全档 **摘要+步骤+结果** 三段；摘要须 **本T/做/不做/上游/AC** 五 bullet（标准+）；步骤引 AC-xxx。完整另字面量严检 |
 | **快速 vs 严谨** | 只控：文档厚度、model 单文件 vs 五件套、**user_decide 时**停点合并、覆盖率阈值；**不**改 todo ①②③；**不**把 AI自主改成逐步追问（严谨+AI = 厚文档 + 审阅闸门） |
 | **「用户不用管」** | = **AI 自主**，≠ 快速、≠ 跳阶段、≠ 薄 todo |
 | **建模跳过** | `user_decide`：建议跳过时须 AskQuestion 确认（或原话已点明）。`AF_DECIDE=ai`：自行落盘建模判定（跳过/增量/全量）→ 审阅闸门，**禁止**再发「建模判定确认」卡。禁止静默进 sol（无判定） |
@@ -39,6 +39,7 @@ version: 9.9.7
 | **写法锚点路径** | brownfield：`atlas/init/codebase/p1-{端}.md`；greenfield：`atlas/solution/code-patterns-{端}.md` |
 | **测试入场** | 以 [05-testing 合并验证](phases/05-testing.md#测试入场门禁与阶段-4③-合并验证) 为准（同会话增量 / 跨会话全量） |
 | **A 档闸门全集** | 以 [validate-atlas-gate](templates/validate-atlas-gate.md) 为准（含 init/req/mod/sol/dev/test） |
+| **文档形态 SSOT（双模式）** | **Template ON**（`AF_TEMPLATE=yes` 或 `atlas/template/**/template-*.md` 存在，且非 `AF_TEMPLATE=no`）：形态规则读 **`atlas/template/`**（缺文件回退同 preset 默认，见 README `preset:`）；legacy REQ-F/DEV-SEC/SOL-F **关闭**。**Template OFF**：v9.11 legacy + skill `templates/` 提示词。bootstrap：`validate-atlas --bootstrap-template minimal\|standard` |
 
 ### 反模式（催进度时仍禁止）
 
@@ -52,8 +53,8 @@ version: 9.9.7
 | 已确认 AI自主却只发卡不写文件 | 直接落盘 → 审阅闸门 |
 | 把多功能揉成一份「MVP 总览 REQ」 | 一功能一 REQ；README 做索引 |
 | 向用户解释「旧名/历史迁移/为什么集中」 | 只陈述当前目录约定 |
-| UI/dev 粘贴 UID 整图或 API JSON | 链 UID/API；仅差量/映射可写正文 |
-| 空壳做法（无目的、无必读） | 前置+必读+`#### … — 目的：` |
+| UI/dev 粘贴 UID 整图或 API JSON | 链 UID/API/UI §字段绑定；dev 禁映射表 |
+| 空壳步骤（无涉及改动/无代码落点） | 摘要+方法级伪代码步骤（legacy 仍用用户/系统/改） |
 | 信息已写清仍整卡复问 | 跳过或只问缺口 + 首行声明依据 |
 | 中途发现上游错却硬扛写码 | 声明 `纠偏：L{n}` 并按阶梯回改 |
 | 严谨+AI自主仍逐步澄清/确认 | 落盘 → 审阅闸门；严谨只加厚文档 |
@@ -110,6 +111,7 @@ tests → 入场 → AC归档 → 回归
 | 阶段 5 | [05-testing](phases/05-testing.md) + [l1-l5-pipeline](templates/l1-l5-pipeline.md) |
 | 模式/决策细节 | 需要时再读 [flow-modes](templates/flow-modes.md) / [stage-delegation](templates/stage-delegation.md) |
 | 落盘自检 | [validate-atlas-gate](templates/validate-atlas-gate.md) |
+| Template ON | 写文档**前** Read `atlas/template/` 下与产物同路径的 `template-*.md`（如 `requirements/template-req.md`、`requirements/ui/template-ui.md`；无则 `presets/{preset}/template/…`） |
 
 禁止预读无关 phase。跨切规则以**本文裁决表**为准，他处复述冲突时作废。
 

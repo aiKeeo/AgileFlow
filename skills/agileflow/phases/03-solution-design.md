@@ -10,7 +10,7 @@
 
 | # | 要素 | 落在哪里 |
 |---|------|----------|
-| **1** | **功能（含边界）** | `features/F-xxx.md` — 说明 + **§边界** + 验收要点 |
+| **1** | **功能（含边界）** | `features/F-xxx.md` — 可选 1 句说明 + **§边界** + 暴露面 |
 | **2** | **契约 / 接口文档（按需）** | `contracts/` — **暴露面详细规格集中存放**；feature 只链 ID |
 | **3** | **架构（全局一份）** | `architecture.md` — 全项目共享，不按功能拆 |
 | **4** | **任务编排** | `atlas/todo.md` + 功能依赖表（供阶段 4 **串行**排序；并行时作批次参考） |
@@ -33,8 +33,8 @@ atlas/solution/
 0. **契约/决策权**：无 env 或 pending → [流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → 停；已确认则按 `AF_DECIDE` 分支（见 [stage-delegation](../templates/stage-delegation.md)）
 1. 读已确认 REQ +（按需）model/ + **有 UID 时读 `requirements/ui/`**
 2. 初始化 `solution/`：README、features/、contracts/（目录即可）
-3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**、验收要点
-4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 须基于 UID** 补充路由、组件树、API 绑定（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）
+3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**（可选 1 句说明；**禁止**联调卡/验收要点）
+4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 链 API 时须 §字段绑定**（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）
 
 **user_decide 分支**（**先落盘再确认**，见 [flow-modes 阶段 3](../templates/flow-modes.md#阶段-3--先落盘再确认快速也适用)）：
 
@@ -74,7 +74,7 @@ atlas/solution/
 
 ## 强制规则
 
-- 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`
+- 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`；**禁止** F `## 联调卡`；UI 链 API → **contracts/UI §字段绑定**
 - 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
 - greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
 - `architecture.md` 全项目**只维护一份**；**user_decide** 时 Write 前须 AskQuestion 技术栈；**ai_decide** 跳过卡片但须落盘选型依据

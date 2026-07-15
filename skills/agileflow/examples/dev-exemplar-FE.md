@@ -1,99 +1,41 @@
 # dev 构思范例（FE）
 
-> ① 照此结构写；UID/UI/API **只链不抄**；布局默认链 UID，偏离才写差量。每步须有 **目的：**。
+> ① 照此结构写；字段绑定 **只看 contracts/UI**，dev 内禁止映射表。
 
-# [T-011] 记录录入页 — 构思 [FE]
+# [T-008-FE] 通知列表已读交互 — 构思 [FE]
 
-- 任务：**T-011** · 端：**FE** · 档位：**标准**
-- → [REQ-002](../requirements/REQ-002-健康记录与可视化.md) · [UID-003](../requirements/ui/UID-003-体重记录页.md) · [UI-003](../solution/contracts/UI-003-体重记录页.md) · [API-003](../solution/contracts/API-003-体重记录.md)
-- depends_on：T-008/T-009 · BE T-004+ · 写法：`code-patterns-frontend` 资产索引
+- 档位：**标准** · depends_on：T-008-BE
+- → [F-008](../solution/features/F-008-通知已读.md) · [UI-008](../solution/contracts/UI-008-通知列表页.md) · [UID-008](../requirements/ui/UID-008-通知中心.md) · 写法：code-patterns-frontend
 
-## 前置
+## 摘要
 
-- depends_on：BE T-004（体重 API 可用）；T-008（登录态注入 `services`）
-- 运行条件：前端 dev server / 小程序工具可预览；已登录
-- 前提假设：路由与 Tab 壳已按 UI-003 建好；本 T 只做录入页交互
+- **本 T**：F-008 的前端切片（T-008-FE）；通知列表展示、点「标记已读」、更新未读圆点与 Tab 角标。
+- **做**：按 UID-008 渲染列表；按 UI-008 绑定对单条发 PATCH；成功后本地更新 isRead 并重算角标；提交中按钮禁用防连点。
+- **不做**：通知推送、批量已读、后端 PATCH 实现（T-008-BE）、消息详情页（F-009）。
+- **上游**：[F-008](../solution/features/F-008-通知已读.md) · [UI-008](../solution/contracts/UI-008-通知列表页.md) · depends_on [T-008-BE](../dev/T-008-BE-通知已读API.md) · [UID-008](../requirements/ui/UID-008-通知中心.md)。
+- **AC**：AC-008-01（标记成功 UI 反馈）、AC-008-02（角标 3→2）、AC-008-03（已读再点不报错）。
+- **接线**：PATCH 路径与列表字段见 [UI-008 §字段绑定](../solution/contracts/UI-008-通知列表页.md#字段绑定)；dev 内禁止另建映射表。
 
-## 必读（只链，打开即用）
+## 步骤
 
-| 用途 | 链接 | 本 T 用到什么 |
-|------|------|---------------|
-| 验收 | [REQ-002](../requirements/REQ-002-健康记录与可视化.md) | AC-002-01 / AC-002-07 |
-| 布局 | [UID-003](../requirements/ui/UID-003-体重记录页.md) | 区域与交互（线框权威） |
-| UI 增量 | [UI-003](../solution/contracts/UI-003-体重记录页.md) | 路由、组件树、API 绑定 |
-| 字段 | [API-003](../solution/contracts/API-003-体重记录.md) | POST body 英文字段 |
+#### 1. 列表与未读态
 
-## 范围
+- **涉及改动**：`NotificationListPage` — 未读圆点 + Tab 角标
 
-- **目标**：一页 Tab 提交体重/饮食/运动；成功可回首页见数据
-- **必须**：三 Tab；字段对齐 API；校验失败本地提示；400 展示 message
-- **不做**：历史编辑删除 UI、食物搜索、定制日期控件
+#### 2. 调已读接口
 
-## 契约
+- **涉及改动**：`notificationService.markRead(id)` — 200 后本地 isRead=true
 
-→ 布局权威 [UID-003](../requirements/ui/UID-003-体重记录页.md)  
-→ 技术增量 [UI-003](../solution/contracts/UI-003-体重记录页.md)  
-→ 字段权威 [API-003](../solution/contracts/API-003-体重记录.md)（映射表只写**英文键名**）
+#### 3. 绑标记按钮
 
-### 布局
+- **涉及改动**：`NotificationItem.onMarkRead()` — 成功后减角标
 
-→ [UID-003](../requirements/ui/UID-003-体重记录页.md)（禁止粘贴整图；本 T 无布局差量）
+#### 4. 防连点
 
-### 复用
-
-| 区域 | 资产 | 决策 |
-|------|------|------|
-| Tab | `components/Segmented.tsx` | 复用 |
-| 数字输入 | 无 | 用 Taro Input |
-| 保存 | 无 | 基础 Button |
-
-### 映射
-
-| UI | API | 字段 | 方向 |
-|----|-----|------|------|
-| NumberInput | API-003 POST | `value` | body |
-| Picker | API-003 POST | `unit` | body |
-| DateTimePicker | API-003 POST | `recordedAt` | body |
-
-饮食/运动 → 同表格式链 API-004/005，勿再贴长表。
-
-### 调用
-
-| Tab | 方法 | 路径 | Body |
-|-----|------|------|------|
-| 体重 | POST | `/api/v1/records/weight` | `value,unit?,recordedAt` |
-
-统一走 `services/record.ts`，禁止页内裸 request。
-
-## 做法
-
-#### Tab 保态 — 目的：切 Tab 不丢未提交表单 `RecordPage`
-
-- 引用：UID-003 §交互 · UI-003 组件树
-- 做：`activeTab` + 三套 form；切 Tab **不清空**；`RecordForm` 受控
-- 完成标志：切走再切回字段仍在
-
-#### 体重提交 — 目的：按映射调 API 并给出成功反馈 `recordService.createWeight`
-
-- 引用：API-003 POST · AC-002-01 · 映射表
-- 做：组装 `{ value, unit, recordedAt }` → toast；可读 `res.data.id`
-- 完成标志：成功 toast；网络面板见 201
-
-#### 防连点与非法值 — 目的：避免重复提交与脏请求 `RecordForm.submit`
-
-- 引用：AC-002-07
-- 做：`submitting` 锁按钮；`value<=0` 本地 toast 不发请求
-- 完成标志：连点仅一次请求；非法值无网络调用
-
-## AC
-
-| AC | Then | 测法 |
-|----|------|------|
-| AC-002-01 | 体重成功 | BE 自动化 + FE 联调 |
-| AC-002-07 | 非法拦截 | FE 人工 |
+- **涉及改动**：`NotificationItem` submitting 锁 — 已读再点不 toast
 
 ## 结果
 
-| AC | 证据 |
+| 项 | 证据 |
 |----|------|
-| … | ③ 填：编译/构建 + 启前端 + 冒烟/联调 PASS |
+| 构建/联调 | npm run build:weapp ✅ · 3 未读→标记 1 条→角标 2 ✅ · 已读再点无报错 ✅ |
