@@ -193,6 +193,36 @@ const cases = [
     fail: true,
     assertStdout: 'TMPL-DEV-CHANGE',
   },
+  {
+    name: 'bad-skip-code → 有业务码无 architecture 应失败',
+    args: ['--root', path.join(fixtures, 'bad-skip-code'), '--only', 'anti-skip'],
+    fail: true,
+    assertStdout: 'SKIP-CODE-无architecture',
+  },
+  {
+    name: 'bad-skip-code → README 冒充 T 应失败',
+    args: ['--root', path.join(fixtures, 'bad-skip-code'), '--only', 'anti-skip'],
+    fail: true,
+    assertStdout: 'SKIP-README冒充T',
+  },
+  {
+    name: 'bad-skip-code → anti-skip 闸门应失败',
+    args: ['--root', path.join(fixtures, 'bad-skip-code'), '--gate', 'anti-skip'],
+    fail: true,
+    assertStdout: 'SKIP-',
+  },
+  {
+    name: 'bad-skip-code → README 揉方案应失败',
+    args: ['--root', path.join(fixtures, 'bad-skip-code'), '--only', 'sol'],
+    fail: true,
+    assertStdout: 'SOL-README-MASH',
+  },
+  {
+    name: 'bad-skip-code → 假测试进度应失败',
+    args: ['--root', path.join(fixtures, 'bad-skip-code'), '--only', 'anti-skip'],
+    fail: true,
+    assertStdout: 'SKIP-测试',
+  },
 ];
 
 let passed = 0;

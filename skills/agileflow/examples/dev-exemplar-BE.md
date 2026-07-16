@@ -22,8 +22,8 @@
 |------|------|-------------|------------------|
 | **S1** | 收 PATCH 请求 | id + token → 进入业务 | 新写 `NotificationController.markRead` — 模块首接口；未登录由 `JwtFilter` 挡 |
 | **S2** | 按 id 查通知 | id → 实体或空 | `NotificationMapper.findById` — 空→404 |
-| **S3** | 校验归属 | 通知 + userId → 通过/拒绝 | 在 `NotificationService` 上加 `assertOwner` — 非本人当 404，不泄露存在性 |
-| **S4** | 标记已读 | 通知 → isRead=true | 在 `NotificationService.markRead` — 已读再 PATCH 仍 200 |
+| **S3** | 校验归属 | 通知 + userId → 通过/拒绝 | 在 `NotificationService.assertOwner()` 中加 owner 校验 — 非本人当 404，不泄露存在性 |
+| **S4** | 标记已读 | 通知 → isRead=true | 在 `NotificationService.markRead()` 中幂等更新 — 已读再 PATCH 仍 200 |
 
 ## 结果
 

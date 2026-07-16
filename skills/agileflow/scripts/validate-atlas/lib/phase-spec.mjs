@@ -238,7 +238,7 @@ export const AI_GATES = {
 
     phase: '0',
 
-    modules: ['af-env', 'dir', 'init'],
+    modules: ['af-env', 'dir', 'init', 'anti-skip'],
 
     when: 'init 落盘完成 · AskQuestion 确认前',
 
@@ -252,7 +252,7 @@ export const AI_GATES = {
 
     phase: '1',
 
-    modules: ['af-env', 'dir', 'req'],
+    modules: ['af-env', 'dir', 'req', 'anti-skip'],
 
     when: 'REQ 落盘 · 需求确认卡前',
 
@@ -266,7 +266,7 @@ export const AI_GATES = {
 
     phase: '2',
 
-    modules: ['af-env', 'dir', 'model'],
+    modules: ['af-env', 'dir', 'model', 'anti-skip'],
 
     when: 'model 落盘 · 建模确认前',
 
@@ -278,7 +278,7 @@ export const AI_GATES = {
 
     phase: '3',
 
-    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed'],
+    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed', 'anti-skip'],
 
     when: '方案+todo 落盘 · 方案确认/阶段闸门前',
 
@@ -310,7 +310,7 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel'],
+    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'anti-skip'],
 
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
 
@@ -325,7 +325,7 @@ export const AI_GATES = {
 
     phase: '5',
 
-    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel'],
+    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'anti-skip'],
 
     when: '进入阶段 5 · 测试入场门禁前',
 
@@ -335,6 +335,13 @@ export const AI_GATES = {
 
   },
 
+  'anti-skip': {
+    phase: 'all',
+    modules: ['af-env', 'anti-skip'],
+    when: '写业务源码前 / 任意声称进度前 · 源码与 atlas 对齐',
+    blocking: true,
+    extra: '有业务源码须 architecture+features+等量 T-*.md；禁 README 冒充 T；假进度硬挡',
+  },
   'req-trace': {
 
     phase: '5',

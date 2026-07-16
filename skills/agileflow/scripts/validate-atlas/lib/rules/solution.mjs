@@ -1,6 +1,7 @@
 import path from 'node:path';
 
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
+import { validateSolutionStructure } from './solution-structure.mjs';
 
 
 
@@ -108,13 +109,29 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
       reporter.add({
 
-        severity: 'warn',
+        severity: 'error',
 
         rule: 'SOL-R003',
 
         file: 'atlas/solution/README.md',
 
-        message: 'solution README 建议含「## 契约清单」索引。',
+        message: 'solution README 须含「## 契约清单」索引（无暴露面可写「无」表行）。',
+
+      });
+
+    }
+
+    if (!/AC\s*[→\-–—]\s*主\s*T|AC\s*→\s*主\s*T|主\s*T/.test(readme) || !/AC-\d+/i.test(readme)) {
+
+      reporter.add({
+
+        severity: 'warn',
+
+        rule: 'SOL-R-AC-T',
+
+        file: 'atlas/solution/README.md',
+
+        message: 'solution README 建议含「AC → 主 T」表（每条 AC 唯一主责）。',
 
       });
 
@@ -160,21 +177,7 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
     }
 
-    if (!/本地验证|一条命令|docker compose|npm test|mvn|go test/i.test(arch)) {
-
-      reporter.add({
-
-        severity: 'warn',
-
-        rule: 'SOL-A-RUN',
-
-        file: 'atlas/solution/architecture.md',
-
-        message: 'architecture 建议含「本地验证一条命令」。',
-
-      });
-
-    }
+    // 本地验证 / 技术栈 / 模块节 → solution-structure.mjs（A 档）
 
   }
 
@@ -224,23 +227,23 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
     }
 
-    if (!/- \*\*暴露面\*\*：/.test(content)) {
+    if (!/←\s*REQ-\d+/m.test(content) && !/<\-\s*REQ-\d+/m.test(content)) {
 
       reporter.add({
 
-        severity: 'warn',
+        severity: 'error',
 
-        rule: 'SOL-F003',
+        rule: 'SOL-F-REQ-TRACE',
 
         file: relPath,
 
-        message: 'feature 建议含「- **暴露面**：」并链到 contracts/。',
+        message: 'feature 须含 REQ 回溯（如 `← REQ-001 · AC-001-01～06`）；边界须从 REQ 提炼。',
 
       });
 
     }
 
-
+    // 暴露面行 → solution-structure SOL-F-EXPOSE（A 档）
 
     if (/^## 联调卡/m.test(content)) {
 
@@ -381,6 +384,8 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
     });
 
   }
+
+  validateSolutionStructure(projectRoot, reporter);
 
 }
 

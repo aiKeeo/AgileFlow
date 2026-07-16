@@ -47,21 +47,12 @@ function dirHasBusinessCode(dir, depth = 0) {
 }
 
 /**
- * 探测是否 brownfield：须有业务源码文件，或已有实质 init（README）
- * 空 packages/、空 src/、空 atlas/init/ → greenfield（勿仅看目录名）
+ * 探测项目内是否已有业务源码（不含 atlas/；与是否 brownfield 解耦）
+ * 用于 anti-skip：有业务码就必须有合规 sol/dev，堵先码后补
  * @param {string} projectRoot
  * @returns {boolean}
  */
-export function detectBrownfield(projectRoot) {
-  const initReadme = path.join(projectRoot, 'atlas', 'init', 'README.md');
-  if (exists(initReadme)) {
-    try {
-      if (fs.statSync(initReadme).size > 0) return true;
-    } catch {
-      /* fall through */
-    }
-  }
-
+export function detectBusinessSource(projectRoot) {
   for (const name of CANDIDATE_DIRS) {
     if (dirHasBusinessCode(path.join(projectRoot, name))) return true;
   }
@@ -78,4 +69,23 @@ export function detectBrownfield(projectRoot) {
   }
 
   return false;
+}
+
+/**
+ * 探测是否 brownfield：须有业务源码文件，或已有实质 init（README）
+ * 空 packages/、空 src/、空 atlas/init/ → greenfield（勿仅看目录名）
+ * @param {string} projectRoot
+ * @returns {boolean}
+ */
+export function detectBrownfield(projectRoot) {
+  const initReadme = path.join(projectRoot, 'atlas', 'init', 'README.md');
+  if (exists(initReadme)) {
+    try {
+      if (fs.statSync(initReadme).size > 0) return true;
+    } catch {
+      /* fall through */
+    }
+  }
+
+  return detectBusinessSource(projectRoot);
 }

@@ -21,10 +21,10 @@
 
 | 步骤 | 动作 | 输入 → 输出 | 注意点（含落点） |
 |------|------|-------------|------------------|
-| **S1** | 渲染列表与未读态 | 列表数据 → 圆点 + Tab 角标 | 在 `NotificationListPage` 按 UID-008 — 有现成 Badge 则直接用 |
-| **S2** | 调已读接口 | id → 200 | 在 `services/api.ts` 照其他 PATCH 加 `notificationService.markRead` — 200 后本地 isRead=true |
-| **S3** | 绑标记按钮 | 点击 → 角标-1 | 在 `NotificationItem` 上加 `onMarkRead` — 不另建 HOC |
-| **S4** | 防连点 | submitting → 忽略重复 | 在 `NotificationItem` 加锁 — 已读再点不 toast |
+| **S1** | 渲染列表与未读态 | 列表数据 → 圆点 + Tab 角标 | 在 `NotificationListPage.render()` 按 UID-008 渲染 — 有现成 `Badge` 组件则直接用 |
+| **S2** | 调已读接口 | id → 200 | 在 `services/api.ts` 照其他 PATCH 加 `notificationService.markRead()` — 200 后本地 `isRead=true` |
+| **S3** | 绑标记按钮 | 点击 → 角标-1 | 在 `NotificationItem.onMarkRead()` 中调 `markRead()` 并更新本地状态 — 不另建 HOC |
+| **S4** | 防连点 | submitting → 忽略重复 | 在 `NotificationItem.handleClick()` 开头加 `if (submitting) return` — 已读再点不 toast |
 
 ## 结果
 

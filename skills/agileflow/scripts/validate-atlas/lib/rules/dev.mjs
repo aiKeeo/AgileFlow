@@ -309,6 +309,29 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
       message: '检测到旧段名（前置/必读/契约）；v9.11 请用 摘要/步骤 + 链 sol。',
     });
   }
+
+  // ③ 证据：有 ## 结果 且勾选语境下应有 AC 映射表；有映射时 BE 须出现 test/unit
+  const resultBody = extractSectionBody(content, '## 结果');
+  if (resultBody && /AC-\d+/i.test(content) && resultBody.length > 20) {
+    const hasAcMap =
+      /AC\s*映射表/.test(resultBody) ||
+      (/\|\s*AC ID\s*\|/i.test(resultBody) && /\|\s*unit\s*\|/i.test(resultBody));
+    if (!hasAcMap) {
+      reporter.add({
+        severity: 'warn',
+        rule: 'DEV-AC-MAP',
+        file: relPath,
+        message: '## 结果 建议含「AC 映射表」（AC ID | unit | ac | 人工）；勾 ③ 前须齐。',
+      });
+    } else if (!fe && !/test\/unit|unit\//i.test(resultBody)) {
+      reporter.add({
+        severity: 'warn',
+        rule: 'DEV-AC-UNIT',
+        file: relPath,
+        message: 'BE dev 的 AC 映射表建议含 test/unit 路径（1 AC ↔ 1 UT）。',
+      });
+    }
+  }
 }
 
 function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'standard') {

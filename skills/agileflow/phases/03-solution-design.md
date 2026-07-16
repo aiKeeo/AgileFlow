@@ -34,8 +34,8 @@ atlas/solution/
 0. **契约/决策权**：无 env 或 pending → [流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → 停；已确认则按 `AF_DECIDE` 分支（见 [stage-delegation](../templates/stage-delegation.md)）
 1. 读已确认 REQ +（按需）model/ + **有 UID 时读 `requirements/ui/`**
 2. 初始化 `solution/`：README、features/、contracts/（目录即可）
-3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**（可选 1 句说明；**禁止**联调卡/验收要点）
-4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 链 API 时须 §字段绑定**（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）
+3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**（**做/不做必须从 REQ 故事+AC+范围提示提炼**，正文含 `← REQ-xxx · AC-…`；可选 1 句说明；**禁止**联调卡/验收要点/边界注水）
+4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 链 API 时须 §字段绑定**（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）；README 写 **AC→主 T**（每条 AC 唯一主责；BE 向 AC 颗粒度≈单测，见 [ac-guide](../templates/ac-guide.md)）
 
 **user_decide 分支**（**先落盘再确认**，见 [flow-modes 阶段 3](../templates/flow-modes.md#阶段-3--先落盘再确认快速也适用)）：
 
@@ -75,7 +75,7 @@ atlas/solution/
 
 ## 强制规则
 
-- 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`；**禁止** F `## 联调卡`；UI 链 API → **contracts/UI §字段绑定**
+- 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`（做/不做从 REQ 提炼）且含 `← REQ-` 回溯；**禁止** F `## 联调卡`；UI 链 API → **contracts/UI §字段绑定**；README 须有 **AC→主 T**
 - 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
 - greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
 - `architecture.md` 全项目**只维护一份**；**user_decide** 时 Write 前须 AskQuestion 技术栈；**ai_decide** 跳过卡片但须落盘选型依据

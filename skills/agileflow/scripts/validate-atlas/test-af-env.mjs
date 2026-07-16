@@ -130,6 +130,8 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
   const root = writeProject({
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：已确认\n',
+    'atlas/solution/architecture.md': '# 架构\n\n## 技术栈\n',
+    'atlas/solution/features/F-001-a.md': '# [F-001] a\n',
     'atlas/todo.md': `## 开发任务
 ### T-001：[BE] x — F-001 [标准]
 - [ ] **① 构思落盘** → \`atlas/dev/T-001.md\`

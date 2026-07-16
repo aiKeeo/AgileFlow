@@ -214,6 +214,23 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
     }
   }
 
+  // 流程进度声称方案完成 → 须有 architecture（堵 README 揉方案）
+  const claimedSolDone =
+    /方案设计\s*✅/.test(content) ||
+    /^\s*-\s+\[[xX]\].*方案设计/m.test(content);
+  if (claimedSolDone) {
+    const archPath = path.join(projectRoot, 'atlas', 'solution', 'architecture.md');
+    if (!exists(archPath)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'TODO-CHECK-方案完成无arch',
+        file: relPath,
+        message:
+          '流程进度已标「方案设计 ✅」，但缺少 atlas/solution/architecture.md——禁止假完成。',
+      });
+    }
+  }
+
   // 流程进度声称开发完成 → 每个 T 必须 ①②③ 齐且证据过关
   const claimedDevDone =
     /开发实现\s*✅/.test(content) ||
@@ -242,6 +259,21 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
         rule: 'TODO-CHECK-开发完成空勾',
         file: relPath,
         message: '流程进度已标「开发实现 ✅」，但所有 T 的 ①②③ 均未勾选。',
+      });
+    }
+  }
+
+  const claimedTestDone =
+    /测试验收\s*✅/.test(content) ||
+    /^\s*-\s+\[[xX]\].*测试验收/m.test(content);
+  if (claimedTestDone) {
+    const testsReadme = readText(path.join(projectRoot, 'atlas', 'tests', 'README.md')) || '';
+    if (!/\bPASS\b/.test(testsReadme)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'TODO-CHECK-测试无PASS',
+        file: relPath,
+        message: '流程进度已标「测试验收 ✅」，但 atlas/tests/README 无字面量 PASS。',
       });
     }
   }
@@ -357,9 +389,13 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
   // 任意阶段：已勾选就必须有证据（sol 阶段未勾选不触发）
   validateCheckboxEvidence(projectRoot, content, reporter, relPath, headers);
 
-  // 开发完成格式：dev 文件数=T 头数 —— 仅阶段 4/5
+  // 开发完成格式：dev 文件数=T 头数 —— 阶段 4/5/all，或已标「开发实现 ✅」
   const devRoot = path.join(projectRoot, 'atlas', 'dev');
-  const checkDevCount = phase === '4' || phase === '5';
+  const claimedDevDoneForCount =
+    /开发实现\s*✅/.test(content) ||
+    /^\s*-\s+\[[xX]\].*开发实现/m.test(content);
+  const checkDevCount =
+    phase === '4' || phase === '5' || phase === 'all' || claimedDevDoneForCount;
   if (checkDevCount && headers.length > 0) {
     const devCount = countDevFiles(devRoot);
     if (devCount !== headers.length) {
@@ -367,7 +403,7 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
         severity: 'error',
         rule: 'TODO-FORMAT-dev数不符',
         file: relPath,
-        message: `dev 文件数(${devCount}) ≠ T 头数(${headers.length})（仅 AF_PHASE/gate phase 为 4|5 时检查）。`,
+        message: `dev 文件数(${devCount}) ≠ T 头数(${headers.length})（phase 为 4|5|all，或已标「开发实现 ✅」时检查）。`,
       });
     }
   }

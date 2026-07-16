@@ -40,10 +40,16 @@ function parseArgs(argv) {
   return args;
 }
 
-/** 解析 dev 文件路径（--dev-file 优先，其次 --a7） */
-function resolveDevFilePath(args) {
+/** 解析 dev 文件路径（--dev-file 优先，其次 --a7）；相对于 --root 解析 */
+function resolveDevFilePath(args, root) {
   const raw = args['dev-file'] ?? args.a7;
-  return raw ? path.resolve(String(raw)) : null;
+  if (!raw) return null;
+  const rawPath = String(raw);
+  // 绝对路径或显式以当前目录开头时保持不变；否则按 --root 解析
+  if (path.isAbsolute(rawPath) || rawPath.startsWith('.') || rawPath.startsWith('..')) {
+    return path.resolve(rawPath);
+  }
+  return path.resolve(root, rawPath);
 }
 
 function printLiteralCheckResult(filePath, result) {
@@ -73,7 +79,7 @@ function printGates() {
 function main() {
   const args = parseArgs(process.argv);
   const root = args.root ? String(args.root) : process.cwd();
-  const devFilePath = resolveDevFilePath(args);
+  const devFilePath = resolveDevFilePath(args, root);
 
   if (args['list-gates']) {
     printGates();

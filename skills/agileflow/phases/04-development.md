@@ -3,6 +3,22 @@
 > **执行清单（先读）**：[dev-quickstart.md](../templates/dev-quickstart.md)  
 > 模板：[dev-rationale.md](../templates/dev-rationale.md) · 范例：exemplar-BE / exemplar-FE · 写法锚点：[code-conventions.md](../templates/code-conventions.md)
 
+## 人读核心（本页能独立看懂）
+
+| | |
+|--|--|
+| **①** | 先写 `atlas/dev/T-xxx.md`，过闸后才能写业务码 |
+| **②** | 按 `## 步骤` 写码；BE：`1 AC ↔ 1 UT` 同批落地 |
+| **可运行** | 勾③前真跑：编译 + 启/调 + 本 T 冒烟 → 证据进 `## 结果` |
+| **③** | 薄 `test/ac`（按需）+ **AC 映射表**；无映射不勾③ |
+| **文件数** | `dev/T-*.md` 数 = todo T 头数；禁止 BE+FE 合文件 |
+
+```
+TodoWrite①②③ → 写 dev → 勾① → 写码+UT → 可运行 → 映射表(+薄ac) → 下一 T
+```
+
+闸门细则 → [dev-quickstart](../templates/dev-quickstart.md)。排障 → [TROUBLESHOOTING](../TROUBLESHOOTING.md)。
+
 ## 规则（构思先行）
 
 > **构思给人看，不是给脚本凑形。** 闸门验的是"形对不对"（段标题、步数、代码落点）；
@@ -16,7 +32,7 @@
 | **一任务一文件** | 1 T = 1 文件；禁止多 T 糅合 / 合并勾选 |
 | **文档按风险分档** | **唯一厚度轴**：全档 **摘要+步骤+结果** 三段；标准+摘要五 bullet；完整=标准+字面量严检（见下） |
 | **步骤可执行** | template 模式：每 `####` 须 **涉及改动** + 代码落点（`` `method` ``）；legacy（`AF_TEMPLATE=no`）：**用户/系统/改**（格式权威 → [dev-quickstart §构思闸门](../templates/dev-quickstart.md#构思闸门勾-①-前)） |
-| **②③分工** | ② 按 `## 步骤` 写码；③ 对照 REQ AC 写 test/ac 并跑绿 |
+| **②③分工** | ② 按 `## 步骤` 写码 + **BE：1 AC↔1 UT**（`test/unit`）；③ 薄 `test/ac` + **AC 映射表**（见 [ac-guide](../templates/ac-guide.md)） |
 | **FE 链 UI 契约** | FE dev **链** `contracts/UI` §字段绑定；**禁止** dev 内字段映射表、禁止 F 联调卡 |
 | **默认串行** | 一次只推进 1 个 T；禁止批量写完所有①再写码。**例外**：用户显式并行 **且** 已过 [parallel 并行启动卡](parallel-orchestration.md#并行启动卡强制) **且** 走批量构思；单批 **最多 3 个 T** 的① |
 | **连续做≠压缩** | 连续做 ≠ 压缩模板 |

@@ -33,7 +33,7 @@ version: 9.15.0
 |------|------|
 | **sol F 极简** | F 只留 **边界+暴露面**；**禁止** F 联调卡/字段绑定/验收要点。UI 链 API 时 **§字段绑定** 在 contracts/UI |
 | **dev 文档** | 全档 **摘要+步骤+结果**；标准/完整步骤优先 **流程表**（动作/输入→输出/注意点含落点）；精简可用一行 **改**；摘要须 **本T/做/不做/上游/AC**（**做**含接法）。`AF_DECIDE=ai` **不减**完整档流程拆解。完整另字面量严检 |
-| **快速 vs 严谨** | 只控：文档厚度、model 单文件 vs 五件套、**user_decide 时**停点合并、覆盖率阈值；**不**改 todo ①②③；**不**把 AI自主改成逐步追问（严谨+AI = 厚文档 + 审阅闸门） |
+| **快速 vs 严谨** | 只控：文档厚度、model 单文件 vs 五件套、**user_decide 时**停点合并、覆盖率阈值；**不**改 todo ①②③；**不**把 AI自主改成逐步追问（严谨+AI = 厚文档 + 审阅闸门）。<br><br>**硬边界**：快速只减「停点次数」与「非关键段落厚度」，不减标题格式、不减 AC 表、不减范围提示、不减 F/契约/dev 文件数、不减可运行闸门；精简档仍须 `## 摘要`（含本T/做/不做/上游/AC）、`## 步骤`（≥1 步）、`## 结果` |
 | **「用户不用管」** | = **AI 自主**（`AF_DECIDE=ai`），≠ 跳阶段、≠ 薄 todo |
 | **委托交付（fast+ai）** | **用户不想自己决策**的典型组合：`AF_FLOW=fast` + `AF_DECIDE=ai` → 阶段内不澄清、A 档绿免审阅卡；**仍**按序落盘、禁跳阶段/①/可运行闸门。原话只点明「你定/别问我」未说模式 → **默认 fast+ai**（用户另说「严谨」→ `strict+ai`） |
 | **建模跳过** | `user_decide`：建议跳过时须 AskQuestion 确认（或原话已点明）。`AF_DECIDE=ai`：自行落盘建模判定（跳过/增量/全量），**禁止**再发「建模判定确认」卡。跳过且四项自检+覆盖依据齐 → **快路径**：本条可写判定并直接进 sol 落盘（**唯一**允许同回复跨入 sol 的例外）；灰区/自检不全 → 审阅闸门→停。禁止静默进 sol（无判定） |
@@ -64,6 +64,26 @@ version: 9.15.0
 | 中途发现上游错却硬扛写码 | 声明 `纠偏：L{n}` 并按阶梯回改 |
 | 严谨+AI自主仍逐步澄清/确认 | 落盘 → 审阅闸门；严谨只加厚文档 |
 
+### 常见借口 vs 真实情况（反合理化）
+
+> AI 失败常不是「不知道规则」，而是**找借口绕过**。产生下列念头时按右列执行，禁止自圆其说后跳过。
+
+| AI 的借口 | 真实情况 |
+|-----------|----------|
+| 「用户说快，所以我跳了闸门」 | **快速 ≠ 跳阶段**；仍走五步，只少问 |
+| 「这个 T 太简单，不需要①」 | 简单走**精简档**，①仍须落盘；无①禁写码 |
+| 「先写码再补 dev 也算①」 | **事后补写不勾①**；须另开正式① |
+| 「闸门没过但用户催了」 | 催进度不改闸门；A 档不过禁止勾 ✅ |
+| 「你定 = 可以不写 atlas」 | AI 自主仍须按序落盘；只少澄清卡 |
+| 「单测绿了就能给用户看」 | 须过**可运行闸门**（编译+启+冒烟） |
+| 「不知道做啥也先写 REQ」 | 先走**探索**出选项，选定后再进 req |
+| 「方案写进 solution/README 就够了」 | **须** `architecture.md`（技术栈/模块/本地验证）+ `features/F-*.md`（做/不做+暴露面）+ `contracts/`；README **只做索引**（`SOL-README-MASH`） |
+| 「dev/README 汇总各 T 也算构思」 | **1 T = 1 文件** `atlas/dev/T-xxx-*.md`；README 冒充 → `SKIP-README冒充T` |
+| 「先把 backend/frontend 搭起来再补 atlas」 | **先码 = 偷懒**；有业务源码无合规 sol/dev → `anti-skip` 硬挡 |
+| 「进度打 ✅ 用户看着舒服」 | 假进度 = A 档失败；须闸门 exit 0 再勾 |
+
+排障 → [TROUBLESHOOTING](TROUBLESHOOTING.md) · 交互示例 → [flow-interaction](examples/flow-interaction.md)
+
 ## 闸门分档
 
 | 档 | 含义 | 靠什么 | 约束力 |
@@ -83,6 +103,9 @@ sol → solution/+todo → 闸门
 dev → TodoWrite①②③ → ①→②→可运行闸门→③ → 闸门
 tests → 入场 → AC归档 → 回归
 ```
+
+**写业务源码前**须 `--gate anti-skip`（或任意含 `anti-skip` 的阶段闸门）exit 0。  
+CLI 参数是 `--root <项目根>`，不是 `--project`。
 
 「继续」= **下一条回复**进下一阶段并落盘。  
 **续作**：读 `atlas/todo.md` checkpoint / ①②③，再重建 TodoWrite。
@@ -116,6 +139,8 @@ tests → 入场 → AC归档 → 回归
 | 阶段 5 | [05-testing](phases/05-testing.md) + [l1-l5-pipeline](templates/l1-l5-pipeline.md) |
 | 模式/决策细节 | 需要时再读 [flow-modes](templates/flow-modes.md) / [stage-delegation](templates/stage-delegation.md) |
 | 落盘自检 | [validate-atlas-gate](templates/validate-atlas-gate.md) |
+| 排障 | [TROUBLESHOOTING](TROUBLESHOOTING.md) |
+| 交互示例 | [flow-interaction](examples/flow-interaction.md) |
 | Template ON | 写文档**前** Read `atlas/template/` 下与产物同路径的 `template-*.md`（如 `requirements/template-req.md`、`requirements/ui/template-ui.md`；无则 `presets/{preset}/template/…`） |
 
 禁止预读无关 phase。跨切规则以**本文裁决表**为准，他处复述冲突时作废。

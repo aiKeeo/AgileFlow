@@ -135,6 +135,15 @@ export function inferPhaseFromArtifacts(projectRoot, brownfield) {
   const solReadme = readText(path.join(atlas, 'solution', 'README.md'));
   if (!solReadme || !isConfirmed(solReadme)) return '3';
 
+  // 方案未拆盘：仍停在 3（堵只确认 README、无 architecture/features 却宣称进开发）
+  const archPath = path.join(atlas, 'solution', 'architecture.md');
+  if (!exists(archPath)) return '3';
+  const featRoot = path.join(atlas, 'solution', 'features');
+  const featFiles = exists(featRoot)
+    ? collectFiles(featRoot, '.md').filter((f) => /^F-\d+-.+\.md$/.test(path.basename(f)))
+    : [];
+  if (reqFiles.length > 0 && featFiles.length === 0) return '3';
+
   const todo = readText(path.join(atlas, 'todo.md')) || '';
   if (hasOpenDevTasks(todo)) return '4';
 

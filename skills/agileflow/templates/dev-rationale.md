@@ -1,70 +1,75 @@
 ﻿# 构思落盘（atlas/dev/）
 
 > 颗粒度 → [exemplar-BE](../examples/dev-exemplar-BE.md) · [exemplar-FE](../examples/dev-exemplar-FE.md)  
-> **流程拆解 + 接现有代码（详细例子）** → [dev-reuse-examples.md](../examples/dev-reuse-examples.md)  
-> 档位 → [04](../phases/04-development.md) · 裁决 → [SKILL](../SKILL.md#裁决表冲突时以此为准)
+> **流程拆解** → [dev-reuse-examples.md](../examples/dev-reuse-examples.md)  
+> **AC≈UT / 映射表** → [ac-guide.md](ac-guide.md)  
+> 档位 → [04](../phases/04-development.md) · 裁决 → [SKILL](../SKILL.md#裁决表冲突时以此为准)  
+> 完整样例（人读）→ [dev-glance-login](../examples/dev-glance-login/)
 
-## 分工（v9.15 · 流程表优先）
+## 分工
 
 | 层 | 定什么 | dev 做什么 |
 |----|--------|------------|
-| **REQ AC** | 行为、异常、验收 Given/When/Then | 摘要列 AC ID |
-| **contracts/API** | 接口完整规格 | BE **只链** API-xxx |
-| **contracts/UI §字段绑定** | 页面上↔请求字段↔接口 | FE **只链** UI-xxx（有 API 时） |
-| **dev/T** | — | 摘要 + **流程表步骤**（或精简档一行改）+ 结果 |
+| **REQ AC** | 单测级 Given/When/Then + 观测面 | **摘要列齐本 T 主责 AC**；禁止改 AC 语义 |
+| **contracts/API·UI** | 接口/字段绑定 | BE 链 API；FE 链 UI（**禁** dev 内映射表） |
+| **② UT** | — | BE：`1 AC ↔ 1` `test/unit` 方法；UI：同构前端单测 |
+| **③ 薄 ac** | — | 出口烟测 + **## 结果 AC 映射表** |
 
-> **`AF_TEMPLATE=no`（legacy）**：仍可用 #### + **用户/系统/改**；标准/完整推荐改流程表。  
-> **`AF_DECIDE=ai`**：不减拆解厚度；完整档算法/链路仍用流程表。
+> **`AF_TEMPLATE=no`（legacy）**：仍可用 #### + **改**；标准/完整优先流程表。  
+> **`AF_DECIDE=ai`**：不减拆解厚度。
 
-## 留什么（仅 3 段）
+## 段结构
 
-| 段 | 精简 | 标准·完整 | 写什么 |
-|----|:----:|:--------:|--------|
-| **## 摘要** | ✅ | ✅ | 五 bullet：**本 T** / **做** / **不做** / **上游** / **AC**（FE+API 可加 **接线**）；**做** 须含接法（扩谁/谁不动/照谁） |
-| **## 步骤** | ✅ | ✅ | **流程表** S1…（动作 / 输入→输出 / 注意点含落点）；精简可用 #### + **改** |
-| **## 结果** | ✅ | ✅ | ③ 可运行证据 |
+| 段 | 写什么 |
+|----|--------|
+| **## 摘要** | 五 bullet：本T / 做（含接法） / 不做 / 上游 / AC（FE 可加接线） |
+| **## 步骤** | 流程表 S1…（或精简一行改） |
+| **## 结果** | 可运行证据 + **AC 映射表**（unit / ac / 人工） |
 
-**不留**：范围、异常、AC 专节、前置、必读、契约、做法、dev 内映射表、抄 API/UID JSON、F 联调卡、单独「复用盘点」大表。
+**不留**：范围/异常/AC 专节、dev 内字段映射表、抄 API JSON、F 联调卡。
 
-## 骨架（标准·完整 · 流程表）
+## 骨架
 
 ```markdown
 # [T-id] 名 — 构思 [BE|FE]
 
 - 档位：[标准|完整|精简] · depends_on：T-xxx
-- → [F-xxx] · [API|UI|UID] · 写法：code-patterns-{端}
+- → [F-xxx] · [API|UI] · 写法：code-patterns-{端}
+- 独立文件：禁止与其他端 T 合并
 
 ## 摘要
 
 - **本 T**：…
-- **做**：扩 `XxxService`；`YyyController` 不动；…
+- **做**：…（含接法；一句话概括改哪些文件/类）
 - **不做**：…
 - **上游**：…
-- **AC**：…
+- **AC**：AC-xxx-01, AC-xxx-02, …（盖住主责）
 
 ## 步骤
 
 | 步骤 | 动作 | 输入 → 输出 | 注意点（含落点） |
 |------|------|-------------|------------------|
-| **S1** | … | a → b | 继续走 `JwtFilter` — … |
-| **S2** | … | … | 在 `XxxService` 上加 `foo` — … |
+| **S1** | … | a → b | 新写 `Xxx.method` — … |
 
 ## 结果
+
 | 项 | 证据 |
+|----|------|
+| 编译/启/冒烟 | … |
+| UT | `npm test -- unit` ✅（②） |
+
+### AC 映射表
+
+| AC ID | unit | ac | 人工 |
+|-------|------|-----|------|
+| AC-xxx-01 | `test/unit/...` | `test/ac/...` | — |
 ```
 
 ## 步骤格式（闸门）
 
-**优先 · 流程表**：`| **S1** | 动作 | 输入 → 输出 | 注意点 |`，注意点须含 `` `Class.method` `` / `` `path/` ``（继续走 / 在…上加 / 照… / 新写）。
+**优先 · 流程表**：注意点须含 `` `Class.method` `` / `` `path/` ``。
 
-**精简 · 一行**：
-
-```
-#### 1. 短标题
-- **改**：`Class.method()` — 边界
-```
-
-（legacy 仍可用 **用户/系统/改** 三行。）
+**精简 · 一行**：`#### 1. …` + `- **改**：…`
 
 | 档 | 最少步数 |
 |----|----------|
@@ -72,4 +77,5 @@
 | 标准 | 2 |
 | 完整 | 3 |
 
-勾①：完整档另跑 `--gate dev-step1-literal --dev-file …`。
+勾①：完整档另跑 `--gate dev-step1-literal --dev-file …`。  
+勾③：映射表须覆盖本 T 主责 AC；BE 主责须有 `test/unit` 路径。

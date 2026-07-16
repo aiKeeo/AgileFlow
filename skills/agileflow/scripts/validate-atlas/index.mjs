@@ -17,6 +17,7 @@ import { validateRunnable } from './lib/rules/runnable.mjs';
 import { validateSmokeEntry } from './lib/rules/smoke.mjs';
 import { validatePixelCompare } from './lib/rules/pixel.mjs';
 import { validateReqTrace } from './lib/rules/trace.mjs';
+import { validateAntiSkip } from './lib/rules/anti-skip.mjs';
 
 /**
  * @typedef {Object} ValidateOptions
@@ -208,6 +209,10 @@ export function validateAtlas(options = {}) {
   }
   if (shouldRun('trace') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
     validateReqTrace(projectRoot, reporter);
+  }
+  // 反偷懒：任意 phase 可跑；有业务码 / 假进度 / README 冒充即硬挡
+  if (shouldRun('anti-skip')) {
+    validateAntiSkip(projectRoot, reporter, { afPhase: afState?.phase });
   }
 
   const decide = afState?.decide ?? '—';

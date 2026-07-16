@@ -8,7 +8,7 @@
 
 | 档 | 闸门/规则 | 失败效果 |
 |----|-----------|----------|
-| **A** | `atlas/agileflow.env`、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture+REQ已确认+决策/栈来源)、todo 三段式 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
+| **A** | `atlas/agileflow.env`、`anti-skip`、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture 必节+README 禁揉+契约对齐+REQ已确认+决策/栈来源)、todo 三段式/假进度 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
 | **B** | 残留 BDD 专节、契约命名等 warn | 可继续 |
 | **C** | AskQuestion 工具调用本身、停止、TodoWrite、并行启动卡 | 靠纪律；**但** user 模式未问栈会以 A 档 `AF-STACK-USER` 卡住 |
 
@@ -82,6 +82,7 @@ cd <skill> && npm run validate:sol
 | 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** env + architecture + REQ 已确认 + 栈来源按决策权落地） |
 | **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
 | **勾①/②/③ 后（任意时刻）** | `--only todo`（规则 `TODO-CHECK-*`） | 勾了无文件 / 勾③无可运行证据 / 假标「开发实现 ✅」→ **A 档失败** |
+| **写业务源码前 / 假进度嫌疑** | `anti-skip` | 有 `backend/`/`frontend/`/`src/` 等业务码却无 `architecture`+`features`+等量 `T-*.md`，或用 `dev/README` 冒充 T，或流程进度假勾 → **A 档失败** |
 | **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS；todo 勾选须与 `atlas/dev/` 对齐） |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
 | **验收归档前** | `req-trace` | 检查 REQ→F→T→AC→报告 链完整性（B 档：warn 不阻塞） |

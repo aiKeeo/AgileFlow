@@ -23,6 +23,14 @@ export function validateModel(projectRoot, reporter) {
       file: 'atlas/model/README.md',
       message: 'model README 缺少「## 文档索引」表。',
     });
+  } else if (/^##\s*表结构\b/m.test(readme) || /^##\s*实体清单\b/m.test(readme)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'MOD-README-MASH',
+      file: 'atlas/model/README.md',
+      message:
+        'model README 禁止写「## 表结构 / ## 实体清单」正文 → 拆到 model-overview.md（快速）或 domain-model 等；README 只做「## 文档索引」。',
+    });
   }
 
   const overviewOnly = exists(path.join(modelRoot, 'model-overview.md'));

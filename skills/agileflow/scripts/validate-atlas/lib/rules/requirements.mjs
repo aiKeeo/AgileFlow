@@ -40,6 +40,15 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
     }
   }
 
+  if (!/^##\s*范围提示/m.test(content)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'REQ-SCOPE',
+      file: relPath,
+      message: 'REQ 须含「## 范围提示」节（范围内/范围外，供 sol 提炼边界）。',
+    });
+  }
+
   if (!/^## 验收标准/m.test(content)) {
     reporter.add({
       severity: 'error',
@@ -54,6 +63,25 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
       file: relPath,
       message: 'AC 节缺少标准表格（须含 AC ID 列）。',
     });
+  } else {
+    // AC 表须含观测面列（API|UI|规则|人工）；颗粒度约定见 ac-guide
+    const acHeader = content.match(/\|[^\n]*AC ID[^\n]*\|/);
+    if (acHeader && !/观测面/.test(acHeader[0])) {
+      reporter.add({
+        severity: 'error',
+        rule: 'REQ-AC-观测面',
+        file: relPath,
+        message: 'AC 表须含「观测面」列（API|UI|规则|人工）。',
+      });
+    }
+    if (acHeader && (!/Given/i.test(acHeader[0]) || !/When/i.test(acHeader[0]) || !/Then/i.test(acHeader[0]))) {
+      reporter.add({
+        severity: 'error',
+        rule: 'REQ-AC-GWT',
+        file: relPath,
+        message: 'AC 表须含 Given / When / Then 列。',
+      });
+    }
   }
 
   if (/^## BDD 验收场景/m.test(content)) {
@@ -259,6 +287,41 @@ function validateReqIndexStatusConsistency(projectRoot, reporter) {
 }
 
 /**
+ * 开发/测试已声称完成时，AC「测试方法」不得仍全是「（③ 后填）」
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ */
+function validateReqAcBackfill(projectRoot, reporter) {
+  const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
+  const claimed =
+    /开发实现\s*✅/.test(todo) ||
+    /^\s*-\s+\[[xX]\].*开发实现/m.test(todo) ||
+    /测试验收\s*✅/.test(todo) ||
+    /^\s*-\s+\[[xX]\].*测试验收/m.test(todo);
+  if (!claimed) return;
+
+  const reqRoot = path.join(projectRoot, 'atlas', 'requirements');
+  if (!exists(reqRoot)) return;
+
+  for (const file of collectFiles(reqRoot, '.md')) {
+    if (file.includes(`${path.sep}ui${path.sep}`)) continue;
+    if (!/^REQ-\d+-.+\.md$/.test(path.basename(file))) continue;
+    const content = readText(file) || '';
+    const acRows = [...content.matchAll(/^\|\s*AC-\d+/gm)];
+    if (acRows.length === 0) continue;
+    const pending = (content.match(/（③\s*后填）/g) || []).length;
+    if (pending >= Math.ceil(acRows.length / 2)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'REQ-AC-未回填',
+        file: rel(projectRoot, file),
+        message: `流程进度已标开发/测试完成，但 AC 表仍有 ${pending}/${acRows.length} 条「（③ 后填）」——须回填 AC 测试方法与状态。`,
+      });
+    }
+  }
+}
+
+/**
  * 校验 atlas/requirements/
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
@@ -279,5 +342,6 @@ export function validateRequirements(projectRoot, reporter, opts = {}) {
       validateReqFile(projectRoot, file, content, reporter);
     }
   }
+  validateReqAcBackfill(projectRoot, reporter);
   validateReqIndexStatusConsistency(projectRoot, reporter);
 }
