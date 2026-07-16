@@ -3,6 +3,7 @@ import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
 import { DEV_MIN_STEPS, DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
 import { Reporter } from '../reporter.mjs';
 import { resolveTemplateMode } from '../template-loader.mjs';
+import { resolveDevSteps, isCodeAnchor } from './dev-steps.mjs';
 import { validateDevFileFromTemplate } from './generic-doc.mjs';
 
 /**
@@ -17,11 +18,10 @@ function resolveProjectRootFromDevFile(filePath) {
   return parts.slice(0, devIdx - 1).join(path.sep);
 }
 
-/** 完整档字面量 */
+/** 完整档字面量（#### 在有流程表时可缺） */
 const LITERAL_REQUIRED = [
   { id: 'DEV-LIT-摘要', pattern: '## 摘要', label: '## 摘要' },
   { id: 'DEV-LIT-步骤', pattern: '## 步骤', label: '## 步骤' },
-  { id: 'DEV-LIT-小节', pattern: '#### ', label: '#### 步骤小节' },
 ];
 
 /** 过短文档 / 旧编号禁形 */
@@ -84,17 +84,6 @@ function checkFakeHeadings(content) {
   return !hasMd && hasPlain;
 }
 
-function collectStepBlocks(content) {
-  const stepsSection = extractSectionBody(content, '## 步骤') ?? '';
-  const matches = [...stepsSection.matchAll(/^#### .+$/gm)];
-  return matches.map((m) => {
-    const start = m.index;
-    const rest = stepsSection.slice(start + m[0].length);
-    const next = rest.search(/^#### /m);
-    const body = (next === -1 ? rest : rest.slice(0, next)).trim();
-    return { heading: m[0], body };
-  });
-}
 
 /** dev 内禁止大段字段映射表（应在 contracts/UI） */
 function hasDevFieldMappingTable(content) {
@@ -201,42 +190,66 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
     });
   }
 
-  const steps = collectStepBlocks(content);
-  if (steps.length < minSteps) {
+  const stepsSection = extractSectionBody(content, '## 步骤') ?? '';
+  const resolved = resolveDevSteps(stepsSection);
+
+  if (tierDef.requireFlowTable && resolved.mode !== 'flow') {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-STEP-FULL-须流程表',
+      file: relPath,
+      message: '完整档须用流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
+    });
+  }
+
+  if (resolved.count < minSteps) {
     reporter.add({
       severity: 'error',
       rule: 'DEV-STEP-最少',
       file: relPath,
-      message: `${tierDef.label}须至少 ${minSteps} 个 #### 步骤（当前 ${steps.length}）。`,
+      message: `${tierDef.label}须至少 ${minSteps} 步（流程表 S1… 或 ####；当前 ${resolved.count}）。`,
     });
   }
 
-  for (const step of steps) {
-    if (!hasStepTriple(step.body)) {
-      reporter.add({
-        severity: 'error',
-        rule: 'DEV-STEP-3',
-        file: relPath,
-        message: `步骤须含 用户/系统/改 三行：${step.heading.slice(0, 60)}`,
-      });
+  if (resolved.mode === 'flow') {
+    for (const step of resolved.flow) {
+      if (!step.hasAnchor) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-流程落点',
+          file: relPath,
+          message: `${step.id} 注意点须含代码落点 \`Class.method\` / \`path/\`（继续走/在…上加/照…/新写）。`,
+        });
+      }
     }
-    const changeLine = step.body.match(/-\s*\*\*改\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
-    if (changeLine && !/`[^`]+`/.test(changeLine[1])) {
-      reporter.add({
-        severity: 'error',
-        rule: 'DEV-STEP-改锚点',
-        file: relPath,
-        message: `「改」行须含代码落点 \`Class.method\`：${step.heading.slice(0, 50)}`,
-      });
-    }
-    const systemLine = step.body.match(/-\s*\*\*系统\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
-    if (systemLine && !/AC-\d+|AC-\d+-\d+|\b\d{3}\b|toast|401|404|201|200/.test(systemLine[1])) {
-      reporter.add({
-        severity: 'warn',
-        rule: 'DEV-STEP-系统',
-        file: relPath,
-        message: `「系统」行建议含 AC-xxx 或可验 HTTP/toast：${step.heading.slice(0, 50)}`,
-      });
+  } else {
+    for (const step of resolved.hash) {
+      if (!hasStepTriple(step.body)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-3',
+          file: relPath,
+          message: `步骤须含 用户/系统/改 三行：${step.heading.slice(0, 60)}`,
+        });
+      }
+      const changeLine = step.body.match(/-\s*\*\*(?:改|涉及改动)\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
+      if (changeLine && !isCodeAnchor(changeLine[1])) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-改锚点',
+          file: relPath,
+          message: `「改/涉及改动」行须含代码落点 \`Class.method\`：${step.heading.slice(0, 50)}`,
+        });
+      }
+      const systemLine = step.body.match(/-\s*\*\*系统\*\*[：:]([\s\S]*?)(?=\n-|\n*$)/);
+      if (systemLine && !/AC-\d+|AC-\d+-\d+|\b\d{3}\b|toast|401|404|201|200/.test(systemLine[1])) {
+        reporter.add({
+          severity: 'warn',
+          rule: 'DEV-STEP-系统',
+          file: relPath,
+          message: `「系统」行建议含 AC-xxx 或可验 HTTP/toast：${step.heading.slice(0, 50)}`,
+        });
+      }
     }
   }
 
@@ -337,13 +350,14 @@ function runDevLiteralChecks(filePath, content, reporter, relPath, tier = 'stand
     });
   }
 
-  const stepCount = (content.match(/^#### /gm) || []).length;
-  if (content.replace(/\s/g, '').length < tierDef.minDocLength && stepCount < 1) {
+  const stepsBody = extractSectionBody(content, '## 步骤') ?? '';
+  const stepResolved = resolveDevSteps(stepsBody);
+  if (content.replace(/\s/g, '').length < tierDef.minDocLength && stepResolved.count < 1) {
     reporter.add({
       severity: 'error',
       rule: 'DEV-FAKE-过短',
       file: relPath,
-      message: '文档过短且无 #### 步骤。',
+      message: '文档过短且无步骤（流程表 S1… 或 ####）。',
     });
   }
 

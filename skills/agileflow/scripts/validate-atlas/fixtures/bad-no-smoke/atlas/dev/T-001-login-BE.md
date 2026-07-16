@@ -32,7 +32,7 @@
 |------|------|------|
 | 入口 | 无 | 新建 `AuthController.login` |
 
-## 做法
+## 步骤
 
 #### 登录成功 — 目的：签发 token `AuthController.login`
 

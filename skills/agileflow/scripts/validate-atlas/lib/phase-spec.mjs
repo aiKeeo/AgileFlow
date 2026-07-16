@@ -224,6 +224,8 @@ export const RISK_TIERS = {
 
     requireStructuredSummary: true,
 
+    requireFlowTable: true,
+
   },
 
 };
@@ -300,7 +302,7 @@ export const AI_GATES = {
 
     extra:
 
-      '按档位：摘要/步骤/结果；标准+摘要须 本T/做/不做/上游/AC 五 bullet；template 每步须 涉及改动+代码落点；legacy 每步须 用户/系统/改；完整另字面量严检',
+      '按档位：摘要/步骤/结果；标准+摘要五 bullet；步骤优先流程表 S1…（注意点含落点）或 ####+涉及改动/改；legacy 可用 用户/系统/改；完整须流程表+字面量严检；ai 不减完整档流程拆解',
 
   },
 
@@ -314,7 +316,8 @@ export const AI_GATES = {
 
     blocking: true,
 
-    extra: 'AF_PHASE=4；dev 文件数=T 头数；## 结果可运行证据；强制原型须 fe-pixel PASS',
+    extra:
+      'AF_PHASE=4；dev 文件数=T 头数；勾①②③须有文件/可运行证据（TODO-CHECK-*）；## 结果可运行；强制原型须 fe-pixel PASS',
 
   },
 

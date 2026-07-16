@@ -71,7 +71,20 @@ function writeProject(files) {
     'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
   });
   try {
-    check('AF_TEMPLATE=no 覆盖 auto-detect', resolveTemplateMode(root) === false);
+    check('AF_TEMPLATE=no → OFF', resolveTemplateMode(root) === false);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+{
+  const root = writeProject({
+    'atlas/agileflow.env':
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+    'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
+  });
+  try {
+    check('template 文件存在但 AF_TEMPLATE 未设 → OFF（不自动检测）', resolveTemplateMode(root) === false);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }

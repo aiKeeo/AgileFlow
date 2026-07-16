@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { collectFiles, exists, readText } from './fs-utils.mjs';
+import { exists, readText } from './fs-utils.mjs';
 import { resolveSkillRoot } from './skill-path.mjs';
 import { TEMPLATE_CONVENTIONS } from './template-conventions.mjs';
 import { parseEnvText } from './af-env.mjs';
@@ -126,15 +126,9 @@ export function resolveTemplateMode(projectRoot) {
   const raw = readText(envPath);
   if (raw) {
     const map = parseEnvText(raw);
-    if (map.AF_TEMPLATE === 'no') return false;
-    if (map.AF_TEMPLATE === 'yes') return true;
+    return map.AF_TEMPLATE === 'yes';
   }
-
-  const templateRoot = path.join(projectRoot, 'atlas', 'template');
-  if (!exists(templateRoot)) return false;
-
-  const files = collectFiles(templateRoot, '.md');
-  return files.some((f) => /template-[^/\\]+\.md$/i.test(f) && path.basename(f) !== 'README.md');
+  return false;
 }
 
 /**

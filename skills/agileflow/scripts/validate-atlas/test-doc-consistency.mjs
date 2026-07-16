@@ -60,7 +60,21 @@ mustInclude('templates/flow-modes.md', 'AI自主 + 连续做');
 
 // —— 建模跳过：user / ai 分叉 ——
 mustInclude('SKILL.md', '`AF_DECIDE=ai`：自行落盘建模判定');
+mustInclude('SKILL.md', '快路径');
+mustInclude('phases/02-modeling.md', '建模跳过快路径：同条进 sol');
 mustInclude('templates/todo.md', '## TodoWrite 强制展开');
+
+// —— fast+ai 审阅降频 ——
+mustInclude('templates/stage-delegation.md', 'fast+ai` 免发卡');
+mustInclude('templates/flow-modes.md', '一行摘要+自动 skip_review');
+
+// —— 小任务默认精简 ——
+mustInclude('phases/04-development.md', '小任务默认');
+mustInclude('phases/03-solution-design.md', '小任务默认精简');
+
+// —— 阶段5 证据复用 ——
+mustInclude('phases/05-testing.md', '证据来源：阶段4③复用');
+mustInclude('templates/ac-guide.md', '默认不复跑');
 
 // —— init：ai 走审阅 ——
 mustInclude('phases/00-project-init.md', 'AF_DECIDE=ai` 已确认');

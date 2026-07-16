@@ -27,10 +27,11 @@
 |--------|------|---------|
 | 段标题 | 全档：`## 摘要` `## 步骤` `## 结果`；标准+摘要五 bullet | DEV-SEC-* |
 | 摘要结构 | 标准+：摘要含 **本T/做/不做/上游/AC** | DEV-SUMMARY-结构 |
-| 步骤（legacy） | 每 `####` 下 **用户/系统/改**；改行有代码落点；精简≥1 / 标准≥2 / 完整≥3 | DEV-STEP-3 · DEV-STEP-最少 |
+| 步骤（legacy） | 每 `####` 下 **用户/系统/改**（格式权威 → [dev-quickstart §构思闸门](dev-quickstart.md#构思闸门勾-①-前)）；改行有代码落点；精简≥1 / 标准≥2 / 完整≥3 | DEV-STEP-3 · DEV-STEP-最少 |
 | 步骤（template） | 每 `####` 下 **涉及改动**；行内含 `` `anchor` ``；步数同上 | TMPL-DEV-CHANGE · TMPL-DEV-STEPS |
+| 步骤（流程表） | `S1…` 行注意点须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``（**禁单单词反引号**如 `` `Service` ``）；标准+完整优先此形态 | DEV-STEP-流程落点 |
 | 链 sol | BE 链 API；FE 链 UI（调 API 时）；dev 禁字段映射表 | DEV-LINK-* · DEV-BAN-映射 |
-| 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` ``；路径型→`` `path/` `` | DEV-LIT-代码落点 |
+| 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` ``；路径型→`` `path/` ``；**禁单单词反引号**（如 `` `Service` `` `` `todo` ``） | DEV-LIT-代码落点 |
 | 禁形旧标题 | 禁 `## 一、目标` `## 五、可执行方案` | DEV-BAN-* |
 | JSON 复贴 | dev 内大段 JSON → error | DEV-COPY-JSON |
 | 文档长度 | 去空格后 ≥ {精简 200 / 标准 350 / 完整 500} 字 | DEV-FAKE-过短 |
@@ -80,7 +81,8 @@ cd <skill> && npm run validate:sol
 | model 落盘 · 确认前 | `mod-confirm` | 禁止进 sol |
 | 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** env + architecture + REQ 已确认 + 栈来源按决策权落地） |
 | **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
-| **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS） |
+| **勾①/②/③ 后（任意时刻）** | `--only todo`（规则 `TODO-CHECK-*`） | 勾了无文件 / 勾③无可运行证据 / 假标「开发实现 ✅」→ **A 档失败** |
+| **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS；todo 勾选须与 `atlas/dev/` 对齐） |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
 | **验收归档前** | `req-trace` | 检查 REQ→F→T→AC→报告 链完整性（B 档：warn 不阻塞） |
 
@@ -95,6 +97,19 @@ cd <skill> && npm run validate:sol
 3. **结果**：`exit 0` / `✅` / `通过` / `PASS` / `UP` / `BUILD SUCCESS` / `成功` / `完成`
 
 禁止空表或只写「③ 验收后填写」。
+
+## 勾选证据（A · todo `TODO-CHECK-*`）
+
+> 堵「AI 自主 / 委托交付」时空跑勾选：checkbox 是承诺，不是装饰。
+
+| 勾选态 | 脚本要求 |
+|--------|----------|
+| 勾 ① | 对应 `atlas/dev/T-xxx-*.md` **必须存在** |
+| 勾 ② | ① 已勾 + 构思文件存在 |
+| 勾 ③ | ② 已勾 + 该文件「## 结果」含可运行证据 |
+| 流程进度「开发实现 ✅」 | 每个 T 的 ①②③ 均已勾且证据过关 |
+
+`sol-confirm` 阶段 ①②③ 应仍为 `[ ]`，不触发本表；一旦勾选（任意 phase）即硬挡。
 
 ## 入场日志（A · smoke）
 

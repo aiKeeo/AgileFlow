@@ -64,6 +64,55 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
       message: '请合并进 AC 表，勿双写「## BDD 验收场景」（AC 表即 BDD）。',
     });
   }
+
+  // REQ 声明了 UID 链接/编号 → 文件须存在（堵空链勾确认）
+  validateReqUidLinks(projectRoot, filePath, content, reporter);
+}
+
+/**
+ * REQ 内 UID 引用不得断链
+ * @param {string} projectRoot
+ * @param {string} filePath
+ * @param {string} content
+ * @param {import('../reporter.mjs').Reporter} reporter
+ */
+function validateReqUidLinks(projectRoot, filePath, content, reporter) {
+  const relPath = rel(projectRoot, filePath);
+  const reqDir = path.dirname(filePath);
+  /** @type {Set<string>} */
+  const declared = new Set();
+
+  for (const m of content.matchAll(/\]\(([^)]*ui\/UID-\d+[^)]*\.md)\)/gi)) {
+    declared.add(m[1].trim());
+  }
+  for (const m of content.matchAll(/`?(atlas\/requirements\/ui\/UID-\d+[^`\s]*\.md)`?/gi)) {
+    declared.add(m[1].trim());
+  }
+  // 界面描述表：| UID-001 | … | ui/UID-001-….md |
+  for (const m of content.matchAll(/\|\s*(UID-\d+)\s*\|[^|\n]*\|\s*\[?`?([^|\n\]]+\.md)`?\]?/g)) {
+    const link = m[2].trim();
+    if (/UID-\d+/i.test(link) || /ui\//i.test(link)) declared.add(link);
+  }
+
+  for (const link of declared) {
+    const cleaned = link.replace(/^\.\//, '').replace(/^\.\.\//, '');
+    let abs;
+    if (cleaned.startsWith('atlas/')) {
+      abs = path.join(projectRoot, cleaned);
+    } else if (path.isAbsolute(cleaned)) {
+      abs = cleaned;
+    } else {
+      abs = path.resolve(reqDir, cleaned);
+    }
+    if (!exists(abs)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'REQ-UID-断链',
+        file: relPath,
+        message: `REQ 引用 UID「${link}」但文件不存在——禁止空链标已确认。`,
+      });
+    }
+  }
 }
 
 /**

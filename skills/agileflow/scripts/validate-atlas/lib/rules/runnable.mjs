@@ -1,7 +1,8 @@
 import path from 'node:path';
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
 
-function extractSectionResult(content) {
+/** @param {string} content */
+export function extractSectionResult(content) {
   const match = content.match(/^## 结果[^\n]*/m);
   if (!match || match.index === undefined) return null;
   const rest = content.slice(match.index + match[0].length);
@@ -9,7 +10,8 @@ function extractSectionResult(content) {
   return (next === -1 ? rest : rest.slice(0, next)).trim();
 }
 
-function hasRunnableEvidence(body) {
+/** @param {string|null|undefined} body */
+export function hasRunnableEvidence(body) {
   if (!body || body.replace(/\s/g, '').length < 30) return false;
   if (/③\s*验收后填写/.test(body) && !/exit\s*0|✅|通过|PASS|\bUP\b|成功/i.test(body)) {
     return false;

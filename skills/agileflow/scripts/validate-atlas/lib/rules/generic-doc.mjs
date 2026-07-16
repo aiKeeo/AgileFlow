@@ -10,6 +10,7 @@ import {
   sectionMatches,
 } from '../template-loader.mjs';
 import { DEV_MIN_STEPS, RISK_TIERS } from '../phase-spec.mjs';
+import { resolveDevSteps, isCodeAnchor } from './dev-steps.mjs';
 
 /**
  * 列出 atlas 下匹配 target glob 的产物文件
@@ -184,41 +185,67 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
   }
 
   const stepsSection = findSectionBody(content, '步骤') ?? '';
-  const stepBlocks = [...stepsSection.matchAll(/^#### .+$/gm)];
-  if (stepBlocks.length < minSteps) {
+  const resolved = resolveDevSteps(stepsSection);
+
+  if (tierDef.requireFlowTable && resolved.mode !== 'flow') {
+    reporter.add({
+      severity: 'error',
+      rule: 'TMPL-DEV-FULL-须流程表',
+      file: relPath,
+      message: '完整档须用流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
+    });
+  }
+
+  if (resolved.count < minSteps) {
     reporter.add({
       severity: 'error',
       rule: 'TMPL-DEV-STEPS',
       file: relPath,
-      message: `dev template 要求至少 ${minSteps} 个 #### 步骤（当前 ${stepBlocks.length}）。`,
+      message: `dev template 要求至少 ${minSteps} 步（流程表 S1… 或 ####；当前 ${resolved.count}）。`,
     });
   }
 
   const changeLabel = String(metaGet(meta, 'changeLabel', '涉及改动'));
   const changeLineRe = buildChangeLabelLineRe(changeLabel);
+  // 兼容：changeLabel 或「改」
+  const changeOrGaiRe = new RegExp(
+    `-\\s*\\*\\*(?:${escapeRegExp(changeLabel)}|改)\\*\\*[：:]`,
+  );
 
-  for (const m of stepBlocks) {
-    const start = m.index ?? 0;
-    const rest = stepsSection.slice(start + m[0].length);
-    const next = rest.search(/^#### /m);
-    const body = (next === -1 ? rest : rest.slice(0, next)).trim();
-    if (!changeLineRe.test(body)) {
-      reporter.add({
-        severity: 'error',
-        rule: 'TMPL-DEV-CHANGE',
-        file: relPath,
-        message: `步骤须含 **${changeLabel}**：${m[0].slice(0, 40)}`,
-      });
-      continue;
+  if (resolved.mode === 'flow') {
+    for (const step of resolved.flow) {
+      if (!step.hasAnchor) {
+        reporter.add({
+          severity: 'error',
+          rule: 'TMPL-DEV-CHANGE',
+          file: relPath,
+          message: `${step.id} 注意点须含代码落点 \`Class.method\` / \`path/\`。`,
+        });
+      }
     }
-    const changeText = extractChangeLine(body, changeLabel);
-    if (!changeText || !/`[^`]+`/.test(changeText)) {
-      reporter.add({
-        severity: 'error',
-        rule: 'TMPL-DEV-CHANGE',
-        file: relPath,
-        message: `「${changeLabel}」行须含代码落点 \`Class.method\`：${m[0].slice(0, 50)}`,
-      });
+  } else {
+    for (const step of resolved.hash) {
+      const body = step.body;
+      if (!changeOrGaiRe.test(body) && !changeLineRe.test(body)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'TMPL-DEV-CHANGE',
+          file: relPath,
+          message: `步骤须含 **${changeLabel}** 或 **改**：${step.heading.slice(0, 40)}`,
+        });
+        continue;
+      }
+      const changeText =
+        extractChangeLine(body, changeLabel) ||
+        extractChangeLine(body, '改');
+      if (!changeText || !isCodeAnchor(changeText)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'TMPL-DEV-CHANGE',
+          file: relPath,
+          message: `「${changeLabel}/改」行须含代码落点 \`Class.method\`：${step.heading.slice(0, 50)}`,
+        });
+      }
     }
   }
 

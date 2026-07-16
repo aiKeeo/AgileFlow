@@ -54,7 +54,7 @@ atlas/active-edits.md    # 运行时锁表（项目初始化时创建）
 |------|------|------|
 | 批量出方案 | Subagent 可写 feature/contract | 每 subagent 只写 `features/F-xxx.md` + 按需 `contracts/*`；`architecture`/`todo` **仅主 Agent** |
 | **批量构思（①）** | **仅主 Agent** | 主 Agent 写 `atlas/dev/T-xxx-*-{FE\|BE}.md`（**禁止** Subagent 创建/改①）；锁表一般不登记 atlas/dev |
-| 写码执行批（②） | Subagent 只改**业务源码** | 按该 T「## 做法」涉及路径登记 `active-edits`；**禁止**两 subagent 同路径；**禁止**改 `atlas/**` |
+| 写码执行批（②） | Subagent 只改**业务源码** | 按该 T「## 步骤」涉及路径登记 `active-edits`；**禁止**两 subagent 同路径；**禁止**改 `atlas/**` |
 | 合并文件 | 仅主 Agent | `architecture.md`、`README.md`、`todo.md`、`active-edits.md` |
 
 > **① 归属**：与 [parallel-orchestration](../phases/parallel-orchestration.md) 一致——Subagent **不得**写 `atlas/dev/T-xxx*.md`。构思文件命名：`T-xxx-*-{FE|BE}.md`。

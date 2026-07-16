@@ -1,11 +1,13 @@
 ﻿---
 name: agileflow
 description: >-
-  规范交付：按序把需求/方案/任务/构思写入 atlas/，再写码与验收。
-  触发：用户要做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init: 前缀。
-version: 9.12.1
+  把想法拆解到实现落地的一套流程。按序把需求/方案/任务/构思写入 atlas/，再写码与验收。
+  防幻觉服从拆解，不反客为主。触发：用户要做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init: 前缀。
+version: 9.15.0
 ---
 # Agileflow
+
+> **核心思想**：流程即产品——把想法拆解到实现落地。防幻觉、防跳阶段、防空跑是加固，服从拆解，不反客为主。
 
 ## 裁决表（冲突时以此为准）
 
@@ -13,9 +15,9 @@ version: 9.12.1
 
 | 议题 | 裁决 |
 |------|------|
-| **首启契约（最高）** | 无 `atlas/agileflow.env`，或 `AF_FLOW`/`AF_DECIDE` 为 `pending` → **必须**先发[流程启动卡](templates/stage-delegation.md#流程启动卡首启强制)（模式+决策权）→ **停**。**禁止**静默写成 `fast`/`ai` 后落盘。用户原话已同时点明两边（如「快速+你定」）才可跳过 |
+| **首启契约（最高）** | 无 `atlas/agileflow.env`，或 `AF_FLOW`/`AF_DECIDE` 为 `pending` → **必须**先发[流程启动卡](templates/stage-delegation.md#流程启动卡首启强制)（模式+决策权）→ **停**。**禁止**静默写成 `fast`/`ai` 后落盘。用户原话命中[委托交付](templates/stage-delegation.md#委托交付fastai用户不想自己决策)（如「你定/别问我」；未说严谨则含 `fast+ai`）或同时点明两边（如「快速+你定」）才可跳过 |
 | **流程状态文件** | **`atlas/agileflow.env`**（AI 维护）：`AF_PHASE` / `AF_FLOW` / `AF_DECIDE` / `AF_TIER` / `AF_STACK_SOURCE`。闸门必读；`pending` 或与产物不一致 → **A 档报错卡住**。模板 → [agileflow.env](templates/agileflow.env) |
-| **阶段结束（AI自主）** | 落盘 → **审阅闸门** → **停**。禁止同回复写下一阶段 |
+| **阶段结束（AI自主）** | 落盘 → **结束闸门** → **停**。`fast+ai`+A档绿 → 一行摘要+自动 skip_review（免发卡）；`strict+ai` → 审阅闸门卡。禁止同回复写下一阶段（建模跳过快路径除外） |
 | **阶段结束（user_decide）** | 落盘 → **阶段闸门**（快速可与确认合并）→ **停** |
 | **术语落盘** | **唯一** `atlas/glossary.md`；greenfield **禁止**写 `atlas/init/**` |
 | **REQ 拆分** | 每个可独立验收功能 **一个** `REQ-*.md`；MVP 是范围标签，不是合并文件理由 |
@@ -30,16 +32,17 @@ version: 9.12.1
 | 议题 | 裁决 |
 |------|------|
 | **sol F 极简** | F 只留 **边界+暴露面**；**禁止** F 联调卡/字段绑定/验收要点。UI 链 API 时 **§字段绑定** 在 contracts/UI |
-| **dev 文档** | 全档 **摘要+步骤+结果** 三段；摘要须 **本T/做/不做/上游/AC** 五 bullet（标准+）；步骤引 AC-xxx。完整另字面量严检 |
+| **dev 文档** | 全档 **摘要+步骤+结果**；标准/完整步骤优先 **流程表**（动作/输入→输出/注意点含落点）；精简可用一行 **改**；摘要须 **本T/做/不做/上游/AC**（**做**含接法）。`AF_DECIDE=ai` **不减**完整档流程拆解。完整另字面量严检 |
 | **快速 vs 严谨** | 只控：文档厚度、model 单文件 vs 五件套、**user_decide 时**停点合并、覆盖率阈值；**不**改 todo ①②③；**不**把 AI自主改成逐步追问（严谨+AI = 厚文档 + 审阅闸门） |
-| **「用户不用管」** | = **AI 自主**，≠ 快速、≠ 跳阶段、≠ 薄 todo |
-| **建模跳过** | `user_decide`：建议跳过时须 AskQuestion 确认（或原话已点明）。`AF_DECIDE=ai`：自行落盘建模判定（跳过/增量/全量）→ 审阅闸门，**禁止**再发「建模判定确认」卡。禁止静默进 sol（无判定） |
-| **决策权已确认后** | `AF_DECIDE=ai`：跳过阶段内澄清卡 → 落盘 → **审阅闸门** → 停（**每阶段最多 1 张审阅**；禁止再叠确认/阶段闸门）。阶段 4：F/MVP 切片对 `ai` **默认不停问**（可运行闸门仍强制；用户说「先给我看/演示」才发阶段性确认）。`AF_DECIDE=user`：信息充分则跳过澄清、只走确认/闸门；否则**只问缺口**。**禁止**把「首启启动卡」当成可跳过的过程审批 |
+| **「用户不用管」** | = **AI 自主**（`AF_DECIDE=ai`），≠ 跳阶段、≠ 薄 todo |
+| **委托交付（fast+ai）** | **用户不想自己决策**的典型组合：`AF_FLOW=fast` + `AF_DECIDE=ai` → 阶段内不澄清、A 档绿免审阅卡；**仍**按序落盘、禁跳阶段/①/可运行闸门。原话只点明「你定/别问我」未说模式 → **默认 fast+ai**（用户另说「严谨」→ `strict+ai`） |
+| **建模跳过** | `user_decide`：建议跳过时须 AskQuestion 确认（或原话已点明）。`AF_DECIDE=ai`：自行落盘建模判定（跳过/增量/全量），**禁止**再发「建模判定确认」卡。跳过且四项自检+覆盖依据齐 → **快路径**：本条可写判定并直接进 sol 落盘（**唯一**允许同回复跨入 sol 的例外）；灰区/自检不全 → 审阅闸门→停。禁止静默进 sol（无判定） |
+| **决策权已确认后** | `AF_DECIDE=ai`：跳过阶段内澄清卡 → 落盘 → 结束闸门（见下）→ 停（**每阶段最多 1 张审阅**；禁止再叠确认/阶段闸门）。**`fast+ai` 且本阶段 A 档闸门绿** → **免发卡**：输出一行审阅摘要 → 自动按 skip_review 标已确认 → 停（下条「继续」进下一阶段）；**`strict+ai`** → 仍发审阅闸门。阶段 4：F/MVP 切片对 `ai` **默认不停问**（可运行闸门仍强制；用户说「先给我看/演示」才发阶段性确认）。`AF_DECIDE=user`：信息充分则跳过澄清、只走确认/闸门；否则**只问缺口**。**禁止**把「首启启动卡」当成可跳过的过程审批。**仍禁**同回复跨阶段写下一阶段文档（建模跳过快路径除外） |
 | **user_decide** | 须阶段内确认/闸门；澄清卡按「信息充分少问」；严谨默认**分步停**；快速默认可合并确认+闸门；`AF_DECIDE=user` 时技术栈未问清（`AF_STACK_SOURCE=pending`）→ **sol-confirm 必挡** |
 | **写法锚点路径** | brownfield：`atlas/init/codebase/p1-{端}.md`；greenfield：`atlas/solution/code-patterns-{端}.md` |
 | **测试入场** | 以 [05-testing 合并验证](phases/05-testing.md#测试入场门禁与阶段-4③-合并验证) 为准（同会话增量 / 跨会话全量） |
 | **A 档闸门全集** | 以 [validate-atlas-gate](templates/validate-atlas-gate.md) 为准（含 init/req/mod/sol/dev/test） |
-| **文档形态 SSOT（双模式）** | **Template ON**（`AF_TEMPLATE=yes` 或 `atlas/template/**/template-*.md` 存在，且非 `AF_TEMPLATE=no`）：形态规则读 **`atlas/template/`**（缺文件回退同 preset 默认，见 README `preset:`）；legacy REQ-F/DEV-SEC/SOL-F **关闭**。**Template OFF**：v9.11 legacy + skill `templates/` 提示词。bootstrap：`validate-atlas --bootstrap-template minimal\|standard` |
+| **文档形态 SSOT（双模式）** | **默认 legacy**（v9.11 legacy + skill `templates/` 提示词）。**Template ON** 仅 `AF_TEMPLATE=yes` 时启用：形态规则读 **`atlas/template/`**（缺文件回退同 preset 默认，见 README `preset:`）；legacy REQ-F/DEV-SEC/SOL-F **关闭**。bootstrap：`validate-atlas --bootstrap-template minimal\|standard`（自动写入 `AF_TEMPLATE=yes`）。文件存在不等于自动开启 |
 
 ### 反模式（催进度时仍禁止）
 
@@ -48,24 +51,26 @@ version: 9.12.1
 | ❌ | ✅ |
 |----|----|
 | 旧项目想改模式却让用户手改 env | 契约重选（pending + 启动卡） |
-| 建模建议跳过却无判定进 sol | `user`：确认卡→停；`ai`：落盘建模判定+审阅闸门→停 |
+| 建模建议跳过却无判定进 sol | `user`：确认卡→停；`ai`：须落盘建模判定（快路径可同条进 sol；灰区/自检不全才审阅停） |
 | 首次 init 静默落盘模式 B | 写法锚点模式卡 → 再落盘 |
 | 已确认 AI自主却只发卡不写文件 | 直接落盘 → 审阅闸门 |
 | 把多功能揉成一份「MVP 总览 REQ」 | 一功能一 REQ；README 做索引 |
 | 向用户解释「旧名/历史迁移/为什么集中」 | 只陈述当前目录约定 |
 | UI/dev 粘贴 UID 整图或 API JSON | 链 UID/API/UI §字段绑定；dev 禁映射表 |
-| 空壳步骤（无涉及改动/无代码落点） | 摘要+方法级伪代码步骤（legacy 仍用用户/系统/改） |
+| 空壳步骤（无涉及改动/无代码落点） | 摘要+方法级伪代码步骤（legacy 仍用用户/系统/改）（格式权威 → [dev-quickstart §构思闸门](templates/dev-quickstart.md#构思闸门勾-①-前)） |
+| **空跑勾选**（勾①无 `atlas/dev/`、勾③无可运行、假标开发✅） | 先落盘再勾；脚本 `TODO-CHECK-*` A 档硬挡（见 [validate-atlas-gate §勾选证据](templates/validate-atlas-gate.md#勾选证据a--todo-todo-check-)） |
+| REQ 链 UID 但 ui/ 空文件 | 先写 UID 再标 REQ 已确认；脚本 `REQ-UID-断链` |
 | 信息已写清仍整卡复问 | 跳过或只问缺口 + 首行声明依据 |
 | 中途发现上游错却硬扛写码 | 声明 `纠偏：L{n}` 并按阶梯回改 |
 | 严谨+AI自主仍逐步澄清/确认 | 落盘 → 审阅闸门；严谨只加厚文档 |
 
 ## 闸门分档
 
-| 档 | 含义 | 靠什么 |
-|----|------|--------|
-| **A** | 不过 → 禁止勾 ✅ / 进阶 | `validate-atlas --gate …` exit 0 |
-| **B** | 可继续，知债 | JS warn |
-| **C** | 脚本管不到（AskQuestion / 停止 / TodoWrite / 并行启动卡） | 纪律 |
+| 档 | 含义 | 靠什么 | 约束力 |
+|----|------|--------|--------|
+| **A** | 不过 → 禁止勾 ✅ / 进阶 | `validate-atlas --gate …` exit 0 | **硬阻断** |
+| **B** | 可继续，知债 | JS warn | 提醒 |
+| **C** | 脚本管不到（AskQuestion / 停止 / TodoWrite / 并行启动卡） | 纪律 | 靠自觉 |
 
 脚本只核验**落盘证据**，不替你编译；可运行须 Agent **实际运行**。
 
@@ -129,11 +134,12 @@ tests → 入场 → AC归档 → 回归
 
 | 说法 | 意思 |
 |------|------|
+| 委托交付 / fast+ai | 用户**不想自己决策**：AI 推断并落盘，少停少卡；≠ 跳阶段、≠ 先码后补 |
 | atlas/ | 流程文档根容器；子目录分阶段隔离（req/model/sol/dev/tests），**禁止**跨阶段混写或「揉成一份」 |
 | ①②③ | 构思→写码→验 AC（每个开发任务 T 的三步） |
 | 落盘 | 写入 atlas/ **对应阶段子目录**的文件（不是聊天里说说，也不是把多阶段塞进一个文件） |
 | 勾① / 勾② / 勾③ | 在 todo.md 中勾选对应步骤的 checkbox |
-| 假段标题 | 纯文本「范围/做法」无 `##` 标记 |
+| 假段标题 | 纯文本「范围/做法（旧名，现用 ## 步骤）」无 `##` 标记 |
 | 可运行证据 | **## 结果** 含编译 + 启/冒烟 + exit0/✅/PASS |
 | 像素对比 | 有强制原型 → fe-pixel report PASS |
 | 范例 | dev-exemplar-BE.md / dev-exemplar-FE.md，写 dev 前必读的标准示例 |

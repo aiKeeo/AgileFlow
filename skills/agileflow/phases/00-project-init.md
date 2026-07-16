@@ -24,6 +24,15 @@
 
 **铁律**：greenfield **禁止**创建 `atlas/init/`；brownfield 在进 **dev:/sol:** 前 **须** 有已确认或进行中的 init（见路由硬规则）。
 
+### 用户跳过 init 处理
+
+brownfield 用户显式要求跳过时：
+
+1. AskQuestion：「检测到已有代码库。跳过 init 可能导致写法锚点缺失。确认跳过？」
+2. 用户确认 → 在 todo.md 标注 `init: 用户跳过（风险已知）`
+3. 后续 dev 阶段写法锚点检查：无 init/code-patterns 时标注 `⚠️ 无写法锚点（init 被跳过）`，不阻塞但提示风险
+4. **禁止静默跳过——必须留痕**
+
 ---
 
 ## 目录结构（按需创建，无则不建）

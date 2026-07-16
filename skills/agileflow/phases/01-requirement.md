@@ -4,6 +4,7 @@
 > 提问卡片：[templates/requirement-askquestion.md](../templates/requirement-askquestion.md)
 > 文档模板：[templates/req-doc.md](../templates/req-doc.md)
 > **UI 描述**：[templates/req-ui-design.md](../templates/req-ui-design.md)
+> **Template ON** 时先读 `atlas/template/requirements/` 下对应 `template-*.md`（无则回退 skill templates/）
 
 ## 模式差异
 
@@ -11,7 +12,7 @@
 |------|------|
 | **信息充分** → 跳过第 1 步澄清卡（user_decide；与严谨共用清单） | 同左：充分则跳过；否则**只问缺口** |
 | 写完 REQ → **确认+阶段闸门合并 1 卡**（user_decide） | 确认卡 → 闸门卡（分步） |
-| **AI 自主** → 跳过需求卡与确认卡 → 落盘 → **审阅闸门** | 同左 |
+| **AI 自主** → 跳过需求卡与确认卡 → 落盘 → **结束闸门**（`fast+ai` 免发卡 / `strict+ai` 审阅卡） | 同左 |
 
 决策委派细则 → [stage-delegation.md](../templates/stage-delegation.md)  
 充分性清单 → [flow-modes §REQ 信息充分例外](../templates/flow-modes.md#req-信息充分例外快速严谨共用)
@@ -26,7 +27,7 @@
 2. **有缺口** → AskQuestion **仅缺口题** → 立即停止（禁止复问已明确项）
 3. 缺口 = 0 → 按充分处理
 
-**AI 自主**（`AF_DECIDE=ai` 已确认）：**本条回复直接落盘 REQ** → **审阅闸门** → 停。不发需求澄清卡。
+**AI 自主**（`AF_DECIDE=ai` 已确认）：**本条回复直接落盘 REQ** → **[结束闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)**（`fast+ai`+A档绿免发卡） → 停。不发需求澄清卡。
 
 - ❌ **禁止**契约未确认就落盘或静默写 `AF_FLOW=fast`/`AF_DECIDE=ai`
 - ❌ **禁止**用聊天文字追问代替 AskQuestion 卡片（**user_decide** 且有缺口时）
@@ -82,7 +83,7 @@
 3. 执行与 user_decide 相同的落盘（多 REQ + README + todo + glossary + 按需 UID）；确保 env 中 `AF_FLOW`/`AF_DECIDE` 已非 `pending`
 4. 在 `requirements/README.md` 追加 **[AI 决策记录](../templates/stage-delegation.md#ai-决策记录落盘必填)**（含：MVP 范围、**REQ 拆成几份及理由**）
 5. REQ 状态先标 **草稿**，README 汇总决策摘要
-6. **不**发需求澄清卡/草稿确认卡 → 直接 **[审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)** → 停止
+6. **不**发需求澄清卡/草稿确认卡 → 直接 **[结束闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)**（`fast+ai` 见[免发卡](../templates/stage-delegation.md#fastai-免发卡审阅降频)） → 停止
 
 ### 第 3 步：AskQuestion 确认草稿（仅 user_decide）
 
@@ -101,7 +102,7 @@
 
 ### 第 4 步：阶段收尾 — **阶段闸门**（仅 user_decide）
 
-> **AI 自主**：由 [审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属) 一步完成，**不走本步**。
+> **AI 自主**：由 [结束闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属) 一步完成（`fast+ai` 免发卡），**不走本步**。
 
 REQ 全部 **已确认**、todo 已更新、**本阶段人类依赖已写入 humanTodo**、**`atlas/README.md` 已更新**（[atlas-readme](../templates/atlas-readme.md)）后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`需求澄清已完成。是否继续进入【数据建模】阶段？`）→ **停止**。
 

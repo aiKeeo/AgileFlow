@@ -22,6 +22,29 @@ const cases = [
     fail: true,
   },
   {
+    name: 'bad-fake-checkboxes → 空跑勾①②③应失败',
+    args: ['--root', path.join(fixtures, 'bad-fake-checkboxes'), '--only', 'todo'],
+    fail: true,
+    assertStdout: 'TODO-CHECK-①无文件',
+  },
+  {
+    name: 'bad-fake-checkboxes → 假开发完成应失败',
+    args: ['--root', path.join(fixtures, 'bad-fake-checkboxes'), '--only', 'todo'],
+    fail: true,
+    assertStdout: 'TODO-CHECK-',
+  },
+  {
+    name: 'good-runnable → todo 勾选证据应通过',
+    args: ['--root', path.join(fixtures, 'good-runnable'), '--only', 'todo'],
+    fail: false,
+  },
+  {
+    name: 'bad-req-uid-missing → UID 断链应失败',
+    args: ['--root', path.join(fixtures, 'bad-req-uid-missing'), '--only', 'req'],
+    fail: true,
+    assertStdout: 'REQ-UID-断链',
+  },
+  {
     name: 'bad-thin-dev → 字面量校验',
     args: ['--root', path.join(fixtures, 'bad-thin-dev'), '--only', 'dev'],
     fail: true,
@@ -45,6 +68,17 @@ const cases = [
     name: 'bad-dev-paste-api → 契约粘贴 JSON 应失败',
     args: ['--dev-file', path.join(fixtures, 'bad-dev-paste-api/atlas/dev/T-001-login-BE.md')],
     fail: true,
+  },
+  {
+    name: 'bad-full-no-flow-table → 完整档 hash 模式应失败',
+    args: ['--dev-file', path.join(fixtures, 'bad-full-no-flow-table/atlas/dev/T-001-login-BE.md'), '--tier', 'full'],
+    fail: true,
+    assertStdout: 'DEV-STEP-FULL-须流程表',
+  },
+  {
+    name: 'good-full-flow-table → 完整档 flow 模式应通过',
+    args: ['--dev-file', path.join(fixtures, 'good-full-flow-table/atlas/dev/T-001-login-BE.md'), '--tier', 'full'],
+    fail: false,
   },
   {
     name: 'good-dev 空结果 → runnable 应失败',
