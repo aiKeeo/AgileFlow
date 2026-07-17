@@ -13,7 +13,7 @@
 |----|------|------|
 | 语言 | TypeScript | … |
 | 框架 | NestJS | … |
-| 数据库 | PostgreSQL | 见 model/physical-model.md |
+| 数据库 | PostgreSQL | 见 model/physical/schema.md |
 
 ## 系统架构图（ASCII）
 

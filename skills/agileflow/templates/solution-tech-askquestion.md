@@ -76,7 +76,7 @@ questions:
       - { id: "sqlite", label: "SQLite（轻量 / 本地）" }
       - { id: "mongodb", label: "MongoDB" }
       - { id: "redis_only", label: "仅 Redis / 内存（无关系库）" }
-      - { id: "follow_model", label: "跟 model/physical-model.md 已定选型走" }
+      - { id: "follow_model", label: "跟 model/physical/schema.md 已定选型走" }
       - { id: "unsure", label: "还没想好，帮我建议" }
 
   - id: "ui_style"

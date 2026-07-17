@@ -73,7 +73,7 @@ const cases = [
     name: 'bad-full-no-flow-table → 完整档 hash 模式应失败',
     args: ['--dev-file', path.join(fixtures, 'bad-full-no-flow-table/atlas/dev/T-001-login-BE.md'), '--tier', 'full'],
     fail: true,
-    assertStdout: 'DEV-STEP-FULL-须流程表',
+    assertStdout: 'DEV-STEP-FULL-须步骤表',
   },
   {
     name: 'good-full-flow-table → 完整档 flow 模式应通过',

@@ -14,7 +14,7 @@
 | 建议跳过且 **`AF_DECIDE=ai`**（自检齐） | **快路径**：落盘建模判定 → **本条直接进 sol 落盘**（禁止再发确认卡/审阅闸门） |
 | 建议跳过且 **`AF_DECIDE=ai`**（灰区/自检不全） | 落盘建模判定 → 审阅闸门 → 停（禁止再发确认卡） |
 | 建议跳过且 **user 尚未确认** | AskQuestion 建模判定确认 → 停；见 [跳过确认](#跳过须用户确认堵静默) |
-| 路由判定「建模：增量」 | 只更新受影响的 model 文件章节 |
+| 路由判定「建模：增量」 | 只更新受影响的 model 文件 |
 | 路由判定「建模：全量」 | 执行下文完整流程 |
 | 用户前缀 `mod:` | 进入本阶段；`user` 可 AskQuestion 跳过/增量/全量（`model:` = `mod:`） |
 | 首个 REQ、尚无 model/ | **全量**建模 |
@@ -69,7 +69,7 @@ questions:
 ```markdown
 📋 建模判定：跳过
 - 已确认 model：atlas/model/README.md（v{x}）
-- 覆盖依据：{本次改动点} → 已由 {实际存在的文件：model-overview.md §x 或 domain-model.md §x / …} 覆盖
+- 覆盖依据：{本次改动点} → 已由 {实际存在的文件：conceptual/entity-relations.md §x 或 entities/User.md §x / …} 覆盖
 - 自检四项：无新实体 ✅ / 无关系变更 ✅ / 无新规则 ✅ / 无存储结构变更 ✅
 - 确认：AskQuestion skip_confirm | 原话「{摘录}」 | AF_DECIDE=ai 自判
 ```
@@ -87,7 +87,7 @@ questions:
 - **greenfield 且有 DB/持久化**（禁止「无 model 就跳过」）
 - **model/README.md 状态为「草稿」**（须完成确认或更新后才能跳过）
 
-**增量更新**：只改**实际存在**的文件章节（快速→`model-overview.md`；严谨→对应五件套）；改完结束闸门 → 停止。
+**增量更新**：只改**实际存在**的文件章节（`entities/` 或 `conceptual/` / `physical/`）；改完结束闸门 → 停止。
 
 **阶段前缀 `mod:`**（=`model:`）：强制进入阶段 2；AskQuestion 提供跳过/增量/全量。
 
@@ -99,53 +99,41 @@ questions:
 
 **本阶段只回答「业务世界是什么」**，不定义 API、不拆开发任务。
 
-## 目录结构（必须）
-
-**严谨模式** — 五件套：
+## 目录结构（必须 — 概念 / 逻辑 / 物理三层）
 
 ```
 atlas/model/
-├── README.md
-├── domain-model.md
-├── entity-relations.md
-├── domain-rules.md
-└── physical-model.md
+├── README.md                         # 索引 + 状态（根目录唯一入口文件）
+├── conceptual/                       # 概念层：世界有什么、怎么约束
+│   ├── entity-relations.md           # ER 图 + 关系表
+│   └── domain-rules.md               # 不变量 / 状态机 / 跨实体规则
+├── entities/                         # 逻辑层：每个实体一份
+│   └── {EntityName}.md               # User.md, WeightRecord.md, …
+└── physical/                         # 物理层：怎么落库
+    └── schema.md                     # 表结构 / 索引 / DDL（无持久化写 N/A）
 ```
 
-**快速模式** — 可单文件（见 [flow-modes.md](../templates/flow-modes.md#快速模式建模精简)）：
-
-```
-atlas/model/
-├── README.md
-└── model-overview.md
-```
+> 与 `init/data/`（as-is：`entities/` · `relations/`）对应：`model/` 是 to-be。  
+> **禁止**把实体、关系、规则、DDL 平铺在 `model/` 根下。  
+> **禁止**用 `model-overview.md` 单文件收敛所有实体。
 
 ## 执行流程
 
-> **按模式二选一**，禁止快速模式仍去写五件套、或严谨模式只写 overview。
-
 0. **决策权**：入口卡或 todo 全局 → [stage-delegation.md](../templates/stage-delegation.md)
 1. 阅读已确认 REQ（`atlas/requirements/REQ-*.md`）
-2. 若 `atlas/model/` 不存在，按模板初始化目录与 `README.md`
+2. 若 `atlas/model/` 不存在，按模板初始化三层目录与 `README.md`
 
-**快速 · 全量**（单文件）：
+**全量**：
 
-3. 编写 `model-overview.md`：聚合根/实体/关系/规则/物理模型要点（可分节，仍一个文件）
-4. 更新 `README.md` 索引，状态 **草稿**
-5. **user_decide**：AskQuestion 确认 → 停 · **ai_decide**：AI 决策记录 → 结束闸门（`fast+ai` 免发卡 / `strict+ai` 审阅卡） → 停
-6. 确认后 README **已确认**，更新 todo
-
-**严谨 · 全量**（五件套）：
-
-3. 编写 `domain-model.md`：聚合根、实体、值对象及职责
-4. 编写 `entity-relations.md`：文本 ER 图 + 关系表
-5. 编写 `domain-rules.md`：不变量、状态机、值对象校验
-6. 编写 `physical-model.md`：有持久化则表/约束/索引/DDL；无则 `N/A` + 存放方式
-7. 更新 `README.md` 索引，状态 **草稿**
+3. 识别全部实体，**每个实体写 `entities/{EntityName}.md`**（字段表 + 约束 + 职责 + 关联）
+4. 编写 `conceptual/entity-relations.md`：文本 ER 图 + 关系表 + 关键约束
+5. 编写 `conceptual/domain-rules.md`：不变量 + 状态机 + 值对象校验
+6. 有持久化则编写 `physical/schema.md`（表/约束/索引/DDL）；无则 `N/A` + 存放方式
+7. 更新 `README.md` 索引（列出三层全部文件），状态 **草稿**
 8. **user_decide**：AskQuestion 确认 → 停 · **ai_decide**：AI 决策记录 → 结束闸门（`fast+ai` 免发卡 / `strict+ai` 审阅卡） → 停
 9. 确认后 README **已确认**，更新 todo
 
-**增量**（任一模式）：只改实际存在的文件章节（快速改 `model-overview`；严谨改对应五件套文件）。
+**增量**：只改实际存在的文件章节（`entities/` 或 `conceptual/` / `physical/`）。
 
 ### 第 10 步：阶段收尾 — **阶段闸门**（仅 user_decide）
 
@@ -169,8 +157,12 @@ atlas/model/
 
 - 必须基于已确认需求，每个聚合根追溯到 REQ
 - 草稿后须结束闸门（user_decide 确认卡 / ai_decide 结束闸门），禁止静默标「已确认」
-- **快速**：`model-overview.md` 须覆盖聚合根清单 + 关系要点 + 关键规则 + 存储要点
-- **严谨**：五件套各文件齐全；`domain-model` 列全聚合根；`entity-relations` 含 ER；每聚合根 ≥1 不变量；物理模型有类型/约束
+- **每个实体独立文件**，落在 `entities/{EntityName}.md`，须含「## 字段」表
+- `conceptual/entity-relations.md` 须含「## ER 图」
+- `conceptual/domain-rules.md` 须含「## 不变量」
+- 有持久化时 `physical/schema.md` 须有表结构 / DDL
+- **禁止**实体/关系/规则/DDL 平铺在 `model/` 根下
+- **禁止**用 `model-overview.md` 单文件收敛所有实体
 - **禁止**本阶段写 API、功能清单、开发任务；**禁止**与 REQ/solution 混文件
 
 ## 产出
@@ -179,8 +171,10 @@ atlas/model/
 |------|------|
 | `atlas/README.md` | 人类驾驶舱（本阶段结束必更新） |
 | `atlas/model/README.md` | 索引 + 状态权威（必有；子文件状态须与此一致） |
-| `atlas/model/model-overview.md` | **快速**单文件 |
-| `atlas/model/domain-model.md` 等五件套 | **严谨** |
+| `atlas/model/conceptual/entity-relations.md` | ER 图 + 关系表（必有） |
+| `atlas/model/conceptual/domain-rules.md` | 不变量 + 状态机（必有） |
+| `atlas/model/entities/{EntityName}.md` | 每个实体一个文件（必有，至少 1 个） |
+| `atlas/model/physical/schema.md` | 表结构 / DDL（有持久化时；无则 N/A） |
 | `atlas/todo.md` | 数据建模 ✅ |
 | `atlas/humanTodo.md` | 待业务确认项 |
 

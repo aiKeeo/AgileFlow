@@ -1,10 +1,25 @@
 import path from 'node:path';
-import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
-import { DEV_MIN_STEPS, DEV_SECTIONS, RISK_TIERS } from '../phase-spec.mjs';
-import { Reporter } from '../reporter.mjs';
-import { resolveTemplateMode } from '../template-loader.mjs';
-import { resolveDevSteps, isCodeAnchor } from './dev-steps.mjs';
-import { validateDevFileFromTemplate } from './generic-doc.mjs';
+import { collectFiles, exists, readText, rel } from '../../fs-utils.mjs';
+import { DEV_MIN_STEPS, DEV_SECTIONS, RISK_TIERS } from '../../phase-spec.mjs';
+import { Reporter } from '../../reporter.mjs';
+import { resolveTemplateMode } from '../../template-loader.mjs';
+import { resolveDevSteps, isCodeAnchor } from './steps.mjs';
+import { validateDevFileFromTemplate } from '../generic-doc.mjs';
+
+/**
+ * dev 阶段校验入口。
+ *
+ * 本文件职责：把「构思→写码→验收」每个 T 的文档质量，按 v9.11 极简 SSOT 格式做 A 档硬挡。
+ * 规则背后意图见同目录 README.md；每个规则报错信息必须含「为什么不过 + 怎么改」。
+ *
+ * 主要分组：
+ * 1. 结构检查（摘要/步骤/结果存在性）；
+ * 2. 摘要质量（本T/做/不做/上游/AC）；
+ * 3. 步骤质量（步数、流程表/####、用户/系统/改、代码落点）；
+ * 4. 链路 SSOT（链 API/UI/UID/F，禁映射表、禁大段 JSON、禁联调卡）；
+ * 5. 旧形态清理（旧标题、冗余段、legacy 段名）；
+ * 6. 结果验收（AC 映射表、test/unit 证据）。
+ */
 
 /**
  * 从 dev 文件路径反推项目根（…/atlas/dev/T-xxx.md）
@@ -32,14 +47,14 @@ const LITERAL_FORBIDDEN = [
   { pattern: '## ② 关键实现点', rule: 'DEV-BAN-关键实现点章', msg: '禁形「## ② 关键实现点」' },
 ];
 
-/** v9.11 禁止的冗余专节 */
+/** v9.11 禁止的冗余专节：这些信息的归属已收敛到 摘要/步骤/结果 + 链上游 */
 const DEV_BANNED_SECTIONS = [
   { heading: '## 范围', rule: 'DEV-BAN-范围', msg: '禁止「## 范围」→ 做/不做并入 ## 摘要' },
   { heading: '## 异常', rule: 'DEV-BAN-异常', msg: '禁止「## 异常」→ 步骤 **系统** 引 AC-xxx' },
   { heading: '## AC', rule: 'DEV-BAN-AC', msg: '禁止「## AC」表 → 摘要列 AC ID，步骤引 AC' },
 ];
 
-/** 标准+ 摘要须含的五类 bullet */
+/** 标准+ 摘要须含的五类 bullet：定位 / 边界 / 上游 / 验收 */
 const SUMMARY_BULLETS = [
   { id: '本T', pattern: /-\s*\*\*本\s*T\*\*[：:]/ },
   { id: '做', pattern: /-\s*\*\*做\*\*[：:]/ },
@@ -69,13 +84,7 @@ function isFeDev(filePath, content) {
 }
 
 function hasCodeAnchor(content) {
-  return (
-    /`[^`]*\.[^`]*`/.test(content) ||
-    /`[^`]+\([^)]*\)`/.test(content) ||
-    /`[^`]+\/[^`]+`/.test(content) ||
-    /pages\//.test(content) ||
-    /services\//.test(content)
-  );
+  return isCodeAnchor(content);
 }
 
 function checkFakeHeadings(content) {
@@ -85,21 +94,49 @@ function checkFakeHeadings(content) {
 }
 
 
-/** dev 内禁止大段字段映射表（应在 contracts/UI） */
-function hasDevFieldMappingTable(content) {
-  if (/字段映射|字段绑定/.test(content) && /\|[^|]+\|[^|]+\|[^|]+\|/.test(content)) {
-    if (isFeDev('', content) && /### 映射/.test(content)) return true;
-    if (/页面上|请求字段|发给后端/.test(content)) return true;
+/** dev 内禁止大段字段映射表（应在 contracts/UI）
+ * 只根据表格表头识别真正的字段映射表，不凭关键词误杀引用说明。
+ */
+function hasDevFieldMappingTable(filePath, content) {
+  const lines = content.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim().startsWith('|')) continue;
+    const cells = line.split('|').map((s) => s.trim()).filter(Boolean);
+    if (cells.length < 2) continue;
+
+    const headerText = cells.join(' ');
+    const hasFieldCol = /(?:^|\s)(字段|页面字段|请求字段|接口字段|后端字段)(?:\s|$)/.test(headerText);
+    const hasMapCol = /(?:^|\s)(映射|后端字段|接口字段|响应字段|请求参数)(?:\s|$)/.test(headerText);
+
+    if (hasFieldCol && hasMapCol) return true;
+
+    // FE dev 的 ### 映射 小节，下面紧跟字段表
+    if (i > 0 && isFeDev(filePath, content) && /### 映射/.test(lines[i - 1] || '') && hasFieldCol) {
+      return true;
+    }
   }
   return false;
 }
 
-/** 大段 JSON 粘贴 */
+/** 大段 JSON 粘贴：契约 JSON 应存在 contracts/API，dev 只链
+ * 只触发真正像 JSON 的代码块（含多个 "key": 键值对），排除 TS/JS 代码、bash 输出、日志。
+ */
 function hasLargeJsonPaste(content) {
   const blocks = [...content.matchAll(/```(?:json)?\s*\n([\s\S]*?)```/gi)];
   for (const block of blocks) {
     const body = block[1] || '';
-    if (body.includes('{') && body.includes('}') && body.length >= 80) {
+    if (body.length < 80) continue;
+    if (!body.includes('{') || !body.includes('}')) continue;
+
+    // 排除常见非 JSON 代码块：TS/JS 关键字、bash 命令、日志行
+    if (/^\s*(function|class|interface|type|enum|const|let|var|export|import|#)\b/m.test(body)) continue;
+    if (/^\s*\$/m.test(body)) continue;
+    if (/^\s*\[\d{4}-\d{2}-\d{2}/m.test(body) || /\bERROR\b|\bWARN\b/.test(body)) continue;
+
+    // 要求至少 2 个双引号键值对，才视为粘贴 JSON 契约
+    const keyValuePairs = [...body.matchAll(/"[^"\n]+"\s*:/g)].length;
+    if (keyValuePairs >= 2) {
       return true;
     }
   }
@@ -193,12 +230,12 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
   const stepsSection = extractSectionBody(content, '## 步骤') ?? '';
   const resolved = resolveDevSteps(stepsSection);
 
-  if (tierDef.requireFlowTable && resolved.mode !== 'flow') {
+  if (tierDef.requireFlowTable && resolved.mode !== 'flow' && resolved.mode !== 'atom') {
     reporter.add({
       severity: 'error',
-      rule: 'DEV-STEP-FULL-须流程表',
+      rule: 'DEV-STEP-FULL-须步骤表',
       file: relPath,
-      message: '完整档须用流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
+      message: '完整档须用原子步骤表（#### S1… + 8 字段规格表）或流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
     });
   }
 
@@ -211,6 +248,16 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
     });
   }
 
+  // 流程表格式与表头声明的列数不一致 → 直接报错，防止目的/动作/注意点静默错位
+  for (const malformed of resolved.malformed ?? []) {
+    reporter.add({
+      severity: 'error',
+      rule: 'DEV-STEP-FLOW-COLS',
+      file: relPath,
+      message: `流程表行列数不一致：${malformed.reason} 行：${malformed.row.slice(0, 80)}`,
+    });
+  }
+
   if (resolved.mode === 'flow') {
     for (const step of resolved.flow) {
       if (!step.hasAnchor) {
@@ -219,6 +266,34 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
           rule: 'DEV-STEP-流程落点',
           file: relPath,
           message: `${step.id} 注意点须含代码落点 \`Class.method\` / \`path/\`（继续走/在…上加/照…/新写）。`,
+        });
+      }
+      if (step.format === 5 && !step.hasPurpose) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-目的',
+          file: relPath,
+          message: `${step.id} 须填「目的」列（为什么做这步），流程表格式：| 步骤 | 目的 | 动作 | 输入→输出 | 注意点 |。`,
+        });
+      }
+    }
+  } else if (resolved.mode === 'atom') {
+    // 原子步骤表：检查 8 字段完整性和调用依赖代码落点
+    for (const step of resolved.atom) {
+      if (step.missingFields.length > 0) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-ATOM-字段',
+          file: relPath,
+          message: `${step.heading.replace(/^####\s*/, '').slice(0, 50)} 缺少字段：${step.missingFields.join('、')}（8 字段须全列：执行角色/触发条件/输入数据/处理逻辑/调用依赖/异常处理/输出数据/状态变更）。`,
+        });
+      }
+      if (!step.hasAnchor) {
+        reporter.add({
+          severity: 'error',
+          rule: 'DEV-STEP-ATOM-落点',
+          file: relPath,
+          message: `${step.heading.replace(/^####\s*/, '').slice(0, 50)} 「调用依赖」字段须含代码落点 \`Service.method(params)\`（或填「无」）。`,
         });
       }
     }
@@ -283,7 +358,7 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
     });
   }
 
-  if (hasDevFieldMappingTable(content)) {
+  if (hasDevFieldMappingTable(filePath, content)) {
     reporter.add({
       severity: 'error',
       rule: 'DEV-BAN-映射',
@@ -315,7 +390,8 @@ function runQualityChecks(filePath, content, reporter, relPath, tier = 'standard
   if (resultBody && /AC-\d+/i.test(content) && resultBody.length > 20) {
     const hasAcMap =
       /AC\s*映射表/.test(resultBody) ||
-      (/\|\s*AC ID\s*\|/i.test(resultBody) && /\|\s*unit\s*\|/i.test(resultBody));
+      (/\|\s*AC(?:\s*ID)?\s*\|/i.test(resultBody) &&
+        /\|\s*[^|\n]*(?:unit|验证|方法|方式|test|人工|manual|冒烟|smoke|ut|it)[^|\n]*\s*\|/i.test(resultBody));
     if (!hasAcMap) {
       reporter.add({
         severity: 'warn',

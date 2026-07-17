@@ -56,13 +56,25 @@ export const PHASE_DIRS = {
 
     id: 'mod',
 
-    dirs: [{ path: 'model', required: true }],
+    dirs: [
+
+      { path: 'model', required: true },
+
+      { path: 'model/conceptual', required: true },
+
+      { path: 'model/entities', required: true },
+
+    ],
 
     files: [
 
       { path: 'README.md', required: true },
 
       { path: 'model/README.md', required: true },
+
+      { path: 'model/conceptual/entity-relations.md', required: true },
+
+      { path: 'model/conceptual/domain-rules.md', required: true },
 
     ],
 
@@ -302,7 +314,7 @@ export const AI_GATES = {
 
     extra:
 
-      '按档位：摘要/步骤/结果；标准+摘要五 bullet；步骤优先流程表 S1…（注意点含落点）或 ####+涉及改动/改；legacy 可用 用户/系统/改；完整须流程表+字面量严检；ai 不减完整档流程拆解',
+      '按档位：摘要/步骤/结果；标准+摘要五 bullet；步骤优先原子步骤表 S1…（#### + 8 字段规格表：执行角色/触发条件/输入数据/处理逻辑含if-else/调用依赖 Service.method(params)/异常处理 错误码+回滚/输出数据/状态变更）或 ####+涉及改动/改；legacy 可用 用户/系统/改；完整须原子步骤表或流程表+字面量严检；ai 不减完整档步骤拆解',
 
   },
 

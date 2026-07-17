@@ -74,7 +74,7 @@ questions:
 **可能影响**（AI 初判）：
 | 层级 | 文件 | 可能改动 |
 |------|------|----------|
-| model | domain-rules.md | … |
+| model | conceptual/domain-rules.md | … |
 | solution | contracts/API-002-xxx.md | … |
 | todo | 开发任务 | 新增 T-00X |
 | dev | F-00X-*.md | 规则推导需更新 |

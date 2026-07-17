@@ -17,12 +17,16 @@
 | `SOL-A-SEC-*` / `SOL-A-RUN` | architecture 缺技术栈/模块/本地验证 | 按模板补三节 |
 | `REQ-SCOPE` / `REQ-AC-未回填` | 无范围提示；或进度已完成仍「③ 后填」 | 补范围；③ 后回填测法与状态 |
 | `SKIP-测试进度假` / `TST-R-PASS` | 「测试验收 ✅」但无字面量 PASS | tests/README 写 PASS + 验收报告/smoke |
-| `MOD-README-MASH` | model README 内联表结构 | 拆到 model-overview / domain-model；README 只索引 |
+| `MOD-README-MASH` | model README 内联表结构 | 拆到 `entities/` 与 `conceptual/`；README 只索引 |
+| `MOD-NO-ENTITY` | `entities/` 下无实体文件 | 每个实体写 `entities/{Name}.md`，禁止用 model-overview.md 单文件 |
+| `MOD-CROSS-MISSING` | 缺 conceptual 跨实体文件 | 补写 `conceptual/entity-relations.md` 与 `conceptual/domain-rules.md` |
+| `MOD-LEGACY-FLAT` | model 根下仍有实体或旧平铺文件 | 迁到 `entities/` · `conceptual/` · `physical/schema.md` |
+| `MOD-ENTITY-FIELDS` | 实体文件缺「## 字段」表 | 补字段表（字段名 \| 类型 \| 约束 \| 说明） |
 | 说「测过了」但编译不过 | 可运行闸门未真跑 | 要求 `## 结果` 写**命令 + exit code** |
 | 跨会话找不到进度 | `todo.md` 缺失或 checkpoint 空 | 打开/重建 todo；说「继续 agileflow」并点名 T |
 | 跳过首启卡直接写 REQ | env 值不对或未走启动卡 | 说「**重选模式**」→ env pending → 再发启动卡 |
 | 想调研/优化却进了 req | 意图是探索不是交付 | 说「先探索」或 `explore:`；选定后再 req |
-| 「快速」仍被要求写① | 快速 ≠ 跳① | 精简档也须①落盘 |
+| 「快速」仍被要求写① / 写细 sol·dev | 快速 ≠ 跳① ≠ 薄文档；加速靠并发 | ①落盘同质；推并行启动卡 |
 | humanTodo 一直阻塞 | 密钥/资源未提供 | 配好后通知「已配置 xxx」 |
 | 并行 Subagent 翻车 | 无①或未过并行启动卡 | 先写齐①；显式说「并行」并确认卡 |
 

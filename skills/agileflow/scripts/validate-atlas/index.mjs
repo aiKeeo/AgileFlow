@@ -7,10 +7,10 @@ import { resolveTemplateMode, resolveTemplatePreset } from './lib/template-loade
 import { validateDirectory } from './lib/rules/directory.mjs';
 import { validateInit } from './lib/rules/init.mjs';
 import { validateRequirements, validateReqConfirmed } from './lib/rules/requirements.mjs';
-import { validateModel } from './lib/rules/model.mjs';
+import { validateModel } from './lib/rules/model/index.mjs';
 import { validateSolution } from './lib/rules/solution.mjs';
 import { validateTodo } from './lib/rules/todo.mjs';
-import { validateDev } from './lib/rules/dev.mjs';
+import { validateDev } from './lib/rules/dev/index.mjs';
 import { validateGenericDocs } from './lib/rules/generic-doc.mjs';
 import { validateTests } from './lib/rules/tests.mjs';
 import { validateRunnable } from './lib/rules/runnable.mjs';
@@ -229,7 +229,7 @@ export { resolveTemplateMode, resolveTemplatePreset } from './lib/template-loade
 export { detectBrownfield } from './lib/brownfield.mjs';
 export { loadAfEnv, validateAfEnv, inferPhaseFromArtifacts } from './lib/af-env.mjs';
 export { resolveSkillRoot, resolveValidateScript, formatPortableGateCommand } from './lib/skill-path.mjs';
-export { runDevLiteralCheck, runA7Grep } from './lib/rules/dev.mjs';
+export { runDevLiteralCheck, runA7Grep } from './lib/rules/dev/index.mjs';
 export { Reporter } from './lib/reporter.mjs';
 export { runGate, listGates, getGate, formatGateCommand } from './lib/workflow.mjs';
 export { AI_GATES, PHASE_DIRS, RISK_TIERS } from './lib/phase-spec.mjs';

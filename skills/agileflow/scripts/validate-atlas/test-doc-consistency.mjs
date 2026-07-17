@@ -88,6 +88,16 @@ mustInclude('SKILL.md', 'AF_TEMPLATE', 'AF_TEMPLATE 双模式');
 mustInclude('SKILL.md', 'atlas/template/', 'atlas/template 路径');
 mustInclude('SKILL.md', '双模式', '双模式 SSOT');
 
+// —— model 三层目录 ——
+mustInclude('phases/02-modeling.md', 'conceptual/', 'model 概念层');
+mustInclude('phases/02-modeling.md', 'entities/', 'model 逻辑层 entities/');
+mustInclude('phases/02-modeling.md', 'physical/schema.md', 'model 物理层 schema');
+mustInclude('templates/modeling-output.md', 'conceptual/entity-relations.md');
+mustInclude('templates/flow-modes.md', 'conceptual/', 'flow-modes model 三层');
+mustNotInclude('phases/02-modeling.md', 'atlas/model/physical-model.md', '旧 physical-model 平铺路径');
+mustNotInclude('phases/02-modeling.md', '└── physical-model.md', '旧根下 physical-model 树');
+mustNotInclude('phases/02-modeling.md', '├── {EntityName}.md', '旧根下实体平铺树');
+
 if (failed) {
   console.error(`\n${failed} consistency check(s) failed`);
   process.exit(1);

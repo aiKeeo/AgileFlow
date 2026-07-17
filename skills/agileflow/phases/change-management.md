@@ -92,8 +92,8 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 **变更内容**：新增「优惠券抵扣」场景
 
 **可能影响**：
-- model/domain-rules.md：订单金额计算规则
-- model/physical-model.md：orders 表新增 coupon_id
+- model/conceptual/domain-rules.md：订单金额计算规则
+- model/physical/schema.md：orders 表新增 coupon_id
 - solution/features/F-003-退款.md：新增 F-003 + §边界
 - solution/contracts/API-003-退款.md：按需
 - todo.md：T-005 等开发任务

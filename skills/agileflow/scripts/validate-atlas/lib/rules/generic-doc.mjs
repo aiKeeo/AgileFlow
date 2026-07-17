@@ -10,7 +10,7 @@ import {
   sectionMatches,
 } from '../template-loader.mjs';
 import { DEV_MIN_STEPS, RISK_TIERS } from '../phase-spec.mjs';
-import { resolveDevSteps, isCodeAnchor } from './dev-steps.mjs';
+import { resolveDevSteps, isCodeAnchor } from './dev/steps.mjs';
 
 /**
  * 列出 atlas 下匹配 target glob 的产物文件
@@ -187,12 +187,12 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
   const stepsSection = findSectionBody(content, '步骤') ?? '';
   const resolved = resolveDevSteps(stepsSection);
 
-  if (tierDef.requireFlowTable && resolved.mode !== 'flow') {
+  if (tierDef.requireFlowTable && resolved.mode !== 'flow' && resolved.mode !== 'atom') {
     reporter.add({
       severity: 'error',
-      rule: 'TMPL-DEV-FULL-须流程表',
+      rule: 'TMPL-DEV-FULL-须步骤表',
       file: relPath,
-      message: '完整档须用流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
+      message: '完整档须用原子步骤表（#### S1… + 8 字段规格表）或流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
     });
   }
 
@@ -202,6 +202,15 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
       rule: 'TMPL-DEV-STEPS',
       file: relPath,
       message: `dev template 要求至少 ${minSteps} 步（流程表 S1… 或 ####；当前 ${resolved.count}）。`,
+    });
+  }
+
+  for (const malformed of resolved.malformed ?? []) {
+    reporter.add({
+      severity: 'error',
+      rule: 'TMPL-DEV-FLOW-COLS',
+      file: relPath,
+      message: `流程表行列数不一致：${malformed.reason}`,
     });
   }
 

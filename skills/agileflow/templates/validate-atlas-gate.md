@@ -29,7 +29,8 @@
 | 摘要结构 | 标准+：摘要含 **本T/做/不做/上游/AC** | DEV-SUMMARY-结构 |
 | 步骤（legacy） | 每 `####` 下 **用户/系统/改**（格式权威 → [dev-quickstart §构思闸门](dev-quickstart.md#构思闸门勾-①-前)）；改行有代码落点；精简≥1 / 标准≥2 / 完整≥3 | DEV-STEP-3 · DEV-STEP-最少 |
 | 步骤（template） | 每 `####` 下 **涉及改动**；行内含 `` `anchor` ``；步数同上 | TMPL-DEV-CHANGE · TMPL-DEV-STEPS |
-| 步骤（流程表） | `S1…` 行注意点须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``（**禁单单词反引号**如 `` `Service` ``）；标准+完整优先此形态 | DEV-STEP-流程落点 |
+| 步骤（原子步骤表） | 每 `#### S1…` 下 8 字段规格表（执行角色/触发条件/输入数据/处理逻辑含 if-else/调用依赖/异常处理/输出数据/状态变更）；调用依赖字段须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``；**标准+完整优先此形态** | DEV-STEP-ATOM-字段 · DEV-STEP-ATOM-落点 |
+| 步骤（流程表·兼容旧） | `S1…` 行注意点须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``（**禁单单词反引号**如 `` `Service` ``） | DEV-STEP-流程落点 |
 | 链 sol | BE 链 API；FE 链 UI（调 API 时）；dev 禁字段映射表 | DEV-LINK-* · DEV-BAN-映射 |
 | 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` ``；路径型→`` `path/` ``；**禁单单词反引号**（如 `` `Service` `` `` `todo` ``） | DEV-LIT-代码落点 |
 | 禁形旧标题 | 禁 `## 一、目标` `## 五、可执行方案` | DEV-BAN-* |
