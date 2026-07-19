@@ -8,10 +8,10 @@
 
 ## 请求体
 
-```json
+```jsonc
 {
-  "username": "string",
-  "password": "string"
+  "username": "alice",     // 必填，1–32，trim
+  "password": "secret123"  // 必填，6–64
 }
 ```
 
@@ -22,7 +22,7 @@
 
 ## 成功响应 `200`
 
-```json
+```jsonc
 {
   "code": 0,
   "data": {

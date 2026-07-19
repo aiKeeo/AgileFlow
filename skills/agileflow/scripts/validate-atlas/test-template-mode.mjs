@@ -55,7 +55,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=yes\n',
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=yes\n',
   });
   try {
     check('AF_TEMPLATE=yes → mode ON', resolveTemplateMode(root) === true);
@@ -67,7 +67,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=no\n',
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=no\n',
     'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
   });
   try {
@@ -80,7 +80,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
     'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
   });
   try {
@@ -126,12 +126,12 @@ function writeProject(files) {
   check('legacy req templateMode skip 无 REQ-F', legacyRep.getIssues().length === 0);
 }
 
-// —— dev 涉及改动（TMPL-DEV-CHANGE）——
+// —— dev 流程表落点（TMPL-DEV-FLOW-ANCHOR）——
 {
   const root = path.join(fixtures, 'good-template-minimal');
   const devFile = path.join(root, 'atlas/dev/T-001-scaffold.md');
   const reporter = new Reporter();
-  validateDevFileFromTemplate(root, devFile, reporter, { tier: 'standard' });
+  validateDevFileFromTemplate(root, devFile, reporter, { tier: 'full' });
   const rules = reporter.getIssues().map((i) => i.rule);
   check('good-template-minimal dev 涉及改动 通过', rules.length === 0, rules.join(','));
 }
@@ -140,16 +140,16 @@ function writeProject(files) {
   const root = path.join(fixtures, 'bad-template-dev-no-anchor');
   const devFile = path.join(root, 'atlas/dev/T-001-scaffold.md');
   const reporter = new Reporter();
-  validateDevFileFromTemplate(root, devFile, reporter, { tier: 'standard' });
+  validateDevFileFromTemplate(root, devFile, reporter, { tier: 'full' });
   const rules = reporter.getIssues().map((i) => i.rule);
-  check('bad-template-dev-no-anchor 含 TMPL-DEV-CHANGE', rules.some((r) => r === 'TMPL-DEV-CHANGE'));
+  check('bad-template-dev-no-anchor 含 TMPL-DEV-FLOW-ANCHOR', rules.some((r) => r === 'TMPL-DEV-FLOW-ANCHOR'));
 }
 
 // —— bootstrap ——
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
   });
   try {
     process.chdir(skillRoot);

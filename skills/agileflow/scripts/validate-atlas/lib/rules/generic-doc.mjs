@@ -9,8 +9,7 @@ import {
   resolveTemplatePreset,
   sectionMatches,
 } from '../template-loader.mjs';
-import { DEV_MIN_STEPS, RISK_TIERS } from '../phase-spec.mjs';
-import { resolveDevSteps, isCodeAnchor } from './dev/steps.mjs';
+import { validateNarrativeFlow, NarrativeIssueType } from './dev/narrative-flow.mjs';
 
 /**
  * 列出 atlas 下匹配 target glob 的产物文件
@@ -85,37 +84,6 @@ function parseForbiddenList(raw) {
 }
 
 /**
- * 转义正则特殊字符
- * @param {string} s
- */
-function escapeRegExp(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
- * 构建 dev 步骤「涉及改动」标签行正则
- * @param {string} label
- */
-function buildChangeLabelLineRe(label) {
-  return new RegExp(`-\\s*\\*\\*${escapeRegExp(label)}\\*\\*[：:]`);
-}
-
-/**
- * 提取步骤 body 中「涉及改动」行文本
- * @param {string} body
- * @param {string} label
- */
-function extractChangeLine(body, label) {
-  const lineRe = buildChangeLabelLineRe(label);
-  const match = body.match(lineRe);
-  if (!match) return null;
-  const start = (match.index ?? 0) + match[0].length;
-  const rest = body.slice(start);
-  const end = rest.search(/\n-/);
-  return (end === -1 ? rest : rest.slice(0, end)).trim();
-}
-
-/**
  * 校验 AC 格式
  * @param {string} content
  * @param {'bullet'|'table'} format
@@ -149,12 +117,8 @@ function validateAcFormat(content, format, reporter, relPath) {
  * @param {Record<string, unknown>} meta
  * @param {string} relPath
  * @param {import('../reporter.mjs').Reporter} reporter
- * @param {string} tier
  */
-function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
-  const tierDef = RISK_TIERS[tier] ?? RISK_TIERS.standard;
-  const minSteps = DEV_MIN_STEPS[tier] ?? 2;
-
+function validateDevFromTemplate(content, meta, relPath, reporter) {
   /** @type {string[]} */
   const summaryBullets = Array.isArray(meta.summaryBullets)
     ? meta.summaryBullets
@@ -165,11 +129,11 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
   const summaryBody = findSectionBody(content, '摘要');
   if (summaryBody && summaryBullets.length) {
     const patterns = {
-      本T: /-\s*\*\*本\s*T\*\*[：:]/,
-      做: /-\s*\*\*做\*\*[：:]/,
-      不做: /-\s*\*\*不做\*\*[：:]/,
-      上游: /-\s*\*\*上游\*\*[：:]/,
-      AC: /-\s*\*\*AC\*\*[：:]/,
+      本T: /-\s*\*\*本\s*T\*\*[：:]\s*\S/,
+      做: /-\s*\*\*做\*\*[：:]\s*\S/,
+      不做: /-\s*\*\*不做\*\*[：:]\s*\S/,
+      上游: /-\s*\*\*上游\*\*[：:]\s*\S/,
+      AC: /-\s*\*\*AC\*\*[：:]\s*\S/,
     };
     for (const b of summaryBullets) {
       const pat = patterns[b] ?? new RegExp(`\\*\\*${b}\\*\\*`);
@@ -184,78 +148,31 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
     }
   }
 
-  const stepsSection = findSectionBody(content, '步骤') ?? '';
-  const resolved = resolveDevSteps(stepsSection);
-
-  if (tierDef.requireFlowTable && resolved.mode !== 'flow' && resolved.mode !== 'atom') {
+  if (/^##\s*步骤(\s|$)/m.test(content)) {
     reporter.add({
       severity: 'error',
-      rule: 'TMPL-DEV-FULL-须步骤表',
+      rule: 'TMPL-DEV-BAN-步骤',
       file: relPath,
-      message: '完整档须用原子步骤表（#### S1… + 8 字段规格表）或流程表（S1… 注意点含落点），禁纯 #### 精简句式。',
+      message: '禁「## 步骤」；template-dev 须用 主流程+边界+实现说明。',
     });
   }
 
-  if (resolved.count < minSteps) {
+  const narrativeRuleMap = {
+    [NarrativeIssueType.FLOW_ENTRY]: 'TMPL-DEV-FLOW-ENTRY',
+    [NarrativeIssueType.FLOW_MIN]: 'TMPL-DEV-FLOW-MIN',
+    [NarrativeIssueType.FLOW_ANCHOR]: 'TMPL-DEV-FLOW-ANCHOR',
+    [NarrativeIssueType.EDGE_EMPTY]: 'TMPL-DEV-EDGE',
+    [NarrativeIssueType.IMPL_BLOCK]: 'TMPL-DEV-IMPL-BLOCK',
+    [NarrativeIssueType.IMPL_FIELDS]: 'TMPL-DEV-IMPL-FIELDS',
+    [NarrativeIssueType.IMPL_ANCHOR]: 'TMPL-DEV-IMPL-ANCHOR',
+  };
+  for (const issue of validateNarrativeFlow(content)) {
     reporter.add({
       severity: 'error',
-      rule: 'TMPL-DEV-STEPS',
+      rule: narrativeRuleMap[issue.type] ?? 'TMPL-DEV-NARRATIVE',
       file: relPath,
-      message: `dev template 要求至少 ${minSteps} 步（流程表 S1… 或 ####；当前 ${resolved.count}）。`,
+      message: issue.message,
     });
-  }
-
-  for (const malformed of resolved.malformed ?? []) {
-    reporter.add({
-      severity: 'error',
-      rule: 'TMPL-DEV-FLOW-COLS',
-      file: relPath,
-      message: `流程表行列数不一致：${malformed.reason}`,
-    });
-  }
-
-  const changeLabel = String(metaGet(meta, 'changeLabel', '涉及改动'));
-  const changeLineRe = buildChangeLabelLineRe(changeLabel);
-  // 兼容：changeLabel 或「改」
-  const changeOrGaiRe = new RegExp(
-    `-\\s*\\*\\*(?:${escapeRegExp(changeLabel)}|改)\\*\\*[：:]`,
-  );
-
-  if (resolved.mode === 'flow') {
-    for (const step of resolved.flow) {
-      if (!step.hasAnchor) {
-        reporter.add({
-          severity: 'error',
-          rule: 'TMPL-DEV-CHANGE',
-          file: relPath,
-          message: `${step.id} 注意点须含代码落点 \`Class.method\` / \`path/\`。`,
-        });
-      }
-    }
-  } else {
-    for (const step of resolved.hash) {
-      const body = step.body;
-      if (!changeOrGaiRe.test(body) && !changeLineRe.test(body)) {
-        reporter.add({
-          severity: 'error',
-          rule: 'TMPL-DEV-CHANGE',
-          file: relPath,
-          message: `步骤须含 **${changeLabel}** 或 **改**：${step.heading.slice(0, 40)}`,
-        });
-        continue;
-      }
-      const changeText =
-        extractChangeLine(body, changeLabel) ||
-        extractChangeLine(body, '改');
-      if (!changeText || !isCodeAnchor(changeText)) {
-        reporter.add({
-          severity: 'error',
-          rule: 'TMPL-DEV-CHANGE',
-          file: relPath,
-          message: `「${changeLabel}/改」行须含代码落点 \`Class.method\`：${step.heading.slice(0, 50)}`,
-        });
-      }
-    }
   }
 
   const forbidden = parseForbiddenList(metaGet(meta, 'forbidden', []));
@@ -270,6 +187,28 @@ function validateDevFromTemplate(content, meta, relPath, reporter, tier) {
         });
       }
     }
+  }
+
+  // 与 legacy 同向：禁范围/做法空壳、禁「写码后填」冒充构思
+  const hasScopeDo = /^##\s*范围(\s|$)/m.test(content) || /^##\s*做法(\s|$)/m.test(content);
+  const missingSummary = !/^##\s*摘要(\s|$)/m.test(content);
+  const missingFlow = !/^##\s*主流程(\s|$)/m.test(content);
+  if (hasScopeDo && (missingSummary || missingFlow)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'TMPL-DEV-STUB',
+      file: relPath,
+      message: '禁止「## 范围/做法」空壳；须先写 ## 摘要 + ## 主流程 + ## 边界 + ## 实现说明。',
+    });
+  }
+  const resultBody = findSectionBody(content, '结果') ?? '';
+  if (/写码后填|写码后补|编码后填|事后补|先码后|③\s*后填|勾③后填/i.test(resultBody)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'TMPL-DEV-RESULT-PLACEHOLDER',
+      file: relPath,
+      message: '## 结果 禁止「写码后填」类占位；勾③前须真跑证据。构思须在①写满。',
+    });
   }
 }
 
@@ -292,10 +231,10 @@ function validateOneSpec(projectRoot, spec, reporter, opts) {
 
   if (files.length === 0 && spec.id !== 'test-report') {
     reporter.add({
-      severity: 'warn',
+      severity: 'info',
       rule: 'TMPL-NO-DOCS',
       file: spec.templateRel,
-      message: `template「${spec.id}」目标 ${target} 暂无产物文件。`,
+      message: `template「${spec.id}」目标 ${target} 暂无产物文件（未落盘前不阻断）。`,
     });
     return;
   }
@@ -336,7 +275,7 @@ function validateOneSpec(projectRoot, spec, reporter, opts) {
     }
 
     if (spec.id === 'dev') {
-      validateDevFromTemplate(content, meta, relPath, reporter, opts.tier ?? 'standard');
+      validateDevFromTemplate(content, meta, relPath, reporter);
     }
   }
 }

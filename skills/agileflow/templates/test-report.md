@@ -1,6 +1,6 @@
-﻿# 测试验收报告模板
+# 测试验收报告模板
 
-> AC 规范：[ac-guide.md](ac-guide.md)
+> AC 规范：[../phases/05-testing.md](../phases/05-testing.md)
 
 ## REQ 验收报告（`atlas/tests/REQ-XXX-验收报告.md`）
 
@@ -18,8 +18,8 @@
 
 | AC ID | 场景名称 | G-W-T 摘要 | 状态 | 测试证据 | event | 日志取证 |
 |-------|----------|------------|------|----------|-------|----------|
-| AC-XXX-01 | 正常登录 | code 有效 → JWT | ✅ | `reqxxx_ac_test#acxxx_01_…`（阶段 4 ③ 编写，阶段 5 复跑） | user.login.success | — |
-| AC-XXX-03 | 首页展示 | 进首页见 BMI | ⚠️ | FE 人工 | — | — |
+| AC-XXX-01 | {场景} | {断言要点} | ✅ | `{testId}`（阶段 4 ③；阶段 5 复用） | {log标记} | — |
+| AC-XXX-02 | {场景} | {断言要点} | ⚠️ | 人工/脚本 | — | — |
 
 ## 2. 可观测性验证
 - 日志路径、检索命令、抽样（event + traceId）

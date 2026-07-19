@@ -33,7 +33,9 @@
 
 ## 文件位置
 
-`atlas/humanTodo.md`
+`atlas/humanTodo.md`（**首启强制**；与 `atlas/role/` 一并 `--bootstrap-scaffold`）
+
+闸门：`HT-001` 缺文件 · `HT-002` 缺骨架 · `HT-BLOCKED` 未清却标 PASS。
 
 ## 模板
 

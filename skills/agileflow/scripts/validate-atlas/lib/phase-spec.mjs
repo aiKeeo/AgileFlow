@@ -128,7 +128,10 @@ export const PHASE_DIRS = {
 
     id: 'test',
 
-    dirs: [{ path: 'tests', required: true }],
+    dirs: [
+      { path: 'tests', required: true },
+      { path: 'logs', required: true },
+    ],
 
     files: [
 
@@ -146,33 +149,33 @@ export const PHASE_DIRS = {
 
 /**
 
- * dev 必填段（v9.11 极简 SSOT：摘要 + 步骤 + 结果）
+ * dev 必填段（统一叙述五段式）
 
  */
 
 export const DEV_SECTIONS = [
 
-  { id: 'summary', heading: '## 摘要', tiers: ['lite', 'standard', 'full'] },
+  { id: 'summary', heading: '## 摘要' },
 
-  { id: 'steps', heading: '## 步骤', tiers: ['lite', 'standard', 'full'] },
+  { id: 'flow', heading: '## 主流程' },
 
-  { id: 'result', heading: '## 结果', tiers: ['lite', 'standard', 'full'] },
+  { id: 'edge', heading: '## 边界' },
+
+  { id: 'impl', heading: '## 实现说明' },
+
+  { id: 'result', heading: '## 结果' },
 
 ];
 
+/** @deprecated 与 DEV_SECTIONS 相同 */
+
+export const DEV_SECTIONS_FE = DEV_SECTIONS;
 
 
-/** 各档最少 #### 步骤数 */
 
-export const DEV_MIN_STEPS = {
+/** 最少 #### / 原子步骤数 */
 
-  lite: 1,
-
-  standard: 2,
-
-  full: 3,
-
-};
+export const DEV_MIN_STEPS = 3;
 
 
 
@@ -182,63 +185,33 @@ export const DEV_MIN_PURPOSE_STEPS = DEV_MIN_STEPS;
 
 
 
+/** 质量定义（keys 兼容旧调用，值相同） */
+
+const UNIFIED_QUALITY = {
+
+  label: '质量要求',
+
+  sections: ['summary', 'flow', 'edge', 'impl', 'result'],
+
+  literalCheck: true,
+
+  fakeHeadingCheck: true,
+
+  minDocLength: 500,
+
+  requireSummary: true,
+
+  requireStructuredSummary: true,
+
+  requireFlowTable: true,
+
+};
+
+
+
 export const RISK_TIERS = {
 
-  lite: {
-
-    label: '精简档',
-
-    sections: ['summary', 'steps', 'result'],
-
-    literalCheck: false,
-
-    fakeHeadingCheck: false,
-
-    minDocLength: 200,
-
-    requireSummary: true,
-
-    requireStructuredSummary: false,
-
-  },
-
-  standard: {
-
-    label: '标准档',
-
-    sections: ['summary', 'steps', 'result'],
-
-    literalCheck: false,
-
-    fakeHeadingCheck: false,
-
-    minDocLength: 350,
-
-    requireSummary: true,
-
-    requireStructuredSummary: true,
-
-  },
-
-  full: {
-
-    label: '完整档',
-
-    sections: ['summary', 'steps', 'result'],
-
-    literalCheck: true,
-
-    fakeHeadingCheck: true,
-
-    minDocLength: 500,
-
-    requireSummary: true,
-
-    requireStructuredSummary: true,
-
-    requireFlowTable: true,
-
-  },
+  full: UNIFIED_QUALITY,
 
 };
 
@@ -250,7 +223,8 @@ export const AI_GATES = {
 
     phase: '0',
 
-    modules: ['af-env', 'dir', 'init', 'anti-skip'],
+    modules: ['af-env', 'dir', 'init', 'doc-first'],
+    docFirstScope: 'integrity',
 
     when: 'init 落盘完成 · AskQuestion 确认前',
 
@@ -264,7 +238,8 @@ export const AI_GATES = {
 
     phase: '1',
 
-    modules: ['af-env', 'dir', 'req', 'anti-skip'],
+    modules: ['af-env', 'dir', 'req', 'doc-first', 'dispatch-ledger'],
+    docFirstScope: 'integrity',
 
     when: 'REQ 落盘 · 需求确认卡前',
 
@@ -278,7 +253,8 @@ export const AI_GATES = {
 
     phase: '2',
 
-    modules: ['af-env', 'dir', 'model', 'anti-skip'],
+    modules: ['af-env', 'dir', 'model', 'doc-first', 'dispatch-ledger'],
+    docFirstScope: 'integrity',
 
     when: 'model 落盘 · 建模确认前',
 
@@ -290,7 +266,8 @@ export const AI_GATES = {
 
     phase: '3',
 
-    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed', 'anti-skip'],
+    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed', 'doc-first', 'dispatch-ledger'],
+    docFirstScope: 'integrity',
 
     when: '方案+todo 落盘 · 方案确认/阶段闸门前',
 
@@ -298,7 +275,7 @@ export const AI_GATES = {
 
     extra:
 
-      'A档：agileflow.env + architecture + REQ已确认 + F边界/暴露面；UI链API须字段绑定；AF_DECIDE=user 须栈来源已问；=ai 须 AI决策记录',
+      'agileflow.env + architecture + 有REQ须F-*.md + REQ已确认 + model已确认或正式跳过判定；UI链API须字段绑定；AF_DECIDE=user 须栈来源已问；=ai 须 AI决策记录',
 
   },
 
@@ -306,7 +283,7 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['dev-step1-literal'],
+    modules: ['dev-step1-literal', 'dispatch-ledger'],
 
     when: '单个 T 的 dev ① 落盘 · 勾 todo ① 前',
 
@@ -314,7 +291,7 @@ export const AI_GATES = {
 
     extra:
 
-      '按档位：摘要/步骤/结果；标准+摘要五 bullet；步骤优先原子步骤表 S1…（#### + 8 字段规格表：执行角色/触发条件/输入数据/处理逻辑含if-else/调用依赖 Service.method(params)/异常处理 错误码+回滚/输出数据/状态变更）或 ####+涉及改动/改；legacy 可用 用户/系统/改；完整须原子步骤表或流程表+字面量严检；ai 不减完整档步骤拆解',
+      'FE/MP：摘要五 bullet + 主流程(≥3)+边界+实现说明(目的/怎么做+落点)；BE：步骤表(≥3)+落点；字面量严检；ai/fast 不减厚度',
 
   },
 
@@ -322,7 +299,8 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'anti-skip'],
+    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'doc-first'],
+    docFirstScope: 'integrity',
 
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
 
@@ -337,7 +315,8 @@ export const AI_GATES = {
 
     phase: '5',
 
-    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'anti-skip'],
+    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'doc-first'],
+    docFirstScope: 'integrity',
 
     when: '进入阶段 5 · 测试入场门禁前',
 
@@ -347,12 +326,13 @@ export const AI_GATES = {
 
   },
 
-  'anti-skip': {
+  'write-code': {
     phase: 'all',
-    modules: ['af-env', 'anti-skip'],
-    when: '写业务源码前 / 任意声称进度前 · 源码与 atlas 对齐',
+    modules: ['af-env', 'doc-first', 'dispatch-ledger'],
+    docFirstScope: 'write-code',
+    when: 'Write 业务源码前 · 文档先行硬锁（fast/strict/ai/user 无差别）',
     blocking: true,
-    extra: '有业务源码须 architecture+features+等量 T-*.md；禁 README 冒充 T；假进度硬挡',
+    extra: 'AF 项目+有源码 → REQ/sol/dev① 格式全过才绿；无微型/hotfix 豁免',
   },
   'req-trace': {
 
@@ -362,9 +342,9 @@ export const AI_GATES = {
 
     when: '阶段 5 · 验收归档前 · 检查需求追溯链完整性',
 
-    blocking: false,
+    blocking: true,
 
-    extra: 'REQ→F→T→AC→验收报告 链路检查；warn 不阻塞但须确认',
+    extra: 'REQ→F→T→AC→验收报告 链路检查；AC ID 须逐条被 F/dev/tests 引用，缺失阻塞归档',
 
   },
 

@@ -1,24 +1,34 @@
 /**
- * 解析 ## 步骤 的三种写法：原子步骤表（S1… + 8 字段规格表）、流程表（S1… 5 列）、#### 小节。
+ * 解析 ## 步骤：BE 仅接受 4 列流程表（S1…）；atom/hash 模式由 dev-core 直接拒绝。
  *
- * 原子步骤表（推荐）：每 `#### S1：步骤名` 下跟 `| 字段 | 内容 |` 表，含 8 个必填字段。
- * 流程表（兼容旧）：5 列扁平表 `| 步骤 | 目的 | 动作 | 输入→输出 | 注意点 |`。
- * #### 小节（精简档）：按「用户 / 系统 / 改」三段描述。
- *
- * 所有解析结果都会交给 index.mjs 的 runQualityChecks 做 A 档硬挡判断。
+ * 所有解析结果都会交给 index.mjs 的 runQualityChecks 做硬挡判断。
  */
 
 /**
- * 反引号内须含 `.` / `/` / `()`（Class.method / path/ / func()）
- * 禁单单词反引号（如 `Service` / `todo`）——堵假落点
+ * 反引号内须为真实代码落点：
+ * - 路径含 `/`（如 `config/SecurityConfig.java`）
+ * - `Class.method` / `pkg.Class.method`
+ * - `func(...)` 调用
+ * 禁：单单词、`pom.xml` / `package.json` 等「仅文件名+扩展名」假锚点
  * @param {string} text
  */
 export function isCodeAnchor(text) {
-  return (
-    /`[^`]*[.][^`]*`/.test(text) ||
-    /`[^`]*\/[^`]*`/.test(text) ||
-    /`[^`]+([^)]*)`/.test(text)
-  );
+  if (!text) return false;
+  const FILE_EXT =
+    /\.(md|xml|json|ya?ml|toml|txt|properties|gradle|kts|java|kt|ts|tsx|js|jsx|vue|css|scss)$/i;
+  for (const m of text.matchAll(/`([^`\n]+)`/g)) {
+    const t = m[1].trim();
+    if (!t) continue;
+    if (t.includes('/')) return true;
+    if (/\([^)]*\)/.test(t)) return true;
+    if (/^[A-Za-z_?][\w]*\.[A-Za-z_][\w.]*$/.test(t)) {
+      // 两段且第二段是扩展名 → 假锚点（pom.xml）；三段+ 如 com.foo.Bar 仍算
+      const parts = t.split('.');
+      if (parts.length === 2 && FILE_EXT.test('.' + parts[1])) continue;
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

@@ -19,4 +19,4 @@
 3. [`atlas/dev/T-001-login-BE.md`](atlas/dev/T-001-login-BE.md) — 一眼 + UT 清单 + 映射表  
 4. [`atlas/dev/T-002-login-FE.md`](atlas/dev/T-002-login-FE.md) — 前端同构  
 
-权威规则：[ac-guide.md](../../templates/ac-guide.md) · [dev-rationale.md](../../templates/dev-rationale.md)
+权威规则：[../phases/05-testing.md](../../phases/05-testing.md) · [dev.md](../../templates/dev.md)

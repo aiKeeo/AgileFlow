@@ -1,7 +1,7 @@
 /**
  * 安装 Playwright Chromium：国内镜像优先，失败回退官方 CDN。
  * 用法：node scripts/fe-smoke-install.mjs
- * 权威说明：agileflow templates/fe-smoke-playwright.md「安装 Chromium」
+ * 权威说明：agileflow templates/../tools/fe-smoke-playwright.md「安装 Chromium」
  */
 import { spawnSync } from 'node:child_process'
 

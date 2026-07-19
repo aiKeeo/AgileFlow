@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "mode": "normal",
+  "entries": [
+    {
+      "at": "2026-01-01T00:00:00.000Z",
+      "phase": "1",
+      "role": "req",
+      "gate": "req-confirm",
+      "taskId": null,
+      "paths": ["atlas/requirements/REQ-001-login.md"]
+    },
+    {
+      "at": "2026-01-01T00:00:01.000Z",
+      "phase": "2",
+      "role": "model",
+      "gate": "mod-confirm",
+      "taskId": null,
+      "paths": ["atlas/model/README.md"]
+    },
+    {
+      "at": "2026-01-01T00:00:02.000Z",
+      "phase": "3",
+      "role": "sol",
+      "gate": "sol-confirm",
+      "taskId": null,
+      "paths": [
+        "atlas/solution/architecture.md",
+        "atlas/solution/features/F-001-login.md",
+        "atlas/solution/contracts/API-001-login.md",
+        "atlas/solution/contracts/UI-001-login.md"
+      ]
+    },
+    {
+      "at": "2026-01-01T00:00:03.000Z",
+      "phase": "4",
+      "role": "dev",
+      "gate": "dev-step1-literal",
+      "taskId": "T-001",
+      "paths": ["atlas/dev/T-001-login-BE.md"]
+    },
+    {
+      "at": "2026-01-01T00:00:04.000Z",
+      "phase": "4",
+      "role": "dev",
+      "gate": "dev-step1-literal",
+      "taskId": "T-002",
+      "paths": ["atlas/dev/T-002-login-FE.md"]
+    }
+  ]
+}

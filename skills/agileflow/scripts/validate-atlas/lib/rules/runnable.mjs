@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
+import { hasCommandTrace, hasTimestamp } from './command-trace.mjs';
 
 /** @param {string} content */
 export function extractSectionResult(content) {
@@ -13,11 +14,14 @@ export function extractSectionResult(content) {
 /** @param {string|null|undefined} body */
 export function hasRunnableEvidence(body) {
   if (!body || body.replace(/\s/g, '').length < 30) return false;
+  if (/写码后填|写码后补|编码后填|事后补|先码后|③\s*后填|勾③后填|验收后填写|待写码/i.test(body)) {
+    return false;
+  }
   if (/③\s*验收后填写/.test(body) && !/exit\s*0|✅|通过|PASS|\bUP\b|成功/i.test(body)) {
     return false;
   }
 
-  const hasBuild = /编译|build|package|mvn|gradle|tsc|npm run|yarn|pnpm|vite|cargo|go build|dotnet|make|cmake|webpack|rollup|esbuild|swc|构建/i.test(body);
+  const hasBuild = /编译|build|package|mvn|gradle|tsc|npm run|npm start|npm test|yarn|pnpm|vite|cargo|go build|dotnet|make|cmake|webpack|rollup|esbuild|swc|python|pytest|node|deno|bun|构建/i.test(body);
   const hasStartOrSmoke =
     /启动|能启|health|listening|Started|冒烟|smoke|主路径|HTTP\s*200|curl|探针|serve|dev server|launch|docker|运行/i.test(body);
   const hasResult = /exit\s*0|✅|通过|PASS|\bUP\b|成功|ok\b|BUILD SUCCESS|完成/i.test(body);
@@ -75,6 +79,27 @@ export function validateRunnable(projectRoot, reporter) {
         file: relPath,
         message:
           '「## 结果」须含编译/build + 启动或冒烟 + exit0/✅/PASS（须实际运行后写入）。',
+      });
+      continue;
+    }
+
+    // 硬闸：可运行证据须含命令痕迹，否则可被纯文字伪造
+    if (!hasCommandTrace(body)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'RUN-RESULT-COMMAND',
+        file: relPath,
+        message: '「## 结果」须含实际执行的命令痕迹（如 `$ npm run build`、反引号命令或「命令：」）。',
+      });
+    }
+
+    // 软闸：建议带时间戳，便于后续拒绝过期报告
+    if (!hasTimestamp(body)) {
+      reporter.add({
+        severity: 'info',
+        rule: 'RUN-RESULT-TIMESTAMP',
+        file: relPath,
+        message: '「## 结果」可带时间戳，便于后续验证报告未过期。',
       });
     }
   }

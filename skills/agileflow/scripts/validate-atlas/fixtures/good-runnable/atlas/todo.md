@@ -1,4 +1,4 @@
-# Todo（fixture · good-runnable）
+﻿# Todo（fixture · good-runnable）
 
 ## 流程进度
 
@@ -6,7 +6,7 @@
 
 ## 开发任务
 
-### T-001 [标准] 登录 BE
+### T-001 登录 BE
 
 - [x] ① 构思落盘 → `atlas/dev/T-001-login-BE.md`
 - [x] ② 按 ## 步骤 写码

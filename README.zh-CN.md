@@ -4,7 +4,7 @@
 
 > 用敏捷五阶段 + **BDD→DDD→SDD→TDD**，把「想法」变成「可运行、可验收、可交接」的成品。简单项目 **~1 小时上线**，MVP **当天可交付**。
 
-[![Version](https://img.shields.io/badge/version-9.9.3-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.18.3-blue.svg)](skills/agileflow/SKILL.md)
 [![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#为什么能-1-小时上线)
 
 ---
@@ -33,8 +33,8 @@ Agileflow 的做法：**流程压缩，但不牺牲结构**。
 | 验收 | 手动点一点 | L1+L3 自动跑通 | **5–10 min** |
 | **合计** | 1–3 天 + 返工 | **~1 小时**（简单 CRUD / 工具类） | |
 
-> **更快**：hotfix、微型改动 → 豁免全流程，**L1+L3 几分钟**。  
-> **更稳**：支付 / 权限 / 核心业务 → 严谨模式，TDD + L1–L5 全验收。
+> **更快**（**须未启用 AF**）：hotfix、微型改动 → 豁免全流程，**L1+L3 几分钟**。  
+> **已启用 AF**：任何写码须 `--gate write-code` 绿，无微型/hotfix 捷径。
 
 ---
 
@@ -192,9 +192,9 @@ atlas/
 
 | 场景 | 走什么 |
 |------|--------|
-| 改一行 bug、纯答疑、hotfix | 豁免五阶段，L1+L3 **几分钟** |
+| 改一行 bug、纯答疑、hotfix | 豁免五阶段，L1+L3 **几分钟**（**须未启用 AF**：无 `atlas/agileflow.env` / `requirements/`） |
 | API / DB / 权限 / 多模块变更 | 强制完整五阶段 |
-| 用户说「快速通道 / 不走流程」 | 仅微型豁免（无 API/DB/MVP）；≠ 快速模式跳阶段 |
+| 用户说「快速通道 / 不走流程」 | 仅未启用 AF 时可微型豁免；已启用 AF → `--gate write-code` 硬挡 |
 
 AI 不会把「解释这行代码」也拉进五阶段，**该快则快，该重则重**。
 
@@ -306,7 +306,7 @@ AgileFlow/
 
 ## 版本
 
-**v9.9.0** — 详见 [SKILL.md](skills/agileflow/SKILL.md)
+**v9.18.3** — 详见 [SKILL.md](skills/agileflow/SKILL.md)
 
 ---
 

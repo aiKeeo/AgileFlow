@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "exitCode": 1,
+  "phase": "4",
+  "at": "2026-07-18T13:28:12.726Z",
+  "summary": "validate-atlas --phase 4 ❌ exit 1\n❌ 阻断 (12)\n  [DEV-AC-UNIT] atlas/dev/T-001-login-BE.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-F] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-F] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-F] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-F] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-F] atlas/requirements/REQ-001-login.md\n  [TRACE-AC-REPORT] atlas/requirements/REQ-001-login.md\n合计: 12 阻断\n❌ 校验失败（有阻断项）"
+}

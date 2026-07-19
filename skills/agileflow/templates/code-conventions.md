@@ -1,7 +1,8 @@
 # 写法锚点（AI 写码规范）
 
 > **目的**：让 AI **少读、抄路径、少造轮子**——按项目既有写法与**可复用资产**写码。  
-> **模式 B / 模式 A**：首次 init **须 AskQuestion** 选定（见 [00-project-init](../phases/00-project-init.md) / [init-askquestion](init-askquestion.md)）；**禁止**静默默认 B。已写入 `init/README`「写法锚点模式」或目录已定型后不再问。
+> **视觉标记**：重要规则可用 🔴🟠🟢🔵 前置，便于扫读。  
+> **模式 B / 模式 A**：首次 init **须 AskQuestion** 选定（见 [00-project-init](../phases/00-project-init.md) / [init-askquestion](contract.md)）；**禁止**静默默认 B。已写入 `init/README`「写法锚点模式」或目录已定型后不再问。
 >
 > **模式 B（常用）**：**FE / BE 分文件**；每文件内 **资产索引靠前**（AI 第一眼用得上）。**不建**平行 catalog。
 > **模式 A**：另建 `atlas/conventions/`。
@@ -73,7 +74,7 @@ atlas/solution/            # greenfield 无 init
 ## 四、典型链路（BE 常要 2~4 条 mermaid；FE 可短/可无）
 ## 五、新功能自检
 - [ ] 已查「资产索引」
-- [ ] 本 T 流程表注意点已含落点（继续走/在…上加/照…/新写）
+- [ ] 本 T 构思齐：FE/MP 主流程+边界+实现说明；BE 流程表落点（新写/改动/复用）
 - [ ] 若抄写：已打开模板参考页/类
 ```
 
@@ -133,14 +134,14 @@ brownfield init:  判定大仓？→ 定主路径 + 覆盖范围
                   → 有余力/要抄写 → **P1**；其余 **P2** refresh
 greenfield sol:   code-patterns-frontend|backend 🌱
                   （资产写「待建设」；§三待补）
-dev ①:            Read 本端锚点资产索引 → 流程表注意点写落点 → 按需 Read §3.x
+dev ①:            Read 本端锚点 → FE/MP 写主流程+实现说明 / BE 写流程表 → 按需 Read §3.x
 dev ③ 后:         新建可复用组件/Util → 追加资产索引一行；典型功能 refresh §三
 init: refresh codebase → 更新资产 + §三§四
 ```
 
 ### brownfield · init 步骤 6
 
-→ [init-scan-checklist.md](init-scan-checklist.md)
+→ [init.md](init.md)
 
 1. 有 FE → 写满 `p1-frontend.md`（**资产索引靠前** + §一~§五）  
 2. 有 BE → 写满 `p1-backend.md`（同上）  
@@ -160,9 +161,9 @@ init: refresh codebase → 更新资产 + §三§四
 ## AI 最小动作链（省力 · 强制）
 
 ```
-1. 看 T 头 [FE]|[BE] → Read 本端 p1-* 或 code-patterns-*（一份）
-2. 写 ①：标准/完整用 **流程表**；注意点写清继续走/在…上加/照…/新写（见 examples/dev-reuse-examples.md）
-3. 精简档可用一行 **改**；禁止表写复用却平行实现
+1. 看 T 头 [FE]|[BE]|[MP] → Read 本端 p1-* 或 code-patterns-*（一份）
+2. 写 ①：FE/MP → 主流程+边界+实现说明；BE → 4 列流程表（≥3）。见 [dev-granularity](dev-granularity.md)
+3. 禁纯 #### + 一行 **改**；禁止表写复用却平行实现
 4. ③ 后新建可复用资产 → 追加资产索引一行
 ```
 
@@ -172,18 +173,18 @@ init: refresh codebase → 更新资产 + §三§四
 
 ## dev 硬规则
 
-**① 构思**：标准/完整（含 AI 自主复杂功能）→ **流程表**；注意点须有落点。精简 → #### + **改** 即可。
+**① 构思**：主流程（≥3，`> 入口：`）+ 边界 + 实现说明（【新写/改动】含目的+怎么做）；BE 入口写 POST/回调，FE 写用户动作。
 
 **② 写码前**：
 
 1. 已 Read **本端**锚点（至少含资产索引）  
-2. 按 ① 流程表 / **改** 下手；复用则路径已在注意点；新建须有原因  
+2. 全端按 `## 实现说明` 落点写码  
 3. 禁止平行再造资产索引里已有的积木
 
 **禁止**：
 
 - ❌ 有本端锚点却不读就写码  
-- ❌ 完整档因「你定」压成两句空步骤  
+- ❌ 因「你定」/快速压成两句空步骤  
 - ❌ 资产索引无路径（只有「有公共组件」）  
 - ❌ 另起 catalog 与 p1 双维护  
 - ❌ 把资产表只放在文末  
@@ -194,7 +195,7 @@ init: refresh codebase → 更新资产 + §三§四
 
 ## init 内分工
 
-→ [init-doc.md](init-doc.md)。greenfield to-be → `solution/architecture.md`。
+→ [init.md](init.md)。greenfield to-be → `solution/architecture.md`。
 
 ---
 

@@ -17,7 +17,14 @@ import { validateRunnable } from './lib/rules/runnable.mjs';
 import { validateSmokeEntry } from './lib/rules/smoke.mjs';
 import { validatePixelCompare } from './lib/rules/pixel.mjs';
 import { validateReqTrace } from './lib/rules/trace.mjs';
-import { validateAntiSkip } from './lib/rules/anti-skip.mjs';
+import { validateDocFirst } from './lib/rules/doc-first.mjs';
+import { validateDispatchLedger } from './lib/rules/dispatch-ledger.mjs';
+import {
+  loadCustomRoles,
+  shouldSkipDocModule,
+  resolveCustomRoleForModule,
+  customSkipMessage,
+} from './lib/rules/role-custom.mjs';
 
 /**
  * @typedef {Object} ValidateOptions
@@ -28,6 +35,9 @@ import { validateAntiSkip } from './lib/rules/anti-skip.mjs';
  * @property {boolean} [verbose]
  * @property {string[]} [only]
  * @property {boolean} [templateMode]
+ * @property {'integrity'|'write-code'} [docFirstScope]
+ * @property {string} [dispatchGate]
+ * @property {string} [devFile]
  */
 
 /**
@@ -37,79 +47,48 @@ import { validateAntiSkip } from './lib/rules/anti-skip.mjs';
  * @param {{ phase: string, tier: string, shouldRun: (name: string) => boolean }} ctx
  */
 function runTemplateDocValidation(projectRoot, reporter, ctx) {
-  const { phase, tier, shouldRun } = ctx;
+  const { phase, tier, shouldRunDoc: runDoc } = ctx;
   const docOpts = { tier };
 
-  if (shouldRun('req') && (phase === 'all' || phase === '1')) {
+  if (runDoc('req') && (phase === 'all' || phase === '1')) {
     validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '1' });
   }
-  if (shouldRun('sol') && (phase === 'all' || phase === '3')) {
+  if (runDoc('sol') && (phase === 'all' || phase === '3')) {
     validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '3' });
   }
-  if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
+  if (runDoc('dev') && (phase === 'all' || phase === '4')) {
     validateGenericDocs(projectRoot, reporter, { ...docOpts, phase: '4' });
   }
 }
 
-/** 风险维度关键词 → 命中即完整档 */
-const RISK_DIMENSIONS = [
-  /支付|payment|alipay|微信支付|交易退款/i,
-  /权限|permission|auth\b|RBAC|角色管理|鉴权/i,
-  /DB\s*schema|数据库迁移|migration\b|DDL\b|ALTER\sTABLE|CREATE\sTABLE/i,
-  /多模块|跨模块|microservice/i,
-];
-
 /**
- * 风险分档：精简 / 标准 / 完整
- * 替代原 T≥3 强制严谨——分档由风险维度决定，不由 T 数量决定
- * @param {string} todo
- * @returns {'lite'|'standard'|'full'}
+ * 始终 full（参数仅兼容旧 CLI）
+ * @param {string} [_todo]
+ * @returns {'full'}
  */
-export function resolveRiskTier(todo) {
-  if (!todo) return 'standard';
-
-  // 1. 显式标注 [精简|标准|完整]
-  if (/\[精简\]|\[lite\]/i.test(todo)) return 'lite';
-  if (/\[完整\]|\[full\]/i.test(todo)) return 'full';
-  if (/\[标准\]|\[standard\]/i.test(todo)) return 'standard';
-
-  // 2. 模块配置区 dev-doc 字段
-  const moduleConfig = todo.match(/##\s*模块配置[\s\S]*?(?=\n##\s|$)/);
-  if (moduleConfig) {
-    const devDocMatch = moduleConfig[0].match(/dev-doc:\s*(\S+)/i);
-    if (devDocMatch) {
-      const val = devDocMatch[1].toLowerCase();
-      if (/lite|精简|3段?/.test(val)) return 'lite';
-      if (/full|完整/.test(val)) return 'full';
-      if (/standard|标准|5段?/.test(val)) return 'standard';
-    }
-  }
-
-  // 3. 风险维度自动检测 → full
-  for (const pattern of RISK_DIMENSIONS) {
-    if (pattern.test(todo)) return 'full';
-  }
-
-  // 4. BE+FE → standard
-  const hasBe = /T-\d+[^\n]*BE|-BE\.md|端：\*\*BE\*\*|【BE】/i.test(todo);
-  const hasFe = /T-\d+[^\n]*FE|-FE\.md|端：\*\*FE\*\*|【FE】/i.test(todo);
-  if (hasBe && hasFe) return 'standard';
-
-  // 5. 默认 standard（不再用 T≥3 强制）
-  return 'standard';
+export function resolveRiskTier(_todo) {
+  return 'full';
 }
 
 /**
- * 解析模式：agileflow.env 优先 → full 档 → todo 字样 → 默认 fast
+ * @param {string} [_devFile]
+ * @param {string} [_todoContent]
+ * @returns {'full'}
+ */
+export function resolveTierForDevFile(_devFile, _todoContent) {
+  return 'full';
+}
+
+/**
+ * 解析模式：agileflow.env / 请求 / todo 字样 → 默认 fast
  * @param {string} projectRoot
  * @param {'fast'|'strict'|'auto'|undefined} requested
- * @param {'lite'|'standard'|'full'} [tier]
+ * @param {string} [_tier]
  * @param {{ flow?: 'fast'|'strict' } | null} [afState]
  */
-function resolveMode(projectRoot, requested, tier, afState) {
+function resolveMode(projectRoot, requested, _tier, afState) {
   if (requested && requested !== 'auto') return requested;
   if (afState?.flow && afState.flow !== 'pending') return afState.flow;
-  if (tier === 'full') return 'strict';
   const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
   if (/模式：.*严谨|强制严谨/.test(todo)) return 'strict';
   if (/模式：.*快速/.test(todo)) return 'fast';
@@ -117,15 +96,13 @@ function resolveMode(projectRoot, requested, tier, afState) {
 }
 
 /**
- * 解析档位：显式 options → env AF_TIER → todo 推断
- * @param {string | undefined} requested
- * @param {string} todoContent
- * @param {{ tier?: string } | null} afState
+ * @param {string | undefined} [_requested]
+ * @param {string} [_todoContent]
+ * @param {{ tier?: string } | null} [_afState]
+ * @returns {'full'}
  */
-function resolveTier(requested, todoContent, afState) {
-  if (requested) return requested;
-  if (afState?.tier) return afState.tier;
-  return resolveRiskTier(todoContent);
+function resolveTier(_requested, _todoContent, _afState) {
+  return 'full';
 }
 
 export function validateAtlas(options = {}) {
@@ -140,6 +117,31 @@ export function validateAtlas(options = {}) {
   const reporter = new Reporter();
   const only = options.only ?? null;
   const shouldRun = (name) => !only || only.includes(name);
+  const customRoles = loadCustomRoles(projectRoot);
+  /** @type {Set<string>} */
+  const customSkipLogged = new Set();
+
+  /**
+   * 文档模块：custom role 时跳过默认格式闸门
+   * @param {string} name
+   */
+  const shouldRunDoc = (name) => {
+    if (!shouldRun(name)) return false;
+    if (!shouldSkipDocModule(name, customRoles)) return true;
+    if (!customSkipLogged.has(name)) {
+      customSkipLogged.add(name);
+      const roleKey = resolveCustomRoleForModule(name, customRoles);
+      if (roleKey) {
+        reporter.add({
+          severity: 'info',
+          rule: 'ROLE-CUSTOM-SKIP',
+          file: `atlas/role/role-${roleKey}.md`,
+          message: customSkipMessage(roleKey, name),
+        });
+      }
+    }
+    return false;
+  };
 
   /** @type {import('./lib/af-env.mjs').AfState | null} */
   let afState = null;
@@ -173,27 +175,30 @@ export function validateAtlas(options = {}) {
   }
 
   if (templateMode) {
-    runTemplateDocValidation(projectRoot, reporter, { phase, tier, shouldRun });
+    runTemplateDocValidation(projectRoot, reporter, { phase, tier, shouldRunDoc });
+    if (shouldRunDoc('sol') && (phase === 'all' || phase === '3')) {
+      validateSolution(projectRoot, reporter, { ...docOpts, templateMode: true });
+    }
   } else {
-    if (shouldRun('req') && (phase === 'all' || phase === '1')) {
+    if (shouldRunDoc('req') && (phase === 'all' || phase === '1')) {
       validateRequirements(projectRoot, reporter, docOpts);
     }
-    if (shouldRun('sol') && (phase === 'all' || phase === '3')) {
+    if (shouldRunDoc('sol') && (phase === 'all' || phase === '3')) {
       validateSolution(projectRoot, reporter, docOpts);
     }
-    if (shouldRun('dev') && (phase === 'all' || phase === '4')) {
+    if (shouldRunDoc('dev') && (phase === 'all' || phase === '4')) {
       validateDev(projectRoot, reporter, docOpts);
     }
   }
 
-  if (shouldRun('req-confirmed') && (phase === 'all' || phase === '3')) {
+  if (shouldRunDoc('req-confirmed') && (phase === 'all' || phase === '3')) {
     validateReqConfirmed(projectRoot, reporter);
   }
-  if (shouldRun('model') && (phase === 'all' || phase === '2')) {
+  if (shouldRunDoc('model') && (phase === 'all' || phase === '2')) {
     validateModel(projectRoot, reporter);
   }
   if (shouldRun('todo') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
-    validateTodo(projectRoot, reporter, { tier, phase: todoPhase });
+    validateTodo(projectRoot, reporter, { tier, phase: todoPhase, customRoles });
   }
   if (shouldRun('runnable') && (phase === 'all' || phase === '4' || phase === '5')) {
     validateRunnable(projectRoot, reporter);
@@ -210,9 +215,22 @@ export function validateAtlas(options = {}) {
   if (shouldRun('trace') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {
     validateReqTrace(projectRoot, reporter);
   }
-  // 反偷懒：任意 phase 可跑；有业务码 / 假进度 / README 冒充即硬挡
-  if (shouldRun('anti-skip')) {
-    validateAntiSkip(projectRoot, reporter, { afPhase: afState?.phase });
+  // 文档先行 / 假进度 integrity（write-code 档见 --gate write-code）
+  if (shouldRun('doc-first')) {
+    validateDocFirst(projectRoot, reporter, {
+      scope: options.docFirstScope ?? 'integrity',
+      afPhase: afState?.phase,
+      templateMode,
+      tier,
+      mode,
+      customRoles,
+    });
+  }
+  if (shouldRun('dispatch-ledger') && options.dispatchGate) {
+    validateDispatchLedger(projectRoot, reporter, {
+      gateId: options.dispatchGate,
+      devFile: options.devFile,
+    });
   }
 
   const decide = afState?.decide ?? '—';

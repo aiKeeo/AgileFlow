@@ -1,7 +1,7 @@
 # 阶段 0：项目盘点（init — 仅 brownfield）
 
-> 文档模板：[templates/init-doc.md](../templates/init-doc.md)  
-> 扫描与验收：[templates/init-scan-checklist.md](../templates/init-scan-checklist.md)  
+> 文档模板：[templates/init.md](../templates/init.md)  
+> 扫描与验收：[templates/init.md](../templates/init.md)  
 > 路由与触发：[00-intent-routing.md](00-intent-routing.md#init-判定brownfield--greenfield)
 
 ## 本阶段做什么
@@ -9,7 +9,7 @@
 对 **已有代码 / 可运行应用** 的仓库做 **as-is 盘点**，落盘 `atlas/init/`。  
 回答：**业务给谁用、核心规则怎么算、怎么跑、API/模块/表/代码各长什么样**。
 
-**分层阅读** → [init-doc.md §盘点层模型](../templates/init-doc.md#盘点层模型init-阅读导航--非测试层)
+**分层阅读** → [init.md §盘点层模型](../templates/init.md#盘点层模型init-阅读导航--非测试层)
 
 **不回答**：本次任务、AC、接口设计、改动决策（分别在 requirements / solution / dev）。
 
@@ -20,7 +20,7 @@
 | **brownfield**：已有业务源码、migration、可运行应用 | **greenfield**：纯从零、新系统、空仓库脚手架、用户明确「不需要 init」 |
 | 用户前缀 `init:` | 仅 Skill/文档仓库且用户只做流程验证（可选 init，非强制） |
 | 首次接触 brownfield 且 `atlas/init/` 不存在 | REQ/model 仅设计阶段（只改 model/，**不**改 init） |
-| `init: refresh …` 增量/全量刷新 | 豁免：纯答疑、review、hotfix |
+| `init: refresh …` 增量/全量刷新 | 纯答疑/review；hotfix 仅**未启用 AF** 时走豁免 |
 
 **铁律**：greenfield **禁止**创建 `atlas/init/`；brownfield 在进 **dev:/sol:** 前 **须** 有已确认或进行中的 init（见路由硬规则）。
 
@@ -62,7 +62,7 @@ atlas/init/
     └── state-machines/       # 无状态机则不存在
 ```
 
-命名与文内标签 → [init-doc.md](../templates/init-doc.md)。  
+命名与文内标签 → [init.md](../templates/init.md)。  
 术语 → 项目根 **`atlas/glossary.md`**（**勿**在 `init/` 再建 `glossary/`）。
 
 ---
@@ -73,7 +73,7 @@ atlas/init/
 ① brownfield 判定 → ② 扫描仓库 → ②b 写法锚点模式卡（首次须问 A/B）→ ③ 按模板落盘 → ④ 落盘自检 → ⑤ AskQuestion 确认 → 停止
 ```
 
-> **②b**：首次全量且模式未记录 → AskQuestion（[init-askquestion](../templates/init-askquestion.md#init-写法锚点模式首次全量--落盘-codebase-前)）→ **停**；用户选定后下条再 ③。可跳过条件见下方「写法锚点」。
+> **②b**：首次全量且模式未记录 → AskQuestion（[init-askquestion](../templates/contract.md#init-写法锚点模式首次全量--落盘-codebase-前)）→ **停**；用户选定后下条再 ③。可跳过条件见下方「写法锚点」。
 
 ### ① brownfield 判定
 
@@ -93,7 +93,7 @@ atlas/init/
 
 ### ② 扫描仓库（读清楚，固定顺序）
 
-> **大仓**：先按 [init-scan-checklist 大仓分级 P0/P1/P2](../templates/init-scan-checklist.md#大仓分级) 执行；**P0 过即可确认**。小仓可同轮加深到 P1。
+> **大仓**：先按 [init-scan-checklist 大仓分级 P0/P1/P2](../templates/init.md#大仓分级) 执行；**P0 过即可确认**。小仓可同轮加深到 P1。
 
 | 顺序 | 读什么 | 提取什么 | 落盘 |
 |------|--------|----------|------|
@@ -123,13 +123,13 @@ atlas/init/
 - 数据：Entity 名、核心表 — 辅助理解领域，**须写清业务用途**
 - **术语**：docs 词汇表、代码 Enum/常量注释、字段 comment、内部 wiki 缩写表
 
-**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](../templates/init-scan-checklist.md#步骤-5-p1-architecture) **总体形态/模块依赖/跨模块调用/模块一览** 写满。
+**步骤 5 · p1-architecture** → 按 [init-scan-checklist §p1-architecture](../templates/init.md#步骤-5-p1-architecture) **总体形态/模块依赖/跨模块调用/模块一览** 写满。
 
-**步骤 6 · codebase** → [大仓分级](../templates/init-scan-checklist.md#大仓分级) + [§codebase](../templates/init-scan-checklist.md#步骤-6-codebase)：P0 先资产索引；P1 再金牌模板/序列图。
+**步骤 6 · codebase** → [大仓分级](../templates/init.md#大仓分级) + [§codebase](../templates/init.md#步骤-6-codebase)：P0 先资产索引；P1 再金牌模板/序列图。
 
-**步骤 7 · 实体** → 按 [init-scan-checklist §实体](../templates/init-scan-checklist.md#步骤-7-data) **业务用途～字段与约束等** 逐实体写满。
+**步骤 7 · 实体** → 按 [init-scan-checklist §实体](../templates/init.md#步骤-7-data) **业务用途～字段与约束等** 逐实体写满。
 
-**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](../templates/init-scan-checklist.md#步骤-7d-p0-domain-math) **规则总览/公式/依赖/易误解/交叉链** 写满。
+**步骤 7d · 领域规则** → 按 [init-scan-checklist §p0-domain-math](../templates/init.md#步骤-7d-p0-domain-math) **规则总览/公式/依赖/易误解/交叉链** 写满。
 
 **术语落盘**（与 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准) 一致）：
 
@@ -142,31 +142,30 @@ atlas/init/
 
 **仓库完全无业务描述** → 仍建 `p0-business.md`，「未找到/待补充」列出；**AskQuestion 确认前**提示用户口述或贴文档链接补全（**含易混淆的内部术语**）。
 
-**写法锚点（步骤 6/6b · 模式须先问）**：
+**写法锚点（步骤 6/6b）**：
 
 > 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。  
-> **禁止**静默默认模式 B。首次全量 init（尚无 `init/README` 中「写法锚点模式」记录，且无 `atlas/conventions/`）→ **落盘 codebase 前**须 AskQuestion → **停**。
+> **`AF_DECIDE=ai` / 默认**：直接 **模式 B**，落盘时写 `写法锚点模式：B`，**不问**。  
+> **`user` 且**尚无模式记录、无 `conventions/`、无 `codebase/p1-*`、原话未点明 → 才 AskQuestion → 停。
 
 ```yaml
 title: "init 写法锚点模式"
 questions:
   - id: init_anchor_mode
-    prompt: "写法锚点文档怎么组织？（影响 atlas/init 目录结构，确认后按所选落盘）"
+    prompt: "写法锚点文档怎么组织？"
     options:
       - id: mode_b
-        label: "模式 B（推荐）：FE/BE 分文件 codebase/p1-*，资产索引靠前；不建 conventions/"
+        label: "模式 B：FE/BE 分文件 codebase/p1-*；不建 conventions/"
       - id: mode_a
-        label: "模式 A：另建 atlas/conventions/ 独立维护约定"
+        label: "模式 A：另建 atlas/conventions/"
 ```
 
 | 选项 | 落盘 |
 |------|------|
-| mode_b | `p1-architecture` + `codebase/p1-frontend|backend`（§一~§五）；**不建** `conventions/`；**禁止**把 p1-frontend\|backend 写在 init 根下 |
-| mode_a | 建 `atlas/conventions/`；codebase 可精简，约定进 conventions |
+| mode_b | `p1-architecture` + `codebase/p1-frontend|backend`；**不建** `conventions/` |
+| mode_a | 建 `atlas/conventions/`；约定进 conventions |
 
-**可跳过本卡**：`init/README` 已写「写法锚点模式：A|B」；或已存在 `atlas/conventions/`（视为 A）/ 已有 `codebase/p1-*`（视为 B）；或用户原话已点明。
-
-落盘时在 `init/README.md` 写：`写法锚点模式：B|A`。
+已有记录 / 目录可推断 / 原话已点明 → 不问。
 
 其余规则：
 
@@ -176,26 +175,21 @@ questions:
 
 ### ③ 落盘
 
-- 严格按 [init-doc.md](../templates/init-doc.md) 写模板正文
+- 严格按 [init.md](../templates/init.md) 写模板正文
 - 每个文件首行：`> **盘点·业务** · …` / `> **P0** · …` / `> **P1** · …`（见分层模型）
 - `README.md` 状态先标 **草稿**
 
 ### ④ 落盘自检
 
-[init-scan-checklist 落盘自检](../templates/init-scan-checklist.md#init-落盘自检)：**P0（A 组）全 ✅** 即可确认；大仓不要求 P2 齐。覆盖范围块必有。
+[init-scan-checklist 落盘自检](../templates/init.md#init-落盘自检)：**P0（A 组）全 ✅** 即可确认；大仓不要求 P2 齐。覆盖范围块必有。
 
-### ⑤ 结束闸门（按决策权）
+### ⑤ 结束处理（按决策权）
 
 | 决策权 | 动作 |
 |--------|------|
-| **`user_decide`** / 契约未确认 | 弹出 [init 确认卡片](../templates/init-askquestion.md#init-确认阶段-0-收尾) → **停止** |
-| **`AF_DECIDE=ai` 已确认** | 落盘 AI 决策记录（扫描范围摘要）→ **[审阅闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)** → **停止**（**禁止**再发 init 确认卡） |
-
-- 用户选「已确认」/审阅继续 → `README.md` 状态改 **已确认**
-- 选「保持草稿」→ 维持草稿，不进入后续 dev
-- 选「部分 refresh」→ 下轮按范围重扫
-
-**init 不是 Agileflow 主阶段 1–4**，但完成时 **必须停**（确认卡或审阅闸门），禁止同回复进入 `req:` / `dev:` 写码。
+| **`user`** | [init 确认卡](../templates/contract.md#init-确认阶段-0-收尾) → **停** |
+| **`fast+ai`** | 标 README **已确认** + AI 决策记录 → 闸门绿 → **可连做**下一阶段（不问） |
+| **`strict+ai`** | AI 决策记录 → 审阅卡 → **停**（禁再发 init 确认卡） |
 ---
 
 ## 增量 refresh（REQ 开发完毕后）
@@ -204,6 +198,7 @@ questions:
 
 1. 该 REQ 关联 **全部** 开发任务步骤 **③ ✅**（`atlas/todo.md`）
 2. 阶段 5 **AC 验收归档** 该 REQ 验收报告完成且 REQ 标 **已实现**
+3. **阶段 4 入口** init 过期检测命中（`src/` mtime 晚于 init；见 [00-intent-routing §init 过期检测](../phases/00-intent-routing.md#init-自动触发brownfield)）且用户选择 refresh
 
 **前提**：本次实现已改变 as-is（新表/新实体/新目录/环境变更等）。仅改文案/UI 样式且无结构变化 → 可 AskQuestion 后选「跳过」。
 
@@ -217,7 +212,7 @@ questions:
 | `init: refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |
 | `init: refresh environment` | 更新 `p0-environment.md`、`p1-tech-stack.md` |
 | `init:` 或 `init: refresh` | 全量重扫 |
-| [增量 refresh 卡片](../templates/init-askquestion.md#init-增量-refreshreq-开发完毕后) | 按用户选择范围执行 |
+| [增量 refresh 卡片](../templates/contract.md#init-增量-refreshreq-开发完毕后) | 按用户选择范围执行 |
 
 **禁止**：REQ/model **设计阶段**更新 init（to-be 只写 model/）；实现未落地前 refresh init。
 

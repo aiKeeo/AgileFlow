@@ -1,7 +1,7 @@
-﻿# 需求变更管理
+# 需求变更管理
 
-> AskQuestion 规范：[templates/askquestion-gate.md](../templates/askquestion-gate.md)
-> 变更提问卡片：[templates/req-change-askquestion.md](../templates/req-change-askquestion.md)
+> AskQuestion 规范：[templates/contract.md](../templates/contract.md)
+> 变更提问卡片：[templates/contract.md](../templates/contract.md)
 > 裁决 → [SKILL 纠偏阶梯](../SKILL.md#裁决表冲突时以此为准)
 
 ## 纠偏阶梯（全阶段）
@@ -67,10 +67,12 @@
 ## 执行流程（固定 5 步 + 默认重跑）
 
 ```
-① 更新 REQ → ② 影响分析 AskQuestion → ③ 按选择改文档 → ④ 是否实现 AskQuestion → ⑤ 重跑开发→测试（默认）
+① 更新 REQ → ② 影响分析 → ③ 改文档 → ④ 是否实现 → ⑤ 重跑开发→测试（默认）
 ```
 
-> **默认策略**：已确认/已实现 REQ 变更后，**默认重跑**「开发实现 → 测试验收」，直至阶段 5 PASS。不再保留「已实现」状态。
+> **默认策略**：变更后默认重跑 4→5。  
+> **`ai`/`fast+ai`**：②④ **不问**——Agent 自判影响层、默认「重跑开发到测试」，落盘影响摘要即可。  
+> **`user`**：②④ 仍须 AskQuestion → 停。
 
 ### ① 更新 REQ 文档
 
@@ -80,31 +82,22 @@
 4. 若原状态为「已实现」→ 改回 **已确认**（待重新开发验收）；若「已确认」→ 标 **变更中**
 5. 更新 `atlas/todo.md` 变更历史
 
-### ② 影响分析 AskQuestion（必须）
+### ② 影响分析
 
-REQ 改完后 **立即 AskQuestion**（见 [req-change-askquestion 影响分析](../templates/req-change-askquestion.md#影响分析req-改完后第一步)），**调用后停止**。
-
-AI 须先给出**影响摘要**（再弹卡片），例如：
+REQ 改完后先写**影响摘要**（通用层名，勿写死业务域）：
 
 ```markdown
-## REQ-001 变更影响摘要
-
-**变更内容**：新增「优惠券抵扣」场景
-
-**可能影响**：
-- model/conceptual/domain-rules.md：订单金额计算规则
-- model/physical/schema.md：orders 表新增 coupon_id
-- solution/features/F-003-退款.md：新增 F-003 + §边界
-- solution/contracts/API-003-退款.md：按需
-- todo.md：T-005 等开发任务
-- dev/F-002-*.md：实现思路需更新
+## REQ-xxx 变更影响摘要
+**变更内容**：{一句话}
+**影响层**：model / solution / todo / dev（勾实际命中）
 ```
 
-卡片让用户勾选**实际需要改的层**（可多选）。
+- **`user`**：再 AskQuestion 勾选层（[req-change-askquestion](../templates/contract.md#影响分析req-改完后第一步)）→ **停**  
+- **`ai`**：自选层 → 直接进 ③（摘要留痕）
 
-### ③ 按用户选择更新文档
+### ③ 按选定范围更新文档
 
-按固定顺序执行，只改用户勾选的部分：
+按固定顺序，只改勾选/自判层：
 
 | 顺序 | 目录/文件 | 改什么 |
 |------|-----------|--------|
@@ -115,40 +108,34 @@ AI 须先给出**影响摘要**（再弹卡片），例如：
 
 规则：
 - 每改完一层，该层 README 状态改 **草稿** → 小改确认后可保持 **已确认**（见下）
-- model/solution 有实质变更须重新 **AskQuestion 确认**该层（可合并为一次）
-  - **实质变更** = 新增/删除文件、新增/修改实体或关系、新增/修改 API 端点或参数、修改业务规则
-  - **非实质变更** = 修正笔误、调整格式、补充注释、更新版本号
+- model/solution 实质变更：`user` 可合并确认；`ai` 自判落盘即可  
 - **禁止**未更新 solution 就改代码
 
-### ④ 是否实现 AskQuestion（必须）
+### ④ 是否实现
 
-文档改完后 **AskQuestion**（见 [req-change-askquestion 是否实现](../templates/req-change-askquestion.md#是否实现文档改完后第二步)），**调用后停止**。
+- **`ai`**：默认「重跑开发到测试」→ 进 ⑤（不问）  
+- **`user`**：AskQuestion（[是否实现](../templates/contract.md#是否实现文档改完后第二步)）→ **停**
 
-| 用户选择 | 动作 |
-|----------|------|
-| **是，重跑开发到测试（默认推荐）** | 进入阶段 4 → 完成后**必须**进阶段 5 重新验收 |
-| 是，仅开发暂不测 | 进入阶段 4；todo 标「待重验」→ 开发完成后 AskQuestion 是否进阶段5（prompt 注明「待重验」）→ 停止 |
-| 否，仅更新文档 | 流程暂停，todo 记「待开发」 |
-| 先验收影响范围 | 列出待改任务清单 → AskQuestion 重新选择（重跑/仅开发/仅文档）→ 停止 |
-
-**卡片默认首选项**：「是，重跑开发到测试」——与用户「需求变动一般默认重启流程」一致。
+| 选择 | 动作 |
+|------|------|
+| 重跑开发到测试（默认） | 阶段 4 → 必须进 5 |
+| 仅开发暂不测 | 阶段 4；todo「待重验」 |
+| 仅更新文档 | 暂停，todo「待开发」 |
 
 ### ⑤ 重跑开发 → 测试（默认路径）
 
-- 选「重跑开发到测试」→ 读 [04-development.md](04-development.md) 按 todo 执行三步序 → **不跳过阶段 5**
-- **重跑范围**：阶段 4 只重做影响分析②中用户勾选的层涉及的 T；未涉及 T 的③保留有效，在 todo 标注 `未受变更影响·③保留`
-- 开发完成后 **自动 AskQuestion 阶段闸门进阶段 5**（变更语境下建议默认选「是，继续」由用户点选）
-- 阶段 5 须覆盖**变更涉及的全部 AC**（含新增场景），旧验收报告标「待更新」
-- 选「仅文档」→ 更新 todo 变更历史，**不发**阶段 4 闸门
+- 读 [04-development](04-development.md) 三步序 → **不跳过阶段 5**  
+- 只重做②命中层涉及的 T；未涉及 T 标 `未受变更影响·③保留`  
+- 开发完：`fast+ai` 连做进 5；`strict+ai`/`user` 结束闸门→停  
+- 阶段 5 覆盖变更涉及全部 AC；旧报告标「待更新」
 
 ---
 
 ## 强制规则
 
-- 已确认/已实现 REQ 变更 → **必须先影响分析 AskQuestion**，禁止猜范围
-- 影响分析 → 改文档 → 是否实现，**两步 AskQuestion 不可合并、不可跳过**
-- **默认**：变更后重跑阶段 4→5，已实现状态不可保留
-- 若变更使原验收报告失效，在 `atlas/tests/` 标注「待更新」
+- 已确认/已实现 REQ 变更 → **先影响分析**（`ai` 自判摘要；`user` 卡勾选）  
+- **`user`**：②④ 两步卡不可跳过；**`ai`**：不问，默认重跑 4→5  
+- 验收失效 → `atlas/tests/` 标「待更新」
 
 ## 产出
 

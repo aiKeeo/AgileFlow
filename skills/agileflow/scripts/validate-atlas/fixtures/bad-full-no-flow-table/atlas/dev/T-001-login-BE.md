@@ -1,6 +1,4 @@
-# [T-001] 登录 — 构思 [BE]
-
-- 档位：**完整**
+# [T-001] 登录 — 构思 [BE]
 - → [F-001](../solution/features/F-001-login.md) · [API-001](../solution/contracts/API-001-login.md)
 - 顺序：✅ 先构思后写码
 

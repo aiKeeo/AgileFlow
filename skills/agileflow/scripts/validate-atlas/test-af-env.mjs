@@ -79,7 +79,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=pending\nAF_DECIDE=pending\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_FLOW=pending\nAF_DECIDE=pending\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
     'atlas/todo.md': '# t\n',
   });
   try {
@@ -93,7 +93,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 // —— 枚举 / 缺失 ——
 {
   const root = writeProject({
-    'atlas/agileflow.env': 'AF_PHASE=9\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+    'atlas/agileflow.env': 'AF_PHASE=9\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
   });
   try {
     const loaded = loadAfEnv(root);
@@ -117,6 +117,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
+    'atlas/model/README.md': '# model\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n',
   });
   try {
@@ -129,6 +130,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
+    'atlas/model/README.md': '# model\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：已确认\n',
     'atlas/solution/architecture.md': '# 架构\n\n## 技术栈\n',
     'atlas/solution/features/F-001-a.md': '# [F-001] a\n',
@@ -150,7 +152,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n',
     'atlas/solution/architecture.md': '## 技术栈\n| 层 | x |\n',
@@ -173,7 +175,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=user\nAF_TIER=standard\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=user\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| a | b |\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',
@@ -190,7 +192,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',
@@ -207,7 +209,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| 技术栈 | Nest | 依据 |\n',
     'atlas/solution/architecture.md': '# 架构\n本文提到技术栈但无正式节\n',
@@ -230,7 +232,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=standard\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_FLOW=fast\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| 技术栈 | x | y |\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',
@@ -256,12 +258,12 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
   const root = writeProject({ 'atlas/todo.md': todoBody });
   try {
     const r3 = new Reporter();
-    validateTodo(root, r3, { tier: 'standard', phase: '3' });
+    validateTodo(root, r3, { tier: 'full', phase: '3' });
     const e3 = r3.getIssues().filter((i) => i.rule === 'TODO-FORMAT-dev数不符');
     check('phase=3 不报 dev数不符', e3.length === 0);
 
     const r4 = new Reporter();
-    validateTodo(root, r4, { tier: 'standard', phase: '4' });
+    validateTodo(root, r4, { tier: 'full', phase: '4' });
     const e4 = r4.getIssues().filter((i) => i.rule === 'TODO-FORMAT-dev数不符');
     check('phase=4 报 dev数不符', e4.length === 1);
   } finally {

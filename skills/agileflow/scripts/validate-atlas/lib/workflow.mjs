@@ -1,13 +1,20 @@
 import path from 'node:path';
-import { validateAtlas, runDevLiteralCheck, resolveRiskTier } from '../index.mjs';
+import { validateAtlas, runDevLiteralCheck, resolveTierForDevFile } from '../index.mjs';
 import { AI_GATES } from './phase-spec.mjs';
 import { Reporter } from './reporter.mjs';
 import { readText } from './fs-utils.mjs';
 import { formatPortableGateCommand } from './skill-path.mjs';
+import { validateDispatchLedger } from './rules/dispatch-ledger.mjs';
+import {
+  loadCustomRoles,
+  shouldSkipDocModule,
+  customSkipMessage,
+} from './rules/role-custom.mjs';
 
 /** 闸门 ID 别名 */
 const GATE_ALIASES = {
   'dev-a7': 'dev-step1-literal',
+  'anti-skip': 'write-code',
 };
 
 /**
@@ -53,22 +60,48 @@ export function runGate(gateId, opts = {}) {
       throw new Error('dev-step1-literal 闸门须指定 devFile（atlas/dev/T-xxx-*.md）');
     }
     const todoContent = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-    const tier = opts.tier ?? resolveRiskTier(todoContent);
-    const literal = runDevLiteralCheck(opts.devFile, { mode: opts.mode, tier });
+    const tier = opts.tier ?? resolveTierForDevFile(opts.devFile, todoContent);
+    const customRoles = loadCustomRoles(projectRoot);
+    const skipLiteral = shouldSkipDocModule('dev-step1-literal', customRoles);
     const reporter = new Reporter();
-    if (!literal.passed) {
-      for (const issue of literal.issues) {
-        reporter.add({ severity: 'error', rule: issue.rule, file: opts.devFile, message: issue.message });
-      }
-    } else {
+    /** @type {{ passed: boolean, issues: object[] } | undefined} */
+    let literal;
+
+    if (skipLiteral) {
       reporter.add({
         severity: 'info',
-        rule: 'DEV-LIT-OK',
-        file: opts.devFile,
-        message: '字面量校验已命中，可勾 ①。',
+        rule: 'ROLE-CUSTOM-SKIP',
+        file: 'atlas/role/role-dev.md',
+        message: customSkipMessage('dev', 'dev-step1-literal'),
       });
+      literal = { passed: true, issues: [] };
+    } else {
+      literal = runDevLiteralCheck(opts.devFile, { mode: opts.mode, tier });
+      if (!literal.passed) {
+        for (const issue of literal.issues) {
+          reporter.add({ severity: 'error', rule: issue.rule, file: opts.devFile, message: issue.message });
+        }
+      } else {
+        reporter.add({
+          severity: 'info',
+          rule: 'DEV-LIT-OK',
+          file: opts.devFile,
+          message: '字面量校验已命中，可勾 ①。',
+        });
+      }
     }
-    return { passed: literal.passed, gateId: resolved, gate, reporter, literal };
+
+    validateDispatchLedger(projectRoot, reporter, {
+      gateId: 'dev-step1-literal',
+      devFile: opts.devFile,
+    });
+    return {
+      passed: reporter.passed(),
+      gateId: resolved,
+      gate,
+      reporter,
+      literal,
+    };
   }
 
   const { passed, reporter } = validateAtlas({
@@ -80,6 +113,9 @@ export function runGate(gateId, opts = {}) {
     tier: opts.tier,
     incremental: opts.incremental,
     verbose: opts.verbose,
+    docFirstScope: gate.docFirstScope ?? 'integrity',
+    dispatchGate: resolved,
+    devFile: opts.devFile,
   });
 
   return { passed, gateId: resolved, gate, reporter };

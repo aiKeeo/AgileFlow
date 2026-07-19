@@ -8,7 +8,7 @@
  *   FE_SMOKE_USER=demo FE_SMOKE_PASS=demo123 node scripts/fe-smoke.mjs
  *
  * 依赖：npm i -D playwright
- * 浏览器：node scripts/fe-smoke-install.mjs（镜像优先，见 fe-smoke-playwright.md）
+ * 浏览器：node scripts/fe-smoke-install.mjs（镜像优先，见 ../tools/fe-smoke-playwright.md）
  * 配置：同目录 fe-smoke.pages.json（routerMode / baseUrl / pages）
  */
 import { chromium } from 'playwright'

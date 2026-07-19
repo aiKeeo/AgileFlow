@@ -1,11 +1,10 @@
 # 阶段 3：方案设计（sol:）
 
-> **本阶段完成 = `atlas/solution/` + `atlas/todo.md` 开发任务已写出**。
-> 用户阶段闸门选「是，继续」后，下条回复进入 dev 须写 `atlas/dev/T-xxx.md`。
-> **用户前缀**：`sol:` = `atlas/solution/`
-> 模板：[templates/solution-core.md](../templates/solution-core.md)  
-> **Template ON** 时先读 `atlas/template/solution/` 下对应 `template-*.md`（无则回退 skill templates/）
-> **默认**：主 Agent **串行**写 features + todo。**并行出方案**仅用户显式要求时 → [parallel-orchestration.md](parallel-orchestration.md) 批量出方案。
+> 完成 = `atlas/solution/` **与** `atlas/todo.md`（根）已写出。进 dev 须写 `atlas/dev/T-xxx.md`。  
+> **禁止** `atlas/solution/todo.md`。  
+> 模板：[solution-core](../templates/solution.md) · Template ON 先读 `atlas/template/solution/`  
+> **角色**：[role-sol.md](../templates/role/role-sol.md)（可覆盖 `atlas/role/role-sol.md`）· 总控 → [orchestrator](../templates/orchestrator.md)  
+> 并行出方案仅用户显式要求 → [parallel](04-development.md#并行阶段-4)
 
 ## 方案设计四要素
 
@@ -31,56 +30,39 @@ atlas/solution/
 
 ## 标准流程（默认）
 
-0. **契约/决策权**：无 env 或 pending → [流程启动卡](../templates/stage-delegation.md#流程启动卡首启强制) → 停；已确认则按 `AF_DECIDE` 分支（见 [stage-delegation](../templates/stage-delegation.md)）
-1. 读已确认 REQ +（按需）model/ + **有 UID 时读 `requirements/ui/`**
-2. 初始化 `solution/`：README、features/、contracts/（目录即可）
-3. 写 `features/F-xxx.md`：映射 REQ、**暴露面**、**§边界**（**做/不做必须从 REQ 故事+AC+范围提示提炼**，正文含 `← REQ-xxx · AC-…`；可选 1 句说明；**禁止**联调卡/验收要点/边界注水）
-4. **按需**写 `contracts/`（有暴露面才建文件）；**UI-xxx 链 API 时须 §字段绑定**（见 [req-ui-design 阶段衔接](../templates/req-ui-design.md#阶段衔接)）；README 写 **AC→主 T**（每条 AC 唯一主责；BE 向 AC 颗粒度≈单测，见 [ac-guide](../templates/ac-guide.md)）
+0. **契约/决策权**：无 env/pending → **启动卡问人**（默认）；明确委托 → `fast+ai` 可跳。→ [启动卡](../templates/contract.md#流程启动卡)。**总控**判断，不写产物正文。
+1. **总控**读已确认 REQ +（按需）model/ + UID
+2. **总控派 role-sol**（加载 [role-sol](../templates/role/role-sol.md)）写 solution/ + T 头建议  
+   - `user`：技术栈未定时先 AskQuestion → 停；再派 role-sol 补 architecture；先落盘再确认（见 [contract 阶段 3](../templates/contract.md#阶段-3-先落盘再确认快速也适用)）
+   - `ai`：role-sol 自选栈；总控写 `AF_STACK_SOURCE=ai_record`
+3. **钉死时序**：收 T 头建议 → **总控写入 `atlas/todo.md`（根）** → 跑 `sol-confirm` → 绿才 `AF_PHASE=4`  
+   - `fast+ai`：同条连做 dev（每 T 一次派 role-dev）· `strict+ai`：审阅卡→停 · `user`：确认/闸门卡→停
+4. 确认后总控标 README **已确认**、沉淀 humanTodo、更新驾驶舱
 
-**user_decide 分支**（**先落盘再确认**，见 [flow-modes 阶段 3](../templates/flow-modes.md#阶段-3--先落盘再确认快速也适用)）：
+F/contracts/architecture 怎么写 → **只维护在 role-sol**；强制规则见下表。
 
-5. **AskQuestion 技术栈** → 停止（禁止此时确认「方案」——architecture 尚未写）
-6. **下条**写 `architecture.md` + `code-patterns` + 补全 features/contracts + 拆解 `todo.md`
-7. **AskQuestion**：  
-   - **快速**：方案确认 + 是否继续 **合并 1 卡** → 停止（含继续则不再单独阶段闸门）  
-   - **严谨**：方案确认卡 → 停止 → 再 **阶段闸门** → 停止  
-8. 确认后 README **已确认**
+### 阶段收尾 — **阶段闸门**（仅 user · 严谨）
 
-**ai_decide 分支**（须 `AF_DECIDE=ai` 已由启动卡/用户原话确认；跳过技术栈/确认用户卡）：
+> **AI / 快速已合并继续**：不走本步。
 
-5. Agent **自行选定**技术栈（写入决策记录）；更新 `atlas/agileflow.env`：`AF_PHASE=3`、`AF_STACK_SOURCE=ai_record`（**禁止**把 `AF_DECIDE` 从 user 改成 ai）
-6. 写 `architecture.md` + `code-patterns-*.md` + features/contracts + `todo` + **AI 决策记录**
-7. 跑 `validate-atlas --gate sol-confirm`（不过 → 按报错改 env/落盘）→ **[结束闸门](../templates/stage-delegation.md#审阅闸门ai-自主专属)**（`fast+ai`+A档绿免发卡；`strict+ai` 审阅卡） → 停止（确认后下条进 dev，并把 `AF_PHASE=4`）
+产物齐、todo 已写、humanTodo 已沉淀、`atlas/README.md` 已更新后 → **总控**发 [阶段闸门](../templates/contract.md#阶段闸门模板) → **停止**。
 
-### 阶段收尾 — **阶段闸门**（仅 user_decide · 严谨）
+## 批量出方案（可选 — 仅用户显式要求）
 
-> **AI 自主**：结束闸门已处理是否继续（`fast+ai` 自动确认 / `strict+ai` 审阅卡），**不走本步**。  
-> **快速**：若确认卡已含「是，继续」→ **不走本步**（见 flow-modes）。
-
-`solution/README.md` 标 **已确认**、todo 已写入、**humanTodo 已沉淀**（**已决事项须从 humanTodo 删除**；用户原话/本阶段已答清的项禁止留在 humanTodo；禁止与 `architecture` 已选栈矛盾）、**`atlas/README.md` 已更新**（已拍板栈 / 现在 / 未决）后 → 调用 [阶段闸门](../templates/askquestion-gate.md#阶段闸门模板)（prompt：`方案设计已完成。是否继续进入【开发实现】阶段？`）→ **停止**。
-## 批量出方案（可选 — 仅用户显式要求并行出方案）
-
-> 用户说「并行出方案 / 多 subagent 写 features」且功能 ≥2 或全栈 FE+BE 时启用。
-
-| 步 | 主 Agent | Subagent |
-|----|----------|----------|
-| 1 | 读 REQ + model | — |
-| 2 | AskQuestion 技术栈 → 停 | — |
-| 2.5 | **AskQuestion 并行启动卡**（确认并行出方案 + 本批功能数 ≤3）→ 停 | — |
-| 3 | 拆片启 Task（路径无冲突） | 各写 `features/F-xxx`（含 §边界）+ 按需 `contracts/*` |
-| 4 | 合并 README 索引、去重 ID | — |
-| 5 | 写/更新 **architecture.md** + todo + 功能依赖 | — |
-| 6 | AskQuestion 方案审阅 → 停 | — |
-| 7 | **AskQuestion 阶段闸门** → 停 | — |
+总控拆片，每片派 **role-sol**（1–3 个 F）；合并 README 后总控写 todo → `sol-confirm`。  
+`user` 须并行启动卡；`fast+ai` 不问直接拆。
 
 ## 强制规则
 
-- 每个 REQ → 至少 1 个 feature；每个 feature → **必须**有 `## 边界`（做/不做从 REQ 提炼）且含 `← REQ-` 回溯；**禁止** F `## 联调卡`；UI 链 API → **contracts/UI §字段绑定**；README 须有 **AC→主 T**
-- 暴露面：`无` | API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过**
-- greenfield **sol:** 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/`
-- `architecture.md` 全项目**只维护一份**；**user_decide** 时 Write 前须 AskQuestion 技术栈；**ai_decide** 跳过卡片但须落盘选型依据
-- 任务只写 `todo.md`；**必须** `### T-xxx` + ①②③（含 dev 路径）；禁止扁平 `- [ ] T-001` 一行完事
-- **风险分档标注（拆 todo 时）**：每个 T 头必须带 `[精简|标准|完整]`。**小任务默认精简**——同时满足：单端、无 DB/持久化结构变更、无权限/支付、预估 <100 行、无跨模块 → 标 `[精简]`；命中支付·权限·DB·多模块·>100 行·用户说严谨 → `[完整]`；其余 → `[标准]`。不确定且不满足精简条件 → `[标准]`。权威定义 → [04-development §风险分档](04-development.md#风险分档)
+| 标记 | 规则 | 说明 |
+|------|------|------|
+| 🔴 | **REQ→feature 映射** | 每个 REQ 至少 1 feature；每个 feature 必须有 `## 边界` 且含 `← REQ-` 回溯；**禁止** F `## 联调卡` |
+| 🟢 | **UI 链 API** | 通过 `contracts/UI` §字段绑定；README 须含 **AC→主 T** |
+| 🟠 | **暴露面** | `无` / API/UI/JOB/EVT 组合；**有则写 contracts，无则跳过** |
+| 🔴 | **技术栈与架构** | `architecture.md` 全项目**只维护一份**；`user_decide` Write 前须 AskQuestion 技术栈；`ai_decide` 跳过卡片但须落盘选型依据 |
+| 🟢 | **代码模式** | greenfield `sol:` 默认建 `solution/code-patterns-*.md` 🌱；**默认不建** `conventions/` |
+| 🔴 | **Todo 格式** | 任务只写 **`atlas/todo.md`（根）**；必须 `### T-xxx` + ①②③（含 dev 路径）；禁止扁平 `- [ ] T-001`；禁止 `solution/todo.md` |
+| 🟢 | **dev 质量** | FE/MP：主流程+边界+实现说明；BE：步骤表；→ [04 §质量要求](04-development.md#质量要求) |
 
 ## 产出
 
@@ -90,7 +72,7 @@ atlas/solution/
 | `features/F-xxx-*.md` | 功能 + §边界（短；禁复述用户故事） |
 | `contracts/*` | 契约（按需；UI 只链 UID） |
 | `architecture.md` | 全局架构（唯一） |
-| `todo.md` | 开发任务：**每个 `### T-xxx` + ①②③ 三步** + 档位标注（见 [todo](../templates/todo.md)） |
+| `atlas/todo.md` | 开发任务（**根路径**）：**每个 `### T-xxx` + ①②③ 三步**（见 [todo](../templates/todo.md)） |
 
 `README.md` 未「已确认」→ 禁止进阶段 4。  
 **todo 未过阶段 3 自检（无三段式）→ 禁止标方案已确认、禁止进阶段 4。**

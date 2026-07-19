@@ -1,43 +1,51 @@
 # Atlas 校验（AI 流程闸门）
 
 > **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`  
-> **诚实边界**：JS 只挡 **A 档**（结构 + 落盘证据）。AskQuestion / TodoWrite / 实际编译 = **C 档**，脚本管不到。  
+> **硬挡**：error 与 warn **同等失败**（exit ≠ 0）。没有「可继续知债」。  
+> **ORCH-*（派活台账）**：**仅** `--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 时校验；`--only req` 等模块单跑**不**验台账，不可替代对应 gate。  
+> **ROLE-CUSTOM-SKIP**：`atlas/role/role-*.md` 相对 `.agileflow-role-baseline.json` 已改 → 跳过该阶段**文档格式**闸门（info，不 fail）；**ORCH 仍硬挡**。重置 baseline：`--refresh-role-baseline --root .`
+> **契约也是硬规则**：`strict+ai`/`user` 该停就停；`fast+ai` 闸门绿该连做就连做——不是可选自觉。  
 > **路径**：勿写死 `.cursor/skills/agileflow`。用下方探测或 `AGILEFLOW_SKILL_ROOT`。
 
-## 分档
+## 闸门覆盖（不过 = 硬挡）
 
-| 档 | 闸门/规则 | 失败效果 |
-|----|-----------|----------|
-| **A** | `atlas/agileflow.env`、`anti-skip`、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`(+architecture 必节+README 禁揉+契约对齐+REQ已确认+决策/栈来源)、todo 三段式/假进度 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
-| **B** | 残留 BDD 专节、契约命名等 warn | 可继续 |
-| **C** | AskQuestion 工具调用本身、停止、TodoWrite、并行启动卡 | 靠纪律；**但** user 模式未问栈会以 A 档 `AF-STACK-USER` 卡住 |
+| 闸门/规则 | 失败效果 |
+|-----------|----------|
+| `atlas/agileflow.env`、**`atlas/agileflow-dispatch.json`（ORCH-*）**、`write-code`（`anti-skip` 别名）、`dev-step1-literal`、`dev-complete`(+runnable)、`test-entry`(+smoke)、`sol-confirm`（architecture + 有 REQ 须 F + REQ 已确认 + model 或正式跳过 + 栈来源）、todo 三段式/假进度、字面量/空壳/占位 | exit ≠ 0 → 禁止勾 ✅ / 进阶；报错含修复动作 |
+| 契约停/连做（AskQuestion、TodoWrite） | 按 [SKILL 裁决表](../SKILL.md) 执行；违规 = 流程失败，禁止用「脚本管不到」当借口跳过 |
 
 ## 脚本不可用时的降级（必读）
 
 当 `node` 命令不存在、脚本路径探测失败、或脚本运行时抛出异常时（exit ≠ 0 但非校验失败）：
 
-1. Agent 须在回复首行标注：`⚠️ validate-atlas 不可用（原因：{node未安装/路径未找到/运行时错误}）`
-2. 降级为 B 档人工校验：Agent 须逐项声明检查结果（段标题/字面量/证据），格式同脚本输出
-3. 降级模式下勾①/✅ 须额外标注 `（人工降级·脚本不可用）`
-4. **禁止因脚本不可用而跳过校验项本身——只降级校验手段，不降级校验标准**
+1. Agent 须在回复**首行**标注：`⚠️ validate-atlas 不可用（原因：{node未安装/路径未找到/运行时错误}）· 以下为 Agent 自检，建议抽查`
+2. **禁止** `fast+ai` 同回复连做下一阶段——降级模式下**每阶段须停**等用户确认或显式「继续」（等同临时 `strict` 停点）
+3. 降级为**人工逐项声明**（禁止笼统「全部通过」），须按当前 `--gate` 列出每项及结果，例如：
+   ```
+   降级自检（gate=sol-confirm）：
+   - [ ] architecture.md 含技术栈/模块/本地验证 → {✅/❌ + 一句依据}
+   - [ ] features/F-*.md 与 REQ 对齐 → {✅/❌}
+   - [ ] contracts 文件名合规 → {✅/❌}
+   …
+   ```
+4. 降级模式下勾①/✅ 须额外标注 `（人工降级·脚本不可用）`
+5. **禁止因脚本不可用而跳过校验项本身——只降级校验手段，不降级校验标准**
 
 ## 字面量校验完整清单
 
 | 检查项 | 要求 | 不过规则 |
 |--------|------|---------|
-| 段标题 | 全档：`## 摘要` `## 步骤` `## 结果`；标准+摘要五 bullet | DEV-SEC-* |
-| 摘要结构 | 标准+：摘要含 **本T/做/不做/上游/AC** | DEV-SUMMARY-结构 |
-| 步骤（legacy） | 每 `####` 下 **用户/系统/改**（格式权威 → [dev-quickstart §构思闸门](dev-quickstart.md#构思闸门勾-①-前)）；改行有代码落点；精简≥1 / 标准≥2 / 完整≥3 | DEV-STEP-3 · DEV-STEP-最少 |
-| 步骤（template） | 每 `####` 下 **涉及改动**；行内含 `` `anchor` ``；步数同上 | TMPL-DEV-CHANGE · TMPL-DEV-STEPS |
-| 步骤（原子步骤表） | 每 `#### S1…` 下 8 字段规格表（执行角色/触发条件/输入数据/处理逻辑含 if-else/调用依赖/异常处理/输出数据/状态变更）；调用依赖字段须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``；**标准+完整优先此形态** | DEV-STEP-ATOM-字段 · DEV-STEP-ATOM-落点 |
-| 步骤（流程表·兼容旧） | `S1…` 行注意点须含代码落点 `` `Class.method` `` / `` `path/` `` / `` `func()` ``（**禁单单词反引号**如 `` `Service` ``） | DEV-STEP-流程落点 |
+| 段标题 | 全端：`## 摘要` `## 主流程` `## 边界` `## 实现说明` `## 结果`；禁 `## 步骤` | DEV-SEC-* · DEV-BAN-步骤 |
+| 主流程 | `> 入口：` + 编号步骤 ≥3；含代码落点 | DEV-FLOW-* |
+| 边界 | 至少一条 `- **场景**：…` | DEV-EDGE-存在 |
+| 实现说明 | `### path` 【新写/改动】含 **目的** + **怎么做/做什么** + 落点 | DEV-IMPL-* |
 | 链 sol | BE 链 API；FE 链 UI（调 API 时）；dev 禁字段映射表 | DEV-LINK-* · DEV-BAN-映射 |
 | 代码落点 | OOP→反引号内含 `.`；函数式→`` `func()` ``；路径型→`` `path/` ``；**禁单单词反引号**（如 `` `Service` `` `` `todo` ``） | DEV-LIT-代码落点 |
 | 禁形旧标题 | 禁 `## 一、目标` `## 五、可执行方案` | DEV-BAN-* |
 | JSON 复贴 | dev 内大段 JSON → error | DEV-COPY-JSON |
-| 文档长度 | 去空格后 ≥ {精简 200 / 标准 350 / 完整 500} 字 | DEV-FAKE-过短 |
+| 文档长度 | 去空格后 ≥ 500 字 | DEV-FAKE-过短 |
 | 假标题 | 纯文本"范围/步骤"无 `##` | DEV-FAKE-标题 |
-| 禁冗余段 | 禁止 dev `## 范围` `## 异常` `## AC`；禁止 F `## 联调卡` | DEV-BAN-* · SOL-F-BAN-* |
+| 禁冗余段 | 禁止 dev `## 范围` `## 做法` `## 异常` `## AC`；禁止 F `## 联调卡`；禁「写码后填」当构思 | DEV-BAN-* · DEV-STUB-* · SOL-F-BAN-* |
 | UI 字段绑定 | UI 契约链 API 须 `## 字段绑定` 表 | SOL-UI-BIND |
 
 ## 如何找到脚本（可移植）
@@ -68,29 +76,30 @@ cd <skill> && npm run validate:sol
 | `AF_PHASE` | 当前阶段；须与产物推断一致，否则 `AF-ENV-PHASE` |
 | `AF_FLOW` | `fast` / `strict` / `pending`（`pending` → `AF-ENV-BOOT`） |
 | `AF_DECIDE` | `ai` / `user` / `pending`（`pending` → `AF-ENV-BOOT`；`user` 决定技术栈要不要先问） |
-| `AF_TIER` | `lite` / `standard` / `full` |
+| `AF_TIER` | `full` |
 | `AF_STACK_SOURCE` | `pending` / `ai_record` / `askquestion` / `user_said` / `repo` |
 
 进阶或改决策后**先改 env 再跑闸门**；报错信息含修复动作。
 
 ## Agent 必须执行的命令
 
-| 时机 | 闸门 | 不过 → |
-|------|------|--------|
-| init 落盘 · AskQuestion 前 | `init-confirm` | 禁止 init 确认 |
-| REQ 落盘 · 确认卡前 | `req-confirm` | 禁止 REQ 确认 |
-| model 落盘 · 确认前 | `mod-confirm` | 禁止进 sol |
-| 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** env + architecture + REQ 已确认 + 栈来源按决策权落地） |
-| **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** |
-| **勾①/②/③ 后（任意时刻）** | `--only todo`（规则 `TODO-CHECK-*`） | 勾了无文件 / 勾③无可运行证据 / 假标「开发实现 ✅」→ **A 档失败** |
-| **写业务源码前 / 假进度嫌疑** | `anti-skip` | 有 `backend/`/`frontend/`/`src/` 等业务码却无 `architecture`+`features`+等量 `T-*.md`，或用 `dev/README` 冒充 T，或流程进度假勾 → **A 档失败** |
-| **开发✅前** | `dev-complete` | 禁止 ✅（**须 ## 结果** 可运行证据；**有原型须** fe-pixel PASS；todo 勾选须与 `atlas/dev/` 对齐） |
-| **进阶段 5 前** | `test-entry` | 禁止 AC 归档（**须** logs smoke；**有原型须** fe-pixel PASS） |
-| **验收归档前** | `req-trace` | 检查 REQ→F→T→AC→报告 链完整性（B 档：warn 不阻塞） |
+| 时机 | 闸门 | 不过 → | 修复（回派 role key） |
+|------|------|--------|----------------------|
+| init 落盘 · AskQuestion 前 | `init-confirm` | 禁止 init 确认 | 总控 |
+| REQ 落盘 · 确认卡前 | `req-confirm` | 禁止 REQ 确认 | `req`（**须**派活台账 role=req） |
+| model 落盘 · 确认前 | `mod-confirm` | 禁止进 sol | `model`（**须**台账 role=model） |
+| 方案+todo · 闸门前 | `sol-confirm` | 禁止进 dev（**须** env + architecture + **有 REQ 则须 F-*.md** + REQ 已确认 + 建模已确认或正式跳过判定 + 栈来源按决策权落地；**总控须先写 todo**） | `sol`（todo 缺 → 总控补写；**须**台账 role=sol） |
+| **勾①前** | `dev-step1-literal --dev-file atlas/dev/T-xxx-*.md` | **禁止勾①** | `dev` · 子阶段①（**须**台账 role=dev + taskId） |
+| **派②前（Write 源码前）** | `write-code` + [写码闸门自检表](dev.md#写码闸门write-前) | AF 项目+有源码须 REQ→sol→dev① 格式全过；不过 → 禁止写码 | `dev` · 子阶段②（有 dev 文件时须台账） |
+| **勾①/②/③ 后（任意时刻）** | `--only todo`（规则 `TODO-CHECK-*`） | 勾了无文件 / **勾①未过构思格式** / 勾③无可运行 / 先码后补空壳 → **失败** | `dev`（对应子阶段）；状态总控维护 |
+| **单 T 勾③前** | 该 T `## 结果` 含可运行证据 + `--only todo` | 禁止勾③ | `dev` · 子阶段③ |
+| **全部 T 齐 · 开发✅前** | `dev-complete` | 禁止 ✅（须可运行证据等） | `dev` · 子阶段③ |
+| **进阶段 5 前** | `test-entry` | 禁止 AC 归档 | 总控 |
+| **验收归档前** | `req-trace` | 链不完整 → **失败** | 总控按断链回派 |
 
 列出：`--list-gates`
 
-## 可运行证据（A · runnable）
+## 可运行证据（runnable · 硬挡）
 
 写入每个 T 的 **## 结果**，须同时可 grep 到：
 
@@ -100,7 +109,7 @@ cd <skill> && npm run validate:sol
 
 禁止空表或只写「③ 验收后填写」。
 
-## 勾选证据（A · todo `TODO-CHECK-*`）
+## 勾选证据（todo `TODO-CHECK-*` · 硬挡）
 
 > 堵「AI 自主 / 委托交付」时空跑勾选：checkbox 是承诺，不是装饰。
 
@@ -113,19 +122,19 @@ cd <skill> && npm run validate:sol
 
 `sol-confirm` 阶段 ①②③ 应仍为 `[ ]`，不触发本表；一旦勾选（任意 phase）即硬挡。
 
-## 入场日志（A · smoke）
+## 入场日志（smoke · 硬挡）
 
 `atlas/logs/` 下至少一个文件名含 `smoke|compile|probe|test-entry|fe-smoke|be-smoke`，正文含通过痕迹。
 
-## 像素对比（A · 有强制原型时）
+## 像素对比（有强制原型时 · 硬挡）
 
-规则与目录 → [fe-pixel-compare](fe-pixel-compare.md)。  
+规则与目录 → [fe-pixel-compare](../tools/fe-pixel-compare.md)。  
 闸门读 `atlas/tests/fe-pixel/report.json`（`dev-complete` / `test-entry`）。
 
 ## 回复格式（勾①时）
 
 ```
-字面量校验：## 摘要 · ## 步骤 · #### 步骤 · 代码落点 已命中
+字面量校验：## 摘要 · （FE/MP：## 主流程 · ## 边界 · ## 实现说明 | BE：## 步骤）· 代码落点 已命中
 validate: exit 0 — <print-cmd 给出的命令>
 ```
 

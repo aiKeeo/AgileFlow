@@ -13,6 +13,17 @@ function normProto(p) {
 }
 
 /**
+ * 防止原型路径穿越：拒绝含 ..、绝对路径、空路径或协议路径。
+ * @param {string} p
+ */
+function isSafeProto(p) {
+  if (!p || /\.\.|^\/|^\\\\|^[a-zA-Z]:/i.test(p) || /^[a-z][a-z0-9+.-]*:\/\//i.test(p)) {
+    return false;
+  }
+  return true;
+}
+
+/**
  * 从 UID / pages.json 收集「强制对比」原型清单
  * 注意：prototypes/ 目录散图不单独阻塞闸门（须 UID 声明或写入 pages.json）
  * @param {string} projectRoot
@@ -33,8 +44,10 @@ function discoverPrototypes(projectRoot) {
       let m;
       let hit = false;
       while ((m = re.exec(content)) !== null) {
+        const raw = m[1].trim();
+        if (!isSafeProto(raw)) continue;
         hit = true;
-        expected.add(normProto(m[1].trim()));
+        expected.add(normProto(raw));
       }
       if (hit) sources.push(rel(projectRoot, file));
     }
@@ -47,7 +60,7 @@ function discoverPrototypes(projectRoot) {
       if (Array.isArray(raw.pages)) {
         let any = false;
         for (const p of raw.pages) {
-          if (!p?.prototype) continue;
+          if (!p?.prototype || !isSafeProto(p.prototype)) continue;
           any = true;
           expected.add(normProto(p.prototype));
         }
@@ -87,7 +100,7 @@ function readPixelReport(projectRoot) {
 function findUncoveredProtos(results, expectedProtos) {
   const covered = new Set();
   for (const r of results || []) {
-    if (!r || r.status !== 'PASS' || !r.prototype) continue;
+    if (!r || String(r.status || '').toUpperCase() !== 'PASS' || !r.prototype) continue;
     covered.add(normProto(r.prototype));
   }
   return expectedProtos.filter((p) => !covered.has(normProto(p)));
@@ -111,7 +124,7 @@ export function validatePixelCompare(projectRoot, reporter) {
       file: reportFile,
       message: `须跑 fe-pixel（来源：${sources.slice(0, 3).join(', ')}${
         sources.length > 3 ? '…' : ''
-      }）。权威 → templates/fe-pixel-compare.md`,
+      }）。权威 → templates/../tools/fe-pixel-compare.md`,
     });
     return;
   }
@@ -155,6 +168,38 @@ export function validatePixelCompare(projectRoot, reporter) {
       message: '缺少 finishedAt（须脚本生成，禁止手写 PASS）。',
     });
     return;
+  }
+
+  // 拒绝过期报告：report.finishedAt 不得早于最近修改的 dev 文件或原型
+  try {
+    const finishedAt = new Date(report.data.finishedAt).getTime();
+    if (!Number.isNaN(finishedAt)) {
+      const devRoot = path.join(projectRoot, 'atlas', 'dev');
+      let latestMs = 0;
+      if (exists(devRoot)) {
+        for (const file of collectFiles(devRoot, '.md')) {
+          const mtime = fs.statSync(file).mtimeMs;
+          if (mtime > latestMs) latestMs = mtime;
+        }
+      }
+      for (const proto of expectedProtos) {
+        const protoPath = path.join(projectRoot, 'atlas', 'requirements', 'ui', 'prototypes', proto);
+        if (exists(protoPath)) {
+          const mtime = fs.statSync(protoPath).mtimeMs;
+          if (mtime > latestMs) latestMs = mtime;
+        }
+      }
+      if (latestMs > 0 && finishedAt < latestMs - 60_000) {
+        reporter.add({
+          severity: 'warn',
+          rule: 'PIXEL-R007',
+          file: report.path,
+          message: `report.finishedAt 早于 dev/原型最新修改（${new Date(latestMs).toISOString()}），报告可能过期，建议重跑 fe-pixel。`,
+        });
+      }
+    }
+  } catch {
+    /* 忽略时间比较异常 */
   }
 
   const uncovered = findUncoveredProtos(results, expectedProtos);

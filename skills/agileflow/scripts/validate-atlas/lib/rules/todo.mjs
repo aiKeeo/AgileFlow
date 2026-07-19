@@ -2,6 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { exists, readText, rel } from '../fs-utils.mjs';
 import { extractSectionResult, hasRunnableEvidence } from './runnable.mjs';
+import { runDevLiteralCheck } from './dev/index.mjs';
+import {
+  shouldSkipTodoSolFormat,
+  shouldSkipTodoDevCheck,
+  customSkipMessage,
+} from './role-custom.mjs';
 
 /** 非法 T 头：## T- 不算 */
 const ILLEGAL_T_HEADER = /^##\s+T-\d+/gm;
@@ -43,9 +49,10 @@ function extractTaskBlock(content, startLine) {
  */
 function checkThreeSteps(block) {
   return {
-    has1: /①.*构思/.test(block) && /atlas\/dev\/T-\d+/.test(block),
-    has2: /②/.test(block) && /写码|按.*(?:五|做法|步骤)/.test(block),
-    has3: /③/.test(block) && /AC|验收/.test(block),
+    // 与 parseStepChecks 同宽：不强制「构思/写码/AC」字样
+    has1: /①/.test(block) && /atlas\/dev\/T-\d+/.test(block),
+    has2: /②/.test(block),
+    has3: /③/.test(block),
   };
 }
 
@@ -68,12 +75,13 @@ function parseStepChecks(block) {
     if (!box) continue;
     const checked = box[1].toLowerCase() === 'x';
 
-    if (/①/.test(line) && /构思/.test(line)) {
+    // ①/②/③：不强制「构思/写码/AC」字样（堵 `- [x] **①** → path` 漏检）
+    if (/①/.test(line) && !/②/.test(line) && !/③/.test(line)) {
       const pathMatch = line.match(/`?(atlas\/dev\/T-\d+[^`\s]*)`?/);
       step1 = { checked, path: pathMatch ? pathMatch[1].replace(/[`'"]/g, '') : null, lineInBlock: i };
-    } else if (/②/.test(line) && /写码|步骤|做法/.test(line)) {
+    } else if (/②/.test(line) && !/①/.test(line) && !/③/.test(line)) {
       step2 = { checked, lineInBlock: i };
-    } else if (/③/.test(line) && /AC|验收/.test(line)) {
+    } else if (/③/.test(line) && !/①/.test(line) && !/②/.test(line)) {
       step3 = { checked, lineInBlock: i };
     }
   }
@@ -129,8 +137,13 @@ function countDevFiles(devRoot) {
  * @param {import('../reporter.mjs').Reporter} reporter
  * @param {string} relPath
  * @param {ReturnType<typeof extractTaskHeaders>} headers
+ * @param {{ skipDevCheck?: boolean, skipSolClaimed?: boolean }} [opts]
  */
-function validateCheckboxEvidence(projectRoot, content, reporter, relPath, headers) {
+function validateCheckboxEvidence(projectRoot, content, reporter, relPath, headers, opts = {}) {
+  const skipDevCheck = opts.skipDevCheck ?? false;
+  const skipSolClaimed = opts.skipSolClaimed ?? false;
+
+  if (!skipDevCheck) {
   let anyChecked = false;
   let allComplete = headers.length > 0;
 
@@ -157,6 +170,21 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
           line: step1 ? absLine(step1.lineInBlock) : header.line,
           message: `${header.id} 已勾 ①，但缺少对应构思文件（须存在 ${step1?.path ?? `atlas/dev/${header.id}-*.md`}）。禁止空跑勾选。`,
         });
+      }
+
+      // 勾①须过构思闸门（摘要+步骤）；堵「范围/做法 + 写码后填」空壳
+      if (s1 && resolved) {
+        const lit = runDevLiteralCheck(resolved.abs, { stage: 'step1' });
+        if (!lit.passed) {
+          const top = lit.issues.slice(0, 2).map((i) => i.rule).join(', ');
+          reporter.add({
+            severity: 'error',
+            rule: 'TODO-CHECK-①格式',
+            file: resolved.rel,
+            line: step1 ? absLine(step1.lineInBlock) : header.line,
+            message: `${header.id} 已勾 ①，但 ${resolved.rel} 未过构思闸门（${top}…）。须先写 ## 摘要 +（FE/MP：主流程+边界+实现说明 | BE：步骤），禁止空壳或写码后回填。`,
+          });
+        }
       }
 
       if (s2 && !s1) {
@@ -214,23 +242,6 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
     }
   }
 
-  // 流程进度声称方案完成 → 须有 architecture（堵 README 揉方案）
-  const claimedSolDone =
-    /方案设计\s*✅/.test(content) ||
-    /^\s*-\s+\[[xX]\].*方案设计/m.test(content);
-  if (claimedSolDone) {
-    const archPath = path.join(projectRoot, 'atlas', 'solution', 'architecture.md');
-    if (!exists(archPath)) {
-      reporter.add({
-        severity: 'error',
-        rule: 'TODO-CHECK-方案完成无arch',
-        file: relPath,
-        message:
-          '流程进度已标「方案设计 ✅」，但缺少 atlas/solution/architecture.md——禁止假完成。',
-      });
-    }
-  }
-
   // 流程进度声称开发完成 → 每个 T 必须 ①②③ 齐且证据过关
   const claimedDevDone =
     /开发实现\s*✅/.test(content) ||
@@ -252,7 +263,6 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
         message: '流程进度已标「开发实现 ✅」，但存在未勾满 ①②③ 的 T——禁止假完成。',
       });
     }
-    // 有勾选证据错误时 claimed 会连带失败；此处再卡「标完成却 0 勾选」
     if (!anyChecked && headers.length > 0) {
       reporter.add({
         severity: 'error',
@@ -261,6 +271,26 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
         message: '流程进度已标「开发实现 ✅」，但所有 T 的 ①②③ 均未勾选。',
       });
     }
+  }
+  }
+
+  // 流程进度声称方案完成 → 须有 architecture（堵 README 揉方案）
+  if (!skipSolClaimed) {
+  const claimedSolDone =
+    /方案设计\s*✅/.test(content) ||
+    /^\s*-\s+\[[xX]\].*方案设计/m.test(content);
+  if (claimedSolDone) {
+    const archPath = path.join(projectRoot, 'atlas', 'solution', 'architecture.md');
+    if (!exists(archPath)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'TODO-CHECK-方案完成无arch',
+        file: relPath,
+        message:
+          '流程进度已标「方案设计 ✅」，但缺少 atlas/solution/architecture.md——禁止假完成。',
+      });
+    }
+  }
   }
 
   const claimedTestDone =
@@ -283,14 +313,37 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
  * 校验 atlas/todo.md（开发完成格式门槛 + 三段式 + 勾选证据）
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
- * @param {{ tier?: string, phase?: string }} [opts]
+ * @param {{ tier?: string, phase?: string, customRoles?: Set<string> }} [opts]
  */
 export function validateTodo(projectRoot, reporter, opts = {}) {
   const phase = opts.phase ?? 'all';
+  const customRoles = opts.customRoles ?? new Set();
+  const skipSolFormat = shouldSkipTodoSolFormat(customRoles);
+  const skipDevCheck = shouldSkipTodoDevCheck(customRoles);
+
+  if (skipSolFormat) {
+    reporter.add({
+      severity: 'info',
+      rule: 'ROLE-CUSTOM-SKIP',
+      file: 'atlas/role/role-sol.md',
+      message: customSkipMessage('sol', 'todo 格式(T头)'),
+    });
+  }
+  if (skipDevCheck) {
+    reporter.add({
+      severity: 'info',
+      rule: 'ROLE-CUSTOM-SKIP',
+      file: 'atlas/role/role-dev.md',
+      message: customSkipMessage('dev', 'todo DEV/TODO-CHECK'),
+    });
+  }
+
   const todoPath = path.join(projectRoot, 'atlas', 'todo.md');
   if (!exists(todoPath)) {
+    const phaseNum = Number(phase);
+    const mustHave = phase === 'all' || (!Number.isNaN(phaseNum) && phaseNum >= 3);
     reporter.add({
-      severity: 'warn',
+      severity: mustHave ? 'error' : 'warn',
       rule: 'TODO-001',
       file: 'atlas/todo.md',
       message: '缺少 atlas/todo.md。',
@@ -321,6 +374,7 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
     });
   }
 
+  if (!skipSolFormat) {
   for (const m of content.matchAll(ILLEGAL_T_HEADER)) {
     const line = content.slice(0, m.index).split('\n').length;
     reporter.add({
@@ -342,16 +396,19 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
       message: `扁平任务列表「${m[0].trim()}」——须 ### T-xxx + ①②③。`,
     });
   }
+  }
 
   const headers = extractTaskHeaders(content);
+  if (!skipSolFormat) {
   for (const header of headers) {
-    if (!/\[精简\]|\[标准\]|\[完整\]/.test(header.raw)) {
+    // 旧稿残留的方括号标签（与端标签 [BE]/[FE] 不同：紧贴描述尾或单独成段）
+    if (/\[(?:精简|标准|完整|lite|standard|full)\]/i.test(header.raw)) {
       reporter.add({
         severity: 'error',
-        rule: 'TODO-FORMAT-缺档位',
+        rule: 'TODO-FORMAT-禁标签',
         file: relPath,
         line: header.line,
-        message: `${header.id} 头须含档位标注 [精简|标准|完整]（例：### T-001：[BE] … — F-001 [标准]）。`,
+        message: `${header.id} T 头格式：### T-xxx：[端] 描述 — F-xxx（勿加额外方括号标签）。`,
       });
     }
 
@@ -385,9 +442,12 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
       });
     }
   }
+  }
 
-  // 任意阶段：已勾选就必须有证据（sol 阶段未勾选不触发）
-  validateCheckboxEvidence(projectRoot, content, reporter, relPath, headers);
+  validateCheckboxEvidence(projectRoot, content, reporter, relPath, headers, {
+    skipDevCheck,
+    skipSolClaimed: skipSolFormat,
+  });
 
   // 开发完成格式：dev 文件数=T 头数 —— 阶段 4/5/all，或已标「开发实现 ✅」
   const devRoot = path.join(projectRoot, 'atlas', 'dev');
@@ -396,7 +456,7 @@ export function validateTodo(projectRoot, reporter, opts = {}) {
     /^\s*-\s+\[[xX]\].*开发实现/m.test(content);
   const checkDevCount =
     phase === '4' || phase === '5' || phase === 'all' || claimedDevDoneForCount;
-  if (checkDevCount && headers.length > 0) {
+  if (!skipDevCheck && checkDevCount && headers.length > 0) {
     const devCount = countDevFiles(devRoot);
     if (devCount !== headers.length) {
       reporter.add({

@@ -1,6 +1,11 @@
 /**
  * 校验结果收集与输出
+ *
+ * 硬挡：error 与 warn 均使校验失败（流程该做的就不分「可继续知债」）。
+ * info 仅说明，不挡。
  */
+
+import { getRuleHint } from './rule-hints.mjs';
 
 /** @typedef {'error' | 'warn' | 'info'} Severity */
 
@@ -22,6 +27,9 @@ export class Reporter {
    * @param {ValidationIssue} issue
    */
   add(issue) {
+    if (!['error', 'warn', 'info'].includes(issue.severity)) {
+      throw new Error(`Unknown severity: ${issue.severity} (rule=${issue.rule})`);
+    }
     this.#issues.push(issue);
   }
 
@@ -43,9 +51,17 @@ export class Reporter {
     return this.#issues.filter((i) => i.severity === 'error').length;
   }
 
-  /** @returns {boolean} */
+  /** @returns {number} */
+  warnCount() {
+    return this.#issues.filter((i) => i.severity === 'warn').length;
+  }
+
+  /**
+   * 无 error、无 warn 才算通过（硬挡）
+   * @returns {boolean}
+   */
   passed() {
-    return this.errorCount() === 0;
+    return this.errorCount() === 0 && this.warnCount() === 0;
   }
 
   /**
@@ -71,19 +87,29 @@ export class Reporter {
           : '(全局)';
         console.log(`  [${item.rule}] ${loc}`);
         console.log(`    ${item.message}`);
+        const hint = getRuleHint(item.rule);
+        if (hint) {
+          console.log(`    💡 ${hint.plain} · ${hint.who}`);
+        }
       }
     };
 
-    printGroup('错误', errors, '❌');
-    printGroup('警告', warns, '⚠️');
+    printGroup('阻断', errors, '❌');
+    printGroup('阻断（原 warn，同等失败）', warns, '❌');
+
+    const roleCustomSkips = infos.filter((i) => i.rule === 'ROLE-CUSTOM-SKIP');
+    const otherInfos = infos.filter((i) => i.rule !== 'ROLE-CUSTOM-SKIP');
+    printGroup('信息（自定义 role 跳过）', roleCustomSkips, 'ℹ️');
     if (verbose) {
-      printGroup('信息', infos, 'ℹ️');
+      printGroup('信息', otherInfos, 'ℹ️');
     }
 
     console.log('\n---');
+    const infoNote =
+      roleCustomSkips.length + (verbose ? otherInfos.length : 0);
     console.log(
-      `合计: ${errors.length} 错误, ${warns.length} 警告${verbose ? `, ${infos.length} 信息` : ''}`
+      `合计: ${errors.length + warns.length} 阻断${infoNote > 0 ? `, ${infoNote} 信息${verbose ? '' : '（含 ROLE-CUSTOM-SKIP；其余 info 加 --verbose）'}` : ''}`,
     );
-    console.log(this.passed() ? '✅ 校验通过（无错误）' : '❌ 校验失败');
+    console.log(this.passed() ? '✅ 校验通过' : '❌ 校验失败（有阻断项）');
   }
 }

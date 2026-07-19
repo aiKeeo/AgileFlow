@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { collectFiles, exists, readText } from './fs-utils.mjs';
+import { isModelingSkipped } from './modeling-skip.mjs';
 
 const ENV_REL = 'atlas/agileflow.env';
 
@@ -7,7 +8,7 @@ const ALLOWED = {
   AF_PHASE: new Set(['0', '1', '2', '3', '4', '5']),
   AF_FLOW: new Set(['fast', 'strict', 'pending']),
   AF_DECIDE: new Set(['ai', 'user', 'pending']),
-  AF_TIER: new Set(['lite', 'standard', 'full']),
+  AF_TIER: new Set(['full']),
   AF_STACK_SOURCE: new Set(['pending', 'ai_record', 'askquestion', 'user_said', 'repo']),
 };
 
@@ -69,7 +70,7 @@ export function loadAfEnv(projectRoot) {
       phase: map.AF_PHASE,
       flow: /** @type {'fast'|'strict'|'pending'} */ (map.AF_FLOW),
       decide: /** @type {'ai'|'user'|'pending'} */ (map.AF_DECIDE),
-      tier: /** @type {'lite'|'standard'|'full'} */ (map.AF_TIER),
+      tier: /** @type {'full'} */ ('full'),
       stackSource: /** @type {AfStackSource} */ (map.AF_STACK_SOURCE),
       file: ENV_REL,
     },
@@ -129,8 +130,11 @@ export function inferPhaseFromArtifacts(projectRoot, brownfield) {
   const anyReqConfirmed = reqFiles.some((f) => /状态[：:]\s*(已确认|已实现)/.test(readText(f) || ''));
   if (!anyReqConfirmed) return '1';
 
-  const modelReadme = readText(path.join(atlas, 'model', 'README.md'));
-  if (modelReadme && !isConfirmed(modelReadme)) return '2';
+  // 未正式跳过建模：无 model 或未确认 → 停在 2（堵静默跳过却 infer 到 3）
+  if (!isModelingSkipped(projectRoot)) {
+    const modelReadme = readText(path.join(atlas, 'model', 'README.md'));
+    if (!modelReadme || !isConfirmed(modelReadme)) return '2';
+  }
 
   const solReadme = readText(path.join(atlas, 'solution', 'README.md'));
   if (!solReadme || !isConfirmed(solReadme)) return '3';
@@ -393,7 +397,7 @@ function validateStackSourceForDecide(projectRoot, state, reporter) {
  * @property {string} phase
  * @property {'fast'|'strict'|'pending'} flow
  * @property {'ai'|'user'|'pending'} decide
- * @property {'lite'|'standard'|'full'} tier
+ * @property {'full'} tier
  * @property {AfStackSource} stackSource
  * @property {string} file
  */

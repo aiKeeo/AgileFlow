@@ -1,6 +1,8 @@
 import path from 'node:path';
 
 import { collectFiles, exists, readText, rel } from '../fs-utils.mjs';
+import { countFeatureFiles, countReqFiles } from '../modeling.mjs';
+import { isApiContractFile, validateApiContractContent } from './api-contract.mjs';
 import { validateSolutionStructure } from './solution-structure.mjs';
 
 
@@ -59,84 +61,90 @@ function hasFieldBindingSection(content) {
 
  */
 
-export function validateSolution(projectRoot, reporter, opts = {}) {
+/**
+ * 契约文件名 + fat 包硬挡（legacy / template 共用）
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ */
+export function validateContractFilenames(projectRoot, reporter) {
+  const contractsRoot = path.join(projectRoot, 'atlas', 'solution', 'contracts');
+  if (!exists(contractsRoot)) return;
+  for (const file of collectFiles(contractsRoot, '.md')) {
+    const baseName = path.basename(file);
+    if (baseName.startsWith('_')) continue;
+    const relPath = rel(projectRoot, file);
+    if (!/^(API|UI|JOB|EVT)-\d+-.+\.md$/.test(baseName)) {
+      const fatBundle = /^(API|UI|JOB|EVT)\.md$/i.test(baseName);
+      reporter.add({
+        severity: 'error',
+        rule: fatBundle ? 'SOL-C001-FAT' : 'SOL-C001',
+        file: relPath,
+        message: fatBundle
+          ? `禁止揉成 ${baseName}：须按暴露面拆成 ${baseName.replace(/\.md$/i, '')}-001-名称.md 等多文件。`
+          : '契约文件名应为 API-XXX-名称.md / UI-XXX-名称.md 等格式（须含编号与名称后缀）。',
+      });
+    }
+  }
+}
 
-  if (opts.templateMode) return;
+/**
+ * solution README 必备节（legacy / template 共用）
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ */
+export function validateSolutionReadmeShape(projectRoot, reporter) {
+  const readmePath = path.join(projectRoot, 'atlas', 'solution', 'README.md');
+  const readme = readText(readmePath);
+  if (!readme) {
+    reporter.add({
+      severity: 'error',
+      rule: 'SOL-R001',
+      file: 'atlas/solution/README.md',
+      message: 'solution 缺少 README.md 索引。',
+    });
+    return;
+  }
+  if (!/## 功能清单/.test(readme)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'SOL-R002',
+      file: 'atlas/solution/README.md',
+      message: 'solution README 须含「## 功能清单」。',
+    });
+  }
+  if (!/## 契约清单/.test(readme)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'SOL-R003',
+      file: 'atlas/solution/README.md',
+      message: 'solution README 须含「## 契约清单」。',
+    });
+  }
+}
+
+export function validateSolution(projectRoot, reporter, opts = {}) {
 
   const solRoot = path.join(projectRoot, 'atlas', 'solution');
 
   if (!exists(solRoot)) return;
 
+  // 形态 SSOT：template 模式也必须跑（禁旁路 fat 契约 / 空 README）
+  validateSolutionReadmeShape(projectRoot, reporter);
+  validateContractFilenames(projectRoot, reporter);
 
+  if (opts.templateMode) return;
 
-  const readmePath = path.join(solRoot, 'README.md');
-
-  const readme = readText(readmePath);
-
-  if (!readme) {
-
+  const readme = readText(path.join(solRoot, 'README.md')) || '';
+  if (
+    readme &&
+    (!/AC\s*[→\-–—]\s*主\s*T|AC\s*→\s*主\s*T|主\s*T/.test(readme) || !/AC-\d+/i.test(readme))
+  ) {
     reporter.add({
-
-      severity: 'error',
-
-      rule: 'SOL-R001',
-
+      severity: 'warn',
+      rule: 'SOL-R-AC-T',
       file: 'atlas/solution/README.md',
-
-      message: 'solution 缺少 README.md 索引。',
-
+      message: 'solution README 须含「AC → 主 T」表（每条 AC 唯一主责）。',
     });
-
-  } else {
-
-    if (!/## 功能清单/.test(readme)) {
-
-      reporter.add({
-
-        severity: 'error',
-
-        rule: 'SOL-R002',
-
-        file: 'atlas/solution/README.md',
-
-        message: 'solution README 缺少「## 功能清单」表。',
-
-      });
-
-    }
-
-    if (!/## 契约清单/.test(readme)) {
-
-      reporter.add({
-
-        severity: 'error',
-
-        rule: 'SOL-R003',
-
-        file: 'atlas/solution/README.md',
-
-        message: 'solution README 须含「## 契约清单」索引（无暴露面可写「无」表行）。',
-
-      });
-
-    }
-
-    if (!/AC\s*[→\-–—]\s*主\s*T|AC\s*→\s*主\s*T|主\s*T/.test(readme) || !/AC-\d+/i.test(readme)) {
-
-      reporter.add({
-
-        severity: 'warn',
-
-        rule: 'SOL-R-AC-T',
-
-        file: 'atlas/solution/README.md',
-
-        message: 'solution README 建议含「AC → 主 T」表（每条 AC 唯一主责）。',
-
-      });
-
-    }
-
   }
 
 
@@ -153,7 +161,7 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
       file: 'atlas/solution/architecture.md',
 
-      message: '缺少全局 architecture.md（A档：sol-confirm 必挡）。',
+      message: '缺少全局 architecture.md（sol-confirm 必挡）。',
 
     });
 
@@ -177,11 +185,23 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
     }
 
-    // 本地验证 / 技术栈 / 模块节 → solution-structure.mjs（A 档）
+    // 本地验证 / 技术栈 / 模块节 → solution-structure.mjs（硬挡）
 
   }
 
 
+
+  // 有 REQ 必须有 F 文件（legacy；template 模式本函数早退）
+  const reqCount = countReqFiles(projectRoot);
+  const featCount = countFeatureFiles(projectRoot);
+  if (reqCount > 0 && featCount === 0) {
+    reporter.add({
+      severity: 'error',
+      rule: 'SOL-FEATURES-000',
+      file: 'atlas/solution/features/',
+      message: `有 ${reqCount} 个 REQ，但缺少 features/F-*.md——禁止只写 architecture 不写功能边界。`,
+    });
+  }
 
   const featureFiles = collectFiles(path.join(solRoot, 'features'), '.md');
 
@@ -243,7 +263,7 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
     }
 
-    // 暴露面行 → solution-structure SOL-F-EXPOSE（A 档）
+    // 暴露面行 → solution-structure SOL-F-EXPOSE（硬挡）
 
     if (/^## 联调卡/m.test(content)) {
 
@@ -325,29 +345,15 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
     if (baseName.startsWith('_')) continue;
 
-
-
     const content = readText(file) || '';
 
     const relPath = rel(projectRoot, file);
 
-    if (!/^(API|UI|JOB|EVT)-\d+-.+\.md$/.test(baseName)) {
+    // 文件名规则已由 validateContractFilenames 覆盖；此处验 API JSON 与 UI 字段绑定
 
-      reporter.add({
-
-        severity: 'warn',
-
-        rule: 'SOL-C001',
-
-        file: relPath,
-
-        message: '契约文件名应为 API-XXX / UI-XXX 等格式。',
-
-      });
-
+    if (isApiContractFile(baseName)) {
+      validateApiContractContent(content, relPath, reporter);
     }
-
-
 
     if (isUiContractFile(baseName) && linksApiContract(content) && !hasFieldBindingSection(content)) {
 

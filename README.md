@@ -4,7 +4,7 @@
 
 > Turn ideas into **runnable, testable, handoff-ready** software with a five-stage agile pipeline and **BDD→DDD→SDD→TDD**. Simple projects ship in **~1 hour**; MVPs in **half a day**.
 
-[![Version](https://img.shields.io/badge/version-9.9.3-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.18.3-blue.svg)](skills/agileflow/SKILL.md)
 [![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#why-ship-in-1-hour)
 
 ---
@@ -33,8 +33,8 @@ Agileflow: **compress the pipeline without dropping structure**.
 | Acceptance | Manual click-through | L1+L3 automated | **5–10 min** |
 | **Total** | 1–3 days + rework | **~1 hour** (simple CRUD / tools) | |
 
-> **Faster**: hotfix, tiny edits → skip full pipeline, **L1+L3 in minutes**.  
-> **Safer**: payments / auth / core business → strict mode, TDD + full L1–L5.
+> **Faster** (only when **AF not enabled**): hotfix, tiny edits → skip full pipeline, **L1+L3 in minutes**.  
+> **AF enabled**: any code write requires `--gate write-code` green; no micro/hotfix shortcut.
 
 ---
 
@@ -192,9 +192,9 @@ atlas/
 
 | Scenario | Path |
 |----------|------|
-| One-line bugfix, Q&A, hotfix | Exempt from five stages, L1+L3 in **minutes** |
+| One-line bugfix, Q&A, hotfix | Exempt from five stages, L1+L3 in **minutes** (**AF not enabled** only) |
 | API / DB / auth / multi-module changes | Full five-stage pipeline |
-| User says *"fast track / skip pipeline"* | Micro-change **exemption** only if truly tiny (no API/DB/MVP) |
+| User says *"fast track / skip pipeline"* | Micro exempt only if **AF not enabled**; AF enabled → `--gate write-code` |
 
 AI won't pull "explain this line" into five stages — **fast when it should be, strict when it must be**.
 
@@ -306,7 +306,7 @@ AgileFlow/
 
 ## Version
 
-**v9.9.0** — see [SKILL.md](skills/agileflow/SKILL.md)
+**v9.18.3** — see [SKILL.md](skills/agileflow/SKILL.md)
 
 ---
 
