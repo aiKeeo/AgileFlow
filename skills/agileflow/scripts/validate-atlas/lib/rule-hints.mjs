@@ -64,11 +64,15 @@ export const RULE_HINTS = {
     who: 'ai',
   },
   'DEV-FLOW-入口': {
-    plain: 'FE/MP 主流程缺 `> 入口：…` 声明',
+    plain: '主流程缺 `> 入口：…` 声明',
     who: 'ai',
   },
   'DEV-FLOW-最少': {
     plain: '主流程编号步骤少于 3 条',
+    who: 'ai',
+  },
+  'DEV-FLOW-最多': {
+    plain: '主流程超过 8 步，应拆 T 或下沉实现说明',
     who: 'ai',
   },
   'DEV-FLOW-落点': {
@@ -79,28 +83,52 @@ export const RULE_HINTS = {
     plain: '缺 ## 边界 节或边界为空',
     who: 'ai',
   },
+  'DEV-EDGE-最少': {
+    plain: '边界少于 2 条（完整质量）',
+    who: 'ai',
+  },
+  'DEV-EDGE-挂钩': {
+    plain: '边界未挂「第 N 步」或 method()',
+    who: 'ai',
+  },
+  'DEV-EDGE-处理': {
+    plain: '边界未写清怎么处理（错误码/toast/return 等）',
+    who: 'ai',
+  },
   'DEV-IMPL-块': {
     plain: '实现说明缺【新写】或【改动】块',
     who: 'ai',
   },
   'DEV-IMPL-字段': {
-    plain: '实现说明某块缺 **目的** 或 **怎么做/做什么**',
+    plain: '实现说明某块缺 **目的** / **做什么** / **怎么做**',
+    who: 'ai',
+  },
+  'DEV-IMPL-怎么做': {
+    plain: '逻辑块怎么做未编号≥2步',
+    who: 'ai',
+  },
+  'DEV-IMPL-怎么做语义': {
+    plain: '怎么做假厚：编号步缺少「条件 → 动作」箭头',
     who: 'ai',
   },
   'DEV-IMPL-落点': {
     plain: '实现说明里缺少文件/方法落点',
     who: 'ai',
   },
+  'DEV-DO-对齐': {
+    plain: '摘要「做」点名的类/路径未出现在实现说明 ### 标题',
+    who: 'ai',
+  },
   'DEV-STEP-FULL-须步骤表': {
-    plain: 'BE dev 缺 ## 步骤 4 列流程表',
+    plain: '已废弃：全端用主流程+边界+实现说明',
     who: 'ai',
   },
   'DEV-BAN-ATOM': {
-    plain: 'BE 禁 8 字段原子步骤表，须改用 4 列流程表',
+    plain: '禁旧原子步骤表，须用叙述五段式',
     who: 'ai',
   },
   'DEV-BAN-HASH': {
-    plain: 'BE 禁 #### 薄写，须改用 4 列流程表',
+    plain: '禁 #### 薄写，须用叙述五段式',
     who: 'ai',
   },
   'DEV-BAN-步骤': {

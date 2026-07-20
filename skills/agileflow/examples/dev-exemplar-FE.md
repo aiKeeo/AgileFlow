@@ -1,13 +1,14 @@
 # dev 构思范例（FE/MP）
 
 > ① FE/MP 用 **叙述五段式**：摘要 + 主流程 + 边界 + 实现说明 + 结果。  
+> **唯一质量线 = 完整**：逻辑块「怎么做」须编号 ≥2 且含「条件 → 动作」；边界 ≥2 且挂第 N 步并写清处理。  
 > 字段绑定 **只看 contracts/UI**，dev 内禁止映射表。  
 > 颗粒度 → [dev-granularity.md](../templates/dev-granularity.md) · 更多例子 → [dev-reuse-examples.md](dev-reuse-examples.md)
 
-# [T-007-MP] 减脂周计划生成与打卡对照 — 构思 [MP]
+﻿# [T-007-MP] 减脂周计划生成与打卡对照 — 构思 [MP]
 
-- 档位：标准 · depends_on：T-003
-- → [F-006](../solution/features/F-006-减脂计划.md) · [API-006](../solution/contracts/API-006-减脂计划服务.md) · [UI-006](../solution/contracts/UI-006-减脂计划页.md) · [UID-006](../requirements/ui/UID-006-减脂计划.md) · 写法：code-patterns-miniprogram
+- 质量：完整 · depends_on：T-003
+- → [F-006](../solution/features/F-006-减脂计划.md) · [API-006](../solution/contracts/API-006-减脂计划服务.md) · [UI-006](../solution/contracts/UI-006-减脂计划页.md) · [UID-006](../requirements/ui/UID-006-减脂计划.md) · 写法：[code-patterns-miniprogram.md](../solution/code-patterns-miniprogram.md)
 
 ## 摘要
 
@@ -71,22 +72,28 @@
 
 - **目的**：计划本地持久化
 - **做什么**：`findActiveByUserId` / `saveAll`
-- **怎么做**：键 `af.fatLossPlans`；active 唯一；替换时旧 plan 标 superseded
+- **怎么做**：
+  1. 键 `af.fatLossPlans` → `findActive` 只返回 active 唯一条
+  2. `saveAll` → 旧 plan 标 superseded 再写入新 plan
 
 ### `miniprogram/utils/date.js` 【改动】
 
 - **目的**：自然周（周一～日）生成
 - **做什么**：加 `weekStartMonday`、`weekDatesMonToSun`
-- **怎么做**：复用已有 `addDaysLocal`
+- **怎么做**：
+  1. `weekStartMonday(d)` → 回退到本周一
+  2. `weekDatesMonToSun` → 复用 `addDaysLocal` 生成 7 日数组
 
 ### `miniprogram/app.json` 【改动】
 
 - **目的**：注册计划页路由
 - **做什么**：`pages` 追加 `"pages/plan/index"`
+- **怎么做**：按现有 pages 数组末尾追加，不改 tabBar 语义
 
 ### `onGenerate` 边界分支 【新写 · 写在 index.js】
 
 - **目的**：处理 CONFLICT / PRECONDITION_FAILED / 其他错误
+- **做什么**：`onGenerate` catch 分支
 - **怎么做**：
   1. PRECONDITION_FAILED → `setData({ showNeedGoal:true })`
   2. CONFLICT → modal 确认 → `confirmReplace:true` 再调
@@ -102,6 +109,9 @@
 
 - **目的**：AC-006 可重复验收
 - **做什么**：6 cases 对应 AC-006-01～06
+- **怎么做**：
+  1. mock goal/diet/exercise → 断言 generate 成功建 7 日
+  2. 无 goal / CONFLICT / 对照拼装各 1 case 对齐 AC
 
 ## 结果
 

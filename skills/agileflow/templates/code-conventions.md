@@ -74,7 +74,7 @@ atlas/solution/            # greenfield 无 init
 ## 四、典型链路（BE 常要 2~4 条 mermaid；FE 可短/可无）
 ## 五、新功能自检
 - [ ] 已查「资产索引」
-- [ ] 本 T 构思齐：FE/MP 主流程+边界+实现说明；BE 流程表落点（新写/改动/复用）
+- [ ] 本 T 构思齐：全端主流程+边界+实现说明（逻辑块怎么做编号 ≥2）
 - [ ] 若抄写：已打开模板参考页/类
 ```
 
@@ -134,7 +134,7 @@ brownfield init:  判定大仓？→ 定主路径 + 覆盖范围
                   → 有余力/要抄写 → **P1**；其余 **P2** refresh
 greenfield sol:   code-patterns-frontend|backend 🌱
                   （资产写「待建设」；§三待补）
-dev ①:            Read 本端锚点 → FE/MP 写主流程+实现说明 / BE 写流程表 → 按需 Read §3.x
+dev ①:            Read 本端锚点 → 写主流程+边界+实现说明（完整质量） → 按需 Read §3.x
 dev ③ 后:         新建可复用组件/Util → 追加资产索引一行；典型功能 refresh §三
 init: refresh codebase → 更新资产 + §三§四
 ```
@@ -162,7 +162,7 @@ init: refresh codebase → 更新资产 + §三§四
 
 ```
 1. 看 T 头 [FE]|[BE]|[MP] → Read 本端 p1-* 或 code-patterns-*（一份）
-2. 写 ①：FE/MP → 主流程+边界+实现说明；BE → 4 列流程表（≥3）。见 [dev-granularity](dev-granularity.md)
+2. 写 ①：全端 → 主流程+边界+实现说明（逻辑块怎么做编号 ≥2）。见 [dev-granularity](dev-granularity.md)
 3. 禁纯 #### + 一行 **改**；禁止表写复用却平行实现
 4. ③ 后新建可复用资产 → 追加资产索引一行
 ```
@@ -173,7 +173,7 @@ init: refresh codebase → 更新资产 + §三§四
 
 ## dev 硬规则
 
-**① 构思**：主流程（≥3，`> 入口：`）+ 边界 + 实现说明（【新写/改动】含目的+怎么做）；BE 入口写 POST/回调，FE 写用户动作。
+**① 构思**：主流程（3～8，`> 入口：`）+ 边界（≥2，挂第 N 步）+ 实现说明（目的+做什么+怎么做编号）；BE 入口写 POST/回调，FE 写用户动作。
 
 **② 写码前**：
 

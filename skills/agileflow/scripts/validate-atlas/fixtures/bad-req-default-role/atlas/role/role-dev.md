@@ -46,7 +46,7 @@
 
 ### 4.1 构思文件必须满足
 - 摘要：5 条 bullet（本 T / 做 / 不做 / 上游 / AC）
-- **全端统一**：`## 主流程`（≥3 步，含 `> 入口：`）+ `## 边界` + `## 实现说明`（【新写/改动】含目的+怎么做+落点）→ 见 [dev-exemplar-FE](../examples/dev-exemplar-FE.md) / [dev-exemplar-BE](../examples/dev-exemplar-BE.md) · [dev-granularity](../templates/dev-granularity.md)
+- **全端统一 · 唯一完整质量线**：`## 主流程`（3～8 步，含 `> 入口：`）+ `## 边界`（≥2，挂第 N 步）+ `## 实现说明`（【新写/改动】含目的+做什么+怎么做；逻辑块怎么做编号 ≥2）→ 见 [dev-exemplar-FE](../examples/dev-exemplar-FE.md) / [dev-exemplar-BE](../examples/dev-exemplar-BE.md) · [dev-granularity](../templates/dev-granularity.md)（每段解释 + few-shot）
 - 步骤里不要直接粘贴 JSON 或 API 契约；只引用路径
 - FE/MP 必须链接到 `UI-xxx` / `UID-xxx`；BE 必须链接到 `API-xxx`
 
@@ -105,11 +105,13 @@
 
 ## 7. 少样本示例（好 vs 坏）
 
-**坏（FE）**：摘要写「实现登录页」，只有 `## 步骤` 流程表，没有主流程叙述和实现说明逻辑。  
-**好（FE）**：`> 入口：用户点登录` + 4 步主流程；边界写空提交/错密码；实现说明展开 `handleSubmit` 【新写】含 if/else。
+> 完整分段 few-shot → [dev-granularity](../templates/dev-granularity.md) · [dev-reuse-examples](../examples/dev-reuse-examples.md)
 
-**坏（BE）**：摘要写「实现登录」，仍用 `## 步骤` 流程表，没有主流程+实现说明。  
-**好（BE）**：`> 入口：POST /api/login` + 3 步主流程；边界写 401/400；实现说明展开 `AuthService` 【新写】含 if/else。
+**坏（FE）**：实现说明「怎么做：调接口跳转」一行糊弄；或仍用 `## 步骤`。  
+**好（FE）**：`> 入口：用户点登录` + ≥3 步主流程；边界 ≥2 挂第 N 步；`handleSubmit` 【新写】怎么做编号含空提交/401。
+
+**坏（BE）**：`AuthService` 怎么做写「查库比对密码」；或用旧 `## 步骤` 流程表。  
+**好（BE）**：`> 入口：POST /api/login` + 主流程；边界挂 400/401；`verifyPassword` 怎么做编号 ≥2（无用户→401 / bcrypt 失败→401）。
 
 **坏**：结果写「已跑测试，全部通过」。  
 **好**：结果写 `npm test -- login.service.test.ts → 3 passed, 0 failed, exit 0`。
@@ -123,8 +125,8 @@
 
 - [ ] 一次派活写多个 T
 - [ ] 无合规 ① 就进入 ②
-- [ ] FE/MP 缺主流程/边界/实现说明，或 BE 缺步骤表
-- [ ] FE/MP 实现说明无【新写/改动】块或缺处理逻辑
+- [ ] 缺主流程/边界/实现说明，或逻辑块怎么做无编号
+- [ ] 实现说明无【新写/改动】块或缺目的/做什么/怎么做
 - [ ] 摘要无本 T 定位
 - [ ] 改 `atlas/todo.md` / `atlas/agileflow.env`
 - [ ] 自行勾 ✅ 或说「T 完成」
@@ -136,8 +138,9 @@
 ## 9. 必读清单（执行前必须读）
 
 - `phases/04-development.md`（阶段质量要求）
-- `templates/dev.md`（步骤表格式 + 写码闸门）
-- `templates/dev.md`（构思 rationale）
+- `templates/dev-granularity.md`（每段解释 + few-shot，**先读**）
+- `templates/dev.md`（写码闸门）
+- `examples/dev-exemplar-BE.md` 或 `examples/dev-exemplar-FE.md`（对本端）
 - `templates/code-conventions.md` + `phases/05-testing.md`
 - 本 T 上游的 `F-*.md` / `API-*.md` / `UI-*.md` / `UID-*.md`
 

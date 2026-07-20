@@ -110,7 +110,7 @@
 - 须过 gate：`validate-atlas --gate {xxx} --root {项目根}`
 - Dev 专用（仅 key=dev）：
   - Tid：T-xxx
-  - 质量：FE/MP 主流程+边界+实现说明；BE 步骤表+摘要五 bullet → [dev-granularity](../templates/dev-granularity.md)
+  - 质量：全端主流程+边界+实现说明（完整质量线）+ 摘要五 bullet → [dev-granularity](../templates/dev-granularity.md)
   - **一次派活内须按 ①→②→③ 顺序完整交付**（不可跳步、不可先码后补）
 ---
 ```

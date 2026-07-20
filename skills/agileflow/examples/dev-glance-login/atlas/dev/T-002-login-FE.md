@@ -35,13 +35,17 @@
 
 - **目的**：请求基座，统一注入 token 与错误 toast
 - **做什么**：封装 `Taro.request`；baseURL 读 `config.ts`
-- **怎么做**：导出 `post/get`；header 自动带 storage token
+- **怎么做**：
+  1. 导出 `post/get`；header 自动带 storage token
+  2. 非 2xx → 统一 toast `message` 后 throw
 
 ### `miniprogram/services/auth.ts` 【新写】
 
 - **目的**：登录接口封装
 - **做什么**：`login(phone, password)` → token
-- **怎么做**：调 `api.post('/api/auth/login')` — 契约见 API-001
+- **怎么做**：
+  1. 调 `api.post('/api/auth/login')` → 契约见 API-001
+  2. 成功 → 返回 data.token；失败 → 向上抛
 
 ### `miniprogram/pages/login/index.tsx` 【新写】
 

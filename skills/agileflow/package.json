@@ -17,6 +17,8 @@
     "fe-pixel": "node scripts/fe-pixel/fe-pixel.mjs",
     "test:validate": "node scripts/validate-atlas/test-fixtures.mjs && node scripts/validate-atlas/test-af-env.mjs && node scripts/validate-atlas/test-template-mode.mjs && node scripts/validate-atlas/test-doc-consistency.mjs && node scripts/validate-atlas/test-skill-examples.mjs",
     "test:af-env": "node scripts/validate-atlas/test-af-env.mjs",
-    "test:docs": "node scripts/validate-atlas/test-doc-consistency.mjs"
+    "test:docs": "node scripts/validate-atlas/test-doc-consistency.mjs",
+    "retest:prepare": "node scripts/agent-retest/prepare.mjs",
+    "retest:score": "node scripts/agent-retest/score.mjs"
   }
 }

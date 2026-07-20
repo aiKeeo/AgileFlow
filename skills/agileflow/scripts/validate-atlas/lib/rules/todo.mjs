@@ -182,7 +182,7 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
             rule: 'TODO-CHECK-①格式',
             file: resolved.rel,
             line: step1 ? absLine(step1.lineInBlock) : header.line,
-            message: `${header.id} 已勾 ①，但 ${resolved.rel} 未过构思闸门（${top}…）。须先写 ## 摘要 +（FE/MP：主流程+边界+实现说明 | BE：步骤），禁止空壳或写码后回填。`,
+            message: `${header.id} 已勾 ①，但 ${resolved.rel} 未过构思闸门（${top}…）。须先写 ## 摘要 + 主流程+边界+实现说明，禁止空壳或写码后回填。`,
           });
         }
       }

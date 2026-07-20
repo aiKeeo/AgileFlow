@@ -20,6 +20,7 @@
 
 ## 边界
 
+- **参数缺失**：第 1 步 → 400
 - **密码错误**：第 2 步 → 401（AC-001-02）
 
 ## 实现说明
@@ -28,19 +29,25 @@
 
 - **目的**：登录入口
 - **做什么**：`login(LoginDto dto)`
-- **怎么做**：收参 → 调 AuthService → 返回 token
+- **怎么做**：
+  1. 收参校验非空 → 空则 400
+  2. 调 `AuthService.verifyPassword` → 返回 token
 
 ### `AuthService.java` 【新写】
 
 - **目的**：凭证校验
 - **做什么**：`verifyPassword(username, password)`
-- **怎么做**：查库 → bcrypt → 失败 401
+- **怎么做**：
+  1. 查库 → 无用户 → 401
+  2. bcrypt 比对 → 失败 401；成功返回 userId
 
 ### `JwtUtil.java` 【新写】
 
 - **目的**：签发 JWT
 - **做什么**：`sign(userId)`
-- **怎么做**：配置过期 → 返回 token
+- **怎么做**：
+  1. 读配置过期时间 → 组装 claims
+  2. 签名 → 返回 token 字符串
 
 ## 结果
 

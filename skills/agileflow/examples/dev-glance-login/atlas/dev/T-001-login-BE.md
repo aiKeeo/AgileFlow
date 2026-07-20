@@ -37,19 +37,25 @@
 
 - **目的**：按 phone 查用户
 - **做什么**：`findByPhone(phone)`
-- **怎么做**：TypeORM repository 查询
+- **怎么做**：
+  1. 注入 TypeORM repository → 绑定 User 实体
+  2. `findOne({ where: { phone } })` → 返回实体或 null
 
 ### `backend/src/user/user.service.ts` 【新写】
 
 - **目的**：用户只读基础
 - **做什么**：`findByPhone(phone)`
-- **怎么做**：调 repository，不暴露 password_hash 给 Controller
+- **怎么做**：
+  1. 调 `repository.findByPhone` → 拿到实体或 null
+  2. 返回脱敏视图 → 不向 Controller 暴露 password_hash
 
 ### `backend/src/auth/auth.controller.ts` 【新写】
 
 - **目的**：登录 HTTP 入口
 - **做什么**：`login(LoginDto)`
-- **怎么做**：校验 DTO → 调 AuthService → 返回 token
+- **怎么做**：
+  1. 校验 DTO phone/password 非空 → 空则 400
+  2. 调 AuthService → 返回 token + 脱敏 user
 
 ### `backend/src/auth/auth.service.ts` 【新写】
 

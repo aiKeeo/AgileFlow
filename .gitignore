@@ -1,9 +1,14 @@
 # WorkBuddy local state
 .workbuddy/
 
-# Root-level local notes / plans (keep the two READMEs)
+# Skill 仓库根勿落业务 atlas（bootstrap 误跑产物）
+/atlas/
+
+# Root-level local notes / plans (keep the two READMEs + 手册)
 /*.yaml
 /*.yml
 /*.md
 !/README.md
 !/README.zh-CN.md
+!/AGENT-RETEST.md
+!/majorflow.md

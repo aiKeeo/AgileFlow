@@ -356,11 +356,18 @@ function runQualityChecks(filePath, content, reporter, relPath, opts = {}) {
   const narrativeRuleMap = {
     [NarrativeIssueType.FLOW_ENTRY]: 'DEV-FLOW-入口',
     [NarrativeIssueType.FLOW_MIN]: 'DEV-FLOW-最少',
+    [NarrativeIssueType.FLOW_MAX]: 'DEV-FLOW-最多',
     [NarrativeIssueType.FLOW_ANCHOR]: 'DEV-FLOW-落点',
     [NarrativeIssueType.EDGE_EMPTY]: 'DEV-EDGE-存在',
+    [NarrativeIssueType.EDGE_MIN]: 'DEV-EDGE-最少',
+    [NarrativeIssueType.EDGE_HOOK]: 'DEV-EDGE-挂钩',
+    [NarrativeIssueType.EDGE_HANDLE]: 'DEV-EDGE-处理',
     [NarrativeIssueType.IMPL_BLOCK]: 'DEV-IMPL-块',
     [NarrativeIssueType.IMPL_FIELDS]: 'DEV-IMPL-字段',
+    [NarrativeIssueType.IMPL_HOWTO]: 'DEV-IMPL-怎么做',
+    [NarrativeIssueType.IMPL_HOWTO_SEM]: 'DEV-IMPL-怎么做语义',
     [NarrativeIssueType.IMPL_ANCHOR]: 'DEV-IMPL-落点',
+    [NarrativeIssueType.DO_ALIGN]: 'DEV-DO-对齐',
   };
   for (const issue of validateNarrativeFlow(content)) {
     reporter.add({

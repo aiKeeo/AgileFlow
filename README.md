@@ -259,7 +259,7 @@ AI stage declaration example:
 | 0:05 | Requirements | REQ-001.md |
 | 0:10 | Modeling | `atlas/model/` + DDL |
 | 0:20 | Solution | `architecture.md` + detailed todo |
-| 0:50 | Development | Business code + L3 tests（按风险档位写①） |
+| 0:50 | Development | Business code + L3 tests（full-quality ① only） |
 | 1:00 | Testing | L1+L3 PASS, acceptance report |
 
 **Result**: Runnable code + `atlas/` docs + acceptance report — deploy or demo immediately.

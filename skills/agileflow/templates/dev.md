@@ -60,7 +60,7 @@
 | **文件存在** | `atlas/dev/T-xxx-*.md` 已落盘 | 先写文件 |
 | **段标题** | 全端：`## 摘要` / `## 主流程` / `## 边界` / `## 实现说明` / `## 结果`；**禁** `## 步骤` / `## 范围` / `## 做法` | 按 exemplar 重写 |
 | **摘要** | `## 摘要` 含 **本 T** / **做** / **不做** / **上游** / **AC** | 补摘要 |
-| **步骤可执行** | **主流程** ≥3 步 + **边界** + **实现说明**（【新写/改动】含目的+怎么做+落点） | 按 [dev-granularity](dev-granularity.md) 重写 |
+| **步骤可执行** | **主流程** 3～8 步 + **边界** ≥2（挂第 N 步）+ **实现说明**（目的+做什么+怎么做；逻辑块编号 ≥2） | 按 [dev-granularity](dev-granularity.md) 重写 |
 | **链 sol** | BE 链 API-xxx；FE 链 UI-xxx（+UID）；dev **禁**字段映射表 | 补链 |
 | **先写再码** | ①前摘要+主流程+边界+实现说明写满；**仅「## 结果」可写码后填证据**；禁「写码后填」当构思 | 重写构思；脚本 `DEV-STUB-*` / `DEV-RESULT-PLACEHOLDER` |
 | **非事后补写** | 无 `顺序：⚠️` / 先码后补 | 标 ⚠️；重写 |
@@ -71,7 +71,7 @@
 
 > 权威 → [04 §质量要求](../phases/04-development.md#质量要求) · [dev-rationale](dev.md)。摘要五 bullet + 步骤 + 结果。
 
-步骤：**全端统一** → 主流程（≥3）+ 边界 + 实现说明。BE 主流程写请求链；FE 写用户动作链。颗粒度 → [dev-granularity](dev-granularity.md) · 例子 → [dev-reuse-examples](../examples/dev-reuse-examples.md) · exemplar-BE/FE。
+步骤：**全端统一 · 唯一完整质量线** → 主流程（3～8）+ 边界（≥2）+ 实现说明（逻辑块怎么做编号 ≥2）。BE 主流程写请求链；FE 写用户动作链。颗粒度（每段解释 + few-shot）→ [dev-granularity](dev-granularity.md) · 例子 → [dev-reuse-examples](../examples/dev-reuse-examples.md) · exemplar-BE/FE。
 
 ---
 

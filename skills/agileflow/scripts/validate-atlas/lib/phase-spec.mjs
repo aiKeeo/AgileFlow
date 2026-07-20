@@ -173,7 +173,7 @@ export const DEV_SECTIONS_FE = DEV_SECTIONS;
 
 
 
-/** 最少 #### / 原子步骤数 */
+/** 主流程最少编号步数 */
 
 export const DEV_MIN_STEPS = 3;
 
@@ -203,6 +203,7 @@ const UNIFIED_QUALITY = {
 
   requireStructuredSummary: true,
 
+  /** @deprecated 名称遗留；现指叙述五段式厚度，非 4 列流程表 */
   requireFlowTable: true,
 
 };
@@ -291,7 +292,7 @@ export const AI_GATES = {
 
     extra:
 
-      'FE/MP：摘要五 bullet + 主流程(≥3)+边界+实现说明(目的/怎么做+落点)；BE：步骤表(≥3)+落点；字面量严检；ai/fast 不减厚度',
+      '全端：摘要五 bullet + 主流程(3～8)+边界(≥2 挂第N步)+实现说明(目的/做什么/怎么做；逻辑块编号≥2)；字面量严检；ai/fast 不减厚度',
 
   },
 

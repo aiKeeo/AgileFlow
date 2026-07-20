@@ -1,6 +1,7 @@
 # dev 构思范例（BE）
 
 > **全端统一叙述五段式**：摘要 + 主流程 + 边界 + 实现说明 + 结果。  
+> **唯一质量线 = 完整**：逻辑块「怎么做」须编号 ≥2 且含「条件 → 动作」；边界 ≥2 且挂第 N 步。  
 > BE 主流程写 **请求/事件 → Controller → Service**；细节在实现说明展开。  
 > 颗粒度 → [dev-granularity.md](../templates/dev-granularity.md) · FE 范例 → [dev-exemplar-FE](dev-exemplar-FE.md)
 
@@ -42,9 +43,9 @@
 - **目的**：支付 HTTP 入口，承接 API-003
 - **做什么**：`createPayment(PaymentRequest req)`
 - **怎么做**：
-  1. 校验 orderId/payChannel/timestamp
-  2. 调 `paymentService.createPayment(req)` 编排 S2～S6
-  3. 统一封装 Result；401 走全局 JwtFilter
+  1. 校验 orderId/payChannel/timestamp → 非法则 1001/1003
+  2. 调 `paymentService.createPayment(req)` → 编排后续步骤
+  3. 统一封装 Result → 401 走全局 JwtFilter
 
 ### `PaymentService.java` 【新写】
 
@@ -55,7 +56,7 @@
   2. status ≠ PENDING_PAY → 2002/2003
   3. 超时 → 2004 + 异步 cancel
 - **怎么做 — checkIdempotency**：
-  1. `redisTemplate.setIfAbsent(pay:idempotency:…)` 
+  1. `redisTemplate.setIfAbsent(pay:idempotency:…)`
   2. false 且 PROCESSING → 3001
   3. Redis 失败 → 降级查 `paymentIdempotencyMapper`
 - **怎么做 — createPaymentRecord**：
@@ -66,13 +67,17 @@
 
 - **目的**：批量预占库存
 - **做什么**：`preDeductBatch(skuList, orderId)`
-- **怎么做**：逐 SKU 加锁 → 查可用量 → preDeduct；任一失败回滚已预扣并抛 4002
+- **怎么做**：
+  1. 逐 SKU 加锁 → 查可用量 → `preDeduct`
+  2. 任一失败 → 回滚已预扣并抛 4002
 
 ### `ChannelAdapter.java` 【新写】
 
 - **目的**：调第三方预下单
 - **做什么**：`prePay(PaymentDO)`
-- **怎么做**：按 payChannel 路由 Alipay/WeChat；失败抛业务异常触发 S4+S3 回滚
+- **怎么做**：
+  1. 按 payChannel 路由 Alipay/WeChat
+  2. 失败抛业务异常 → 触发库存+幂等锁回滚
 
 ## 结果
 

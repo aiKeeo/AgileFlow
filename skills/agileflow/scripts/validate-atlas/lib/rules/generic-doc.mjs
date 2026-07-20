@@ -160,11 +160,18 @@ function validateDevFromTemplate(content, meta, relPath, reporter) {
   const narrativeRuleMap = {
     [NarrativeIssueType.FLOW_ENTRY]: 'TMPL-DEV-FLOW-ENTRY',
     [NarrativeIssueType.FLOW_MIN]: 'TMPL-DEV-FLOW-MIN',
+    [NarrativeIssueType.FLOW_MAX]: 'TMPL-DEV-FLOW-MAX',
     [NarrativeIssueType.FLOW_ANCHOR]: 'TMPL-DEV-FLOW-ANCHOR',
     [NarrativeIssueType.EDGE_EMPTY]: 'TMPL-DEV-EDGE',
+    [NarrativeIssueType.EDGE_MIN]: 'TMPL-DEV-EDGE-MIN',
+    [NarrativeIssueType.EDGE_HOOK]: 'TMPL-DEV-EDGE-HOOK',
+    [NarrativeIssueType.EDGE_HANDLE]: 'TMPL-DEV-EDGE-HANDLE',
     [NarrativeIssueType.IMPL_BLOCK]: 'TMPL-DEV-IMPL-BLOCK',
     [NarrativeIssueType.IMPL_FIELDS]: 'TMPL-DEV-IMPL-FIELDS',
+    [NarrativeIssueType.IMPL_HOWTO]: 'TMPL-DEV-IMPL-HOWTO',
+    [NarrativeIssueType.IMPL_HOWTO_SEM]: 'TMPL-DEV-IMPL-HOWTO-SEM',
     [NarrativeIssueType.IMPL_ANCHOR]: 'TMPL-DEV-IMPL-ANCHOR',
+    [NarrativeIssueType.DO_ALIGN]: 'TMPL-DEV-DO-ALIGN',
   };
   for (const issue of validateNarrativeFlow(content)) {
     reporter.add({

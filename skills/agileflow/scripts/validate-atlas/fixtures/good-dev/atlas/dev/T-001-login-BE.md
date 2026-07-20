@@ -30,19 +30,25 @@
 
 - **目的**：登录 HTTP 入口
 - **做什么**：`login(LoginDto dto)`
-- **怎么做**：校验 username/password 非空 → 调 AuthService → 封装 200 响应
+- **怎么做**：
+  1. 校验 username/password 非空 → 空则 400
+  2. 调 `AuthService.verifyPassword` → 封装 200 + token
 
 ### `AuthService.java` 【新写】
 
 - **目的**：凭证校验
 - **做什么**：`verifyPassword(username, password)`
-- **怎么做**：查用户 → bcrypt 比对 → 失败抛 401；成功返回 userId
+- **怎么做**：
+  1. 查用户 → 不存在 → 抛 401
+  2. bcrypt 比对 → 失败抛 401；成功返回 userId
 
 ### `JwtUtil.java` 【新写】
 
 - **目的**：签发 JWT
 - **做什么**：`sign(userId)`
-- **怎么做**：配置过期 → 返回 token 字符串
+- **怎么做**：
+  1. 读配置过期时间 → 组装 claims
+  2. 签名 → 返回 token 字符串
 
 ## 结果
 

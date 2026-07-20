@@ -1,6 +1,6 @@
 ﻿# [T-007-MP] 减脂周计划生成与打卡对照 — 构思 [MP]
 
-- 档位：标准 · depends_on：T-003
+- 质量：完整 · depends_on：T-003
 - → [F-006](../solution/features/F-006-减脂计划.md) · [API-006](../solution/contracts/API-006-减脂计划服务.md) · [UI-006](../solution/contracts/UI-006-减脂计划页.md) · [UID-006](../requirements/ui/UID-006-减脂计划.md) · 写法：[code-patterns-miniprogram.md](../solution/code-patterns-miniprogram.md)
 
 ## 摘要

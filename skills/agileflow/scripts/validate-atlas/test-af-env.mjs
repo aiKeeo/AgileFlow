@@ -137,7 +137,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
     'atlas/todo.md': `## 开发任务
 ### T-001：[BE] x — F-001 [标准]
 - [ ] **① 构思落盘** → \`atlas/dev/T-001.md\`
-- [ ] **② 按 ## 步骤 写码**
+- [ ] **② 按 ## 实现说明 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 `,
   });
@@ -252,7 +252,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 ## 开发任务
 ### T-001：[BE] x — F-001 [标准]
 - [ ] **① 构思落盘** → \`atlas/dev/T-001-x-BE.md\`
-- [ ] **② 按 ## 步骤 写码**
+- [ ] **② 按 ## 实现说明 写码**
 - [ ] **③ 对照 REQ 验收 AC**
 `;
   const root = writeProject({ 'atlas/todo.md': todoBody });

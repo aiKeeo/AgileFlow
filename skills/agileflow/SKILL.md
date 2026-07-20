@@ -40,7 +40,7 @@ version: 9.21.0
 | 议题 | 裁决 |
 |------|------|
 | **总控派活** | 读 `atlas/role/role-*.md` + 注入任务 → **真派** Subagent（Cursor=`Task`）→ 收回报写 **派活台账** → 再跑 gate。Dev **每 T 一次**（内 ①→②→③）。sol 先写 `atlas/todo.md` 再 `sol-confirm`。阶段 0/5 总控直做，不记 role 台账 |
-| **sol F / dev 文档** | F=边界+暴露面；FE/MP dev=摘要+主流程+边界+实现说明+结果；BE dev=摘要+步骤+结果 → [dev-granularity](templates/dev-granularity.md) · [dev](templates/dev.md) |
+| **sol F / dev 文档** | F=边界+暴露面；**全端** dev=摘要+主流程+边界+实现说明+结果（唯一完整质量线）→ [dev-granularity](templates/dev-granularity.md) · [dev](templates/dev.md) |
 | **快速 vs 严谨 / 委托** | 只控停点；文档同质。委托非默认。→ [contract](templates/contract.md) |
 | **建模跳过** | user 须确认；ai 落盘判定。`fast+ai`+自检齐可同条进 sol |
 | **写法锚点** | brownfield：`init/codebase/p1-{端}.md`；greenfield：`solution/code-patterns-{端}.md` |
