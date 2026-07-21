@@ -12,16 +12,14 @@
 | 场景 | 动作 |
 |------|------|
 | 建议跳过且 **user 已确认**（卡或原话） | **不进入本阶段**，落盘建模判定后可进阶段 3 |
-| 建议跳过且 **`fast+ai`**（自检齐） | 落盘判定 → **同条进 sol**（连做） |
-| 建议跳过且 **`strict+ai`**（自检齐） | 落盘判定 → 审阅卡 → **停** |
-| 建议跳过且 **`AF_DECIDE=ai`**（灰区） | 落盘判定 → 审阅卡 → **停** |
+| 建议跳过且 **`ai`**（自检齐） | 落盘判定 → **同条进 sol**（连做） |
 | 建议跳过且 **user 尚未确认** | AskQuestion 建模判定确认 → 停；见 [跳过确认](#跳过须用户确认堵静默) |
 | 路由判定「建模：增量」 | 只更新受影响的 model 文件 |
 | 路由判定「建模：全量」 | 执行下文完整流程 |
 | 用户前缀 `mod:` | 进入本阶段；`user` 可 AskQuestion 跳过/增量/全量（`model:` = `mod:`） |
 | 首个 REQ、尚无 model/ | **全量**建模 |
 
-阶段 1 结束或进 sol 前须落盘判定：`跳过 | 增量 | 全量`。`user` 问人；`fast+ai` 自检齐→同条进 sol；`strict+ai`/灰区→审阅→停。禁止无判定静默进 sol。
+阶段 1 结束或进 sol 前须落盘判定：`跳过 | 增量 | 全量`。`user` 问人；`ai` 自检齐→同条进 sol。禁止无判定静默进 sol。
 
 ## 建模按需判定
 
@@ -38,10 +36,8 @@
 
 建议跳过时：
 
-- **`fast+ai` · 跳过**（四项自检 ✅ + 覆盖依据已校验 + todo `⏭️`）→ 同条进 sol。首行：`建模跳过：同条进 sol`
-- **`strict+ai` · 跳过**（同上自检）→ 审阅卡 → **停**（禁止同条进 sol）
-- **`AF_DECIDE=ai` · 灰区** → 落盘判定 + `⏭️` → 审阅卡 → **停**
-- **`user_decide`**：原话未点明跳过 → AskQuestion → **停**：
+- **`ai` · 跳过**（四项自检 ✅ + 覆盖依据已校验 + todo `⏭️`）→ 同条进 sol。首行：`建模跳过：同条进 sol`
+- **`user`**：原话未点明跳过 → AskQuestion → **停**：
 
 ```yaml
 title: "建模判定确认"
@@ -130,19 +126,17 @@ atlas/model/
 
 0. **总控**读 env/todo/已确认 REQ；按条件表判定 `跳过 | 增量 | 全量`（判定权在总控）
 1. **跳过路径**（总控）：
-   - `fast+ai` 自检齐 → 派 role-model 落盘「建模判定：跳过」+ 总控 todo `⏭️` → **建模跳过：同条进 sol**（派 role-sol）
-   - **`strict+ai` · 跳过**：落盘判定 + 审阅卡 → 停
-   - `AF_DECIDE=ai` 灰区 → 落盘判定 + 审阅卡 → 停
-   - `user_decide` → AskQuestion 建模判定确认 → 停
-2. **增量/全量**：总控按 [orchestrator](../templates/orchestrator.md) 加载 [role-model.md](../templates/role/role-model.md)，注入判定后派出 → 收产物 → 跑 `mod-confirm` → 绿则 **user** 确认停 / **ai** `fast+ai` 连做或 `strict+ai` 审阅停；确认后总控标 README 已确认并更新 todo
+   - `ai` 自检齐 → 派 role-model 落盘「建模判定：跳过」+ 总控 todo `⏭️` → **建模跳过：同条进 sol**（派 role-sol）
+   - `user` → AskQuestion 建模判定确认 → 停
+2. **增量/全量**：总控按 [orchestrator](../templates/orchestrator.md) 加载 [role-model.md](../templates/role/role-model.md)，注入判定后派出 → 收产物 → 跑 `mod-confirm` → 绿则 **user** 确认停 / **ai** 连做；确认后总控标 README 已确认并更新 todo
 
 角色正文（三层目录怎么写）**只维护在 role-model**，本文件不复述。
 
-### 阶段收尾 — **阶段闸门**（仅 user_decide）
+### 阶段收尾 — **阶段闸门**（仅 user）
 
 > **AI 自主**：不走本步。
 
-`model/README.md` 标 **已确认**、**总控**更新 todo 后 → **总控**调用 [阶段闸门](../templates/contract.md#阶段闸门模板) → **停止**。
+`model/README.md` 标 **已确认**、**总控**更新 todo 后 → **总控**调用 [阶段闸门](../templates/contract.md#72-阶段闸门user) → **停止**。
 
 ## 前置条件
 
@@ -159,7 +153,7 @@ atlas/model/
 ## 强制规则（全量/增量时适用）
 
 - 必须基于已确认需求，每个聚合根追溯到 REQ
-- 草稿后须结束闸门（user_decide 确认卡 / ai_decide 结束闸门），禁止静默标「已确认」
+- 草稿后须结束闸门（user 确认卡 / ai 结束处理），禁止静默标「已确认」
 - **每个实体独立文件**，落在 `entities/{EntityName}.md`，须含「## 字段」表
 - `conceptual/entity-relations.md` 须含「## ER 图」
 - `conceptual/domain-rules.md` 须含「## 不变量」

@@ -10,7 +10,7 @@
 - 关联需求：`atlas/requirements/REQ-XXX-名称.md`
 - 关联功能：F-xxx（可选）
 - 验收时间：{{时间}}
-- 验收模式：快速 | 严谨
+- 决策权：AI 全权 | 我来决策
 - **结论**：`PASS` | `BLOCKED-HUMAN` | `FAIL`
 - AC 覆盖：X/Y 自动化 ✅（Z 条 ⚠️ FE 人工）
 

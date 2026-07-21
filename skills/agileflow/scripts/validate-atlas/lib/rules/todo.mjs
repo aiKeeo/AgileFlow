@@ -172,7 +172,7 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
         });
       }
 
-      // 勾①须过构思闸门（摘要+步骤）；堵「范围/做法 + 写码后填」空壳
+      // 勾①须过构思闸门（五段式字面量）；堵「范围/做法 + 写码后填」空壳
       if (s1 && resolved) {
         const lit = runDevLiteralCheck(resolved.abs, { stage: 'step1' });
         if (!lit.passed) {

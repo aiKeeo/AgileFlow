@@ -32,7 +32,7 @@
 识别意图 → 确认契约 → 选阶段 → 加载 role-{key}.md → 注入本次任务 → 【调用宿主 API】派 Subagent
 → 收回报 → 写入 atlas/agileflow-dispatch.json（派活台账）
 → 路径自检（见下）→ validate-atlas --gate … → 绿：更新 env/todo → 进阶
-                                              → 红：报错回灌同角色（最多 2 轮）→ 仍红则审阅/阶段闸门
+                                              → 红：报错回灌同角色（最多 2 轮）→ 仍红则阶段闸门（user）
 ```
 
 ### 派活台账（gate 前必写 · 唯一硬挡实现）
@@ -49,6 +49,7 @@
   "phase": "1",
   "role": "req",
   "gate": "req-confirm",
+  "subagentId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "taskId": null,
   "paths": ["atlas/requirements/REQ-001-login.md"]
 }
@@ -58,13 +59,35 @@
 |------|------|
 | `role` | `req` \| `model` \| `sol` \| `dev` |
 | `gate` | 本段产物对应的验收闸门 |
-| `taskId` | 仅 dev：如 `T-001` |
+| **`subagentId`** | **必填**（normal 模式）：宿主 Subagent/Task 返回的 ID；无则视为假台账 |
+| `taskId` | **dev 必填**：如 `T-001`；req/model/sol 为 null |
 | `paths` | 本子代理落盘路径（可 `*` 通配） |
 
 子代理返回可含 `<!-- AF-DISPATCH-ACK: role=req phase=1 paths=... -->` 供总控抄 `paths`（**脚本不校验**；见各 role 模板）。  
 无 Subagent 宿主 → 设 `"mode": "degraded-single-session"` 并首行声明；**仅无 Subagent 能力时允许，滥用 = 流程违规**。
 
-**`fast+ai` 连做**：仍须每阶段/每 T 调用 Task + 记台账；连做的是停点，不是本会话包办。
+**`ai` 连做**：仍须每阶段/每 T 调用 Task + 记台账；连做的是停点，不是本会话包办。
+
+### 反模式（禁止）
+
+| 偷懒做法 | 为何违规 | 正确做法 |
+|----------|----------|----------|
+| 主线程写 REQ/sol/dev 正文，台账只补 paths | ORCH 验的是派活证据，不是文件存在 | 先 `Task` 派 `role-*`，收回报后记 `subagentId` + paths |
+| 只开 2 个 subagent 写 backend/frontend，文档自己写 | 写码 subagent ≠ role-dev 替代品；req/sol 仍须 role 派活 | **按 role 派**：req → model → sol → 每 T 一次 dev |
+| 「文档要连贯所以总控写更快」 | skill 明文禁止；连贯不是绕过派活的借口 | 同一总控串行派 Subagent，上下文在派活块里写清 |
+| `taskId: null` + 通配 paths 糊弄 gate | 脚本现硬挡 `subagentId` / dev `taskId` | 每条 entry 带真实 `subagentId` |
+
+### `ai` 自治循环（钉死 · 禁止甩「继续」给人）
+
+用户已委托（`AF_DECIDE=ai`，含「别问我 / 你定 / 直接做完」）时：
+
+| 必须 | 禁止 |
+|------|------|
+| **阻塞式**派 Subagent：等本批回报 → 记台账 → 跑 gate → **同会话内**立刻派下一批 / 进下一阶段 | 后台派完一批就结束本轮，等用户（或外人）说「继续」 |
+| 闸门红 → 回灌同角色自修（最多 2 轮）后继续 | 回复里写「请回复继续」「等你确认再开下一批」 |
+| 循环直到约定终点（至少 `dev-complete` 绿；用户要求测完则到测试收口） | 把人工续跑当成正常节奏 |
+
+同批并行：可一次开多个阻塞 Task（≤并行上限），**本批齐**后再往下。仅 `user`，或真缺人料（密钥/选卡），才允许停。
 
 ### 落盘路径自检（gate 前 · 总控必做）
 
@@ -77,7 +100,7 @@
 | 动作 | 说明 | 禁止 |
 |------|------|------|
 | **1. 读状态** | env、todo、上游产物 | 预读无关 phase |
-| **2. 写状态** | `AF_PHASE`、栈来源、todo、驾驶舱 README、索引状态行、REQ「已确认」行、**派活台账**；**用户话术**委托/接管/重选时**必须**改 `AF_FLOW`/`AF_DECIDE` | 写产物正文；**无用户话术**静默改决策维 |
+| **2. 写状态** | `AF_PHASE`、栈来源、todo、驾驶舱 README、索引状态行、REQ「已确认」行、**派活台账**；**用户话术**委托/接管/重选时**必须**改 `AF_DECIDE` | 写产物正文；**无用户话术**静默改决策维 |
 | **3. 派 Subagent** | **必须真调用**宿主多 Agent API；按下方加载规则拼 prompt | 整阶段包给通用 Agent；一 Subagent 多 T/多阶段；**口头说派却自己写** |
 | **4. 跑 gate** | `validate-atlas --gate …` | 红装绿；自己补产物糊弄 |
 | **5. 进阶/回滚** | 绿则进；红则回灌 | 跳过 gate 改 `AF_PHASE` |
@@ -101,7 +124,7 @@
 ## 本次任务（总控注入）
 
 - 阶段：{N}
-- 模式：{AF_FLOW}+{AF_DECIDE}
+- 决策：{AF_DECIDE}
 - 任务一句话：{...}
 - 上游路径：
   - ...
@@ -134,7 +157,7 @@ req-confirm 绿
 → 总控判定建模（跳过 | 增量 | 全量）：
    · 建议跳过且自检齐 → 派 role-model 落「建模判定：跳过」→ mod-confirm 绿 → AF_PHASE=3 → 可进 sol
    · 须建模（增量/全量）→ AF_PHASE=2 → 派 role-model
-   · user / strict+ai → 审阅或阶段闸门后再改 AF_PHASE（禁止静默跳）
+   · user → 阶段闸门后再改 AF_PHASE（禁止静默跳）
 ```
 
 ### 阶段 3 时序（钉死）
@@ -150,26 +173,26 @@ req-confirm 绿
 
 | 阶段 | Subagent 做 | 总控回报后 gate / 检查 | 勾选 |
 |------|-------------|------------------------|------|
-| `①` | 写 `atlas/dev/T-xxx-*.md`（FE/MP：摘要+主流程+边界+实现说明；BE：摘要+步骤；**先不写码**） | `dev-step1-literal --dev-file …` | 勾① |
-| `②` | 按 **实现说明**（FE/MP）或 **步骤**（BE）写码 + UT；登记/释放 active-edits | `--gate write-code` + [写码闸门](dev.md#写码闸门write-前) | 勾② |
+| `①` | 写 `atlas/dev/T-xxx-*.md`（全端：摘要+主流程+边界+实现说明；**先不写码**） | `dev-step1-literal --dev-file …` | 勾① |
+| `②` | 按 **实现说明** 写码 + UT；登记/释放 active-edits | `--gate write-code` + [写码闸门](dev.md#写码闸门write-前) | 勾② |
 | `③` | 回填 `## 结果` 可运行证据 + AC 映射 | `--only todo`（TODO-CHECK-③） | 勾③ |
-| 全部 T 齐 | — | `dev-complete` | 标「开发实现 ✅」 |
+| 全部 T 齐 | — | `dev-complete`（含 **REQ AC 回填**，禁仍「③ 后填」） | 标「开发实现 ✅」 |
 
 红 → 回灌**同 T 同角色**修复（仍算一次派活的续修，非另开 T）。  
+③ 时须回填对应 REQ 的 AC「测试方法 / 状态」；未回填则 `dev-complete` / `test-entry` 红。  
 
-**并行（默认应做）**：进阶段 4 → [parallel §谁可以并行](../phases/04-development.md#并行阶段-4#谁可以并行总控扫描--须同时满足)（`fast+ai` 扫描即开 · FE+BE / 无依赖 T）——**开多个 role-dev Subagent**，不是总控自己并行写码。
+**并行（默认应做）**：进阶段 4 → [parallel §谁可以并行](../phases/04-development.md#并行阶段-4#谁可以并行总控扫描--须同时满足)（`ai` 扫描即开 · FE+BE / 无依赖 T）——**开多个 role-dev Subagent**，不是总控自己并行写码。
 
 ## 验收失败
 
 | 次数 | 动作 |
 |------|------|
 | 1～2 | 报错完整回灌**同角色**修复 |
-| 3 | `fast+ai` 降级审阅卡；`strict+ai`/`user` 审阅/阶段闸门 |
+| 3 | `user` 阶段闸门；`ai` 摘要后继续自修 |
 
 ## 契约分叉
 
-- `fast+ai`：自动串派 Subagent + 记台账，不 AskQuestion；阶段完成一行摘要  
-- `strict+ai`：gate 绿 → 审阅卡 → 停  
+- `ai`：阻塞式串/并派 Subagent + 记台账，不 AskQuestion；闸门绿后**同会话连做**到终点，不甩「继续」  
 - `user`：缺口/确认卡由总控发 → 再派角色  
 
 ## 反模式
@@ -180,11 +203,13 @@ req-confirm 绿
 | 单会话包办（WorkBuddy 也不例外） | 开多 Agent；无能力则声明降级+分步 gate |
 | 整阶段外包给一个通用 Subagent | 1 角色 = 1 阶段或 **1 T**（dev 一次派活内走 ①→②→③） |
 | 口头「将派活」却自己 Write | 先调用宿主 Subagent/Task API + 记台账 |
+| **`ai` 派完一批等人说「继续」** | **阻塞等回报 → 同会话立刻下一批**，直到交付 |
 | gate 红 ORCH-* | 补派 Subagent 或补写 `atlas/agileflow-dispatch.json` 后再跑 gate |
-| gate 红自己补几行 | 回灌或审阅 |
+| gate 红自己补几行 | 回灌或阶段闸门 |
 | Subagent 说完就信 | 亲自跑 gate |
 | Subagent 写 todo/env | 总控独占 |
 | sol-confirm 前未写 todo | 先写 todo 再跑 gate |
+| 标「开发实现 ✅」但 REQ AC 仍「③ 后填」 | 先回填 AC 再 `dev-complete` |
 
 ## 相关
 

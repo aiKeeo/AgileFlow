@@ -30,27 +30,27 @@ atlas/solution/
 
 ## 标准流程（默认）
 
-0. **契约/决策权**：无 env/pending → **启动卡问人**（默认）；明确委托 → `fast+ai` 可跳。→ [启动卡](../templates/contract.md#流程启动卡)。**总控**判断，不写产物正文。
+0. **契约/决策权**：无 env/pending → **启动卡问人**（默认）；明确委托 → `AF_DECIDE=ai` 可跳。→ [启动卡](../templates/contract.md#71-流程启动卡)。**总控**判断，不写产物正文。
 1. **总控**读已确认 REQ +（按需）model/ + UID
 2. **总控派 role-sol**（加载 [role-sol](../templates/role/role-sol.md)）写 solution/ + T 头建议  
-   - `user`：技术栈未定时先 AskQuestion → 停；再派 role-sol 补 architecture；先落盘再确认（见 [contract 阶段 3](../templates/contract.md#阶段-3-先落盘再确认快速也适用)）
+   - `user`：技术栈未定时先 AskQuestion → 停；再派 role-sol 补 architecture；先落盘再确认（见 [contract 阶段 3](../templates/contract.md#阶段-3-先落盘再确认)）
    - `ai`：role-sol 自选栈；总控写 `AF_STACK_SOURCE=ai_record`
 3. **钉死时序**：收 T 头建议 → **总控写入 `atlas/todo.md`（根）** → 跑 `sol-confirm` → 绿才 `AF_PHASE=4`  
-   - `fast+ai`：同条连做 dev（每 T 一次派 role-dev）· `strict+ai`：审阅卡→停 · `user`：确认/闸门卡→停
+   - `ai`：同条连做 dev（每 T 一次派 role-dev）· `user`：确认/闸门卡→停
 4. 确认后总控标 README **已确认**、沉淀 humanTodo、更新驾驶舱
 
 F/contracts/architecture 怎么写 → **只维护在 role-sol**；强制规则见下表。
 
-### 阶段收尾 — **阶段闸门**（仅 user · 严谨）
+### 阶段收尾 — **阶段闸门**（仅 user）
 
-> **AI / 快速已合并继续**：不走本步。
+> **AI 自主**：不走本步。
 
-产物齐、todo 已写、humanTodo 已沉淀、`atlas/README.md` 已更新后 → **总控**发 [阶段闸门](../templates/contract.md#阶段闸门模板) → **停止**。
+产物齐、todo 已写、humanTodo 已沉淀、`atlas/README.md` 已更新后 → **总控**发 [阶段闸门](../templates/contract.md#72-阶段闸门user) → **停止**。
 
 ## 批量出方案（可选 — 仅用户显式要求）
 
 总控拆片，每片派 **role-sol**（1–3 个 F）；合并 README 后总控写 todo → `sol-confirm`。  
-`user` 须并行启动卡；`fast+ai` 不问直接拆。
+`user` 须并行启动卡；`ai` 不问直接拆。
 
 ## 强制规则
 

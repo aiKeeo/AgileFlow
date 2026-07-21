@@ -1,5 +1,10 @@
 {
   "version": 1,
-  "files": {},
-  "updatedAt": "2026-07-19T16:36:33.884Z"
+  "files": {
+    "role-req.md": "sha256:4f5d8e4f802acdd602d719ac21f56cad8bf3310c6454661b1822bdfa7668262b",
+    "role-model.md": "sha256:7e3bd5419c0057ab0115b50f43aa36d8770d58e71c5ad5a78ab875182dfc25fe",
+    "role-sol.md": "sha256:e59c703063be525ab7f105b539add24fef00aa3a2632a56e0a860f382354728e",
+    "role-dev.md": "sha256:feab862c017f5300abe72df1548ca6c48beb384870da07d38364167bc7ed8391"
+  },
+  "updatedAt": "2026-07-21T08:38:48.562Z"
 }

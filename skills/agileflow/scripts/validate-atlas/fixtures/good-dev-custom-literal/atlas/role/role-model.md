@@ -24,7 +24,7 @@
 - **判定**：`跳过` | `增量` | `全量`
 - **上游**：已确认的 `atlas/requirements/REQ-*.md`
 - **上下文**：仓库目录、是否已有 model、是否需要持久化
-- **模式**：`AF_FLOW` + `AF_DECIDE`
+- **决策**：`AF_DECIDE`
 - **Template 模式**：若启用，须先读 `atlas/template/model/`
 
 ---
@@ -134,7 +134,7 @@
 ## 本次任务（总控注入）
 
 - 阶段：2
-- 模式：{AF_FLOW}+{AF_DECIDE}
+- 决策：{AF_DECIDE}
 - 判定：{跳过|增量|全量}
 - 任务一句话：{…}
 - 上游路径：{…}

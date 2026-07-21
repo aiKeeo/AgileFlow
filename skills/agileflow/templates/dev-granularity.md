@@ -1,7 +1,7 @@
 # dev 颗粒度 SSOT（全端 · 唯一质量线）
 
 > **没有精简档 / 标准档。** 每个 T 一律按完整质量写。  
-> `AF_FLOW=fast` / `AF_DECIDE=ai` **不减**厚度——要快只能并发，不能薄写。  
+> `AF_DECIDE=ai` **不减**厚度——要快只能并发，不能薄写。  
 > 完整范例：[dev-exemplar-FE](../examples/dev-exemplar-FE.md) · [dev-exemplar-BE](../examples/dev-exemplar-BE.md) · [dev-reuse-examples](../examples/dev-reuse-examples.md)
 
 ---

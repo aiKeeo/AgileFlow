@@ -246,6 +246,8 @@ export function validateDispatchLedger(projectRoot, reporter, ctx) {
 
   const entries = ledger.entries ?? [];
 
+  validateEntryProvenance(reporter, entries);
+
   if (gateId === 'req-confirm') {
     validatePathDispatch(projectRoot, reporter, entries, 'req', 'req-confirm', listReqFiles);
     return;
@@ -264,7 +266,37 @@ export function validateDispatchLedger(projectRoot, reporter, ctx) {
 }
 
 /**
- * 按 role 校验台账 paths 是否覆盖落盘文件
+ * normal 模式：每条台账须能证明「真派过 Subagent」，禁止主线程写完后补假账
+ * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {Array<{ role?: string, taskId?: string|null, subagentId?: string|null }>} entries
+ */
+function validateEntryProvenance(reporter, entries) {
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    const subId = e.subagentId;
+    if (!subId || String(subId).trim() === '') {
+      reporter.add({
+        severity: 'error',
+        rule: 'ORCH-NO-SUBAGENT-ID',
+        file: DISPATCH_LEDGER_REL,
+        message: `台账 entries[${i}] role=${e.role ?? '?'} 缺 subagentId（宿主 Subagent/Task 返回的 ID）——禁止主线程包办后补 paths`,
+      });
+    }
+    if (e.role === 'dev') {
+      const tid = e.taskId;
+      if (!tid || !/^T-\d+/.test(String(tid))) {
+        reporter.add({
+          severity: 'error',
+          rule: 'ORCH-DEV-NO-TASKID',
+          file: DISPATCH_LEDGER_REL,
+          message: `台账 entries[${i}] role=dev 缺合法 taskId（如 T-001）——每 T 须独立派活`,
+        });
+      }
+    }
+  }
+}
+
+/**
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
  * @param {Array<{ role?: string, paths?: string[] }>} entries

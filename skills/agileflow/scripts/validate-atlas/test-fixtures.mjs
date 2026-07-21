@@ -281,6 +281,18 @@ const cases = [
     assertStdout: 'ORCH-NO-DISPATCH',
   },
   {
+    name: 'bad-orch-no-subagent-id → 缺 subagentId 应失败',
+    args: ['--root', path.join(fixtures, 'bad-orch-no-subagent-id'), '--gate', 'req-confirm'],
+    fail: true,
+    assertStdout: 'ORCH-NO-SUBAGENT-ID',
+  },
+  {
+    name: 'bad-orch-no-subagent-id → dev-complete 收口仍验 subagentId',
+    args: ['--root', path.join(fixtures, 'bad-orch-no-subagent-id'), '--gate', 'dev-complete'],
+    fail: true,
+    assertStdout: 'ORCH-NO-SUBAGENT-ID',
+  },
+  {
     name: 'bad-orch-mismatch-req → req-confirm paths 未覆盖 REQ 应失败',
     args: ['--root', path.join(fixtures, 'bad-orch-mismatch-req'), '--gate', 'req-confirm'],
     fail: true,

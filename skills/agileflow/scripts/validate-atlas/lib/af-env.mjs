@@ -6,7 +6,6 @@ const ENV_REL = 'atlas/agileflow.env';
 
 const ALLOWED = {
   AF_PHASE: new Set(['0', '1', '2', '3', '4', '5']),
-  AF_FLOW: new Set(['fast', 'strict', 'pending']),
   AF_DECIDE: new Set(['ai', 'user', 'pending']),
   AF_TIER: new Set(['full']),
   AF_STACK_SOURCE: new Set(['pending', 'ai_record', 'askquestion', 'user_said', 'repo']),
@@ -68,7 +67,6 @@ export function loadAfEnv(projectRoot) {
     ok: true,
     state: {
       phase: map.AF_PHASE,
-      flow: /** @type {'fast'|'strict'|'pending'} */ (map.AF_FLOW),
       decide: /** @type {'ai'|'user'|'pending'} */ (map.AF_DECIDE),
       tier: /** @type {'full'} */ ('full'),
       stackSource: /** @type {AfStackSource} */ (map.AF_STACK_SOURCE),
@@ -213,14 +211,14 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
   let blocked = false;
 
   // 首启契约未确认：禁止用 pending 冒充已问过用户
-  if (state.flow === 'pending' || state.decide === 'pending') {
+  if (state.decide === 'pending') {
     blocked = true;
     reporter.add({
       severity: 'error',
       rule: 'AF-ENV-BOOT',
       file: ENV_REL,
       message:
-        'AF_FLOW/AF_DECIDE 仍为 pending → 须先 AskQuestion「流程启动卡」（模式+决策权），用户选定后再写入 fast|strict 与 ai|user；禁止静默默认。',
+        'AF_DECIDE 仍为 pending → 须先 AskQuestion「流程启动卡」（谁决策），用户选定后再写入 ai|user；禁止静默默认。',
     });
   }
 
@@ -272,7 +270,7 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
       severity: 'info',
       rule: 'AF-ENV-OK',
       file: ENV_REL,
-      message: `af-env phase=${state.phase} flow=${state.flow} decide=${state.decide} tier=${state.tier} stack=${state.stackSource} infer=${inferred}`,
+      message: `af-env phase=${state.phase} decide=${state.decide} tier=${state.tier} stack=${state.stackSource} infer=${inferred}`,
     });
   }
 
@@ -395,7 +393,6 @@ function validateStackSourceForDecide(projectRoot, state, reporter) {
 /**
  * @typedef {Object} AfState
  * @property {string} phase
- * @property {'fast'|'strict'|'pending'} flow
  * @property {'ai'|'user'|'pending'} decide
  * @property {'full'} tier
  * @property {AfStackSource} stackSource

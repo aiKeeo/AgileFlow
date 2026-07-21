@@ -188,8 +188,7 @@ questions:
 | 决策权 | 动作 |
 |--------|------|
 | **`user`** | [init 确认卡](../templates/contract.md#init-确认阶段-0-收尾) → **停** |
-| **`fast+ai`** | 标 README **已确认** + AI 决策记录 → 闸门绿 → **可连做**下一阶段（不问） |
-| **`strict+ai`** | AI 决策记录 → 审阅卡 → **停**（禁再发 init 确认卡） |
+| **`ai`** | 标 README **已确认** + AI 决策记录 → 闸门绿 → **可连做**下一阶段（不问） |
 ---
 
 ## 增量 refresh（REQ 开发完毕后）
@@ -245,7 +244,7 @@ questions:
 
 ## 首行声明
 
-`📍 Agileflow | 模式：{快速/严谨} | 阶段：0-项目盘点 | 入口：init:{全量|refresh 范围} | init：atlas/init/`
+`📍 Agileflow | 决策：{AI全权/我来} | 阶段：0-项目盘点 | 入口：init:{全量|refresh 范围} | init：atlas/init/`
 
 refresh 时加：`操作：{全量|增量 data|…} | 触发：{首次|REQ-xxx 开发完毕}`
 

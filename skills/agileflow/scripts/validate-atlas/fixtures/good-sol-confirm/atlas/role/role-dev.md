@@ -23,7 +23,7 @@
 派活前你必须已经读到以下信息，并当作约束执行：
 
 - **Tid**：T-xxx
-- **模式**：`AF_FLOW` + `AF_DECIDE`
+- **决策**：`AF_DECIDE`
 - **上游**：
   - 所属 F/REQ 的 `solution/features/F-*.md` 或 `solution/contracts/API-*.md` / `UI-*.md`
   - 本 T 的写法锚点（API/UID/FE/BE）
@@ -38,7 +38,7 @@
 |---|---|---|
 | **① 构思** | `atlas/dev/T-xxx-*.md`（摘要+主流程+边界+实现说明+结果；此时结果可空） | 业务源码、改 todo、写其他 T |
 | **② 写码** | 业务源码（仅限实现说明涉及路径）、`test/unit`（BE 1 AC ↔ 1 UT）、`active-edits.md` **本 T 行** | 其他 T、非本 T 的 active-edits 行 |
-| **③ 证据** | 回填 `## 结果`（命令+exit0/✅/PASS）、薄 `test/ac`、AC 映射表 | 无证据自称通过 |
+| **③ 证据** | 回填 `## 结果`（命令+exit0/✅/PASS）、薄 `test/ac`、AC 映射表；**回填对应 REQ AC「测试方法/状态」**（禁仍「③ 后填」） | 无证据自称通过；AC 仍后填却勾③ |
 
 ---
 
@@ -149,7 +149,7 @@
 ## 本次任务（总控注入）
 
 - 阶段：4
-- 模式：{AF_FLOW}+{AF_DECIDE}
+- 决策：{AF_DECIDE}
 - Tid：T-xxx
 - 任务一句话：{…}
 - 上游路径：{…}

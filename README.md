@@ -1,202 +1,180 @@
-# Agileflow — AI Agent Skill · Ship in ~1 Hour 
+# AgileFlow — AI Agent Skill
 
 **English** | [中文](README.zh-CN.md)
 
-> Turn ideas into **runnable, testable, handoff-ready** software with a five-stage agile pipeline and **BDD→DDD→SDD→TDD**. Simple projects ship in **~1 hour**; MVPs in **half a day**.
+> **The pipeline is the product.** Built for teams that need **deliverable, auditable, handoff-ready** output — not code trapped in chat history.
 
-[![Version](https://img.shields.io/badge/version-9.18.3-blue.svg)](skills/agileflow/SKILL.md)
-[![Fast Delivery](https://img.shields.io/badge/Fast%20Delivery-~1%20Hour-orange.svg)](#why-ship-in-1-hour)
+[![Version](https://img.shields.io/badge/version-9.23.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Enterprise Ready](https://img.shields.io/badge/Enterprise-Deliverable%20Evidence-green.svg)](#enterprise-grade-deliverables)
 
 ---
 
 ## One-liner
 
-**Agileflow** encodes software engineering best practices into an AI-executable Skill: **BDD** for requirements, **DDD** for modeling, **SDD** for design, **TDD** for code — with human confirmation gates at every stage and a full `atlas/` documentation trail.  
-Tell your AI *"run agileflow"* — from zero to deployable in **as little as 1 hour**, usually an MVP within half a day.
+Typical AI coding delivers **code**. Enterprise delivery needs an **evidence package** — how to accept, who dispatched what, what actually ran, what's blocked, whether you can sign off.
 
-> **Fast mode ≠ skip stages.** Fast still walks req→mod→sol→dev→tests; it only merges AskQuestions and thins docs by **risk tier** (lite/standard/full).
-
----
-
-## Why ship in ~1 hour?
-
-Typical AI coding: **code first, think later** → missing tests, missing docs, requirements change and everything gets thrown away. Delivery measured in **days**.
-
-Agileflow: **compress the pipeline without dropping structure**.
-
-| Step | Traditional | Agileflow (Fast Mode) | Typical Time |
-|------|-------------|----------------------|--------------|
-| Requirements | Verbal, AI guesses | BDD scenarios + 1 round of confirmation | **5–10 min** |
-| Modeling | Skipped or patched later | Lightweight DDD: core tables + DDL | **5–10 min** |
-| Design | Written while coding | SDD template: API + task list | **10–15 min** |
-| Development | Large dumps, hard to maintain | Atomic tasks, one at a time | **20–30 min** |
-| Acceptance | Manual click-through | L1+L3 automated | **5–10 min** |
-| **Total** | 1–3 days + rework | **~1 hour** (simple CRUD / tools) | |
-
-> **Faster** (only when **AF not enabled**): hotfix, tiny edits → skip full pipeline, **L1+L3 in minutes**.  
-> **AF enabled**: any code write requires `--gate write-code` green; no micro/hotfix shortcut.
+AgileFlow: **standard artifacts at every stage + script-verifiable gates**, full REQ → implementation → acceptance report trace. Solo speed still works (`AF_DECIDE=ai` ~1h), but the design center is **team review, audit, and handoff**.
 
 ---
 
-## Who is this for?
+## Enterprise-grade deliverables
 
-| Audience | Pain Point | How Agileflow Helps |
-|----------|------------|---------------------|
-| **Indie devs / founders** | Ideas sit for weeks before a demo | Fast mode: **deployable demo in ~1 hour** |
-| **Freelancers** | No docs at handoff, hard to close projects | Full `atlas/` + REQ ↔ acceptance report mapping |
-| **Tech leads (small teams)** | AI output hard to review or hand off | Five-stage artifacts: divisible, auditable |
-| **Backend / full-stack engineers** | Schema and API drift apart | DDD first — confirm DDL & API before coding |
-| **Users afraid AI goes off-track** | AI codes silently, wrong direction = full rewrite | **Stage gates + requirement cards** — you approve each step |
-| **Users stuck mid-flow** | Missing keys/env, AI pretends it's done | **humanTodo** lists what *you* must do; incomplete = `BLOCKED-HUMAN` |
-| **Users who lose visibility** | Close chat, lose all progress | **`atlas/todo.md` live progress** + resume with *"continue agileflow"* |
-| **Compliance-minded teams** | Req → impl → test not traceable | BDD scenarios → tests → per-REQ acceptance reports |
+**OpenSpec** excels at the **spec layer** (brownfield increments). **Superpowers** excels at the **execution layer** (TDD + subagents). **AgileFlow** excels at the **delivery layer** — stage-gated evidence you can review, audit, and sign off.
 
----
+| Deliverable | Enterprise use |
+|-------------|----------------|
+| `REQ-*.md` + BDD AC | Requirements baseline; single acceptance authority — downstream links only |
+| `solution/` contracts + `F-*.md` | Architecture/API/boundary review before code |
+| `dev/T-*.md` + `## 结果` | Per-task design notes + **runnable proof** — not empty checkboxes |
+| `tests/REQ-*-验收报告.md` | Per-REQ sign-off: PASS / FAIL / `BLOCKED-HUMAN` |
+| `agileflow-dispatch.json` | Subagent dispatch ledger (`subagentId` / `taskId`) — process audit |
+| `humanTodo.md` | External deps explicit; never fake "delivered" when blocked |
+| `validate-atlas` (9 gates) | CI-ready: `exit 0` to advance — no verbal "done" |
 
-## Key Highlights
-
-### 🚀 Ship in ~1 Hour
-
-Not "AI dumps a pile of code" — **compressed pipeline, preserved structure**. Simple CRUD / tool projects: five stages, **~1 hour** to deploy; MVPs **same day**.
-
-| Mode | Speed | Best For |
-|------|-------|----------|
-| **Fast** | ~1 hour | Demos, CRUD, internal tools |
-| **Strict** | Half day – 1 day | Payments, auth, core business |
-| **Exempt path** | Minutes | One-line bugfix, hotfix (L1+L3) |
+**In one line**: OpenSpec tracks *how specs evolve*; Superpowers tracks *how to execute the plan*; AgileFlow tracks **whether the delivery package is complete, evidenced, and traceable**.
 
 ---
 
-### 📐 Five Stages × BDD→DDD→SDD→TDD
+## How we compare
 
-Each stage binds one engineering method — **think first, code second**:
+vs. **[OpenSpec](https://openspec.dev)** and **[Superpowers](https://github.com/obra/superpowers)** — all three stop blind coding, different layers:
+
+| | **OpenSpec** | **Superpowers** | **AgileFlow** |
+|---|-------------|-----------------|---------------|
+| **Layer** | Individual/team **spec** (brownfield) | Individual/squad **execution** (TDD + subagents) | **Delivery** (stage evidence + hard blocks) |
+| **One-liner** | Lightweight spec-driven: align before code | Brainstorm → plan → subagent execution | Standard artifacts per stage; script says when to advance |
+| **Strength** | Delta specs, fluid `/opsx:*` workflow | TDD enforced, dual review per task | 9 gates, full AC chain, acceptance reports, dispatch ledger |
+| **Trade-off** | No hard gates — verify is soft | No unified CLI gate — discipline via skills | Heavier — not for one-line hotfixes |
+
+### Dimension comparison (with raw AI baseline)
+
+| Dimension | Raw AI chat | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
+|-----------|:-----------:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
+| Structured stages (idea → ship) | ❌ | ⚠️ Fluid OPSX (explore→propose→apply→verify) | ✅ Brainstorm→plan→subagent execution | ✅ **req→model→sol→dev→test** |
+| Machine hard-blocks (CLI fail = can't advance) | ❌ | ❌ `/opsx:verify` is soft | ❌ Skills + review, no unified gate | ✅ **`validate-atlas` — 9 gates** |
+| Checkbox / task done = files + proof | ❌ | ⚠️ `tasks.md` honor system | ⚠️ Plan tasks + review | ✅ **`TODO-CHECK-*` enforced** |
+| Enterprise delivery / compliance trace | ❌ | ⚠️ Spec deltas, no acceptance report chain | ⚠️ Plan + review | ✅ **REQ AC backfill + per-REQ reports + `req-trace`** |
+| Role-based review (docs by zone) | ❌ | ⚠️ proposal/design split | ⚠️ Plan-centric | ✅ **requirements / model / solution / dev / tests isolated** |
+| CI-gatable "done" definition | ❌ | ❌ | ❌ | ✅ **`validate-atlas` exit 0** |
+| Explicit external-dependency blocks | ❌ | ❌ | ❌ | ✅ **`humanTodo` + `BLOCKED-HUMAN`** |
+| Resume after closing chat | ❌ | ✅ `changes/` per change | ⚠️ Session/plan dependent | ✅ **`todo.md` + `agileflow.env`** |
+| Auditable subagent dispatch | ❌ | ❌ | ✅ Per-task dispatch + compliance/quality review | ✅ **`agileflow-dispatch.json` (incl. subagentId)** |
+| TDD / test discipline | ❌ | ⚠️ Not core | ✅ **RED-GREEN-REFACTOR enforced** | ✅ Step ③ proves AC + runnable evidence in `## 结果` |
+| Full BDD / DDD / SDD chain | ❌ | ⚠️ SDD + spec deltas | ⚠️ Plan + TDD focus | ✅ **REQ→model→sol→dev artifacts** |
+| Brownfield incremental change | ❌ | ✅ **Strong** (specs live with code) | ⚠️ | ✅ `init` inventory + code anchors |
+| "You decide" vs "I decide" | — | — | — | ✅ **`AF_DECIDE=ai/user`** |
+| Setup cost | zero | **low** (`openspec init` + slash commands) | **low** (Cursor `/plugin-add superpowers`) | **medium** (install skill, one sentence) |
+| Simple CRUD typical time | 30min–2h (often no docs) | **faster** (lightweight, fewer gates) | 1–3h (brainstorm + plan overhead) | **~1h (full atlas included)** |
+| Handoff / auditability | low | high (`specs/`) | medium (plan + code) | **highest** (full evidence pack + ledger + gate logs) |
+
+### Which to pick
+
+| Your situation | Better fit |
+|----------------|------------|
+| Mature codebase, small increments, specs evolve long-term | **OpenSpec** |
+| Solo/squad, strong TDD, long subagent execution runs | **Superpowers** |
+| **Vendor handoff, internal audit, multi-role review, sign-off reports** | **AgileFlow** |
+| Zero-to-MVP that must demo **and** hand off documentation | **AgileFlow** |
+| One-line bugfix, pure Q&A | All three heavy → raw AI or AF exempt path |
+
+### Measurable facts (AgileFlow itself)
+
+| Metric | Value | What it means |
+|--------|-------|---------------|
+| Hard-block gates | **9** | Full chain `init`→`req`→`mod`→`sol`→`dev`→`test`; `write-code` blocks stage-skipping |
+| Validation fixtures | **63+** | Positive/negative regression; CI via `npm run test:validate` |
+| Rule modules | **40+** | Design-note literals, fake checkboxes, broken UID links, dispatch ledger, etc. |
+| Phase playbooks | **8** | `phases/` — routing, change management, all five stages |
+| Dev quality tier | **1 (full)** | Five-part design notes + numbered logic blocks — autonomy doesn't thin docs |
+| E2E agent retest | **ai + user** | Real agent smoke tests → [AGENT-RETEST.md](AGENT-RETEST.md) |
+
+### Where AgileFlow wins (enterprise delivery)
+
+1. **Nothing advances without complete artifacts** — 9 gates + 63+ fixtures; "done" is script-verifiable and CI-ready.
+2. **REQ owns acceptance** — BDD AC backfilled into sign-off reports; auditors can answer "how was this requirement proven?"
+3. **Process is auditable** — dispatch ledger logs `subagentId`; `AF_DECIDE=user` supports governance gates.
+4. **Clear human/machine boundary** — `humanTodo` + `BLOCKED-HUMAN`; missing keys or sign-off never marked PASS.
+5. **Fast solo, strict enterprise** — `ai` cuts friction; `user` for payments/auth/compliance-sensitive work.
+
+> One-line bugfixes and pure Q&A? AgileFlow is intentionally heavy — that's by design, not a gap.
+
+---
+
+## The pipeline
 
 ```
-Requirements → Modeling → Solution → Development → Testing
-     BDD          DDD        SDD         TDD        L1–L5
-   ~10min       ~10min     ~15min      ~30min      ~10min
+req → model (as needed) → sol → dev (①②③) → test
 ```
 
-| Stage | Method | Key Output |
-|:-----:|:------:|------------|
-| 1 Requirements | **BDD** | `REQ-*.md` (Given-When-Then scenarios) |
-| 2 Modeling | **DDD** | Aggregates, invariants, ER diagram, `sql/init.sql` |
-| 3 Solution | **SDD** | Architecture, API contracts, observability, atomic tasks |
-| 4 Development | **TDD** | Business code + tests (strict: red→green→refactor) |
-| 5 Testing | **BDD trace-back** | Per-REQ acceptance reports + L1–L5 pipeline |
+| Stage | What it delivers |
+|-------|------------------|
+| **req** | One REQ per feature, Given/When/Then acceptance criteria |
+| **model** | Domain model when complexity warrants it — or an explicit skip decision |
+| **sol** | Boundaries, contracts, architecture, dev tasks in `todo.md` |
+| **dev** | Design notes per task, business code, runnable proof in `## 结果` |
+| **test** | Batch delivery proof — not "unit tests green = shipped" |
+
+Methods map cleanly: **BDD → DDD → SDD → TDD**, but the point is **traceable stages**, not ceremony for its own sake.
+
+Philosophy and constraints → [majorflow.md](majorflow.md). Execution details → [SKILL.md](skills/agileflow/SKILL.md).
 
 ---
 
-### 🤝 Human-in-the-Loop — AI asks when it needs you
+## Two ways to work with it
 
-AI doesn't bulldoze through — **key decisions and external resources require humans**:
+| | **`AF_DECIDE=ai`** | **`AF_DECIDE=user`** |
+|---|-------------------|----------------------|
+| You say | "You decide" / "Don't ask me" | "I'll decide" |
+| Friction | Fewer clarification cards, fewer stage pauses | Stage gates — you approve before advancing |
+| Speed | Best for demos, CRUD, internal tools | Best for payments, auth, core business |
+| What doesn't change | Full pipeline, `atlas/` artifacts, ①②③, runnable evidence | Same |
 
-| Mechanism | When | What you do |
-|-----------|------|-------------|
-| **Requirement confirmation card** | Stage 1: unclear input / draft done | Pick scope, confirm BDD scenarios |
-| **Domain rule confirmation** | Stage 2: modeling draft done | Confirm aggregates, invariants, schema |
-| **Stage gate** | End of stages 1–4 | Click *"Yes, continue"* to proceed; *"No, pause"* anytime |
-| **humanTodo** | Any stage with external deps | Provide API keys, merchant IDs, `.env`, business sign-off, ops resources |
-
-**humanTodo example** (AI writes to `atlas/humanTodo.md` automatically):
-
-| Item | Source Stage | Status |
-|------|--------------|--------|
-| Provide WeChat Pay merchant ID & API key | Requirements | ⬜ Pending |
-| Confirm `.env.local` DB connection configured | Solution | ⬜ Pending |
-| Business confirms order state transitions | Modeling | ✅ Done |
-
-- AI sees ⬜ pending → **stops proactively**, never fakes completion
-- You finish & notify AI → unblock and continue
-- Missing resources → acceptance marked **`BLOCKED-HUMAN`**, never falsely "delivered"
-
-**You steer direction; AI executes — not the other way around.**
+> **"You decide" ≠ skip stages.** It means less asking — not thinner docs, not unchecked boxes, not code-before-design.
 
 ---
 
-### 📊 Full Progress Visibility — always know where AI is
+## Why you can trust the output
 
-Open the `atlas/` folder — **see exactly where the project stands**:
+Three guardrails keep AI from hallucinating, going off-script, or faking completion:
 
-**① Stage declaration** — first line of every AI reply:
+| Pillar | What it enforces |
+|--------|------------------|
+| **Shape** | Right artifacts in `atlas/`; checkboxes match real files (`validate-atlas` hard-blocks) |
+| **Command** | You steer direction; AI executes — startup card, stage gates, resume from `todo.md` |
+| **Run** | Compile / start / smoke evidence in dev notes — scripts verify form, **you** run the proof |
 
-```
-📍 Agileflow | Mode: Fast | Stage: 3-Solution Design | Basis: next incomplete stage in todo
-```
-
-**② `atlas/todo.md`** — AI tasks + pipeline progress + change history:
-
-```markdown
-## Pipeline Progress
-- [x] Requirements ✅
-- [x] Modeling ✅
-- [ ] Solution Design 🔄     ← current stage
-- [ ] Development
-- [ ] Testing
-
-## Dev Tasks
-- [x] Create database tables
-- [ ] Implement user API 🔄  ← in progress
-- [ ] Implement order API
-
-## Change History
-| Time | Action | Note |
-| 2026-06-11 10:30 | Done | REQ-001 confirmed |
-| 2026-06-11 10:45 | In progress | Modeling draft awaiting confirmation |
-```
-
-**③ REQ lifecycle** — every requirement doc has clear states:
-
-```
-Draft → Confirmed → Implemented → (Deprecated)
-```
-
-**④ Resume from breakpoint** — close chat, come back, say *"continue agileflow"* — AI reads `todo.md` and picks up. **No re-explaining.**
-
-**⑤ Acceptance reports** — Stage 5: one report per REQ, scenario-by-scenario ✅/❌, conclusion PASS / BLOCKED-HUMAN / FAIL.
+Blocked on your side? `humanTodo.md` lists what only a human can provide. Incomplete → **`BLOCKED-HUMAN`**, never falsely "delivered".
 
 ---
 
-### 🛡️ Quality Assured — L1–L5 Layered Acceptance
-
-| Layer | What | Fast | Strict |
-|-------|------|:----:|:------:|
-| L1 | Lint / Type Check | ✅ | ✅ |
-| L2 | Build | ✅ | ✅ |
-| L3 | Unit / integration tests (incl. REQ cases) | ✅ | ✅ |
-| L4 | Coverage ≥80% | — | ✅ |
-| L5 | Smoke / E2E (real external resources) | skippable | ✅ |
-
-On failure, AI retries up to 3 rounds; still failing → back to Stage 4. **Never marks PASS with bugs.**
-
----
-
-### 📁 atlas/ Documentation — fast delivery, still handoff-ready
-
-Auto-generated throughout — **reviewable, divisible, auditable**:
+## What lands in `atlas/`
 
 ```
 atlas/
-├── requirements/REQ-001-xxx.md   # BDD + optional ui/UID-*
-├── model/                        # DDD (or model-overview in fast mode)
-├── solution/architecture.md      # SDD + features/contracts + todo tasks
-├── dev/T-xxx-*.md                # ① design notes per task
-├── tests/REQ-*-验收报告.md        # Per-REQ acceptance
-├── todo.md                       # Progress + ①②③
-└── humanTodo.md                  # What needs you
+├── requirements/REQ-*.md      # BDD + optional UID
+├── model/                     # DDD (or skip rationale)
+├── solution/                  # architecture, contracts, features
+├── dev/T-*.md                 # per-task ① design notes
+├── tests/                     # per-REQ acceptance reports
+├── todo.md                    # pipeline + task ①②③ progress
+├── humanTodo.md               # what needs you
+└── agileflow-dispatch.json    # subagent dispatch ledger
 ```
+
+Close the chat, come back, say **"continue agileflow"** — AI reads `todo.md` and picks up. No re-explaining.
 
 ---
 
-### 🧭 Smart Routing — small things skip the full pipeline
+## Who it's for
 
-| Scenario | Path |
-|----------|------|
-| One-line bugfix, Q&A, hotfix | Exempt from five stages, L1+L3 in **minutes** (**AF not enabled** only) |
-| API / DB / auth / multi-module changes | Full five-stage pipeline |
-| User says *"fast track / skip pipeline"* | Micro exempt only if **AF not enabled**; AF enabled → `--gate write-code` |
+| You | AgileFlow helps when… |
+|-----|----------------------|
+| **Enterprise tech lead / delivery owner** | You need role-based review, stage gates, sign-off reports — not just code |
+| **Compliance / QA / internal audit** | Full REQ → impl → acceptance trace; no fake checkboxes |
+| **Agencies / vendor handoff** | You deliver an `atlas/` evidence pack, not just a repo |
+| **Founders / indie devs** | You need something demoable **and** handoff-ready for the next person |
 
-AI won't pull "explain this line" into five stages — **fast when it should be, strict when it must be**.
+**Best for enterprise-grade delivery**; casual one-liners and hotfixes → too heavy; use raw AI or AF exempt path.
 
 ---
 
@@ -204,118 +182,45 @@ AI won't pull "explain this line" into five stages — **fast when it should be,
 
 ```bash
 git clone https://github.com/aiKeeo/AgileFlow.git
-```
-
-Copy `skills/agileflow` to your project's Skill directory (pick the one you use):
-
-| Tool | Project | Global |
-|------|---------|--------|
-| **Cursor** | `YOUR_PROJECT/.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
-| **Claude Code** | `YOUR_PROJECT/.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
-| **Trae** | `YOUR_PROJECT/.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
-
-```bash
-# Example (Cursor)
 cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
-
-# Example (Claude Code)
-cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.claude/skills/
-
-# Example (Trae)
-cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.trae/skills/
 ```
 
-Repository: [github.com/aiKeeo/AgileFlow](https://github.com/aiKeeo/AgileFlow)
+| Tool | Project path | Global path |
+|------|--------------|-------------|
+| **Cursor** | `.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
+| **Claude Code** | `.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
+| **Trae** | `.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
+
+Step-by-step → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
 
 ---
 
 ## Usage
 
 ```
-Run agileflow — I need a todo-list API shipped today
+Run agileflow — ship a todo-list API today
 ```
 
 ```
-Continue agileflow                 # Resume from atlas/todo.md breakpoint
-Full pipeline, fast mode, deliver in 1 hour
+Continue agileflow
 ```
 
-Stage-specific: `write requirements` / `model data` / `design solution` / `implement` / `run acceptance tests`
-
-AI stage declaration example:
-
-```
-📍 Agileflow | Mode: Fast | Stage: 1-Requirements | Basis: new feature, 1h delivery target
-```
+Stage shortcuts: `write requirements` / `model data` / `design solution` / `implement` / `run acceptance tests`
 
 ---
 
-## 1-Hour Delivery Example
-
-**Scenario**: Expense-tracking API (CRUD + SQLite)
-
-| Time | Stage | AI Output |
-|------|-------|-----------|
-| 0:05 | Requirements | REQ-001.md |
-| 0:10 | Modeling | `atlas/model/` + DDL |
-| 0:20 | Solution | `architecture.md` + detailed todo |
-| 0:50 | Development | Business code + L3 tests（full-quality ① only） |
-| 1:00 | Testing | L1+L3 PASS, acceptance report |
-
-**Result**: Runnable code + `atlas/` docs + acceptance report — deploy or demo immediately.
-
----
-
-## Flow Diagram
-
-```mermaid
-flowchart LR
-    S1[BDD Requirements] --> S2[DDD Modeling]
-    S2 --> S3[SDD Solution]
-    S3 --> S4[Development]
-    S4 --> S5[L1-L5 Acceptance]
-```
-
----
-
-## Directory Structure
+## Repo layout
 
 ```
 AgileFlow/
-├── README.md
-├── README.zh-CN.md
-├── LICENSE
-└── skills/agileflow/
-    ├── SKILL.md
-    ├── phases/          # Five-stage instructions
-    ├── templates/       # Doc & gate templates
-    └── examples/
+├── majorflow.md           # core philosophy
+├── AGENT-RETEST.md        # agent smoke-test playbook
+├── README.md / README.zh-CN.md
+└── skills/agileflow/      # the Skill (SKILL.md, phases/, templates/, scripts/)
 ```
-
----
-
-## When to Use / Skip
-
-| ✅ Use | ❌ Skip |
-|--------|---------|
-| Run agileflow / full pipeline / ship today | Pure Q&A, explanations |
-| Build from scratch, MVP, demo | Code review, read code |
-| Have `atlas/` and say *"continue agileflow"* | Single-file tweak, one-line bugfix |
-
----
-
-## Version
-
-**v9.18.3** — see [SKILL.md](skills/agileflow/SKILL.md)
 
 ---
 
 ## License
 
-MIT
-
----
-
-## Contributing
-
-Issues and PRs welcome.
+MIT — Issues and PRs welcome.

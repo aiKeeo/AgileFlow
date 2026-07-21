@@ -1,20 +1,22 @@
 # Agileflow 排障（短表）
 
 > 闸门报错 / AI 卡住时先查本表。细则 → [validate-atlas-gate](templates/validate-atlas-gate.md) / [SKILL 裁决表](SKILL.md)。  
-> 脚本报错行末含 `💡 白话 · 谁修`；下表 **谁修**：`AI`=说继续即可 · `你`=需选卡/提供资源 · `双方`=配合。
+> 脚本报错行末含 `💡 白话 · 谁修`；下表 **谁修**：`AI`=自修后重跑闸门（`AF_DECIDE=ai` 勿等人说继续）· `你`=需选卡/提供资源 · `双方`=配合。
 
 ## 高频（置顶）
 
 | 问题 | 白话 | 谁修 | 怎么做 |
 |------|------|------|--------|
-| 闸门红 / `[SOL-*]` | 方案或契约文档不合规 | AI | 贴完整报错；说「继续」让 AI 修 |
+| 闸门红 / `[SOL-*]` | 方案或契约文档不合规 | AI | 贴完整报错；AI 自修后重跑 |
 | 闸门红 / `[DEV-*]` `[TODO-CHECK-*]` | dev 文档薄/缺证据/勾了但没文件 | AI | 让 AI 补 dev + 真跑命令写 `## 结果` |
-| 闸门红 / `[REQ-*]` | 需求缺 AC/UID/范围 | AI | 说「继续」补 REQ |
-| `AF-ENV-BOOT` | 还没选连做/严谨 | 你 | 答启动卡或说「重选模式」 |
-| AI 不写文件、像卡住 | 在等你点审阅/阶段闸门卡 | 你 | 点「继续」；要全自动→「后面都你定」 |
-| `fast+ai` 却每阶段停 | Agent 误用旧纪律 | AI | 提醒按委托**连做**；仍须闸门绿 |
+| 闸门红 / `[REQ-*]` | 需求缺 AC/UID/范围 | AI | 补 REQ / 回填 AC 后重跑 |
+| `AF-ENV-BOOT` | 还没选谁决策 | 你 | 答启动卡或说「重选决策权」 |
+| AI 不写文件、像卡住 | 在等你点阶段闸门卡 | 你 | 点「继续」；要全自动→「后面都你定」 |
+| `ai` 却每阶段停 | Agent 误用旧纪律 | AI | 提醒按委托**连做**；仍须闸门绿 |
+| `ai` 派完一批等人「继续」 | 后台派活后交班 | AI | 改阻塞式 Task；同会话循环到交付 → [orchestrator](templates/orchestrator.md) |
 | 总控包办 REQ/sol/dev / 未开 Subagent | 口头派活或连做误读 | AI | 查是否真派 Subagent；补派 + 记 `atlas/agileflow-dispatch.json`；无 Subagent 宿主才可用 `degraded-single-session`（滥用=违规） |
 | `ORCH-NO-DISPATCH` / `ORCH-DISPATCH-MISMATCH` | 无台账或未覆盖产物路径 | AI | 派 Subagent（Cursor=Task）对应 role → 收回报写台账 → 重跑 gate |
+| `ORCH-NO-SUBAGENT-ID` / `ORCH-DEV-NO-TASKID` | 台账缺 Subagent ID 或 dev 缺 taskId | AI | 每条 entry 写宿主返回的 `subagentId`；dev 写 `taskId`（如 T-001）；`dev-complete`/`test-entry` 收口亦验 |
 | 改了 `atlas/role/` 仍被 REQ-*/DEV-* 挡 | baseline 未更新或 role 未判 custom | AI | 确认 `.agileflow-role-baseline.json` 存在；自定义后应见 `ROLE-CUSTOM-SKIP`；恢复默认闸门 → `--refresh-role-baseline` |
 
 ## 全表
@@ -32,21 +34,21 @@
 | `SOL-README-MASH*` | solution README 写了技术栈/API 表 | AI | README 只留索引 |
 | `SOL-CONTRACTS-缺` / `SOL-F-EXPOSE` / `SOL-F-BOUND` | 暴露面有编号无文件/边界缺做不做 | AI | 补 contracts；F 写暴露面与边界 |
 | `SOL-A-SEC-*` / `SOL-A-RUN` | architecture 缺技术栈/模块/本地验证 | AI | 按模板补三节 |
-| `REQ-SCOPE` / `REQ-AC-未回填` | 无范围提示；AC 未回填 | AI | 补范围；③ 后回填测法 |
+| `REQ-SCOPE` / `REQ-AC-未回填` | 无范围提示；AC 未回填 | AI | 补范围；③ 回填测法；`dev-complete`/`test-entry` 强制拦 |
 | `SKIP-测试进度假` / `TST-R-PASS` | 「测试验收 ✅」但无 PASS | AI | tests/README 写 PASS + 报告 |
 | `MOD-*` | model 目录结构/实体不合规 | AI | 按 02-modeling 补 entities/conceptual |
 | 说「测过了」但编译不过 | 可运行闸门未真跑 | AI | 要求 `## 结果` 写**命令 + exit code** |
 | 断点找不到进度 | todo 缺失或 checkpoint 空 | 双方 | 打开/重建根 todo；说「继续 agileflow」 |
-| 跳过首启卡直接写 REQ | env 未 pending | 你 | 说「**重选模式**」→ 再发启动卡 |
+| 跳过首启卡直接写 REQ | env 未 pending | 你 | 说「**重选决策权**」→ 再发启动卡 |
 | 想调研却进了 req | 意图是探索 | 你 | 说「先探索」或 `explore:` |
-| 「连做」仍要写① / 细 sol·dev | 连做≠薄文档；加速靠并发 | — | 正常；见 [contract §1](templates/contract.md#1-两维--env) |
+| AI 自主仍要写① / 细 sol·dev | 单档位不减厚；加速靠并发 | — | 正常；见 [contract](templates/contract.md) |
 | humanTodo 一直阻塞 | 密钥/资源未提供 | 你 | 配好后说「已配置 xxx」 |
 | 并行 Subagent 翻车 | 路径冲突或未过并发启用 | AI | 查 [parallel](phases/04-development.md#并行阶段-4) |
-| `⚠️ validate-atlas 不可用` | 无 node / 脚本路径失败 | 双方 | AI 逐项自检；**你建议抽查**；此模式禁连做 |
+| `⚠️ validate-atlas 不可用` | 无 node / 脚本路径失败 | 双方 | AI 逐项自检；**你建议抽查**；`ai` 模式禁甩「继续」给人 |
 
 ```bash
 node <skill>/scripts/validate-atlas.mjs --list-gates
 node <skill>/scripts/validate-atlas.mjs --gate sol-confirm
 ```
 
-仍不行：把**完整报错原文**贴给 AI，并打开 `atlas/README.md` / `atlas/todo.md` 看「现在」。节奏对照 → [examples/flow-interaction.md](examples/flow-interaction.md)
+仍不行：把**完整报错原文**贴给 AI，并打开 `atlas/README.md` / `atlas/todo.md` 看「现在」。停点对照 → [examples/flow-interaction.md](examples/flow-interaction.md)

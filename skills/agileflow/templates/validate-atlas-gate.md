@@ -2,9 +2,9 @@
 
 > **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`  
 > **硬挡**：error 与 warn **同等失败**（exit ≠ 0）。没有「可继续知债」。  
-> **ORCH-*（派活台账）**：**仅** `--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 时校验；`--only req` 等模块单跑**不**验台账，不可替代对应 gate。  
+> **ORCH-*（派活台账）**：`--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 验路径覆盖 + 溯源；`dev-complete` / `test-entry` 另做**台账溯源审计**（`subagentId` / dev `taskId`，不重复路径匹配）。`--only req` 等模块单跑**不**验台账，不可替代对应 gate。  
 > **ROLE-CUSTOM-SKIP**：`atlas/role/role-*.md` 相对 `.agileflow-role-baseline.json` 已改 → 跳过该阶段**文档格式**闸门（info，不 fail）；**ORCH 仍硬挡**。重置 baseline：`--refresh-role-baseline --root .`
-> **契约也是硬规则**：`strict+ai`/`user` 该停就停；`fast+ai` 闸门绿该连做就连做——不是可选自觉。  
+> **契约也是硬规则**：`user` 该停就停；`ai` 闸门绿该连做就连做——不是可选自觉。  
 > **路径**：勿写死 `.cursor/skills/agileflow`。用下方探测或 `AGILEFLOW_SKILL_ROOT`。
 
 ## 闸门覆盖（不过 = 硬挡）
@@ -19,7 +19,7 @@
 当 `node` 命令不存在、脚本路径探测失败、或脚本运行时抛出异常时（exit ≠ 0 但非校验失败）：
 
 1. Agent 须在回复**首行**标注：`⚠️ validate-atlas 不可用（原因：{node未安装/路径未找到/运行时错误}）· 以下为 Agent 自检，建议抽查`
-2. **禁止** `fast+ai` 同回复连做下一阶段——降级模式下**每阶段须停**等用户确认或显式「继续」（等同临时 `strict` 停点）
+2. **禁止** `ai` 同回复连做下一阶段——降级模式下**每阶段须停**等用户确认或显式「继续」
 3. 降级为**人工逐项声明**（禁止笼统「全部通过」），须按当前 `--gate` 列出每项及结果，例如：
    ```
    降级自检（gate=sol-confirm）：
@@ -74,7 +74,6 @@ cd <skill> && npm run validate:sol
 | 键 | 用途 |
 |----|------|
 | `AF_PHASE` | 当前阶段；须与产物推断一致，否则 `AF-ENV-PHASE` |
-| `AF_FLOW` | `fast` / `strict` / `pending`（`pending` → `AF-ENV-BOOT`） |
 | `AF_DECIDE` | `ai` / `user` / `pending`（`pending` → `AF-ENV-BOOT`；`user` 决定技术栈要不要先问） |
 | `AF_TIER` | `full` |
 | `AF_STACK_SOURCE` | `pending` / `ai_record` / `askquestion` / `user_said` / `repo` |
@@ -93,7 +92,7 @@ cd <skill> && npm run validate:sol
 | **派②前（Write 源码前）** | `write-code` + [写码闸门自检表](dev.md#写码闸门write-前) | AF 项目+有源码须 REQ→sol→dev① 格式全过；不过 → 禁止写码 | `dev` · 子阶段②（有 dev 文件时须台账） |
 | **勾①/②/③ 后（任意时刻）** | `--only todo`（规则 `TODO-CHECK-*`） | 勾了无文件 / **勾①未过构思格式** / 勾③无可运行 / 先码后补空壳 → **失败** | `dev`（对应子阶段）；状态总控维护 |
 | **单 T 勾③前** | 该 T `## 结果` 含可运行证据 + `--only todo` | 禁止勾③ | `dev` · 子阶段③ |
-| **全部 T 齐 · 开发✅前** | `dev-complete` | 禁止 ✅（须可运行证据等） | `dev` · 子阶段③ |
+| **全部 T 齐 · 开发✅前** | `dev-complete` | 禁止 ✅（须可运行证据 + **REQ AC 已回填**） | `dev` · 子阶段③ |
 | **进阶段 5 前** | `test-entry` | 禁止 AC 归档 | 总控 |
 | **验收归档前** | `req-trace` | 链不完整 → **失败** | 总控按断链回派 |
 

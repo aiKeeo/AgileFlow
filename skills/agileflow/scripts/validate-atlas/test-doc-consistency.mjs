@@ -72,25 +72,31 @@ const killed = [
 for (const rel of killed) mustNotExist(rel);
 
 // —— 首启默认问人 ——
-mustInclude('SKILL.md', '**禁止**静默写 `fast+ai`');
-// remove duplicate broken assert
-mustInclude('templates/contract.md', '**禁止**静默');
+mustInclude('SKILL.md', '**禁止**静默写 ai');
+mustInclude('templates/contract.md', '契约未确认静默写');
 mustInclude('templates/contract.md', '默认问人');
 mustInclude('phases/01-requirement.md', '默认问人');
-mustNotInclude('SKILL.md', '契约：默认 fast+ai');
+mustNotInclude('SKILL.md', 'AF_FLOW');
+mustNotInclude('templates/contract.md', 'AF_FLOW');
 mustNotInclude('templates/contract.md', '默认不问启动');
 mustNotInclude('templates/contract.md', '默认不问：');
 
 // —— 话术上下文（消双义）——
-mustInclude('templates/contract.md', '正在**审阅卡上');
-mustInclude('templates/contract.md', '只 `skip_review`');
-mustInclude('SKILL.md', '中途 AI 接管');
 mustInclude('templates/contract.md', '后面都你定');
+mustInclude('SKILL.md', '中途 AI 接管');
 
-// —— 连做 / 停点 ——
-mustInclude('SKILL.md', '连做');
-mustInclude('templates/contract.md', '可同回复连做');
-mustInclude('templates/contract.md', '`fast+ai`');
+// —— ai 连做 / user 闸门 ——
+mustInclude('SKILL.md', '同会话连做');
+mustInclude('templates/contract.md', '同会话连做');
+mustInclude('templates/orchestrator.md', '自治循环');
+mustInclude('templates/orchestrator.md', '阻塞式');
+mustInclude('SKILL.md', '派完一批等人「继续」');
+mustInclude('templates/contract.md', 'AF_DECIDE');
+mustInclude('templates/orchestrator.md', 'AF_DECIDE');
+
+// —— AC 收口 ——
+mustInclude('templates/orchestrator.md', 'REQ AC 回填');
+mustInclude('scripts/validate-atlas/lib/phase-spec.mjs', 'req-ac-backfill');
 
 // —— 并行在 04 ——
 mustInclude('phases/04-development.md', '## 并行阶段-4');
@@ -102,8 +108,10 @@ mustInclude('SKILL.md', '多 Agent');
 mustInclude('SKILL.md', 'WorkBuddy');
 mustInclude('templates/orchestrator.md', '宿主义务');
 mustInclude('templates/orchestrator.md', '用户话术');
-mustInclude('templates/orchestrator.md', 'AF_FLOW');
+mustInclude('templates/orchestrator.md', 'subagentId');
+mustInclude('templates/orchestrator.md', '只开 2 个 subagent');
 mustInclude('templates/orchestrator.md', 'AF_DECIDE');
+mustInclude('SKILL.md', '只开写码 subagent');
 
 // —— 路径铁律 ——
 mustInclude('SKILL.md', '路径铁律');
@@ -146,7 +154,7 @@ mustInclude('scripts/validate-atlas/lib/reporter.mjs', 'error 与 warn 均使校
 // —— 质量 / 测试 ——
 mustInclude('phases/04-development.md', '## 质量要求');
 mustInclude('phases/05-testing.md', '证据来源：阶段4③复用');
-mustInclude('phases/01-requirement.md', 'fast+ai`：摘要后连做');
+mustInclude('phases/01-requirement.md', '摘要后连做');
 
 // —— 加载指向 contract ——
 mustInclude('SKILL.md', 'templates/contract.md');
@@ -161,6 +169,38 @@ mustNotInclude('SKILL.md', 'parallel-orchestration.md');
 mustNotInclude('SKILL.md', 'subagent-contracts.md');
 mustNotInclude('phases/01-requirement.md', 'stage-delegation.md');
 mustNotInclude('phases/04-development.md', 'parallel-orchestration.md');
+
+// —— 版本号与 package.json 一致 ——
+const skillVersion = read('SKILL.md').match(/^version:\s*([^\n]+)/m)?.[1]?.trim();
+const pkgVersion = JSON.parse(read('package.json')).version;
+assert(skillVersion === pkgVersion, `SKILL.md version (${skillVersion}) 须与 package.json (${pkgVersion}) 一致`);
+
+// —— 禁止旧「模式」/ AF_FLOW 残留 ——
+const noModeBanFiles = [
+  'templates/todo.md',
+  'examples/dev-glance-login/atlas/todo.md',
+  'examples/dev-glance-login/atlas/README.md',
+];
+for (const rel of noModeBanFiles) {
+  mustNotInclude(rel, '模式：快速');
+  mustNotInclude(rel, '模式：严谨');
+  mustNotInclude(rel, 'AF_FLOW');
+}
+
+const fixturesTodoRoot = path.join(skillRoot, 'scripts/validate-atlas/fixtures');
+for (const name of fs.readdirSync(fixturesTodoRoot)) {
+  const todoRel = path.join('scripts/validate-atlas/fixtures', name, 'atlas/todo.md');
+  const abs = path.join(skillRoot, todoRel);
+  if (!fs.existsSync(abs)) continue;
+  mustNotInclude(todoRel, '模式：快速');
+  mustNotInclude(todoRel, '模式：严谨');
+  mustNotInclude(todoRel, 'AF_FLOW');
+}
+
+mustInclude('templates/validate-atlas-gate.md', 'dev-complete');
+mustInclude('templates/validate-atlas-gate.md', '台账溯源审计');
+mustInclude('scripts/validate-atlas/lib/phase-spec.mjs', "'dispatch-ledger'");
+mustNotInclude('scripts/validate-atlas/lib/phase-spec.mjs', 'ai/fast');
 
 // —— 脚本仍在 ——
 mustInclude('scripts/validate-atlas/lib/af-env.mjs', "AF_TIER: new Set(['full'])");

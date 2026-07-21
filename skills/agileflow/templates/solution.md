@@ -2,7 +2,7 @@
 
 > **格式模板**：示例域名（订单/登录等）仅演示章节结构，落盘时替换为当前项目。  
 > **四要素**：① 功能（含边界） ② **契约/接口文档**（按需，集中放 `contracts/`） ③ 架构（全局一份） ④ 任务（**`atlas/todo.md` 根**，禁止 `solution/todo.md`）  
-> **质量同质**：快速 / 严谨 / AI 自主 **同质**——禁止因「快速」薄写 F、契约、architecture、todo。要加速 → [并行](../phases/04-development.md#并行阶段-4)。对照 → [dev](dev.md) · [contract](contract.md)
+> **质量同质**：`ai` / `user` **同质**——禁止因决策权薄写 F、契约、architecture、todo。要加速 → [并行](../phases/04-development.md#并行阶段-4)。对照 → [dev](dev.md) · [contract](contract.md)
 
 ## 颗粒度铁律（开发要看得清）
 

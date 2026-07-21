@@ -21,15 +21,15 @@
 权威流程 → orchestrator.md · 角色正文 → role/role-dev.md
 ```
 
-**连续做 / 全部开发 / yes_all** = **先展开 TodoWrite**，再按清单逐条做（每条含可运行闸门）；**≠** 摘要 / 空壳 / 合并多 T / **从不编译启动** / **跳过 TodoWrite** / **扁平 todo** / **薄写构思**。连做模式（`fast`）同样遵守：无①禁写码、禁合并 T、禁跳过闸门；**sol/dev 与严谨同质**（铁律 → [contract §1](../templates/contract.md#1-两维--env)）。
+**连续做 / 全部开发 / yes_all** = **先展开 TodoWrite**，再按清单逐条做（每条含可运行闸门）；**≠** 摘要 / 空壳 / 合并多 T / **从不编译启动** / **跳过 TodoWrite** / **扁平 todo** / **薄写构思**。`ai` 连做同样遵守：无①禁写码、禁合并 T、禁跳过闸门；**sol/dev 质量线唯一**（铁律 → [contract §1](../templates/contract.md#1-env)）。
 
-| 用户说 / 模式 | 总控必须 | 禁止 |
+| 用户说 / 决策 | 总控必须 | 禁止 |
 |---------------|---------------|------|
-| 全部开发 / 直接全开发 | 展开 todo → 扫描 FE+BE / 无依赖 T → `fast+ai` 自动并行或串行 | 有可并发却强行串行；跳步；薄写 |
-| 并行 / FE+BE / 无依赖 T | `fast+ai`：**扫描即开**；`user`：并行卡 | 有 depends_on 仍硬并行 |
+| 全部开发 / 直接全开发 | 展开 todo → 扫描 FE+BE / 无依赖 T → `ai` 自动并行或串行 | 有可并发却强行串行；跳步；薄写 |
+| 并行 / FE+BE / 无依赖 T | `ai`：**扫描即开**；`user`：并行卡 | 有 depends_on 仍硬并行 |
 | 给用户看 / MVP 演示 | 存在端编译+启动+MVP 主路径冒烟全过 | 「代码齐了」就直接交给用户 |
 
-**未开并行启动卡 → 禁止启用「串行约束」并行例外。** 快速要加速 → 推并发，不是薄①。对照 → [fast-means-parallel](../templates/contract.md)。
+**未开并行启动卡 → 禁止启用「串行约束」并行例外。** 要加速 → 推并发，不是薄①。对照 → [contract §4](../templates/contract.md#4-停点总表)。
 
 **标「开发实现 ✅」前**：须过 [开发完成格式门槛](#开发完成格式门槛) 全项。
 
@@ -142,7 +142,7 @@
 - 若跑了 FE Playwright：附 `atlas/logs/fe-smoke-report.json` 的 summary（pass/fail/skip）
 - **有强制原型**：勾③前跑 [fe-pixel-compare](../tools/fe-pixel-compare.md)；`## 结果` 写 `atlas/tests/fe-pixel/report.json` PASS
 - **禁止**只写「测过了」无命令无结果；**禁止**空表「③ 验收后填写」就勾③
-- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0  
+- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable、**REQ AC 回填**；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0  
   → [validate-atlas-gate](validate-atlas-gate.md)
 
 ### ❌ 不过
@@ -167,4 +167,4 @@ BE：
 
 FE 字段绑定 → **contracts/UI §字段绑定**；BE 接口 → **API-xxx**；dev 内禁止映射表。
 
-首行：`📍 Agileflow | 模式：{快速/严谨} | 阶段：4 | 步骤：{①|②|③} | 任务：T-xxx`
+首行：`📍 Agileflow | 决策：{AI全权/我来} | 阶段：4 | 步骤：{①|②|③} | 任务：T-xxx`

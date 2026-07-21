@@ -48,7 +48,7 @@ export function getGate(gateId) {
 /**
  * 执行 AI 流程闸门校验
  * @param {string} gateId
- * @param {{ projectRoot?: string, brownfield?: boolean | 'auto', devFile?: string, mode?: 'fast'|'strict'|'auto', verbose?: boolean }} [opts]
+ * @param {{ projectRoot?: string, brownfield?: boolean | 'auto', devFile?: string, mode?: 'full'|'auto', verbose?: boolean }} [opts]
  */
 export function runGate(gateId, opts = {}) {
   const resolved = resolveGateId(gateId);

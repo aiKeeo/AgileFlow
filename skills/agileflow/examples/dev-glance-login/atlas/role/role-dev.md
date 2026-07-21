@@ -23,7 +23,7 @@
 派活前你必须已经读到以下信息，并当作约束执行：
 
 - **Tid**：T-xxx
-- **模式**：`AF_FLOW` + `AF_DECIDE`
+- **决策**：`AF_DECIDE`
 - **上游**：
   - 所属 F/REQ 的 `solution/features/F-*.md` 或 `solution/contracts/API-*.md` / `UI-*.md`
   - 本 T 的写法锚点（API/UID/FE/BE）
@@ -149,7 +149,7 @@
 ## 本次任务（总控注入）
 
 - 阶段：4
-- 模式：{AF_FLOW}+{AF_DECIDE}
+- 决策：{AF_DECIDE}
 - Tid：T-xxx
 - 任务一句话：{…}
 - 上游路径：{…}

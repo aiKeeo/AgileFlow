@@ -15,9 +15,9 @@
 
 首条回复：`📍 Agileflow …`。  
 **无 env / `pending`**：  
-- **探索支路（①.5）**：只读分析 + 选项卡（禁写 env/REQ/源码）；选定进正式阶段 → **仍须契约**（默认启动卡问人；明确委托才 `fast+ai`）。  
-- **正式阶段落盘**：未确认契约 → **pending + [启动卡](../templates/contract.md#流程启动卡)→停**；仅话术明确让 AI 自己干 → 写 `fast+ai` 可跳。  
-已确认：`fast+ai` 连做 / `strict+ai` 审阅停 / `user` 缺口卡。详见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)。
+- **探索支路（①.5）**：只读分析 + 选项卡（禁写 env/REQ/源码）；选定进正式阶段 → **仍须契约**（默认启动卡问人；明确委托才 `AF_DECIDE=ai` 可跳）。  
+- **正式阶段落盘**：未确认契约 → **pending + [启动卡](../templates/contract.md#71-流程启动卡)→停**；仅话术明确让 AI 自己干 → 写 `AF_DECIDE=ai` 可跳。  
+已确认：`ai` 连做 / `user` 闸门停。详见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)。
 
 ## 识别顺序（固定 5 步）
 
@@ -81,11 +81,11 @@
 
 **格式**：`sol: 设计退款` → 进 solution/ 方案设计。
 
-**多前缀消息**：一条消息含多个前缀时按出现顺序处理，每个前缀独立路由。**`fast+ai`**：可同条按序落盘→过闸→连做。**`strict+ai` / `user`**：逐阶段落盘→闸门→停。
+**多前缀消息**：一条消息含多个前缀时按出现顺序处理，每个前缀独立路由。**`ai`**：可同条按序落盘→过闸→连做。**`user`**：逐阶段落盘→闸门→停。
 
 **空前缀**：用户只发 `sol:` 或 `dev:` 无内容时 → 进入该阶段但 AskQuestion「请描述本次{阶段名}的具体内容」→ 停止。
 
-带前缀即启用 Agileflow；阶段结束按契约：**user** → 阶段闸门→停；**`strict+ai`** → 审阅闸门→停；**`fast+ai`+闸门绿** → 免发卡 → **可连做**。禁止写无条件「每阶段都要 AskQuestion 澄清卡」。
+带前缀即启用 Agileflow；阶段结束按契约：**user** → 阶段闸门→停；**`ai`+闸门绿** → 免发卡 → **可连做**。禁止写无条件「每阶段都要 AskQuestion 澄清卡」。
 
 ### `test:` 分层（可指定层 / 单端）
 
@@ -205,13 +205,13 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ## §建模按需判定（阶段 2 非必经）
 
-> 建模判定 → [02-modeling](02-modeling.md#建模按需判定)。跳过须落盘判定；`fast+ai` 自检齐可同条进 sol；禁止无判定静默跳过。
+> 建模判定 → [02-modeling](02-modeling.md#建模按需判定)。跳过须落盘判定；`ai` 自检齐可同条进 sol；禁止无判定静默跳过。
 
 ---
 
 ## ① 豁免判定（最先做）
 
-> **🔴 已启用 AgileFlow**（存在 `atlas/agileflow.env` 或 `atlas/requirements/`）→ **微型/hotfix 不适用**，任何写码须 `--gate write-code` 绿；连做模式（`fast+ai`）只少停点，文档仍须先行。
+> **🔴 已启用 AgileFlow**（存在 `atlas/agileflow.env` 或 `atlas/requirements/`）→ **微型/hotfix 不适用**，任何写码须 `--gate write-code` 绿；`ai` 决策只少停点，文档仍须先行。
 
 命中下表 → 走豁免，**不进入流程**；未命中 → 继续 **①.5 探索判定**，再 ②。
 
@@ -227,7 +227,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 > ❌ **禁止不声明就当豁免开写**。灰区（想自称微型但不确定）→ **必须 AskQuestion**，禁止自行判豁免。
 
 **🔴 微型豁免边界**：「不走流程」仅微型改动。MVP/多模块/API·DB / 已启用 Agileflow 交付 → **禁止** temp/微型豁免（见上方 [豁免边界](#①-豁免判定最先做)）。  
-🟠 **「可压缩」仅指**：AskQuestion 停点次数，以及连做模式（`fast`）下是否**推并发**；**不指**跳阶段、**不指**薄写 sol/dev。详见 [contract §1 铁律](../templates/contract.md#1-两维--env)。
+🟠 **「可压缩」仅指**：AskQuestion 停点次数，以及 `ai` 下是否**推并发**；**不指**跳阶段、**不指**薄写 sol/dev。详见 [contract §1 铁律](../templates/contract.md#1-env)。
 
 > 🔵 「用户不用管」→ **AI 自主**，不是跳阶段、也不是薄文档。
 
@@ -244,11 +244,11 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 ---
 
-## 模式判定（连做 / 严谨）
+## 决策权判定
 
-**权威** → [contract.md](../templates/contract.md)（连做仍按序走完阶段；sol/dev 同质；加速靠并发）。
+**权威** → [contract.md](../templates/contract.md)（`ai` 仍按序走完阶段；sol/dev 同质；加速靠少停 + 并发）。
 
-路由侧：无契约 → **默认问人（启动卡）**；话术明确委托 → `fast+ai` 可跳；原话点明两边 → 按原话写。详见 [contract](../templates/contract.md)。
+路由侧：无契约 → **默认问人（启动卡）**；话术明确委托 → `AF_DECIDE=ai` 可跳；原话点明决策权 → 按原话写。详见 [contract](../templates/contract.md)。
 
 ---
 
@@ -267,7 +267,7 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 
 | 检查项 | 路径 | 状态含义 |
 |--------|------|----------|
-| **流程状态（机器权威）** | `atlas/agileflow.env` | `AF_PHASE`/`AF_FLOW`/`AF_DECIDE`/`AF_TIER`/`AF_STACK_SOURCE`；与产物不一致 → 先改 env 再进阶；模板 → [agileflow.env](../templates/agileflow.env) |
+| **流程状态（机器权威）** | `atlas/agileflow.env` | `AF_PHASE`/`AF_DECIDE`/`AF_TIER`/`AF_STACK_SOURCE`；与产物不一致 → 先改 env 再进阶；模板 → [agileflow.env](../templates/agileflow.env) |
 | **会话续作 checkpoint** | `atlas/todo.md` →「## 进行中」/ checkpoint 行 | **跨会话权威**：当前 T + ①/②/③；新聊天先读此处再 TodoWrite |
 | **项目盘点** | `atlas/init/README.md` | brownfield 不存在/未确认 → 阶段 0；greenfield 忽略；「已确认」→ 可进后续 |
 | 流程进度 | `atlas/todo.md` →「流程进度」区 | 哪几阶段已 ✅（须与 `AF_PHASE` 对齐） |
@@ -306,21 +306,17 @@ REQ/model **设计阶段**只改 `model/`，**不**改 init；**实现落地后*
 | 用户说 | 动作 |
 |--------|------|
 | 做功能/实现/开发（**未**点明决策权） | **pending + 启动卡问人** → 停 |
-| 不想看了 / 后面都你定 / 剩下你来 / 直接做完 / 你接管 | **改 env → `AF_DECIDE=ai`（常+`AF_FLOW=fast`）** → 接管剩余阶段；仍须闸门 |
+| 不想看了 / 后面都你定 / 剩下你来 / 直接做完 / 你接管 | **改 env → `AF_DECIDE=ai`** → 接管剩余阶段；仍须闸门 |
 | 这阶段你定 / 不用问我了 | **仅本阶段**少问；**不**改全局 `AF_DECIDE`（全局仍可为 `user`） |
-| 不审了继续 / 跳过审阅 | **仅当**正在审阅卡上 → 只 skip 本卡；**不**改 `AF_DECIDE`（**禁止**当成全局接管） |
-| 不审了**做**继续 / 后面都你定直接做完 | 同上「全局接管」行（口语变体，**带「做」= 接管**，与「不审了继续」不同） |
 | 这阶段我来 / 后面都我来 | user_decide |
-| 重选模式 / 换流程 / 重开启动卡 / 重新选决策权 | **契约重选** → pending + 流程启动卡 |
-
-> **易混**：「不审了继续」= 跳过**当前审阅卡**；「不审了**做**继续」/「后面都你定」= 全局 AI 接管。详见 [SKILL 错→对](../SKILL.md)。
+| 重开启动卡 / 重新选决策权 | **契约重选** → pending + 流程启动卡 |
 
 ### 用户描述需求（最常见入口）
 
 用户**用原话**说要做啥 → **阶段 1**（须先过流程契约）：
 
-> 契约未确认 → **默认启动卡问人**（保持 pending）；明确委托才 `fast+ai`；其后按契约连做或停。
-> **禁止**：契约未确认就落盘；AI自主只问不写；user_decide 用聊天追问代替卡片；`strict`/`user` 同回复写码；连做时跳过 闸门。详见 [01-requirement](01-requirement.md)。
+> 契约未确认 → **默认启动卡问人**（保持 pending）；明确委托才 `AF_DECIDE=ai`；其后按契约连做或停。
+> **禁止**：契约未确认就落盘；AI自主只问不写；`user` 用聊天追问代替卡片；`user` 同回复写码；`ai` 连做时跳过闸门。详见 [01-requirement](01-requirement.md)。
 
 ### 硬规则：不可跳阶段（豁免与前缀单阶段模式除外）
 
@@ -358,7 +354,7 @@ questions:
 ```
 
 - 仅当用户意图**唯一且前置已满足**时，可省略此卡片，但须在回复**首行声明**：
-  `📍 Agileflow | 模式：{快速/严谨} | 阶段：{N}-{名称} | 依据：{用户原话或 todo 状态}`
+  `📍 Agileflow | 决策：{AI全权/我来} | 阶段：{N}-{名称} | 依据：{用户原话或 todo 状态}`
 
 ### 全新项目 / 用户发来需求
 
@@ -386,4 +382,4 @@ questions:
 
 ## 进入阶段后的行为
 
-进入阶段后：① 声明行 → ② 契约检查 → ③ 只读一个 phase + 其 templates → ④ 落盘 → 闸门 → **`fast+ai` 连做 / 其余停**（[SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)）
+进入阶段后：① 声明行 → ② 契约检查 → ③ 只读一个 phase + 其 templates → ④ 落盘 → 闸门 → **`ai` 连做 / `user` 停**（[SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)）

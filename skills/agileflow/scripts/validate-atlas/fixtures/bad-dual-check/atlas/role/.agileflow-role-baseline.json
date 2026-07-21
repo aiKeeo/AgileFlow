@@ -1,10 +1,10 @@
 {
   "version": 1,
   "files": {
-    "role-req.md": "sha256:3a3e82c4afbc2c4d4bd7295dd471bf94e4bc46abaa024234862d6e356b8ca261",
-    "role-model.md": "sha256:81e25b9576c7b99bb51074f005f9588c69dab2ac4fe2976bc3d56bf4bdafcfea",
-    "role-sol.md": "sha256:19df14f989be5ff9a54b2806328ce20a2ddaf7a8c8a411ac16b7ae60d1bd7868",
-    "role-dev.md": "sha256:a9aaab06adae11dd5b1bb1a87bebce59d9fac4402db684f5c8897a7c4ffaa5d7"
+    "role-req.md": "sha256:4f5d8e4f802acdd602d719ac21f56cad8bf3310c6454661b1822bdfa7668262b",
+    "role-model.md": "sha256:7e3bd5419c0057ab0115b50f43aa36d8770d58e71c5ad5a78ab875182dfc25fe",
+    "role-sol.md": "sha256:e59c703063be525ab7f105b539add24fef00aa3a2632a56e0a860f382354728e",
+    "role-dev.md": "sha256:feab862c017f5300abe72df1548ca6c48beb384870da07d38364167bc7ed8391"
   },
-  "updatedAt": "2026-07-19T16:36:37.367Z"
+  "updatedAt": "2026-07-21T08:38:48.550Z"
 }

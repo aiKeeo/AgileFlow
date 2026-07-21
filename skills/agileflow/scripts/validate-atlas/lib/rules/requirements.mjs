@@ -578,21 +578,36 @@ function validateReqIndexStatusConsistency(projectRoot, reporter) {
 }
 
 /**
- * 开发/测试已声称完成时，AC「测试方法」不得仍全是「（③ 后填）」
+ * 是否已在 todo 声称开发/测试完成
  * @param {string} projectRoot
- * @param {import('../reporter.mjs').Reporter} reporter
  */
-function validateReqAcBackfill(projectRoot, reporter) {
+function todoClaimsDevOrTestDone(projectRoot) {
   const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-  const claimed =
+  return (
     /开发实现\s*✅/.test(todo) ||
     /^\s*-\s+\[[xX]\].*开发实现/m.test(todo) ||
     /测试验收\s*✅/.test(todo) ||
-    /^\s*-\s+\[[xX]\].*测试验收/m.test(todo);
-  if (!claimed) return;
+    /^\s*-\s+\[[xX]\].*测试验收/m.test(todo)
+  );
+}
+
+/**
+ * AC「测试方法」不得仍是「（③ 后填）」
+ * - 默认：仅当 todo 已标开发/测试完成时检查（write-code 全链）
+ * - force：dev-complete / test-entry 收口闸门无条件检查（禁止未回填却进收口）
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {{ force?: boolean }} [opts]
+ */
+export function validateReqAcBackfill(projectRoot, reporter, opts = {}) {
+  if (!opts.force && !todoClaimsDevOrTestDone(projectRoot)) return;
 
   const reqRoot = path.join(projectRoot, 'atlas', 'requirements');
   if (!exists(reqRoot)) return;
+
+  const reason = opts.force
+    ? '收口闸门（dev-complete/test-entry）要求 AC 已回填'
+    : '流程进度已标开发/测试完成';
 
   for (const file of collectFiles(reqRoot, '.md')) {
     if (file.includes(`${path.sep}ui${path.sep}`)) continue;
@@ -606,7 +621,7 @@ function validateReqAcBackfill(projectRoot, reporter) {
         severity: 'error',
         rule: 'REQ-AC-未回填',
         file: rel(projectRoot, file),
-        message: `流程进度已标开发/测试完成，但 AC 表仍有 ${pending}/${acRows.length} 条「（③ 后填）」——须回填 AC 测试方法与状态。`,
+        message: `${reason}，但 AC 表仍有 ${pending}/${acRows.length} 条「（③ 后填）」——须回填 AC 测试方法与状态。`,
       });
     }
   }

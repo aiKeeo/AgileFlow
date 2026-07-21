@@ -8,7 +8,10 @@
       "role": "dev",
       "gate": "dev-step1-literal",
       "taskId": "T-999",
-      "paths": ["atlas/dev/T-999-other-BE.md"]
+      "paths": [
+        "atlas/dev/T-999-other-BE.md"
+      ],
+      "subagentId": "fixture-subagent-dev-1"
     }
   ]
 }

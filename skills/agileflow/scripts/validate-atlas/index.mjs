@@ -6,7 +6,11 @@ import { loadAfEnv, validateAfEnv } from './lib/af-env.mjs';
 import { resolveTemplateMode, resolveTemplatePreset } from './lib/template-loader.mjs';
 import { validateDirectory } from './lib/rules/directory.mjs';
 import { validateInit } from './lib/rules/init.mjs';
-import { validateRequirements, validateReqConfirmed } from './lib/rules/requirements.mjs';
+import {
+  validateRequirements,
+  validateReqConfirmed,
+  validateReqAcBackfill,
+} from './lib/rules/requirements.mjs';
 import { validateModel } from './lib/rules/model/index.mjs';
 import { validateSolution } from './lib/rules/solution.mjs';
 import { validateTodo } from './lib/rules/todo.mjs';
@@ -31,7 +35,7 @@ import {
  * @property {string} [projectRoot]
  * @property {'all'|'0'|'1'|'2'|'3'|'4'|'5'} [phase]
  * @property {boolean | 'auto'} [brownfield]
- * @property {'fast'|'strict'|'auto'} [mode]
+ * @property {'full'|'auto'} [mode]
  * @property {boolean} [verbose]
  * @property {string[]} [only]
  * @property {boolean} [templateMode]
@@ -80,19 +84,13 @@ export function resolveTierForDevFile(_devFile, _todoContent) {
 }
 
 /**
- * 解析模式：agileflow.env / 请求 / todo 字样 → 默认 fast
- * @param {string} projectRoot
- * @param {'fast'|'strict'|'auto'|undefined} requested
- * @param {string} [_tier]
- * @param {{ flow?: 'fast'|'strict' } | null} [afState]
+ * 解析模式（兼容 CLI）：唯一档位 full
+ * @param {string} _projectRoot
+ * @param {'full'|'auto'|undefined} requested
  */
-function resolveMode(projectRoot, requested, _tier, afState) {
-  if (requested && requested !== 'auto') return requested;
-  if (afState?.flow && afState.flow !== 'pending') return afState.flow;
-  const todo = readText(path.join(projectRoot, 'atlas', 'todo.md')) || '';
-  if (/模式：.*严谨|强制严谨/.test(todo)) return 'strict';
-  if (/模式：.*快速/.test(todo)) return 'fast';
-  return 'fast';
+function resolveMode(_projectRoot, requested) {
+  if (requested && requested !== 'auto') return 'full';
+  return 'full';
 }
 
 /**
@@ -157,7 +155,7 @@ export function validateAtlas(options = {}) {
   }
 
   const tier = resolveTier(options.tier, todoContent, afState);
-  const mode = resolveMode(projectRoot, options.mode, tier, afState);
+  const mode = resolveMode(projectRoot, options.mode);
   const templateMode = options.templateMode ?? resolveTemplateMode(projectRoot);
   const templatePreset = templateMode ? resolveTemplatePreset(projectRoot) : null;
   const docOpts = { mode, tier, templateMode };
@@ -225,6 +223,10 @@ export function validateAtlas(options = {}) {
       mode,
       customRoles,
     });
+  }
+  // 收口硬拦：dev-complete / test-entry 无条件验 AC 回填（不依赖 todo 是否已勾完成）
+  if (shouldRun('req-ac-backfill') && !templateMode) {
+    validateReqAcBackfill(projectRoot, reporter, { force: true });
   }
   if (shouldRun('dispatch-ledger') && options.dispatchGate) {
     validateDispatchLedger(projectRoot, reporter, {

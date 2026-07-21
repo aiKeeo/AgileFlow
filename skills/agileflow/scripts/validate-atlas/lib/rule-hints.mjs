@@ -167,6 +167,14 @@ export const RULE_HINTS = {
     plain: '未派 Subagent 或未记派活台账：总控禁止包办 REQ/model/sol/dev',
     who: 'ai',
   },
+  'ORCH-NO-SUBAGENT-ID': {
+    plain: '台账缺 subagentId：像主线程写完再补假账，须真派 Subagent 并抄回 ID',
+    who: 'ai',
+  },
+  'ORCH-DEV-NO-TASKID': {
+    plain: 'dev 台账缺 taskId：每 T 须独立派 role-dev',
+    who: 'ai',
+  },
   'ROLE-CUSTOM-SKIP': {
     plain: 'atlas/role 相对 baseline 已自定义，跳过该阶段默认文档格式闸门（ORCH 仍硬挡）',
     who: 'ai',
@@ -204,7 +212,7 @@ export const RULE_HINTS = {
     who: 'ai',
   },
   'AF-ENV-BOOT': {
-    plain: '流程还没选模式（启动卡未答）',
+    plain: '还没选谁决策（启动卡未答）',
     who: 'user',
   },
   'DIR-TODO-PATH': {
@@ -221,18 +229,18 @@ export function getRuleHint(rule) {
   const hit = RULE_HINTS[rule];
   if (hit) {
     const whoLabel =
-      hit.who === 'ai' ? 'AI 修（说「继续」即可）' : hit.who === 'user' ? '需要你选/确认' : 'AI + 你配合';
+      hit.who === 'ai' ? 'AI 自修后重跑闸门' : hit.who === 'user' ? '需要你选/确认' : 'AI + 你配合';
     return { plain: hit.plain, who: whoLabel };
   }
   const prefix = rule.split('-').slice(0, 2).join('-');
   if (prefix.startsWith('SOL-')) {
-    return { plain: '方案/契约文档不合规', who: 'AI 修（说「继续」即可）' };
+    return { plain: '方案/契约文档不合规', who: 'AI 自修后重跑闸门' };
   }
   if (prefix.startsWith('DEV-') || prefix.startsWith('TODO-')) {
-    return { plain: '开发任务文档或勾选证据不合规', who: 'AI 修（说「继续」即可）' };
+    return { plain: '开发任务文档或勾选证据不合规', who: 'AI 自修后重跑闸门' };
   }
   if (prefix.startsWith('REQ-')) {
-    return { plain: '需求文档不合规', who: 'AI 修（说「继续」即可）' };
+    return { plain: '需求文档不合规', who: 'AI 自修后重跑闸门' };
   }
   return null;
 }

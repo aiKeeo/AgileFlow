@@ -423,7 +423,7 @@ function validateDevStep1ForAllT(projectRoot, reporter) {
 function validateWriteCodeFullChain(projectRoot, reporter, opts) {
   const tier = opts.tier ?? 'full';
   const customRoles = opts.customRoles ?? new Set();
-  const docOpts = { tier, mode: opts.mode ?? 'fast', templateMode: opts.templateMode ?? false };
+  const docOpts = { tier, mode: opts.mode ?? 'full', templateMode: opts.templateMode ?? false };
   const sub = new Reporter();
 
   if (docOpts.templateMode) {
@@ -492,7 +492,7 @@ export function validateDocFirst(projectRoot, reporter, opts = {}) {
     severity: 'info',
     rule: 'DOC-FIRST-触发',
     message: hasBusiness
-      ? 'AgileFlow 项目已探测到业务源码——执行文档先行全链格式校验（与 AF_FLOW/AF_DECIDE 无关）。'
+      ? 'AgileFlow 项目已探测到业务源码——执行文档先行全链格式校验（与 AF_DECIDE 无关）。'
       : 'AgileFlow 项目写码前闸门——首笔写码亦须 REQ→sol→dev① 全链格式通过。',
   });
 

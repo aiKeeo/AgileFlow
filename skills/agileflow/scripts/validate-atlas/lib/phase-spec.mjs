@@ -292,7 +292,7 @@ export const AI_GATES = {
 
     extra:
 
-      '全端：摘要五 bullet + 主流程(3～8)+边界(≥2 挂第N步)+实现说明(目的/做什么/怎么做；逻辑块编号≥2)；字面量严检；ai/fast 不减厚度',
+      '全端：摘要五 bullet + 主流程(3～8)+边界(≥2 挂第N步)+实现说明(目的/做什么/怎么做；逻辑块编号≥2)；字面量严检；单档 full 不减厚度',
 
   },
 
@@ -300,7 +300,7 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'doc-first'],
+    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger'],
     docFirstScope: 'integrity',
 
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
@@ -308,7 +308,7 @@ export const AI_GATES = {
     blocking: true,
 
     extra:
-      'AF_PHASE=4；dev 文件数=T 头数；勾①②③须有文件/可运行证据（TODO-CHECK-*）；## 结果可运行；强制原型须 fe-pixel PASS',
+      'AF_PHASE=4；dev 文件数=T 头数；勾①②③须有文件/可运行证据（TODO-CHECK-*）；## 结果可运行；REQ AC 须已回填（禁仍「③ 后填」）；强制原型须 fe-pixel PASS',
 
   },
 
@@ -316,14 +316,14 @@ export const AI_GATES = {
 
     phase: '5',
 
-    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'doc-first'],
+    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger'],
     docFirstScope: 'integrity',
 
     when: '进入阶段 5 · 测试入场门禁前',
 
     blocking: true,
 
-    extra: 'AF_PHASE=5；同会话增量 / 跨会话全量；强制原型须 fe-pixel PASS',
+    extra: 'AF_PHASE=5；同会话增量 / 跨会话全量；REQ AC 须已回填；强制原型须 fe-pixel PASS',
 
   },
 
@@ -331,7 +331,7 @@ export const AI_GATES = {
     phase: 'all',
     modules: ['af-env', 'doc-first', 'dispatch-ledger'],
     docFirstScope: 'write-code',
-    when: 'Write 业务源码前 · 文档先行硬锁（fast/strict/ai/user 无差别）',
+    when: 'Write 业务源码前 · 文档先行硬锁（ai/user 无差别）',
     blocking: true,
     extra: 'AF 项目+有源码 → REQ/sol/dev① 格式全过才绿；无微型/hotfix 豁免',
   },

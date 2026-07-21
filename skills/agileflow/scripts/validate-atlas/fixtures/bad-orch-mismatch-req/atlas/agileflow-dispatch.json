@@ -8,7 +8,10 @@
       "role": "req",
       "gate": "req-confirm",
       "taskId": null,
-      "paths": ["atlas/requirements/REQ-999-other.md"]
+      "paths": [
+        "atlas/requirements/REQ-999-other.md"
+      ],
+      "subagentId": "fixture-subagent-req-1"
     }
   ]
 }

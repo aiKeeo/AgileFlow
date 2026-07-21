@@ -28,7 +28,7 @@
 
 - **上游**：已确认 REQ、model/ 或跳过判定、仓库上下文
 - **栈来源**：`ai_record` / `askquestion` / `user_said` / `repo`
-- **模式**：`AF_FLOW` + `AF_DECIDE`
+- **决策**：`AF_DECIDE`
 - **Template 模式**：若启用，须先读 `atlas/template/solution/`
 
 ---
@@ -164,7 +164,7 @@
 ## 本次任务（总控注入）
 
 - 阶段：3
-- 模式：{AF_FLOW}+{AF_DECIDE}
+- 决策：{AF_DECIDE}
 - 任务一句话：{…}
 - 上游路径：{…}
 - 产物期望：{…}

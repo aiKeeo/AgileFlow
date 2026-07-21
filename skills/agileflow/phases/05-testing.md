@@ -11,7 +11,7 @@
 阶段 4 **步骤 ③** 已由 Dev Worker 在 `test/ac/` 按 REQ AC 写完验收测试并跑绿；本阶段**不重写测试**（缺测见下方 [缺测回阶段 4③](#缺测回阶段-4③)）。**总控**直接负责：
 
 1. **测试入场门禁**（与阶段 4③ 合并验证）：**③ 证据可解析** → 增量；**不可解析** → 全量重验。见下方 [合并验证](#测试入场门禁与阶段-4③-合并验证)
-2. **AC 验收归档**（逐 REQ）：③ 证据可解析 → **默认不复跑**，引用 `## 结果`/checkpoint 摘要更新 AC 状态并出报告；不可解析 / 用户点名全量 → 复跑 `test/ac/` 后再归档 → REQ 已实现
+2. **AC 验收归档**（逐 REQ）：③ 证据可解析 → **默认不复跑**，引用 `## 结果`/checkpoint 摘要更新 AC 状态并出报告；**REQ 表「AC 测试方法/状态」须已在阶段 4③ 回填**（`test-entry` 硬拦「③ 后填」）；不可解析 / 用户点名全量 → 复跑 `test/ac/` 后再归档 → REQ 已实现
 3. **全量回归归档**（全部完成后）：全量静态检查→构建→单元/AC验收测试→集成→冒烟 → 更新 `atlas/tests/README.md` → PASS / BLOCKED-HUMAN / FAIL
 
 步骤细则见 [ac-guide 阶段 5](../phases/05-testing.md#阶段-5tests) · 门禁细则见 [测试流水线](../phases/05-testing.md#测试入场门禁)。
@@ -31,7 +31,7 @@
 | `test:pixel-fe` | FE 像素对比（有原型） | [fe-pixel-compare](../templates/../tools/fe-pixel-compare.md) |
 | `test:5-0` / `test:5a` / `test:5b` | 仅对应子阶段（CLI 短名） | 本文对应节 |
 
-分层跑完 → 证据写入 `atlas/logs/` 或 tests README → **总控** AskQuestion（继续全量 / 修 / 停）。
+分层跑完 → 证据写入 `atlas/logs/` 或 tests README → **`user`**：总控 AskQuestion（继续全量 / 修 / 停）；**`ai`**：闸门绿则同会话连做全量/收口，不问。
 
 ### BE 冒烟（`test:smoke-be`）
 
