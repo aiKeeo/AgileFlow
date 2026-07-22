@@ -4,7 +4,7 @@
 
 > **流程本身就是产品。** 面向需要**可交付、可审计、可交接**的团队——把想法落成带证据链的成品，不是聊天记录里的一堆代码。
 
-[![Version](https://img.shields.io/badge/version-9.23.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.31.0-blue.svg)](skills/agileflow/SKILL.md)
 [![Enterprise Ready](https://img.shields.io/badge/Enterprise-可交付证据链-green.svg)](#企业级可交付)
 
 ---

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "mode": "degraded-single-session",
+  "degradedReason": "测试：滥用 degraded",
+  "degradedAt": "2026-07-21T12:00:00.000Z",
+  "entries": []
+}

@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { collectFiles, exists, readText } from './fs-utils.mjs';
 import { isModelingSkipped } from './modeling-skip.mjs';
+import { loadFlow, bandForStep, inferStepFromFlow, inferWaveFromFlow, listFlowSteps, parseAfStep, formatAfStep } from './flow.mjs';
+import fs from 'node:fs';
 
 const ENV_REL = 'atlas/agileflow.env';
 
@@ -9,6 +11,7 @@ const ALLOWED = {
   AF_DECIDE: new Set(['ai', 'user', 'pending']),
   AF_TIER: new Set(['full']),
   AF_STACK_SOURCE: new Set(['pending', 'ai_record', 'askquestion', 'user_said', 'repo']),
+  AF_HOST_CAPABILITY: new Set(['full', 'degraded', 'pending']),
 };
 
 const REQUIRED_KEYS = Object.keys(ALLOWED);
@@ -67,9 +70,11 @@ export function loadAfEnv(projectRoot) {
     ok: true,
     state: {
       phase: map.AF_PHASE,
+      step: map.AF_STEP || '',
       decide: /** @type {'ai'|'user'|'pending'} */ (map.AF_DECIDE),
       tier: /** @type {'full'} */ ('full'),
       stackSource: /** @type {AfStackSource} */ (map.AF_STACK_SOURCE),
+      hostCapability: /** @type {'full'|'degraded'|'pending'} */ (map.AF_HOST_CAPABILITY),
       file: ENV_REL,
     },
   };
@@ -109,6 +114,12 @@ function hasOpenDevTasks(todo) {
  * @returns {string}
  */
 export function inferPhaseFromArtifacts(projectRoot, brownfield) {
+  const flowLoaded = loadFlow(projectRoot);
+  if (flowLoaded.ok && flowLoaded.flow) {
+    const stepId = inferStepFromFlow(projectRoot, flowLoaded.flow, { brownfield });
+    if (stepId) return bandForStep(flowLoaded.flow, stepId);
+  }
+
   const atlas = path.join(projectRoot, 'atlas');
   if (!exists(atlas)) return brownfield ? '0' : '1';
 
@@ -177,6 +188,62 @@ export function isUserStackSettled(stackSource) {
  * @param {{ brownfield?: boolean, gatePhase?: string, requireEnv?: boolean }} [opts]
  * @returns {AfState | null}
  */
+
+/**
+ * 前进到指定 flow 步或一波：原子写入 AF_STEP + AF_PHASE（最左档）
+ * @param {string} projectRoot
+ * @param {string|string[]} nextStepIdOrWave
+ * @returns {{ ok: true, step: string, phase: string, wave: string[] } | { ok: false, error: string }}
+ */
+export function advanceStep(projectRoot, nextStepIdOrWave) {
+  const wave = Array.isArray(nextStepIdOrWave)
+    ? nextStepIdOrWave.filter(Boolean)
+    : parseAfStep(String(nextStepIdOrWave || ''));
+  return setAfWave(projectRoot, wave);
+}
+
+/**
+ * 写入当前波光标
+ * @param {string} projectRoot
+ * @param {string[]} waveIds
+ */
+export function setAfWave(projectRoot, waveIds) {
+  const envPath = path.join(projectRoot, ENV_REL);
+  if (!exists(envPath)) {
+    return { ok: false, error: '缺少 atlas/agileflow.env' };
+  }
+  const flowLoaded = loadFlow(projectRoot);
+  if (!flowLoaded.ok || !flowLoaded.flow) {
+    return { ok: false, error: '缺少或无法解析 atlas/flow.yaml' };
+  }
+  const ids = listFlowSteps(flowLoaded.flow).map((s) => s.id);
+  const wave = (waveIds || []).filter(Boolean);
+  if (wave.length === 0) {
+    return { ok: false, error: '波不能为空' };
+  }
+  for (const id of wave) {
+    if (!ids.includes(id)) {
+      return { ok: false, error: `AF_STEP 含未知 id=${id}（允许：${ids.join('|')}）` };
+    }
+  }
+  const left = wave[0];
+  const phase = bandForStep(flowLoaded.flow, left);
+  const stepValue = formatAfStep(wave);
+  let raw = readText(envPath) || '';
+  if (/^AF_STEP=/m.test(raw)) {
+    raw = raw.replace(/^AF_STEP=.*$/m, `AF_STEP=${stepValue}`);
+  } else {
+    raw = `AF_STEP=${stepValue}\n` + raw;
+  }
+  if (/^AF_PHASE=/m.test(raw)) {
+    raw = raw.replace(/^AF_PHASE=.*$/m, `AF_PHASE=${phase}`);
+  } else {
+    raw = raw.replace(/^AF_STEP=.*$/m, (m) => `${m}\nAF_PHASE=${phase}`);
+  }
+  fs.writeFileSync(envPath, raw.endsWith('\n') ? raw : raw + '\n');
+  return { ok: true, step: stepValue, phase, wave };
+}
+
 export function validateAfEnv(projectRoot, reporter, opts = {}) {
   const requireEnv = opts.requireEnv !== false;
   const loaded = loadAfEnv(projectRoot);
@@ -220,6 +287,74 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
       message:
         'AF_DECIDE 仍为 pending → 须先 AskQuestion「流程启动卡」（谁决策），用户选定后再写入 ai|user；禁止静默默认。',
     });
+  }
+
+  // 跑闸门时宿主能力须已声明（总控首条回复根据 tool list 写 full|degraded）
+  if (opts.gatePhase && state.hostCapability === 'pending') {
+    blocked = true;
+    reporter.add({
+      severity: 'error',
+      rule: 'AF-ENV-CAPABILITY-PENDING',
+      file: ENV_REL,
+      message:
+        'AF_HOST_CAPABILITY 仍为 pending → 总控首条回复须根据工具列表写入 full（有 Subagent/Task）或 degraded（确无）；再跑 gate。',
+    });
+  }
+
+
+  // 有 flow.yaml 时：AF_STEP 为进度光标（单步或逗号波），AF_PHASE=最左档
+  const flowLoaded = loadFlow(projectRoot);
+  if (flowLoaded.ok && flowLoaded.flow) {
+    const flow = flowLoaded.flow;
+    const stepIds = listFlowSteps(flow).map((s) => s.id);
+    const envStepRaw = parseEnvText(readText(path.join(projectRoot, ENV_REL)) || '').AF_STEP || '';
+    const envWave = parseAfStep(envStepRaw);
+    if (envWave.length === 0) {
+      blocked = true;
+      reporter.add({
+        severity: 'error',
+        rule: 'AF-ENV-STEP-MISSING',
+        file: ENV_REL,
+        message:
+          '有 atlas/flow.yaml 时须维护 AF_STEP（当前步 id，或并行波 id1,id2）。AF_PHASE=最左步的 band。',
+      });
+    } else {
+      const unknown = envWave.filter((id) => !stepIds.includes(id));
+      if (unknown.length) {
+        blocked = true;
+        reporter.add({
+          severity: 'error',
+          rule: 'AF-ENV-STEP',
+          file: ENV_REL,
+          message: `AF_STEP 含未知 id：${unknown.join(',')}（允许：${stepIds.join('|')}）`,
+        });
+      } else {
+        const left = envWave[0];
+        const band = bandForStep(flow, left);
+        if (state.phase !== band) {
+          blocked = true;
+          reporter.add({
+            severity: 'error',
+            rule: 'AF-ENV-STEP-PHASE',
+            file: ENV_REL,
+            message: `AF_STEP=${envStepRaw} 要求 AF_PHASE=${band}（最左 ${left}），当前 ${state.phase} → 用 advanceStep/setAfWave 成对写入。`,
+          });
+        }
+        const inferredWave = inferWaveFromFlow(projectRoot, flow, {
+          brownfield: Boolean(opts.brownfield),
+        });
+        const norm = (arr) => [...arr].sort().join(',');
+        if (inferredWave.length && norm(envWave) !== norm(inferredWave)) {
+          blocked = true;
+          reporter.add({
+            severity: 'error',
+            rule: 'AF-ENV-STEP',
+            file: ENV_REL,
+            message: `AF_STEP=${envStepRaw} 与产物推断波 ${formatAfStep(inferredWave)} 不一致 → 更新后再跑闸门。`,
+          });
+        }
+      }
+    }
   }
 
   // 声称阶段必须与产物推断一致（不过 → 报错并写出应改成的值）
@@ -270,7 +405,7 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
       severity: 'info',
       rule: 'AF-ENV-OK',
       file: ENV_REL,
-      message: `af-env phase=${state.phase} decide=${state.decide} tier=${state.tier} stack=${state.stackSource} infer=${inferred}`,
+      message: `af-env phase=${state.phase} decide=${state.decide} tier=${state.tier} stack=${state.stackSource} host=${state.hostCapability} infer=${inferred}`,
     });
   }
 
@@ -393,8 +528,10 @@ function validateStackSourceForDecide(projectRoot, state, reporter) {
 /**
  * @typedef {Object} AfState
  * @property {string} phase
+ * @property {string} step
  * @property {'ai'|'user'|'pending'} decide
  * @property {'full'} tier
  * @property {AfStackSource} stackSource
+ * @property {'full'|'degraded'|'pending'} hostCapability
  * @property {string} file
  */

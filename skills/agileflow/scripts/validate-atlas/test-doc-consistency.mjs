@@ -72,10 +72,12 @@ const killed = [
 for (const rel of killed) mustNotExist(rel);
 
 // —— 首启默认问人 ——
-mustInclude('SKILL.md', '**禁止**静默写 ai');
-mustInclude('templates/contract.md', '契约未确认静默写');
+mustInclude('SKILL.md', 'L0 五条');
+mustInclude('templates/contract.md', '行为矩阵（ai vs user');
+mustInclude('templates/contract.md', '必守边界');
 mustInclude('templates/contract.md', '默认问人');
-mustInclude('phases/01-requirement.md', '默认问人');
+mustInclude('phases/01-requirement.md', 'contract §4 行为矩阵');
+mustNotInclude('phases/01-requirement.md', '## 决策差异');
 mustNotInclude('SKILL.md', 'AF_FLOW');
 mustNotInclude('templates/contract.md', 'AF_FLOW');
 mustNotInclude('templates/contract.md', '默认不问启动');
@@ -109,7 +111,7 @@ mustInclude('SKILL.md', 'WorkBuddy');
 mustInclude('templates/orchestrator.md', '宿主义务');
 mustInclude('templates/orchestrator.md', '用户话术');
 mustInclude('templates/orchestrator.md', 'subagentId');
-mustInclude('templates/orchestrator.md', '只开 2 个 subagent');
+mustInclude('templates/orchestrator.md', '只开写码 subagent');
 mustInclude('templates/orchestrator.md', 'AF_DECIDE');
 mustInclude('SKILL.md', '只开写码 subagent');
 
@@ -123,7 +125,20 @@ mustInclude('templates/orchestrator.md', '落盘路径自检');
 mustInclude('templates/role/README.md', 'atlas/role');
 mustInclude('templates/role/README.md', 'baseline');
 mustInclude('templates/validate-atlas-gate.md', 'ROLE-CUSTOM');
-mustInclude('templates/role/role-dev.md', '一次派活');
+mustInclude('templates/role/README.md', 'resolveRolePrompt');
+mustInclude('templates/orchestrator.md', 'resolveRolePrompt');
+mustExist('scripts/validate-atlas/lib/role-prompt.mjs');
+mustExist('templates/role/layers/dev/core.md');
+mustExist('templates/role/layers/req/return.md');
+mustInclude('templates/role/role-dev.md', 'AF-ROLE: assembled');
+mustInclude('templates/contract.md', 'AF_HOST_CAPABILITY');
+mustInclude('scripts/validate-atlas/lib/af-env.mjs', "AF_HOST_CAPABILITY: new Set(['full', 'degraded', 'pending'])");
+mustInclude('scripts/validate-atlas/lib/rule-hints.mjs', 'ORCH-DEGRADED-REASON');
+mustInclude('scripts/validate-atlas/lib/rule-hints.mjs', 'AF-ENV-CAPABILITY-PENDING');
+mustInclude('templates/orchestrator.md', 'checkpoint 协议');
+mustInclude('phases/05-testing.md', '测试失败回退');
+mustInclude('phases/change-management.md', '影响面判定');
+mustNotInclude('phases/00-intent-routing.md', '../phases/05-testing.md');
 mustInclude('templates/orchestrator.md', '一次派活');
 mustInclude('SKILL.md', 'atlas/role/');
 mustInclude('SKILL.md', 'bootstrap-scaffold');
@@ -154,7 +169,7 @@ mustInclude('scripts/validate-atlas/lib/reporter.mjs', 'error 与 warn 均使校
 // —— 质量 / 测试 ——
 mustInclude('phases/04-development.md', '## 质量要求');
 mustInclude('phases/05-testing.md', '证据来源：阶段4③复用');
-mustInclude('phases/01-requirement.md', '摘要后连做');
+mustInclude('phases/01-requirement.md', 'contract §4 行为矩阵');
 
 // —— 加载指向 contract ——
 mustInclude('SKILL.md', 'templates/contract.md');
@@ -169,6 +184,22 @@ mustNotInclude('SKILL.md', 'parallel-orchestration.md');
 mustNotInclude('SKILL.md', 'subagent-contracts.md');
 mustNotInclude('phases/01-requirement.md', 'stage-delegation.md');
 mustNotInclude('phases/04-development.md', 'parallel-orchestration.md');
+
+mustInclude('phases/00-intent-routing.md', 'atlas-structure');
+mustInclude('phases/atlas-structure.md', '路径铁律');
+mustExist('phases/atlas-structure.md');
+mustInclude('templates/orchestrator.md', '正确做法与红线（≤15）');
+mustInclude('SKILL.md', 'orchestrator §正确做法与红线');
+mustInclude('SKILL.md', '红线（≤15');
+mustNotInclude('templates/orchestrator.md', '## 反模式\n\n| 禁止 | 正确 |');
+mustNotInclude('templates/orchestrator.md', '### 反模式（禁止 · 唯一表）');
+mustInclude('SKILL.md', '一处定义、他处只链');
+mustInclude('templates/contract.md', 'AF_TEMPLATE');
+mustNotInclude('phases/04-development.md', 'dev-quickstart');
+mustNotInclude('phases/05-testing.md', '（权威）');
+mustNotInclude('phases/05-testing.md', '../phases/05-testing.md](../phases/05-testing.md)（权威）');
+mustInclude('TROUBLESHOOTING.md', 'validate-atlas-gate');
+mustInclude('templates/dev.md', '闸门 SSOT');
 
 // —— 版本号与 package.json 一致 ——
 const skillVersion = read('SKILL.md').match(/^version:\s*([^\n]+)/m)?.[1]?.trim();
@@ -199,8 +230,77 @@ for (const name of fs.readdirSync(fixturesTodoRoot)) {
 
 mustInclude('templates/validate-atlas-gate.md', 'dev-complete');
 mustInclude('templates/validate-atlas-gate.md', '台账溯源审计');
+mustInclude('templates/validate-atlas-gate.md', 'L1 脚本硬挡');
 mustInclude('scripts/validate-atlas/lib/phase-spec.mjs', "'dispatch-ledger'");
 mustNotInclude('scripts/validate-atlas/lib/phase-spec.mjs', 'ai/fast');
+
+// —— SSOT 白名单：标记只出现在 owner 文件 ——
+const ssotMarkers = [
+  { needle: '行为矩阵（ai vs user', owner: 'templates/contract.md' },
+  { needle: '闸门 SSOT', owner: 'templates/dev.md' },
+  { needle: '正确做法与红线（≤15）', owner: 'templates/orchestrator.md' },
+];
+const ssotScanRoots = ['SKILL.md', 'phases', 'templates'];
+function collectMdFiles(relDir) {
+  const abs = path.join(skillRoot, relDir);
+  if (!fs.statSync(abs).isDirectory()) return [relDir];
+  const out = [];
+  for (const name of fs.readdirSync(abs)) {
+    if (!name.endsWith('.md')) continue;
+    out.push(path.join(relDir, name));
+  }
+  return out;
+}
+const mdForSsot = [];
+for (const root of ssotScanRoots) {
+  const abs = path.join(skillRoot, root);
+  if (!fs.existsSync(abs)) continue;
+  if (fs.statSync(abs).isFile()) mdForSsot.push(root);
+  else mdForSsot.push(...collectMdFiles(root));
+}
+for (const { needle, owner } of ssotMarkers) {
+  for (const rel of mdForSsot) {
+    if (rel === owner) continue;
+    if (read(rel).includes(needle)) {
+      assert(false, `${rel} 禁止重复 SSOT 标记「${needle}」（唯一 owner: ${owner}）`);
+    }
+  }
+  assert(read(owner).includes(needle), `${owner} 须含 SSOT 标记「${needle}」`);
+}
+
+// —— Markdown 相对链接存在性（总控关键路径；跳过占位符路径） ——
+const linkScanFiles = [
+  'SKILL.md',
+  'QUICKSTART.md',
+  'TROUBLESHOOTING.md',
+  ...collectMdFiles('phases'),
+  'templates/contract.md',
+  'templates/orchestrator.md',
+  'templates/dev.md',
+  'templates/validate-atlas-gate.md',
+  'templates/todo.md',
+];
+const linkRe = /\[([^\]]*)\]\(([^)]+)\)/g;
+function resolveLink(fromRel, raw) {
+  const target = raw.split('#')[0].trim();
+  if (!target || /^https?:\/\//i.test(target) || /^mailto:/i.test(target)) return null;
+  if (/[{}]/.test(target)) return null;
+  const fromDir = path.dirname(fromRel);
+  const resolved = path.normalize(path.join(skillRoot, fromDir, target));
+  if (!resolved.startsWith(skillRoot)) return 'outside';
+  return path.relative(skillRoot, resolved);
+}
+for (const rel of linkScanFiles) {
+  if (!exists(rel)) continue;
+  const content = read(rel);
+  let m;
+  while ((m = linkRe.exec(content)) !== null) {
+    const [, , href] = m;
+    const resolved = resolveLink(rel, href);
+    if (resolved === null || resolved === 'outside') continue;
+    assert(exists(resolved), `${rel} 链接目标不存在: (${href}) → ${resolved}`);
+  }
+}
 
 // —— 脚本仍在 ——
 mustInclude('scripts/validate-atlas/lib/af-env.mjs', "AF_TIER: new Set(['full'])");

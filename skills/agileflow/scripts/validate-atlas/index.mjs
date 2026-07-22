@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readText } from './lib/fs-utils.mjs';
+import { readText, exists } from './lib/fs-utils.mjs';
 import { detectBrownfield } from './lib/brownfield.mjs';
 import { Reporter } from './lib/reporter.mjs';
 import { loadAfEnv, validateAfEnv } from './lib/af-env.mjs';
@@ -29,6 +29,7 @@ import {
   resolveCustomRoleForModule,
   customSkipMessage,
 } from './lib/rules/role-custom.mjs';
+import { validateFlowFile, isStepSkipped } from './lib/flow.mjs';
 
 /**
  * @typedef {Object} ValidateOptions
@@ -165,6 +166,12 @@ export function validateAtlas(options = {}) {
       ? phase
       : afState?.phase ?? (phase !== 'all' ? phase : 'all');
 
+  // 有 env = 已启用 AF：须有 flow.yaml；仅有文件则校验形状（不硬检 depends 文件是否存在）
+  if (shouldRun('flow')) {
+    const afEnabled = exists(path.join(projectRoot, 'atlas', 'agileflow.env'));
+    validateFlowFile(projectRoot, reporter, { requireFile: afEnabled });
+  }
+
   if (shouldRun('dir')) {
     validateDirectory(projectRoot, reporter, { phase, brownfield, templateMode });
   }
@@ -178,21 +185,30 @@ export function validateAtlas(options = {}) {
       validateSolution(projectRoot, reporter, { ...docOpts, templateMode: true });
     }
   } else {
-    if (shouldRunDoc('req') && (phase === 'all' || phase === '1')) {
+    if (shouldRunDoc('req') && (phase === 'all' || phase === '1') && !isStepSkipped(projectRoot, 'req')) {
       validateRequirements(projectRoot, reporter, docOpts);
     }
-    if (shouldRunDoc('sol') && (phase === 'all' || phase === '3')) {
+    if (shouldRunDoc('sol') && (phase === 'all' || phase === '3') && !isStepSkipped(projectRoot, 'sol')) {
       validateSolution(projectRoot, reporter, docOpts);
     }
-    if (shouldRunDoc('dev') && (phase === 'all' || phase === '4')) {
+    if (shouldRunDoc('dev') && (phase === 'all' || phase === '4') && !isStepSkipped(projectRoot, 'dev')) {
       validateDev(projectRoot, reporter, docOpts);
     }
   }
 
   if (shouldRunDoc('req-confirmed') && (phase === 'all' || phase === '3')) {
-    validateReqConfirmed(projectRoot, reporter);
+    if (!isStepSkipped(projectRoot, 'req')) {
+      validateReqConfirmed(projectRoot, reporter);
+    } else {
+      reporter.add({
+        severity: 'info',
+        rule: 'FLOW-STEP-SKIP',
+        file: 'atlas/flow.yaml',
+        message: 'req.skip=true → 跳过 REQ 已确认校验（外挂 AC 场景）。',
+      });
+    }
   }
-  if (shouldRunDoc('model') && (phase === 'all' || phase === '2')) {
+  if (shouldRunDoc('model') && (phase === 'all' || phase === '2') && !isStepSkipped(projectRoot, 'model')) {
     validateModel(projectRoot, reporter);
   }
   if (shouldRun('todo') && (phase === 'all' || phase === '3' || phase === '4' || phase === '5')) {

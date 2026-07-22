@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { exists } from './fs-utils.mjs';
 import { createEmptyLedger, DISPATCH_LEDGER_REL } from './rules/dispatch-ledger.mjs';
 import { bootstrapRoleBaselines } from './rules/role-custom.mjs';
+import { ensureFlowYaml } from './flow.mjs';
 
 const ROLE_FILES = ['role-req.md', 'role-model.md', 'role-sol.md', 'role-dev.md'];
 
@@ -135,6 +136,8 @@ export function bootstrapAtlasScaffold(projectRoot) {
     todoCreated = true;
   }
 
+  const flowBoot = ensureFlowYaml(projectRoot, skillRoot);
+
   const ledgerPath = path.join(projectRoot, DISPATCH_LEDGER_REL);
   let ledgerCreated = false;
   if (!exists(ledgerPath)) {
@@ -149,6 +152,7 @@ export function bootstrapAtlasScaffold(projectRoot) {
     role: { copied, skipped },
     human: { created: humanCreated, path: humanPath },
     todo: { created: todoCreated, path: todoPath },
+    flow: { created: flowBoot.created, path: flowBoot.path },
     dispatch: { created: ledgerCreated, path: ledgerPath },
     roleBaseline: {
       created: roleBaseline.created,

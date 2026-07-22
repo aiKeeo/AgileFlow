@@ -84,6 +84,8 @@ $NODE "$SKILL/scripts/agent-retest/score.mjs" \
 
 `score.mjs` 的 `ORCH` 项会检 `subagentId` / dev `taskId`；`dev-complete` / `test-entry` 闸门亦做台账溯源审计。
 
+有 FE（`frontend/` / `miniprogram/` 等）时，`test-entry` 另硬检 Playwright 三件套：`fe-smoke-report.json` + `fe-smoke-shots/` + `fe-smoke-visual-review.md`（小程序须 H5）。缺则 `GATE_DEV` 失败。
+
 ---
 
 ## A · ai（AI 自主）
@@ -132,6 +134,35 @@ prompt：`skills/agileflow/tools/agent-retest/USER-SIM.prompt.md`。
 可答：启动卡、缺口、确认、技术栈、阶段闸门、并行卡、F 里程碑。  
 禁止：教流程、闸门名、atlas。  
 剧本：认技术栈；需求/方案「确认继续」；并行「可以并行」；不选「重选契约/暂停」除非记失败。
+
+---
+
+## C · custom-flow（特殊阶段 / AF_STEP）
+
+验证 **自定义 flow 步**是否被当作正式阶段加载执行（非旁路备注）。
+
+```bash
+WORK=~/code/af-retest-custom-flow-$(date +%Y%m%d)
+prepare.mjs --work-root "$WORK" --mode ai --scenario custom-flow
+```
+
+- 工作区**预置** `atlas/flow.yaml`（`research` → `req` → `ux-spike` → `model` → … → `preflight`）与 `role-ux-spike.md`
+- 被试 prompt 用**饮水打卡瘦需求**（`PROMPT.ai.custom-flow.md`），**禁止**教被试步名
+- 打分：`score.mjs` 额外检 `CUSTOM_RESEARCH`（须早于首个 REQ）/ `CUSTOM_UX` / `CUSTOM_PREFLIGHT` / `AF_STEP` / `LEDGER_STEPS`（台账含 research、ux-spike）/ `MODEL_SKIP_FLOW`
+- 总控直做步（如 research）台账：`role=orch-direct` + `subagentId="orch-direct"` + `stepId`
+- 人工：盘上 `research-water.md` 时间早于首个 REQ；会话曾落在 `AF_STEP=research|ux-spike`
+
+## D · parallel-flow（依赖驱动并行波 + 门牌）
+
+```bash
+WORK=~/code/af-retest-parallel-flow-$(date +%Y%m%d)
+prepare.mjs --work-root "$WORK" --mode ai --scenario parallel-flow
+```
+
+- 预置 `research` ∥ `competitor`（均 `depends: []`）再 `req`（depends 两份产物）
+- 被试 prompt 含 **`research:`** 门牌切入（应拉起整波并行）
+- 打分：`PARALLEL_RESEARCH` / `PARALLEL_COMPETITOR` / `PARALLEL_LEDGER`（两步台账）
+- 人工：首行曾声明 flow 波并发；两日志均有
 
 ---
 

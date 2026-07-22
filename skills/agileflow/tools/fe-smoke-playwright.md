@@ -1,8 +1,9 @@
-# 前端 Playwright 冒烟（通用 · 页面可展示）
+# 前端 Playwright 冒烟（强制 · 截图 + AI 目视）
 
-> **用途**：对**任意可在浏览器打开的前端**做页面冒烟——逐路由打开、收集 `console.error` / `pageerror`、确认能渲染（非白屏）。  
+> **用途**：对**任意可在浏览器打开的前端**做页面冒烟——逐路由打开、收集 `console.error` / `pageerror`、截图、总控目视（非白屏 / 无报错层）。  
 > **范例脚本**：[examples/fe-smoke/fe-smoke.mjs](../examples/fe-smoke/fe-smoke.mjs)  
-> **不替代**：可运行闸门 编译/启动、BE 接口冒烟、阶段 5 细 AC、微信开发者工具真机。
+> **不替代**：可运行闸门 编译/启动、BE 接口冒烟、阶段 5 细 AC、微信开发者工具真机。  
+> **硬门槛**：项目存在 `frontend/` / `miniprogram/` / `web/` 等 FE 目录时，`test-entry` **必须**过本套证据；**禁止跳过仍标 PASS**。
 
 ---
 
@@ -12,10 +13,22 @@
 |----------|--------|
 | Web / SPA（React、Vue、Vite、Next 静态导出等） | **正常 `dev` / `preview` 启动** → Playwright 打开 `FE_BASE_URL` |
 | 管理后台 / PC 站 | 同上；`routerMode` 多为 `history` |
-| 小程序（Taro / uni-app 等） | **用其 H5 构建产物或 `dev:h5` 启动**再测；**禁止**声称已覆盖 weapp 真机 |
-| 纯原生 weapp / 无 H5 | 本脚本**不适用** → 人工/开发者工具；AskQuestion 选跳过并写明原因 |
+| 小程序（Taro / uni-app 等） | **必须**用其 **H5**（`dev:h5` / H5 产物）再测；**禁止**无 H5 声称已过本门槛 |
+| 纯原生 weapp / 无法起 H5 | **不得标测试 PASS** → humanTodo「补 H5 构建」；人工/开发者工具另验 weapp |
 
-**原则**：脚本只认「浏览器里能打开的 URL」，不认框架名。
+**原则**：脚本只认「浏览器里能打开的 URL」，不认框架名。H5 PASS ≠ weapp 真机已测。
+
+---
+
+## 过关三件套（缺一不可）
+
+| # | 证据 | 说明 |
+|---|------|------|
+| 1 | `atlas/logs/fe-smoke-report.json` | `ok === true`；每非 skip 页有结果 |
+| 2 | `atlas/logs/fe-smoke-shots/{id}.png` | 脚本自动截；report 内 `screenshot` 路径须存在 |
+| 3 | `atlas/logs/fe-smoke-visual-review.md` | 总控 **Read 每张图** 后写；`screenshotsReviewed: true` + 每页 `PASS` |
+
+闸门规则：`FE-SMOKE-*`（见 validate-atlas `smoke` 模块）。仅有 `be-smoke` / curl 关键词 **不够**。
 
 ---
 
@@ -23,19 +36,18 @@
 
 | 点 | 结论 |
 |----|------|
-| 通用 Web FE | ✅ 启动后配 `FE_BASE_URL` + `pages.json` 即可 |
-| 路由差异 | ✅ 配置 `routerMode`：`history`（默认）/ `hash`（Taro H5 等）/ `path`（完整 path 自管） |
-| 读 console | ✅ 落盘 `atlas/logs/fe-smoke.*`，AI 可读 |
-| 小程序 | ⚠️ **仅 H5 形态**；weapp 原生另测 |
+| 通用 Web FE | ✅ 启动后配 `FE_BASE_URL` + `pages.json` |
+| 路由差异 | ✅ `routerMode`：`history` / `hash`（Taro H5）/ `path` |
+| 读 console | ✅ 落盘 `atlas/logs/fe-smoke.*` |
+| 截图 + AI 目视 | ✅ 脚本截图；Node 不看图；总控 Read 图写 review |
+| 小程序 | ⚠️ **仅 H5**；无 H5 → 不得 PASS |
 | 无 FE 服务 | ❌ 须先启动；脚本不替你起服务 |
-| 登录态 | ✅ 可选 API 登录 + 注入 localStorage（键名可配） |
-| 替代全量 E2E | ❌ 只验「能开、不炸」 |
-| **浏览器二进制下载** | ✅ **必须走镜像优先**（见下）；官方 CDN 国内极慢/超时，会硬性门槛体验 |
-| 镜像是否永远可用 | ⚠️ Playwright≥1.58 Chromium 走 CfT 路径；优先 `cdn.npmmirror.com/binaries/playwright`；失败再回退官方 |
-| 装全套浏览器 | ❌ **只装 chromium**；勿 `install` 无参 |
+| 登录态 | ✅ 可选 API 登录 + localStorage |
+| 替代全量 E2E | ❌ 只验「能开、不炸、目视正常」 |
+| **浏览器二进制** | ✅ **镜像优先**（见下）；只装 chromium |
+| AskQuestion 跳过 | ❌ **已取消**；有 FE 时不可「跳过仍过」 |
 
-**结论：可实现且应做成通用能力。** 可选增强；AskQuestion 决定是否跑。**安装浏览器时镜像优先，否则影响体验。**  
-**有强制原型时**：另须 [fe-pixel-compare](../tools/fe-pixel-compare.md)（`test:pixel-fe`）。
+**有强制原型时**：另须 [fe-pixel-compare](fe-pixel-compare.md)（`test:pixel-fe`），与本门槛并行不互替。
 
 ---
 
@@ -49,7 +61,8 @@
 1. 首次跑 FE 冒烟前：若本机尚无 Playwright Chromium → **先装**，再跑脚本  
 2. 安装命令 **默认带国内镜像**（见下）；超时/404 → 清掉 host 再试官方一次  
 3. **只装 `chromium`**；已装过则跳过（`npx playwright install chromium` 幂等）  
-4. 禁止默默挂在官方 CDN 上超过 ~2 分钟还不换镜像/回退
+4. 禁止默默挂在官方 CDN 上超过 ~2 分钟还不换镜像/回退  
+5. Chromium 未装成功 → 冒烟未执行 → **FAIL**，禁止跳过装浏览器仍标 PASS
 
 ### 推荐命令
 
@@ -71,52 +84,26 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://cdn.npmmirror.com/binaries/playwright npx playw
 unset PLAYWRIGHT_DOWNLOAD_HOST && npx playwright install chromium
 ```
 
-**项目脚本（推荐写入 package.json，免记 env）**：
+**项目脚本（推荐写入 package.json）**：
 
 ```json
 "smoke:fe:install": "node scripts/fe-smoke-install.mjs"
 ```
 
-范例安装包装：[examples/fe-smoke/fe-smoke-install.mjs](../examples/fe-smoke/fe-smoke-install.mjs)（内置镜像 → 失败回退官方）。
-
-备用镜像（主镜像 404 时可试）：`https://npmmirror.com/mirrors/playwright`。
+范例：[examples/fe-smoke/fe-smoke-install.mjs](../examples/fe-smoke/fe-smoke-install.mjs)。  
+备用镜像：`https://npmmirror.com/mirrors/playwright`。
 
 ---
 
-## 何时询问（AskQuestion）
+## 何时跑（强制，不问「是否跳过」）
 
-命中**任一**且 architecture / todo 存在 **FE**（含 Web / 小程序-H5）：
+命中**任一**且存在 FE 目录：
 
-1. **F-xxx / MVP 切片** 可运行闸门 通过后：`user` 在阶段性确认卡之前或之中问；`ai` 仅在用户要演示时问  
-2. **阶段 5 · 测试入场 · 功能冒烟时**
-3. 用户说「给用户看 / 演示 / 页面测一下」  
-4. 用户前缀 **`test:smoke-fe`** / **`test:smoke`**（有 FE）→ **直接跑**，可跳过本卡
+1. **阶段 5 · `test-entry` 前**（硬挡）  
+2. 用户前缀 **`test:smoke-fe`** / **`test:smoke`**（有 FE）  
+3. F/MVP 切片可运行后进测试验收前（须已齐本套证据）
 
-### 询问卡模板
-
-```yaml
-title: "前端页面冒烟（Playwright）"
-questions:
-  - id: fe_smoke_playwright
-    prompt: |
-      是否跑前端页面冒烟自动化？（通用：Web / 后台 / 小程序-H5）
-      - 须已正常启动前端（如 npm run dev / dev:h5 / preview）
-      - 打开 pages 清单每一页；收集 console.error / pageerror
-      - 结果 → atlas/logs/fe-smoke.*
-    options:
-      - id: run_fe_smoke
-        label: "跑 Playwright 前端冒烟"
-      - id: skip_fe_smoke
-        label: "跳过（仅人工/构建冒烟）"
-      - id: later
-        label: "稍后，先继续别的"
-```
-
-| 用户选 | Agent 必须 |
-|--------|------------|
-| 跑 | 确认 `FE_BASE_URL` 可访问 → 跑脚本 → Read report → FAIL 则修 FE；PASS 再继续 |
-| 跳过 | 证据写「FE Playwright：用户跳过」；**不豁免**编译与启动冒烟 |
-| 稍后 | 停 |
+`ai` / `user` **无差别**：有 FE 就必须跑；不得发卡「跳过 Playwright」。
 
 ---
 
@@ -125,8 +112,8 @@ questions:
 | 项 | 约定 |
 |----|------|
 | 脚本 | `scripts/fe-smoke.mjs`（从 exemplar 复制） |
-| 清单 | `scripts/fe-smoke.pages.json`（见下） |
-| 产出 | `atlas/logs/fe-smoke.log` + `fe-smoke-report.json` |
+| 清单 | `scripts/fe-smoke.pages.json` |
+| 产出 | `fe-smoke.log` + `fe-smoke-report.json` + `fe-smoke-shots/*.png` + `fe-smoke-visual-review.md` |
 
 ### `fe-smoke.pages.json` 结构
 
@@ -139,74 +126,92 @@ questions:
   "userKey": "user",
   "pages": [
     { "id": "home", "path": "/", "readySelector": "body", "needsAuth": false },
-    { "id": "login", "path": "/login", "readySelector": "body", "needsAuth": false },
-    { "id": "dashboard", "path": "/dashboard", "readySelector": "[data-testid=dashboard], body", "needsAuth": true }
+    { "id": "login", "path": "/login", "readySelector": "body", "needsAuth": false }
   ]
 }
 ```
 
 | 字段 | 说明 |
 |------|------|
-| `routerMode` | `history`：`BASE + basePath + path`；`hash`：`BASE/#/path`；`path`：`path` 已是绝对或完整 URL 片段 |
-| `basePath` | 如 `/admin`（无则 `""`） |
-| `baseUrl` | 前端已启动的地址；可被 `FE_BASE_URL` 覆盖 |
-| `tokenKey` / `userKey` | localStorage 键；可被 env 覆盖 |
-| `pages[].path` | 路由路径；Web 常用 `/xxx`；小程序 H5 常用 `pages/xxx/index` |
+| `routerMode` | `history` / `hash`（小程序 H5 常用）/ `path` |
+| `pages[].path` | Web：`/xxx`；小程序 H5：常 `pages/xxx/index` |
 | `readySelector` | 默认 `body`；建议业务根节点 |
-| `needsAuth` | true 时需登录注入，否则 SKIP |
+| `needsAuth` | true 时需登录注入，否则 SKIP（SKIP 页不计入目视必过页） |
 
-### 环境变量（可选；优先于 json）
+### 环境变量
 
 | 变量 | 默认 | 说明 |
 |------|------|------|
-| `FE_BASE_URL` | json `baseUrl` 或 `http://127.0.0.1:5173` | Vite 常 5173；Next 常 3000；小程序 H5 常 10086 |
+| `FE_BASE_URL` | json `baseUrl` 或 `http://127.0.0.1:5173` | Vite 常 5173；小程序 H5 常 10086 |
 | `FE_SMOKE_USER` / `FE_SMOKE_PASS` | 空 | 可选登录 |
 | `FE_SMOKE_LOGIN_URL` | `{BASE}/api/v1/auth/login` | 登录 API |
 | `FE_SMOKE_TOKEN_KEY` / `USER_KEY` | json 或 `token` / `user` | localStorage 键 |
 | `FE_SMOKE_IGNORE` | React DevTools 提示 | console 忽略子串，`\|` 分隔 |
 
-### 通过（PASS）
+### Playwright 脚本通过（单页）
 
-每页：导航成功 + 无 `pageerror` + 无未忽略 `console.error` + `readySelector` 可见。
+导航成功 + 无 `pageerror` + 无未忽略 `console.error` + `readySelector` 可见 + 已截图。  
+`blankSuspect` 为启发式（可见文本过短），**不单独挡闸门**；总控目视须覆盖。
 
-### 证据铁律（防假 PASS）
+---
+
+## AI 目视协议（总控）
+
+脚本跑绿后，总控必须：
+
+1. **Read** `atlas/logs/fe-smoke-shots/` 下 report 引用的每张 PNG（用读图能力，看画面）  
+2. 按页判断：非白屏、非整页空白壳、无明显 error overlay / 未捕获异常文案、路由内容已挂载  
+3. 写 `atlas/logs/fe-smoke-visual-review.md`：
+
+```markdown
+# FE Smoke Visual Review
+
+screenshotsReviewed: true
+
+| page | status | notes |
+|------|--------|-------|
+| home | PASS | 首页标题与列表可见 |
+| login | PASS | 表单与按钮可见，无报错层 |
+```
+
+任一眼见异常 → 该行 `FAIL` → 修 FE → 重跑脚本 → 重目视。  
+**禁止**未 Read 图就写 `screenshotsReviewed: true`。
+
+---
+
+## 证据铁律（防假 PASS）
 
 | 规则 | 说明 |
 |------|------|
-| **无报告 = 未跑** | 必须存在并 **Read** 过 `atlas/logs/fe-smoke-report.json`；仅口头「跑过了」无效 |
-| **summary.ok !== true** | 不得标可运行闸门 / 测试入场 FE 冒烟通过 |
-| **H5 ≠ weapp** | 本脚本只测浏览器 URL。微信开发者工具里的 `env: …,mp` 报错 **不在覆盖范围**；不得用 H5 PASS 声称「小程序控制台无错」 |
-| **Chromium 未装成功** | install 失败/超时 → 冒烟未执行 → **FAIL/未跑**，禁止跳过装浏览器仍标 PASS |
-
-**用户在开发者工具看到的报错**（如 `taroExports.useState is not a function`）→ 属 **weapp 真机/模拟器** 问题，须修 weapp 构建或人工验；**不能**用 Playwright H5 结果反驳。
+| **无报告 = 未跑** | 须存在 `fe-smoke-report.json` 且 `ok === true` |
+| **无截图 = 未跑完** | 每非 skip 页截图文件须在盘上 |
+| **无目视 = 未验收** | 须 `fe-smoke-visual-review.md` 且每页 PASS |
+| **H5 ≠ weapp** | 不得用 H5 PASS 声称「小程序控制台无错」 |
+| **禁止用户跳过豁免** | 与「这个才算过」一致；不能起 H5 → FAIL + humanTodo，不标 PASS |
 
 ---
 
 ## Agent 执行清单
 
 ```
-1. AskQuestion → 停（test:smoke-fe / test:smoke 可跳过询问）
-2. 选「跑」→ 确认前端已启动（architecture 中的 dev 命令）
-3. 无 Chromium → 按「安装 Chromium（镜像优先）」执行 smoke:fe:install / fe-smoke-install.mjs
-4. 无 pages.json → 按路由/菜单生成（Web：router；小程序：app.config → 仅 H5 测）
-5. pages.json 写对 baseUrl + routerMode（Web=history；小程序 H5=hash）
-6. node scripts/fe-smoke.mjs
-7. Read atlas/logs/fe-smoke-report.json
-8. FAIL → 修 → 重跑；PASS → 写入可运行闸门 / 测试入场证据
+1. 确认 FE 目录存在；小程序 → 启动 H5（不能起则 humanTodo，停）
+2. 无 Chromium → smoke:fe:install / fe-smoke-install.mjs（镜像优先）
+3. 无 pages.json → 按路由/app.config 生成（H5 用 hash）
+4. 前端已监听 → node scripts/fe-smoke.mjs
+5. Read fe-smoke-report.json；ok 否 → 修 → 重跑
+6. Read 每张 fe-smoke-shots/*.png → 写 fe-smoke-visual-review.md
+7. validate-atlas --gate test-entry（有 FE 时 FE-SMOKE-* 须绿）
 ```
 
 ---
 
 ## 正误
 
-**✅** Web / 后台：正常 `npm run dev` → Playwright  
-**✅** 小程序：仅 `dev:h5` / H5 产物 → Playwright（勿冒充 weapp）  
-**✅** 安装浏览器：**镜像优先**，失败再官方；只装 chromium  
-**✅** 用户跳过并记录  
-**❌** 把「仅 H5 冒烟」写成「小程序真机已测」  
-**❌** 默认写死某一端口 / 只认某一框架路径  
-**❌** 不询问就声称每页测过  
-**❌** 裸跑官方 `playwright install` 卡住也不换镜像（糟蹋用户时间）  
-**❌** 在 askquestion-gate / 05 / l1-l5 再复制一套安装命令（只链本文）  
-**❌** 无 `fe-smoke-report.json` 或未 Read 报告就声称冒烟通过  
-**❌** 用 H5 Playwright PASS 否认微信开发者工具（mp）控制台报错  
+**✅** Web：`npm run dev` → Playwright → 截图 → 目视  
+**✅** 小程序：`dev:h5` → Playwright → 截图 → 目视（勿冒充 weapp）  
+**✅** 安装浏览器：镜像优先；只装 chromium  
+**❌** AskQuestion「跳过 Playwright」仍标 PASS  
+**❌** 只有 be-smoke / mvn test 无 FE 报告  
+**❌** 未 Read 截图就写 screenshotsReviewed  
+**❌** 用 H5 PASS 否认微信开发者工具（mp）报错  
+**❌** 在 05 / orchestrator 再复制一套安装命令（只链本文）

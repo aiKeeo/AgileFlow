@@ -10,31 +10,42 @@
 
 ```
 1. 首启已落盘 atlas/role/（缺 → --bootstrap-scaffold 或闸门 DIR-ROLE）
-2. 总控 Read atlas/role/role-{key}.md（项目版；用户可改）
-3. 文末追加「本次任务」块
-4. 【必须】调用宿主多 Agent API 发给 Subagent（禁止本会话代写正文）
-5. 收回报 → 总控写 atlas/agileflow-dispatch.json → validate-atlas --gate（流程见 [orchestrator §派活台账](../orchestrator.md#派活台账gate-前必写--唯一硬挡实现)）
+2. resolveRolePrompt(projectRoot, key)：
+   · custom（哈希 ≠ baseline）→ Read atlas/role/role-{key}.md **全文**
+   · 默认（assembled）→ skill templates/role/layers/{key}/ 拼装 core+return（按需 +quality/examples）
+3. 追加薄「本次任务」块（只列路径 + gate，禁止贴上游正文）→ buildTaskEnvelope
+4. 【必须】调用宿主多 Agent API 发给 Subagent
+5. 收回报 → 总控写 atlas/agileflow-dispatch.json → validate-atlas --gate
 ```
 
-| key | 文件 | 角色 |
-|-----|------|------|
-| `req` | `role-req.md` | REQ Writer |
-| `model` | `role-model.md` | Model Writer |
-| `sol` | `role-sol.md` | Sol Writer |
-| `dev` | `role-dev.md` | Dev Worker |
+实现：`scripts/validate-atlas/lib/role-prompt.mjs`（`resolveRolePrompt` · `assembleSkillLayers` · `buildTaskEnvelope`）
+
+| key | 文件（stamp / custom 全文） | layers 目录 |
+|-----|---------------------------|-------------|
+| `req` | `role-req.md` | `layers/req/` |
+| `model` | `role-model.md` | `layers/model/` |
+| `sol` | `role-sol.md` | `layers/sol/` |
+| `dev` | `role-dev.md` | `layers/dev/` |
 
 阶段 0 init / 阶段 5 tests：无角色派活，**总控直接做**。
 
 ## 自定义 role → 文档闸门自动失效
 
-首启 `--bootstrap-scaffold` 会写入 `atlas/role/.agileflow-role-baseline.json`（各 `role-*.md` 的 sha256）。
+首启 `--bootstrap-scaffold` 会写入 `atlas/role/.agileflow-role-baseline.json`（各 `role-*.md` stamp 的 sha256）。
 
-**相对 baseline 内容有改动** → 该 role 视为用户自定义；`validate-atlas --gate` **跳过**对应阶段默认**文档格式**闸门（REQ-*/MOD-*/SOL-*/DEV-* 等），输出 info `ROLE-CUSTOM-SKIP`。
+**相对 baseline 内容有改动** → 该 role 视为用户自定义；派活 **verbatim 全文**；`validate-atlas --gate` **跳过**对应阶段默认**文档格式**闸门（REQ-*/MOD-*/SOL-*/DEV-* 等），输出 info `ROLE-CUSTOM-SKIP`。
 
 **仍硬挡**：`af-env`、`dir`、**ORCH 派活台账**、runnable/smoke 等流程闸门。
 
-重置「默认」对照：从 skill 恢复 role 正文后执行  
+重置「默认 assembled」：从 skill 恢复 stamp 后执行  
 `node <skill>/scripts/validate-atlas.mjs --refresh-role-baseline --root .`
+
+### 默认 vs custom 派活体积
+
+| 模式 | prompt 来源 | 典型 dev 体积 |
+|------|------------|---------------|
+| **assembled** | `layers/{key}/core+return` + 薄任务块 | ~2KB / 次（quality/examples 按需） |
+| **custom** | `atlas/role/role-*.md` 全文 + 任务块 | 用户文件大小 |
 
 ## 首启落盘（强制）
 

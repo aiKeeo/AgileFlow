@@ -1,5 +1,5 @@
 /**
- * Agileflow 通用前端冒烟：逐页打开，收集 console.error / pageerror → atlas/logs。
+ * Agileflow 通用前端冒烟：逐页打开，收集 console.error / pageerror，截图 → atlas/logs。
  * 适用于任意浏览器可打开的 FE（Vite/React/Vue/Next/后台；小程序仅用 H5 形态测）。
  *
  * 用法：
@@ -10,6 +10,12 @@
  * 依赖：npm i -D playwright
  * 浏览器：node scripts/fe-smoke-install.mjs（镜像优先，见 ../tools/fe-smoke-playwright.md）
  * 配置：同目录 fe-smoke.pages.json（routerMode / baseUrl / pages）
+ *
+ * 产出：
+ *   atlas/logs/fe-smoke.log
+ *   atlas/logs/fe-smoke-report.json（含 screenshot 路径、blankSuspect）
+ *   atlas/logs/fe-smoke-shots/{id}.png
+ * 总控须 Read 截图并写 atlas/logs/fe-smoke-visual-review.md 后，test-entry 才过。
  */
 import { chromium } from 'playwright'
 import fs from 'node:fs'
@@ -33,7 +39,11 @@ function findRepoRoot(startDir) {
 const SCRIPT_DIR = __dirname
 const REPO_ROOT = findRepoRoot(SCRIPT_DIR)
 const LOG_DIR = path.join(REPO_ROOT, 'atlas', 'logs')
+const SHOT_DIR = path.join(LOG_DIR, 'fe-smoke-shots')
 const PAGES_FILE = path.join(SCRIPT_DIR, 'fe-smoke.pages.json')
+
+/** 可见文本过短时标 blankSuspect（启发式；仍须 AI 目视） */
+const BLANK_TEXT_THRESHOLD = 8
 
 const SMOKE_USER = process.env.FE_SMOKE_USER || ''
 const SMOKE_PASS = process.env.FE_SMOKE_PASS || ''
@@ -153,9 +163,34 @@ async function injectAuth(page, cfg, auth) {
   )
 }
 
+/**
+ * 安全文件名：page id → shots 文件名
+ * @param {string} id
+ */
+function shotFileName(id) {
+  return `${String(id).replace(/[^a-zA-Z0-9._-]+/g, '_')}.png`
+}
+
+/**
+ * 启发式：可见文本过短 → 疑似白屏/空壳
+ * @param {import('playwright').Page} page
+ */
+async function detectBlankSuspect(page) {
+  try {
+    const text = await page.locator('body').innerText({ timeout: 3000 })
+    const compact = String(text || '').replace(/\s+/g, '').trim()
+    return compact.length < BLANK_TEXT_THRESHOLD
+  } catch {
+    return true
+  }
+}
+
 async function smokeOnePage(browser, cfg, pageDef, auth) {
+  const pageId = pageDef.id || pageDef.path
+  const shotRel = path.join('atlas', 'logs', 'fe-smoke-shots', shotFileName(pageId))
+  const shotAbs = path.join(REPO_ROOT, shotRel)
   const result = {
-    id: pageDef.id || pageDef.path,
+    id: pageId,
     path: pageDef.path,
     url: pageUrl(cfg, pageDef.path),
     ok: false,
@@ -163,12 +198,15 @@ async function smokeOnePage(browser, cfg, pageDef, auth) {
     skipReason: '',
     consoleErrors: [],
     pageErrors: [],
-    readySelector: pageDef.readySelector || 'body'
+    readySelector: pageDef.readySelector || 'body',
+    screenshot: shotRel,
+    blankSuspect: false
   }
 
   if (pageDef.needsAuth && !auth) {
     result.skipped = true
     result.skipReason = 'needsAuth 但未提供 FE_SMOKE_USER/PASS 或登录失败'
+    result.screenshot = null
     return result
   }
 
@@ -195,6 +233,9 @@ async function smokeOnePage(browser, cfg, pageDef, auth) {
     await page.goto(result.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
     await page.waitForSelector(result.readySelector, { timeout: pageDef.timeoutMs || 15000 })
     await new Promise((r) => setTimeout(r, 500))
+    result.blankSuspect = await detectBlankSuspect(page)
+    fs.mkdirSync(SHOT_DIR, { recursive: true })
+    await page.screenshot({ path: shotAbs, fullPage: true })
     result.consoleErrors = consoleErrors
     result.pageErrors = pageErrors
     result.ok = consoleErrors.length === 0 && pageErrors.length === 0
@@ -202,6 +243,12 @@ async function smokeOnePage(browser, cfg, pageDef, auth) {
     result.consoleErrors = consoleErrors
     result.pageErrors = [...pageErrors, String(e.message || e)]
     result.ok = false
+    try {
+      fs.mkdirSync(SHOT_DIR, { recursive: true })
+      await page.screenshot({ path: shotAbs, fullPage: true })
+    } catch {
+      result.screenshot = null
+    }
   } finally {
     await context.close()
   }
@@ -211,6 +258,7 @@ async function smokeOnePage(browser, cfg, pageDef, auth) {
 async function main() {
   const cfg = loadConfig()
   fs.mkdirSync(LOG_DIR, { recursive: true })
+  fs.mkdirSync(SHOT_DIR, { recursive: true })
 
   const auth = await tryLoginToken(cfg)
   const browser = await chromium.launch({ headless: true })
@@ -221,6 +269,7 @@ async function main() {
   lines.push(`routerMode=${cfg.routerMode}`)
   lines.push(`basePath=${cfg.basePath || '(none)'}`)
   lines.push(`auth=${auth ? 'yes' : 'no'}`)
+  lines.push(`shots=${SHOT_DIR}`)
   lines.push('')
 
   try {
@@ -230,10 +279,12 @@ async function main() {
       const status = r.skipped ? 'SKIP' : r.ok ? 'PASS' : 'FAIL'
       lines.push(`## [${status}] ${r.id}  ${r.url}`)
       if (r.skipReason) lines.push(`- skip: ${r.skipReason}`)
+      if (r.screenshot) lines.push(`- screenshot: ${r.screenshot}`)
+      if (r.blankSuspect) lines.push(`- blankSuspect: true（启发式；须 AI 目视）`)
       for (const e of r.pageErrors) lines.push(`- pageerror: ${e}`)
       for (const e of r.consoleErrors) lines.push(`- console.error: ${e}`)
       lines.push('')
-      console.log(`[fe-smoke] ${status} ${r.id}`)
+      console.log(`[fe-smoke] ${status} ${r.id}${r.blankSuspect ? ' blankSuspect' : ''}`)
     }
   } finally {
     await browser.close()
@@ -246,11 +297,13 @@ async function main() {
     baseUrl: cfg.baseUrl,
     routerMode: cfg.routerMode,
     at: new Date().toISOString(),
+    shotsDir: path.relative(REPO_ROOT, SHOT_DIR).replace(/\\/g, '/'),
     summary: {
       total: results.length,
       pass: results.filter((r) => r.ok).length,
       fail: failed.length,
-      skip: skipped.length
+      skip: skipped.length,
+      blankSuspect: results.filter((r) => r.blankSuspect).length
     },
     results
   }
@@ -261,7 +314,11 @@ async function main() {
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), 'utf8')
   console.log(`[fe-smoke] wrote ${logPath}`)
   console.log(`[fe-smoke] wrote ${reportPath}`)
+  console.log(`[fe-smoke] shots → ${SHOT_DIR}`)
   console.log(`[fe-smoke] summary`, report.summary)
+  console.log(
+    '[fe-smoke] 下一步：总控 Read 每张截图，写 atlas/logs/fe-smoke-visual-review.md（screenshotsReviewed: true + 每页 PASS）'
+  )
 
   process.exit(report.ok ? 0 : 1)
 }

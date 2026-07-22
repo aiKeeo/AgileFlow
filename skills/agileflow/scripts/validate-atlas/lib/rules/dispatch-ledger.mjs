@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { collectFiles, exists, rel } from '../fs-utils.mjs';
+import { loadAfEnv } from '../af-env.mjs';
 
 /** 派活台账（与 agileflow.env 同级，项目 atlas/ 内） */
 export const DISPATCH_LEDGER_REL = 'atlas/agileflow-dispatch.json';
@@ -176,6 +177,47 @@ function entriesForRole(entries, role) {
 }
 
 /**
+ * 降级台账：须 degradedReason；且不得与 env AF_HOST_CAPABILITY=full 冲突
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {{ degradedReason?: string }} ledger
+ * @returns {boolean} true = 可跳过 ORCH 校验
+ */
+function validateDegradedLedger(projectRoot, reporter, ledger) {
+  const reason = String(ledger.degradedReason ?? '').trim();
+  if (!reason) {
+    reporter.add({
+      severity: 'warn',
+      rule: 'ORCH-DEGRADED-REASON',
+      file: DISPATCH_LEDGER_REL,
+      message:
+        '降级单会话模式须填写 degradedReason（为何宿主无 Subagent/Task）；缺则禁止跳过 ORCH 校验。',
+    });
+    return false;
+  }
+
+  const envLoaded = loadAfEnv(projectRoot);
+  if (envLoaded.ok && envLoaded.state.hostCapability === 'full') {
+    reporter.add({
+      severity: 'warn',
+      rule: 'ORCH-DEGRADED-CONFLICT',
+      file: DISPATCH_LEDGER_REL,
+      message:
+        'AF_HOST_CAPABILITY=full 但台账 mode=degraded-single-session → 滥用降级或 env 未同步；须 normal + subagentId。',
+    });
+    return false;
+  }
+
+  reporter.add({
+    severity: 'info',
+    rule: 'ORCH-DISPATCH-SKIP',
+    file: DISPATCH_LEDGER_REL,
+    message: `降级单会话模式：跳过派活台账校验（reason: ${reason.slice(0, 80)}）`,
+  });
+  return true;
+}
+
+/**
  * 若权威路径已读但旧路径仍存在，提示删除 stale 文件
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
@@ -234,13 +276,7 @@ export function validateDispatchLedger(projectRoot, reporter, ctx) {
     warnStaleLegacyLedgers(projectRoot, reporter);
   }
   if (isDegradedDispatchMode(ledger)) {
-    reporter.add({
-      severity: 'info',
-      rule: 'ORCH-DISPATCH-SKIP',
-      file: DISPATCH_LEDGER_REL,
-      message:
-        '降级单会话模式：跳过派活台账校验（仅宿主确无 Subagent 时允许；滥用 = 流程违规）',
-    });
+    validateDegradedLedger(projectRoot, reporter, ledger);
     return;
   }
 
@@ -273,16 +309,39 @@ export function validateDispatchLedger(projectRoot, reporter, ctx) {
 function validateEntryProvenance(reporter, entries) {
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
-    const subId = e.subagentId;
-    if (!subId || String(subId).trim() === '') {
+    const stepId = e.stepId != null ? String(e.stepId).trim() : '';
+    if (!stepId) {
+      reporter.add({
+        severity: 'error',
+        rule: 'ORCH-STEP-ID',
+        file: DISPATCH_LEDGER_REL,
+        message: `台账 entries[${i}] 缺 stepId（须等于当时 AF_STEP / flow 步 id）——走过的步必须记账`,
+      });
+    }
+
+    const role = e.role != null ? String(e.role) : '';
+    const subId = e.subagentId != null ? String(e.subagentId).trim() : '';
+    const isOrchDirect = role === 'orch-direct';
+
+    if (isOrchDirect) {
+      if (subId !== 'orch-direct') {
+        reporter.add({
+          severity: 'error',
+          rule: 'ORCH-DIRECT-ID',
+          file: DISPATCH_LEDGER_REL,
+          message: `台账 entries[${i}] role=orch-direct 时 subagentId 须为字面 "orch-direct"（总控直做步；禁止空串）`,
+        });
+      }
+    } else if (!subId) {
       reporter.add({
         severity: 'error',
         rule: 'ORCH-NO-SUBAGENT-ID',
         file: DISPATCH_LEDGER_REL,
-        message: `台账 entries[${i}] role=${e.role ?? '?'} 缺 subagentId（宿主 Subagent/Task 返回的 ID）——禁止主线程包办后补 paths`,
+        message: `台账 entries[${i}] role=${role || '?'} 缺 subagentId（宿主 Subagent/Task 返回的 ID）——禁止主线程包办后补 paths`,
       });
     }
-    if (e.role === 'dev') {
+
+    if (role === 'dev') {
       const tid = e.taskId;
       if (!tid || !/^T-\d+/.test(String(tid))) {
         reporter.add({

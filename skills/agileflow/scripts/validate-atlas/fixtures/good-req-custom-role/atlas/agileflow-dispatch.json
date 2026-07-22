@@ -11,7 +11,8 @@
       "paths": [
         "atlas/requirements/REQ-001-login.md"
       ],
-      "subagentId": "fixture-subagent-req-1"
+      "subagentId": "fixture-subagent-req-1",
+      "stepId": "req"
     }
   ]
 }

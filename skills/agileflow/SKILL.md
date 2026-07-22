@@ -2,106 +2,82 @@
 name: agileflow
 description: >-
   多 Agent 强制流程：当前会话=总控，必须派 Subagent/Task 写 REQ/model/sol/dev，禁止单会话包办正文。
-  按序落盘 atlas/ 再写码与验收。触发：做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init: 前缀。
-version: 9.23.0
+  按序落盘 atlas/ 再写码与验收。触发：做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init:/fix:/refactor:/tweak:/perf:/chore:/ut:/revise: 前缀。
+version: 9.31.0
 ---
 # Agileflow
 
-> **核心思想**：流程即产品——把想法拆解到实现落地。防幻觉、防跳阶段、防空跑是加固，服从拆解，不反客为主。
+> 产品思想（人读）→ [majorflow.md](majorflow.md)。编排实例 → 项目 `atlas/flow.yaml`。  
+> **本文只做路由 + 裁决 + 红线**；怎么写产物 → role layers / phases。
 
-## 多 Agent（横幅）
+## L0 五条（总控必读）
 
-读到本 skill = **你是总控**。阶段 1–4 必须派 Subagent/Task 写产物正文；禁止本会话包办 REQ/sol/dev/码。无子代理能力（含部分 WorkBuddy 环境）→ 首行 `⚠️ 宿主无 Subagent…` 后仍按角色边界分步 + 每阶段 gate。  
-> **AI 自主连做 ≠ 单会话包办**：连做仍须**每阶段 / 每 T 真调用 Task**；连做的是停点，不是跳过 Subagent。  
-> 首行：`📍 Agileflow | 决策：{AF_DECIDE→AI全权/我来} | 阶段：{AF_PHASE} | …`（env 值须译成用户能懂的中文）
+1. **按 flow 走到落地** — 启用步过闸；skip 不装完成；写业务码前 `--gate write-code` 绿。快捷轨 → [quick-commands](phases/quick-commands.md)。
+2. **总控只路由** — 派 Subagent 写正文；记 `atlas/agileflow-dispatch.json`；跑 gate；改 env/todo/**flow**。首启 `--bootstrap-scaffold`。**仅总控改 flow**；角色禁改。
+3. **先落盘再进阶** — `validate-atlas --gate …` exit 0 才勾 ✅ / 进下一启用步。
+4. **决策权控停点** — `AF_DECIDE`；`ai` 闸门绿 → **同会话连做**（阻塞派活）；中途 AI 接管 → [contract §3](templates/contract.md#3-话术表必须看上下文)。`ai` ≠ 关 req/sol/test。
+5. **一处定义、他处只链** — 细则在 SSOT；本文不抄。
 
-## 裁决表（冲突时以此为准）
+**牢记**：每阶段/每 T 真派 Subagent · `pending` 默认问人 · 首条写 `AF_HOST_CAPABILITY` · 同 gate 自修最多 3 轮。
 
-### 全局铁律
+## 你是总控（多 Agent）
 
-| 议题 | 裁决 |
-|------|------|
-| **首启契约（最高）** | `AF_DECIDE=pending`。没说清谁决策 → [contract 启动卡](templates/contract.md#71-流程启动卡)→停。明确委托（你定/别问我…）→ 可写 `AF_DECIDE=ai`。**禁止**静默写 ai。权威 → [contract](templates/contract.md) |
-| **多 Agent / 总控（最高）** | 总控只路由、派 Subagent、**记派活台账**、跑 gate、更新状态。禁写产物正文。可写：`agileflow.env`·`todo.md`·`humanTodo.md`·驾驶舱·REQ 状态行。用户话术委托/接管/重选时**必须**改 `AF_DECIDE`。首启 `--bootstrap-scaffold` 落盘 `atlas/role/` + `humanTodo.md` + `agileflow-dispatch.json`。→ [orchestrator](templates/orchestrator.md) |
-| **派活台账（硬挡）** | Subagent 回报后总控写入 `atlas/agileflow-dispatch.json`；**仅** `validate-atlas --gate` 校验 `ORCH-*`（Node CLI，跨 IDE 通用；**无 IDE Hook**）。无 Subagent 宿主 → `mode: degraded-single-session` 跳过。 |
-| **自定义 role** | `atlas/role/role-*.md` 相对 bootstrap baseline 有改动 → **跳过该阶段默认文档格式闸门**（`ROLE-CUSTOM-SKIP`）；**ORCH / af-env / dir 仍硬挡**。重置：`--refresh-role-baseline` |
-| **流程状态** | `atlas/agileflow.env`：`AF_PHASE`/`AF_DECIDE`/`AF_TIER=full`/`AF_STACK_SOURCE`；pending 或与产物不一致 → 闸门卡住 |
-| **阶段结束** | `ai`+闸门绿 → 摘要+**同会话连做**（阻塞式派活，**禁止**甩「继续」给人）；`user` → 阶段闸门→停。细节 → [contract §4](templates/contract.md#4-停点总表) · [orchestrator 自治循环](templates/orchestrator.md) |
-| **中途 AI 接管** | 「不想看了/后面都你定/剩下你来」等 → 立刻改 `AF_DECIDE=ai`。→ [contract §3](templates/contract.md#3-话术表必须看上下文) |
-| **路径铁律（最高）** | 只认全名 `requirements/`·`model/`·`solution/`·`dev/`·`tests/`；`todo.md` 仅 atlas 根；派活台账 `atlas/agileflow-dispatch.json`；契约一暴露面一文件 `API-XXX-*.md`/`UI-XXX-*.md` |
-| **REQ 拆分 / 只链不抄 / AC=BDD** | 一功能一 REQ；下游只链 UID/API/UI§字段绑定/F；AC 即 Given/When/Then |
-| **人类驾驶舱** | 强制 `atlas/README.md` → [atlas-readme](templates/atlas-readme.md) |
-| **信息充分少问** | → [contract §5](templates/contract.md#5-信息充分少问user) |
-| **纠偏阶梯** | L0–L3 → [change-management](phases/change-management.md) |
-| **术语落盘** | 唯一 `atlas/glossary.md`；greenfield 禁 `atlas/init/**` |
+流程决策（步、派谁、闸门、env）；**不写** REQ/model/sol/dev 正文。无 Subagent → [orchestrator 宿主义务](templates/orchestrator.md#宿主义务workbuddy--cursor--codex--其他)（含 WorkBuddy）。  
+> 连做的是停点，不是跳过 Task。首行：`📍 Agileflow | 决策：… | 步：{AF_STEP} | 档：{AF_PHASE} | …`
 
-### 阶段机制
+## 裁决优先级（高→低）
 
-| 议题 | 裁决 |
-|------|------|
-| **总控派活** | 读 `atlas/role/role-*.md` + 注入任务 → **真派** Subagent（Cursor=`Task`）→ 收回报写 **派活台账** → 再跑 gate。Dev **每 T 一次**（内 ①→②→③）。sol 先写 `atlas/todo.md` 再 `sol-confirm`。阶段 0/5 总控直做，不记 role 台账 |
-| **sol F / dev 文档** | F=边界+暴露面；**全端** dev=摘要+主流程+边界+实现说明+结果（唯一完整质量线）→ [dev-granularity](templates/dev-granularity.md) · [dev](templates/dev.md) |
-| **决策权 / 委托** | 只控停点与是否问人；文档同质（`AF_TIER=full`）。委托非默认。→ [contract](templates/contract.md) |
-| **建模跳过** | user 须确认；ai 落盘判定。`ai`+自检齐可同条进 sol |
-| **写法锚点** | brownfield：`init/codebase/p1-{端}.md`；greenfield：`solution/code-patterns-{端}.md` |
-| **测试入场 / 闸门全集** | [05-testing](phases/05-testing.md) · [validate-atlas-gate](templates/validate-atlas-gate.md) |
-| **文档形态** | 默认 legacy；`AF_TEMPLATE=yes` 才读 `atlas/template/` |
+1. `validate-atlas`（含 flow skip / `FLOW-*`）  
+2. 项目 `atlas/flow.yaml`（做不做）  
+3. **本文红线**  
+4. [contract](templates/contract.md) · [orchestrator](templates/orchestrator.md) · `phases/*` · `templates/*` · `atlas/role/*`
 
-### 错 → 对（合并）
+`flow` 管开关；phases 管怎么做。`skip` 步不准宣称完成。
 
-| ❌ | ✅ |
-|----|----|
-| 单会话包办正文 | 派 Subagent + 记台账（含 `subagentId`） |
-| 只开写码 subagent、文档主线程写 | 按 role 派：req/model/sol/每 T dev |
-| `ai` 连做跳过 Task | 连做仍每阶段/每 T 开 Subagent |
-| 契约未确认静默 `AF_DECIDE=ai` | pending + 启动卡；明确委托才跳过 |
-| 你定 = 不写 atlas / 每阶段仍停 | 仍落盘；`ai` 应连做 |
-| `ai` 派完一批等人「继续」 | 阻塞等回报 → 同会话循环到交付 |
-| `req:` → 目录 `atlas/req/` | 目录必须 `requirements/` |
-| 先码后补 ① | 事后补写不勾① |
+## 红线（≤15 · 与 orchestrator 同表）
 
-## 闸门（硬挡）
+> 完整「正确做法 + 红线」→ [orchestrator §正确做法与红线](templates/orchestrator.md#正确做法与红线15)。下表为速查。
 
-`validate-atlas --gate …` exit 0 才能进阶/勾 ✅。error=warn=失败。可运行须真跑并写入 `## 结果`。
+| # | 正确做法 | 踩线（禁） |
+|---|----------|------------|
+| 1 | 派 Subagent + 台账含 `subagentId`（`stepId`） | 单会话包办正文 / 口头派活 |
+| 2 | 按 role：req→model→sol→**每 T** dev | 只开写码 subagent、文档主线程写 |
+| 3 | `ai` 连做仍每阶段/每 T 开 Task | 连做跳过 Task |
+| 4 | 阻塞等回报 → 同会话循环 | 派完一批等人「继续」 |
+| 5 | `pending`+启动卡；明确委托才 `ai` | 静默写 `AF_DECIDE=ai` |
+| 6 | 有 Task → `full` + normal 台账 | 假 `degraded` 躲 ORCH |
+| 7 | 目录 `requirements/` | `atlas/req/` |
+| 8 | `--gate write-code` 绿再写业务码 | 先码后补 ① |
+| 9 | gate exit 0 才进阶 | 红装绿 / 自补糊弄 |
+| 10 | 总控写 env/todo/flow/台账 | Subagent 改状态文件 |
+| 11 | sol 先写 `todo.md` 再 `sol-confirm` | 无 todo 过 sol 闸 |
+| 12 | 同 gate 自修≤3 轮仍红 → **停** | silent 连做 |
+| 13 | 只读当前步 phase + 路由必读 | 预读无关 phase 详情 |
+| 14 | skip 仅 orch criteria 或用户明示 | 静默/赶工 skip |
+| 15 | AC 回填后再勾开发完成 | AC 仍「③ 后填」装 ✅ |
 
-## 主链（不可跳）
+横切（链 SSOT，不占红线格）：[路径铁律](phases/atlas-structure.md#路径铁律落盘前自检--写错即闸门红) · 一功能一 REQ · AC=BDD · `atlas/README` 驾驶舱 · glossary · `atlas/role/` + bootstrap。
 
-```
-req → requirements/ → 闸门
-mod → model/ → 闸门（可跳须判定进 todo）
-sol → solution/ + atlas/todo.md → 闸门
-dev → ①→②→可运行→③ → 闸门
-tests → 入场 → AC 归档
-```
+## 加载（按需）
 
-写业务源码前须 `--gate write-code` 绿（`anti-skip` 为别名）。CLI：`--root` 不是 `--project`。
-
-### 阶段 4
-
-→ [dev](templates/dev.md) · [04](phases/04-development.md)  
-每 T：TodoWrite①②③ → 派 1 次 role-dev → 勾选。并行 → [04 §并行](phases/04-development.md#并行阶段-4)。
-
-### 豁免
-
-首行 `豁免：{微型|hotfix|问答}` → [00-intent-routing](phases/00-intent-routing.md)（**仅未启用 AF**：无 `atlas/agileflow.env` 且无 `atlas/requirements/`）
-
-## 加载
-
-| 场景 | 必读 |
-|------|------|
-| 启用 | 本文 + [00-intent-routing](phases/00-intent-routing.md)；契约 → [contract](templates/contract.md) |
-| 当前阶段 | **一个** `phases/xx.md` + 其链接的 **一个** 产物模板 |
-| 阶段 4 | [04](phases/04-development.md) + [dev](templates/dev.md) + exemplar + [todo](templates/todo.md) |
-| 阶段 5 | [05-testing](phases/05-testing.md) |
-| 派活 | [orchestrator](templates/orchestrator.md) + `atlas/role/` |
+| 场景 | 读 |
+|------|-----|
+| 启用 | 本文 + [00](phases/00-intent-routing.md) + [atlas-structure](phases/atlas-structure.md) + [contract](templates/contract.md) |
+| 到步 | `atlas/flow.yaml` 该步 → **一个** `phases/xx.md` + 一个产物模板 |
+| 派活 | [orchestrator](templates/orchestrator.md) + `resolveRolePrompt` / [role layers](templates/role/README.md) |
+| 阶段 4/5 | [dev](templates/dev.md) · [04](phases/04-development.md) · [05](phases/05-testing.md) |
 | 闸门名 | [validate-atlas-gate](templates/validate-atlas-gate.md) |
+| 快捷 | [quick-commands](phases/quick-commands.md) |
 
-禁止预读无关 phase。他处与裁决表冲突 → 以本文为准；契约细节以 [contract](templates/contract.md) 为准。
+冲突：以本文红线为准；契约细节以 contract 为准。
 
-### 关键文件
+## SSOT 索引
 
-| 级别 | 文件 |
+| 议题 | 文件 |
 |------|------|
-| 关键 | SKILL.md, phases/00-intent-routing.md, templates/contract.md |
-| 阶段关键 | phases/01～05 |
-| 脚本 | scripts/validate-atlas.mjs |
+| 决策/停点 | [contract](templates/contract.md) |
+| 派活/台账/红线全文 | [orchestrator](templates/orchestrator.md) |
+| 路径 | [atlas-structure](phases/atlas-structure.md) |
+| 编排 | `atlas/flow.yaml` · [flow](templates/flow.md) |
+| ①②③ | [dev](templates/dev.md) |
+| 纠偏 | [change-management](phases/change-management.md) |

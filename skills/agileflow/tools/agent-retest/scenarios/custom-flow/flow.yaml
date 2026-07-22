@@ -1,0 +1,91 @@
+version: 1
+steps:
+  - id: research
+    mode: strict
+    prompt: null
+    depends: []
+    outputs:
+      - atlas/logs/research-water.md
+    reason: "复测：req 前先调研竞品/习惯"
+
+  - id: req
+    mode: strict
+    prompt: req
+    depends:
+      - atlas/logs/research-water.md
+    outputs:
+      - atlas/requirements/REQ-*.md
+      - atlas/requirements/README.md
+
+  - id: ux-spike
+    mode: strict
+    prompt: atlas/role/role-ux-spike.md
+    depends:
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/logs/ux-spike.md
+
+  - id: model
+    mode: orch
+    prompt: model
+    criteria:
+      - "无新业务实体、无状态机、无跨表不变式 → 可判定 skip"
+      - "仅字段级微调且已有 model 覆盖 → 可判定 skip 或增量"
+      - "新实体 / 状态机 / 权限主体变化 → 必须执行（禁止 skip）"
+      - "拿不准 → 按执行，禁止为赶工 skip"
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/logs/ux-spike.md
+    outputs:
+      - atlas/model/README.md
+      - atlas/model/conceptual/entity-relations.md
+      - atlas/model/conceptual/domain-rules.md
+      - atlas/model/entities/*.md
+      - atlas/model/physical/schema.md
+
+  - id: sol
+    mode: strict
+    prompt: sol
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/model/
+    outputs:
+      - atlas/solution/README.md
+      - atlas/solution/features/F-*.md
+      - atlas/solution/contracts/
+      - atlas/solution/architecture.md
+      - atlas/todo.md
+
+  - id: preflight
+    mode: orch
+    prompt: null
+    criteria:
+      - "瘦需求、无支付/权限/PII → 可 skip"
+      - "涉及合规/敏感数据 → 必须执行"
+    depends:
+      - atlas/todo.md
+      - atlas/solution/README.md
+    outputs:
+      - atlas/logs/preflight.md
+
+  - id: dev
+    mode: strict
+    prompt: dev
+    depends:
+      - atlas/todo.md
+      - atlas/solution/features/F-*.md
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/dev/T-*-*.md
+
+  - id: test
+    mode: strict
+    prompt: null
+    depends:
+      - atlas/todo.md
+      - atlas/dev/T-*-*.md
+      - atlas/requirements/REQ-*.md
+      - atlas/tests/
+    outputs:
+      - atlas/tests/README.md
+      - atlas/tests/REQ-*-验收报告.md

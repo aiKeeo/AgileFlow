@@ -1,7 +1,7 @@
 # 阶段 2：数据建模（按需）
 
 > AskQuestion 规范：[templates/contract.md](../templates/contract.md)
-> **本阶段完成 = `atlas/model/` 文件已写出（或 todo 标跳过）**，不是聊过建模。
+> **本阶段完成 = `atlas/model/` 已写出，或总控已在 `atlas/flow.yaml` 将 `model` 标 `skip: true` + `reason`。** 不是聊过建模。
 > 文档模板与确认卡片：[templates/model.md](../templates/model.md)
 > **何时需要建模**：见下方 [§建模按需判定](#建模按需判定)
 > **Template ON** 时先读 `atlas/template/model/` 下对应 `template-*.md`（无则回退 skill templates/）  
@@ -11,8 +11,8 @@
 
 | 场景 | 动作 |
 |------|------|
-| 建议跳过且 **user 已确认**（卡或原话） | **不进入本阶段**，落盘建模判定后可进阶段 3 |
-| 建议跳过且 **`ai`**（自检齐） | 落盘判定 → **同条进 sol**（连做） |
+| 建议跳过且 **user 已确认**（卡或原话） | 总控写 `flow.yaml` model skip+reason → `AF_STEP`+1 进 sol |
+| 建议跳过且 **`ai`**（自检齐） | 总控写 `flow.yaml` skip+reason → **同条进 sol**（连做） |
 | 建议跳过且 **user 尚未确认** | AskQuestion 建模判定确认 → 停；见 [跳过确认](#跳过须用户确认堵静默) |
 | 路由判定「建模：增量」 | 只更新受影响的 model 文件 |
 | 路由判定「建模：全量」 | 执行下文完整流程 |
@@ -34,9 +34,18 @@
 
 ### 跳过须确认（堵静默）
 
+### 主路径（有 flow.yaml）
+
+1. `AF_STEP=model`，对照该步 `criteria`
+2. 可跳 → 写 `atlas/flow.yaml`：`skip: true` + `reason`（勿只写 todo）
+3. `advanceStep(projectRoot, 'sol')`（或成对改 AF_STEP+AF_PHASE）
+4. **通常不派** model 角色；同条进 sol
+
+### 建议跳过时的确认
+
 建议跳过时：
 
-- **`ai` · 跳过**（四项自检 ✅ + 覆盖依据已校验 + todo `⏭️`）→ 同条进 sol。首行：`建模跳过：同条进 sol`
+- **`ai` · 跳过**（四项自检 ✅ + 覆盖依据已校验）→ 总控写 `flow.yaml` `model.skip`+`reason` → `AF_STEP=sol` → 同条进 sol。首行：`建模跳过：同条进 sol`
 - **`user`**：原话未点明跳过 → AskQuestion → **停**：
 
 ```yaml
@@ -58,12 +67,12 @@ questions:
 
 | 选项 | 下条动作 |
 |------|----------|
-| skip_confirm | 落盘「建模判定：跳过」+ todo `⏭️` → 可进阶段 3 |
+| skip_confirm | 总控写 `flow.yaml` model skip+reason → `AF_STEP`+1 → 可进 sol |
 | do_incremental / do_full | 进阶段 2 对应路径 |
 
-**跳过确认后必须落盘「建模判定」**（禁止只口头跳过）：
+**跳过确认后必须落盘 flow skip**（禁止只口头跳过）。可选镜像 todo「建模判定」行（**legacy**，有 flow 时以 flow 为准）：
 
-**机器核验行（写进 `atlas/todo.md`，须同行一字不差形态）**：
+**（Legacy）无 `atlas/flow.yaml` 时的机器核验行（写进 `atlas/todo.md`）**：
 
 ```markdown
 建模判定：跳过（依据：{至少一句实质覆盖理由}）⏭️
@@ -79,7 +88,7 @@ questions:
 - 确认：AskQuestion skip_confirm | 原话「{摘录}」 | AF_DECIDE=ai 自判
 ```
 
-缺同行「依据」+⏭️ → **脚本不认跳过**；缺实质覆盖理由 / 四项未勾 → **禁止跳过**。
+有 `flow.yaml` 时：**以 flow skip+reason 为准**，todo 行可省略。无 flow 的旧项目：缺同行「依据」+⏭️ → 脚本不认跳过。
 > **覆盖依据校验（Model Writer 自检）**：写入覆盖依据前，Model Writer 须先 Read 引用的文件路径，确认文件存在且引用的章节存在。引用不存在的文件/章节 = 跳过判定无效，须进阶段 2。
 
 **必须进入或增量更新 model/**（**不问「能否跳过」**，直接进阶段 2），当**任一**命中：
@@ -134,9 +143,8 @@ atlas/model/
 
 ### 阶段收尾 — **阶段闸门**（仅 user）
 
-> **AI 自主**：不走本步。
-
-`model/README.md` 标 **已确认**、**总控**更新 todo 后 → **总控**调用 [阶段闸门](../templates/contract.md#72-阶段闸门user) → **停止**。
+→ [contract §7.2 阶段闸门](../templates/contract.md#72-阶段闸门user)（`ai` 跳过）。  
+本阶段前置：`model/README.md` 标 **已确认**、todo 已更新。
 
 ## 前置条件
 

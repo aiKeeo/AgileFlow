@@ -323,7 +323,8 @@ export const AI_GATES = {
 
     blocking: true,
 
-    extra: 'AF_PHASE=5；同会话增量 / 跨会话全量；REQ AC 须已回填；强制原型须 fe-pixel PASS',
+    extra:
+      'AF_PHASE=5；同会话增量 / 跨会话全量；REQ AC 须已回填；强制原型须 fe-pixel PASS；有 FE 时须 fe-smoke-report.json + 截图 + visual-review 全 PASS',
 
   },
 

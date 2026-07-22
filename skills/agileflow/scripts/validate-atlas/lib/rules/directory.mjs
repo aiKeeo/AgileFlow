@@ -69,7 +69,7 @@ export function validateDirectory(projectRoot, reporter, opts = {}) {
       if (!exists(full)) {
         let message = `阶段 ${ph} 缺少目录 atlas/${dir.path}/`;
         if (ph === '2' && dir.path === 'model') {
-          message += '；若确需跳过建模，须在 todo 写入「建模判定：跳过（依据：…）⏭️」。';
+          message += '；若确需跳过建模：在 atlas/flow.yaml 将 model.skip=true 并写 reason（旧项目可 todo「建模判定：跳过…⏭️」）。';
         }
         reporter.add({
           severity: dir.required ? 'error' : 'warn',

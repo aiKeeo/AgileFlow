@@ -12,6 +12,7 @@
 !/README.zh-CN.md
 !/AGENT-RETEST.md
 !/majorflow.md
+.qoder/
 
 # Local agent retest output (see AGENT-RETEST.md)
 /agent-retest-reports/

@@ -55,7 +55,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=yes\n',
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=full\nAF_TEMPLATE=yes\n',
   });
   try {
     check('AF_TEMPLATE=yes → mode ON', resolveTemplateMode(root) === true);
@@ -67,7 +67,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_TEMPLATE=no\n',
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=full\nAF_TEMPLATE=no\n',
     'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
   });
   try {
@@ -80,7 +80,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=full\n',
     'atlas/template/requirements/template-req.md': '---\ntarget: requirements/REQ-*.md\n---\n# x\n',
   });
   try {
@@ -149,7 +149,7 @@ function writeProject(files) {
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=full\n',
   });
   try {
     process.chdir(skillRoot);

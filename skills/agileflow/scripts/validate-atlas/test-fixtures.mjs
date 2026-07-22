@@ -228,6 +228,17 @@ const cases = [
     fail: false,
   },
   {
+    name: 'bad-no-fe-smoke → 有 FE 无 Playwright 报告应失败',
+    args: ['--root', path.join(fixtures, 'bad-no-fe-smoke'), '--only', 'smoke'],
+    fail: true,
+    assertStdout: 'FE-SMOKE-NO-REPORT',
+  },
+  {
+    name: 'good-fe-smoke → Playwright+截图+目视应通过',
+    args: ['--root', path.join(fixtures, 'good-fe-smoke'), '--only', 'smoke'],
+    fail: false,
+  },
+  {
     name: 'list-gates',
     args: ['--list-gates'],
     fail: false,
@@ -285,6 +296,18 @@ const cases = [
     args: ['--root', path.join(fixtures, 'bad-orch-no-subagent-id'), '--gate', 'req-confirm'],
     fail: true,
     assertStdout: 'ORCH-NO-SUBAGENT-ID',
+  },
+  {
+    name: 'bad-orch-degraded-no-reason → 缺 degradedReason 应失败',
+    args: ['--root', path.join(fixtures, 'bad-orch-degraded-no-reason'), '--gate', 'req-confirm'],
+    fail: true,
+    assertStdout: 'ORCH-DEGRADED-REASON',
+  },
+  {
+    name: 'bad-orch-degraded-conflict-full → full+capability 却 degraded 应失败',
+    args: ['--root', path.join(fixtures, 'bad-orch-degraded-conflict-full'), '--gate', 'req-confirm'],
+    fail: true,
+    assertStdout: 'ORCH-DEGRADED-CONFLICT',
   },
   {
     name: 'bad-orch-no-subagent-id → dev-complete 收口仍验 subagentId',

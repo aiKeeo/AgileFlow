@@ -1,5 +1,5 @@
 {
-  "comment": "复制为项目 scripts/fe-smoke.pages.json。Web/后台用 history；小程序 H5 常用 hash。baseUrl/tokenKey 可写在此，免设 env。",
+  "comment": "复制为项目 scripts/fe-smoke.pages.json。Web/后台用 history；小程序 H5 常用 hash（path 如 pages/index/index）。baseUrl/tokenKey 可写在此，免设 env。有 FE 时 test-entry 强制要求 fe-smoke-report.json + 截图 + visual-review。",
   "routerMode": "history",
   "basePath": "",
   "baseUrl": "http://127.0.0.1:5173",

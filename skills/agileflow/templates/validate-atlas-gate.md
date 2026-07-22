@@ -3,11 +3,22 @@
 > **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`  
 > **硬挡**：error 与 warn **同等失败**（exit ≠ 0）。没有「可继续知债」。  
 > **ORCH-*（派活台账）**：`--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 验路径覆盖 + 溯源；`dev-complete` / `test-entry` 另做**台账溯源审计**（`subagentId` / dev `taskId`，不重复路径匹配）。`--only req` 等模块单跑**不**验台账，不可替代对应 gate。  
+> **flow.yaml**：`atlas/flow.yaml` 某步 `skip: true` 时，对应 `req-confirm|mod-confirm|sol-confirm|test-entry` **短路为 PASS**（`FLOW-STEP-SKIP`）；`write-code` / doc-first **不**再硬要已 skip 步的产物。约定 → [flow.md](flow.md)。  
 > **ROLE-CUSTOM-SKIP**：`atlas/role/role-*.md` 相对 `.agileflow-role-baseline.json` 已改 → 跳过该阶段**文档格式**闸门（info，不 fail）；**ORCH 仍硬挡**。重置 baseline：`--refresh-role-baseline --root .`
 > **契约也是硬规则**：`user` 该停就停；`ai` 闸门绿该连做就连做——不是可选自觉。  
 > **路径**：勿写死 `.cursor/skills/agileflow`。用下方探测或 `AGILEFLOW_SKILL_ROOT`。
 
 ## 闸门覆盖（不过 = 硬挡）
+
+### 分级（读 gate 时对照）
+
+| 级别 | 谁验 | 典型项 |
+|------|------|--------|
+| **L1 脚本硬挡** | `validate-atlas --gate` exit 0 | ORCH-*（含 `ORCH-DEGRADED-*`）、`AF-ENV-*`（含 `AF-ENV-PHASE`/`AF-ENV-GATE`/`AF-ENV-CAPABILITY-PENDING`）、dir、write-code、dev-step1-literal、dev-complete、test-entry、todo 三段式、`DOC-FIRST-*` |
+| **L2 流程契约** | 总控 + [contract §4](../templates/contract.md#4-停点总表) / [SKILL 裁决表](../SKILL.md) | AskQuestion 停点、`ai` 连做、`user` 阶段闸门、TodoWrite 展开 |
+| **L3 质量可读** | role 模板 + 人审 + dev-granularity | 构思厚度、字面量、AC 映射语义、驾驶舱可读性 |
+
+> L1 失败 = 禁止勾 ✅ / 进阶。L2 违规 = 流程失败（不可用「脚本管不到」跳过）。L3 由闸门字面量与 role 共同约束，过 L1 仍须满足 L3 才宜交付。
 
 | 闸门/规则 | 失败效果 |
 |-----------|----------|

@@ -13,6 +13,20 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DEFAULT_SKILL_ROOT = path.resolve(__dirname, '../..');
 
+const SCENARIOS = {
+  slimtrack: { promptSuffix: '' },
+  'custom-flow': {
+    promptFile: 'PROMPT.ai.custom-flow.md',
+    seed: 'custom-flow',
+    note: '预置含 research/ux-spike/preflight 的 flow.yaml；验 AF_STEP 与自定义步落盘。勿教被试步名。',
+  },
+  'parallel-flow': {
+    promptFile: 'PROMPT.ai.parallel-flow.md',
+    seed: 'parallel-flow',
+    note: '预置 research∥competitor 同波并行再 req；prompt 含 research: 门牌切入。',
+  },
+};
+
 const MODES = {
   ai: {
     decide: 'ai',
@@ -50,13 +64,33 @@ function normalizeMode(mode) {
   return '';
 }
 
-function loadTemplate(skillRoot, modeId) {
+function loadTemplate(skillRoot, modeId, scenarioId) {
+  const scenario = SCENARIOS[scenarioId] || SCENARIOS.slimtrack;
   const cfg = MODES[modeId];
-  const p = path.join(skillRoot, 'tools/agent-retest', cfg.promptFile);
+  const promptFile = scenario.promptFile && modeId === 'ai' ? scenario.promptFile : cfg.promptFile;
+  const p = path.join(skillRoot, 'tools/agent-retest', promptFile);
   if (!fs.existsSync(p)) {
     throw new Error(`缺少提示模板: ${p}`);
   }
   return fs.readFileSync(p, 'utf8');
+}
+
+function seedScenarioWorkdir(skillRoot, workRoot, scenarioId) {
+  const scenario = SCENARIOS[scenarioId];
+  if (!scenario?.seed) return;
+  const seedDir = path.join(skillRoot, 'tools/agent-retest/scenarios', scenario.seed);
+  const atlas = path.join(workRoot, 'atlas');
+  fs.mkdirSync(path.join(atlas, 'role'), { recursive: true });
+  fs.mkdirSync(path.join(atlas, 'logs'), { recursive: true });
+  const flowSrc = path.join(seedDir, 'flow.yaml');
+  if (fs.existsSync(flowSrc)) {
+    fs.copyFileSync(flowSrc, path.join(atlas, 'flow.yaml'));
+  }
+  for (const name of fs.readdirSync(seedDir)) {
+    if (name.startsWith('role-') && name.endsWith('.md')) {
+      fs.copyFileSync(path.join(seedDir, name), path.join(atlas, 'role', name));
+    }
+  }
 }
 
 function renderPrompt(template, skillRoot, workRoot) {
@@ -71,7 +105,7 @@ function main() {
   const modeId = normalizeMode(args.mode);
   if (args.help || !args.workRoot || !modeId) {
     console.log(`用法:
-  node scripts/agent-retest/prepare.mjs --work-root <新项目目录> [--mode ai|user] [--skill-root <skill>]
+  node scripts/agent-retest/prepare.mjs --work-root <新项目目录> [--mode ai|user] [--scenario slimtrack|custom-flow] [--skill-root <skill>]
 
 作用:
   1. 创建空工作区（若已存在则保留，不覆盖）
@@ -81,6 +115,11 @@ function main() {
 --mode:
   ai   AI 自主（默认；「你定」）
   user 用户决策（须开 user-sim）
+
+--scenario:
+  slimtrack     默认（减肥小程序全栈）
+  custom-flow   预置特殊 flow 步（饮水打卡瘦需求）
+  parallel-flow research∥competitor 并行波 + research: 切入
 `);
     process.exit(args.help ? 0 : 1);
   }
@@ -94,7 +133,8 @@ function main() {
 
   const cfg = MODES[modeId];
   fs.mkdirSync(args.workRoot, { recursive: true });
-  const prompt = renderPrompt(loadTemplate(skillRoot, modeId), skillRoot, args.workRoot);
+  seedScenarioWorkdir(skillRoot, args.workRoot, args.scenario);
+  const prompt = renderPrompt(loadTemplate(skillRoot, modeId, args.scenario), skillRoot, args.workRoot);
   const meta = {
     createdAt: new Date().toISOString(),
     skillRoot,
@@ -104,13 +144,14 @@ function main() {
     expectedDecide: cfg.decide,
     autonomyRule: cfg.autonomyRule,
     continueToken: '继续',
-    note: cfg.note,
+    note: (SCENARIOS[args.scenario]?.note) || cfg.note,
   };
   fs.writeFileSync(path.join(args.workRoot, 'agent-retest.meta.json'), JSON.stringify(meta, null, 2) + '\n');
   fs.writeFileSync(path.join(args.workRoot, 'agent-retest.prompt.txt'), prompt);
 
   console.log('=== AgileFlow Agent 复测 · 已准备 ===');
-  console.log(`mode:   ${modeId}（AF_DECIDE=${cfg.decide}）`);
+  console.log(`mode:     ${modeId}（AF_DECIDE=${cfg.decide}）`);
+  console.log(`scenario: ${args.scenario}`);
   console.log(`skill:  ${skillRoot}`);
   console.log(`work:   ${args.workRoot}`);
   console.log(`meta:   ${path.join(args.workRoot, 'agent-retest.meta.json')}`);

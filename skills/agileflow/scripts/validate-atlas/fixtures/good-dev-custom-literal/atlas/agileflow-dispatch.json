@@ -11,7 +11,8 @@
       "paths": [
         "atlas/dev/T-001-login-BE.md"
       ],
-      "subagentId": "fixture-subagent-dev-1"
+      "subagentId": "fixture-subagent-dev-1",
+      "stepId": "dev"
     }
   ]
 }

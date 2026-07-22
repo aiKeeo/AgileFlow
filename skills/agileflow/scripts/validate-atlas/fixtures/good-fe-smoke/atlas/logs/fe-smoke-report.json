@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:5173",
+  "routerMode": "history",
+  "at": "2026-07-22T00:00:00.000Z",
+  "shotsDir": "atlas/logs/fe-smoke-shots",
+  "summary": { "total": 2, "pass": 2, "fail": 0, "skip": 0, "blankSuspect": 0 },
+  "results": [
+    {
+      "id": "home",
+      "path": "/",
+      "url": "http://127.0.0.1:5173/",
+      "ok": true,
+      "skipped": false,
+      "screenshot": "atlas/logs/fe-smoke-shots/home.png",
+      "blankSuspect": false,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "id": "login",
+      "path": "/login",
+      "url": "http://127.0.0.1:5173/login",
+      "ok": true,
+      "skipped": false,
+      "screenshot": "atlas/logs/fe-smoke-shots/login.png",
+      "blankSuspect": false,
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ]
+}

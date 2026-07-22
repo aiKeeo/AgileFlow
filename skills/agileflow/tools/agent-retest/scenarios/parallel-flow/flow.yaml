@@ -1,0 +1,70 @@
+version: 1
+steps:
+  - id: research
+    mode: strict
+    prompt: null
+    depends: []
+    outputs:
+      - atlas/logs/research-water.md
+    reason: "市场/习惯调研"
+
+  - id: competitor
+    mode: strict
+    prompt: null
+    depends: []
+    outputs:
+      - atlas/logs/competitor-water.md
+    reason: "竞品分析；与 research 无互依 → 同波并行"
+
+  - id: req
+    mode: strict
+    prompt: req
+    depends:
+      - atlas/logs/research-water.md
+      - atlas/logs/competitor-water.md
+    outputs:
+      - atlas/requirements/REQ-*.md
+      - atlas/requirements/README.md
+
+  - id: model
+    mode: orch
+    prompt: model
+    criteria:
+      - "无新业务实体、无状态机、无跨表不变式 → 可判定 skip"
+      - "拿不准 → 按执行，禁止为赶工 skip"
+    depends:
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/model/README.md
+
+  - id: sol
+    mode: strict
+    prompt: sol
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/model/
+    outputs:
+      - atlas/solution/README.md
+      - atlas/solution/features/F-*.md
+      - atlas/solution/architecture.md
+      - atlas/todo.md
+
+  - id: dev
+    mode: strict
+    prompt: dev
+    depends:
+      - atlas/todo.md
+      - atlas/solution/features/F-*.md
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/dev/T-*-*.md
+
+  - id: test
+    mode: strict
+    prompt: null
+    depends:
+      - atlas/todo.md
+      - atlas/dev/T-*-*.md
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/tests/README.md

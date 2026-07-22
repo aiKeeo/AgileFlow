@@ -1,7 +1,6 @@
 # 总控 Agent（Orchestrator）工作流
 
-> **你 = 总控 = 必须开多 Agent。** 禁止本会话独自写完 REQ/model/solution/dev 正文。  
-> 总控**禁止**写 REQ/model/solution/dev 正文；只路由、**派 Subagent**、跑 gate、更新状态。  
+> **你 = 总控 = 多 Agent 编排者。** 总控做**流程决策**（阶段、派谁、闸门、纠偏级、env）；不做**业务决策**（REQ 怎么写、方案怎么拆、代码怎么实现）。本会话只做：路由、**派 Subagent**、记台账、跑 gate、更新状态。  
 > 阶段 0 / 5 由总控直接执行。  
 > 角色提示词 → [role/](role/README.md) · 流程契约 → [contract](contract.md)
 
@@ -12,7 +11,9 @@
 | 宿主有 Subagent/Task/多 Agent | 你必须 |
 |------------------------------|--------|
 | **有** | **立刻调用**该能力派 `role-req|model|sol|dev`；把 role 全文 +「本次任务」块放入子代理 prompt |
-| **无** | 首行：`⚠️ 宿主无 Subagent，降级单会话但逐步模拟角色边界`；仍禁止跳阶段/先码；每角色产物写完立刻跑对应 gate |
+| **无** | 首行：`⚠️ 宿主无 Subagent · degraded · reason={…}`；`agileflow.env` 设 `AF_HOST_CAPABILITY=degraded`；台账 `mode=degraded-single-session` + **degradedReason**；仍禁止跳阶段/先码 |
+
+**首条回复（有 Subagent 时）**：读 tool list → 写 `agileflow.env` 的 `AF_HOST_CAPABILITY=full`（`pending` 跑 gate 会红）。**有 Task 却标 degraded = 流程违规**（脚本 `ORCH-DEGRADED-CONFLICT`）。
 
 **Cursor**：用 `Task` 工具。  
 **Codex / Claude Code**：用对等 Subagent/Agent 工具。  
@@ -29,11 +30,18 @@
 ## 核心循环
 
 ```
-识别意图 → 确认契约 → 选阶段 → 加载 role-{key}.md → 注入本次任务 → 【调用宿主 API】派 Subagent
-→ 收回报 → 写入 atlas/agileflow-dispatch.json（派活台账）
-→ 路径自检（见下）→ validate-atlas --gate … → 绿：更新 env/todo → 进阶
-                                              → 红：报错回灌同角色（最多 2 轮）→ 仍红则阶段闸门（user）
+识别意图 → 确认契约 → 读 flow.yaml + AF_STEP
+  → 用户打了门牌 id: → resolvePrefixToStepId → 取 waveContaining（含该步的就绪波）
+  → 否则 listParallelWave（当前所有 depends 已齐且未完成的步）
+  → user 且波≥2 → 并行确认卡 → 停；ai → 整波并行
+  → 波内每步：orch 可 skip+reason；否则 stepToDispatchEnvelope 派 Task，或 prompt:null → orch-direct
+  → 每步台账必含 stepId；阻塞至波齐（产物齐或已 skip）
+  → 有内置 gate 的步过对应 gate；自定义步无 gate → 产物+台账即可
+  → setAfWave / advanceStep 写入下一波 → ai 连做
 ```
+
+> **flow.yaml 不存在** → 视同默认模板（全启用，model 为 orch）。scaffold 幂等，重跑 `--bootstrap-scaffold` 可补。  
+> **Flow 波并行 ≠ 阶段 4 的 T 并行**：前者看 step depends；后者看 todo `depends_on`。首行须写清 `并发：flow波 a|b` 或 `并发：T-001|T-002`。
 
 ### 派活台账（gate 前必写 · 唯一硬挡实现）
 
@@ -57,25 +65,44 @@
 
 | 字段 | 说明 |
 |------|------|
-| `role` | `req` \| `model` \| `sol` \| `dev` |
-| `gate` | 本段产物对应的验收闸门 |
+| `role` | `req` \| `model` \| `sol` \| `dev` \| **`orch-direct`**（总控直做） |
+| `stepId` | **必填**：当时 flow 步 id |
+| `gate` | 本段产物对应的验收闸门（无内置 gate 可空） |
 | **`subagentId`** | **必填**（normal 模式）：宿主 Subagent/Task 返回的 ID；无则视为假台账 |
 | `taskId` | **dev 必填**：如 `T-001`；req/model/sol 为 null |
 | `paths` | 本子代理落盘路径（可 `*` 通配） |
 
 子代理返回可含 `<!-- AF-DISPATCH-ACK: role=req phase=1 paths=... -->` 供总控抄 `paths`（**脚本不校验**；见各 role 模板）。  
-无 Subagent 宿主 → 设 `"mode": "degraded-single-session"` 并首行声明；**仅无 Subagent 能力时允许，滥用 = 流程违规**。
+无 Subagent 宿主 → 设 `"mode": "degraded-single-session"` + **`degradedReason`** + `degradedAt`；`AF_HOST_CAPABILITY=degraded`；**仅确无 Subagent 时允许**。
 
 **`ai` 连做**：仍须每阶段/每 T 调用 Task + 记台账；连做的是停点，不是本会话包办。
 
-### 反模式（禁止）
+### 正确做法与红线（≤15）
 
-| 偷懒做法 | 为何违规 | 正确做法 |
-|----------|----------|----------|
-| 主线程写 REQ/sol/dev 正文，台账只补 paths | ORCH 验的是派活证据，不是文件存在 | 先 `Task` 派 `role-*`，收回报后记 `subagentId` + paths |
-| 只开 2 个 subagent 写 backend/frontend，文档自己写 | 写码 subagent ≠ role-dev 替代品；req/sol 仍须 role 派活 | **按 role 派**：req → model → sol → 每 T 一次 dev |
-| 「文档要连贯所以总控写更快」 | skill 明文禁止；连贯不是绕过派活的借口 | 同一总控串行派 Subagent，上下文在派活块里写清 |
-| `taskId: null` + 通配 paths 糊弄 gate | 脚本现硬挡 `subagentId` / dev `taskId` | 每条 entry 带真实 `subagentId` |
+<a id="正确做法与红线15"></a>
+<a id="反模式禁止--唯一表"></a>
+
+**总控正确节奏**：读 flow/`AF_STEP` →（就绪波可并行）按 role **真派** Task → 记台账（`stepId`+`subagentId`）→ 跑 gate → 绿则 `advanceStep`/`setAfWave` → `ai` 同会话连做。
+
+| # | 正确做法 | 踩线（禁） |
+|---|----------|------------|
+| 1 | `Task` 派 `role-*`，台账含真实 `subagentId`（及 `stepId`） | 主线程写正文 / 只补 paths / 口头说派 |
+| 2 | 按 role：req→model→sol→**每 T 一次** dev | 只开写码 subagent；文档主线程写 |
+| 3 | `ai` 连做仍每阶段/每 T 开 Task | 连做跳过 Task |
+| 4 | **阻塞**等回报 → 同会话循环到约定终点 | 派完一批等人「继续」 |
+| 5 | `pending`+启动卡；用户明确委托才 `AF_DECIDE=ai` | 静默改决策维 |
+| 6 | 有 Task → `AF_HOST_CAPABILITY=full` + normal 台账 | 假 degraded 躲 ORCH |
+| 7 | 产物进 `atlas/requirements/` 等铁律路径 | `atlas/req/` 等错目录 |
+| 8 | `--gate write-code` 绿再写业务码 | 先码后补 ① |
+| 9 | 总控亲自跑 gate；红则回灌同角色 | 红装绿 / 自己补几行糊弄 |
+| 10 | 总控独占 env/todo/flow/台账 | Subagent 写状态文件 |
+| 11 | 先写 `atlas/todo.md` 再 `sol-confirm` | 无 todo 过 sol 闸 |
+| 12 | 同 gate 自修≤3 轮仍红 → 首行 ⚠️ **停** | silent 连做 |
+| 13 | 派活信封只列路径；不预读无关 phase | 整阶段外包通用 Agent；一 Agent 多 T |
+| 14 | skip 仅 orch `criteria` 或用户明示，写 flow `reason` | 静默/赶工 skip |
+| 15 | REQ AC 回填后再标开发完成 | AC 仍「③ 后填」装 ✅ |
+
+> SKILL 只链本表，不另维护禁止清单。旧称「反模式」= 上表踩线列。
 
 ### `ai` 自治循环（钉死 · 禁止甩「继续」给人）
 
@@ -93,7 +120,7 @@
 
 派活「本次任务」里**写死全路径**；回报后若路径违规 → **先改路径再跑 gate**，禁止进阶。
 
-> **权威表**（含脚本错误码）→ [00-intent-routing §路径铁律](../phases/00-intent-routing.md#路径铁律落盘前自检--写错即闸门红)。本节不重复表格。
+> **权威表**（含脚本错误码）→ [atlas-structure §路径铁律](../phases/atlas-structure.md#路径铁律落盘前自检--写错即闸门红)。本节不重复表格。
 
 ## 总控能做的 5 件事
 
@@ -107,35 +134,33 @@
 
 ## 角色加载与派活
 
+> 细则 → [role/README](role/README.md) · 实现 → `scripts/validate-atlas/lib/role-prompt.mjs`
+
 ```
 1. 确认 atlas/role/ 已落盘（缺 → --bootstrap-scaffold；闸门 DIR-ROLE）
 2. key ∈ {req, model, sol, dev}
-3. 读 atlas/role/role-{key}.md（项目版，可自定义；禁止绕过改用别的提示词凑合）
-4. 文末追加「本次任务」块（见下）
-5. 【宿主 Subagent/Task】整段发给子代理 —— 不是贴在本会话自言自语
+3. body = resolveRolePrompt(root, key, ctx)   // custom: atlas 全文 | 默认: skill layers
+4. prompt = body + buildTaskEnvelope({ 路径-only, gate, Tid… })
+5. 【宿主 Subagent/Task】发出 —— 不是贴在本会话自言自语
 ```
 
-> skill `templates/role/` 仅作首启复制源。派活 **只读** `atlas/role/`。
+**assembled（默认）**：不读 atlas stamp 正文，从 `templates/role/layers/{key}/` 拼 `core+return`；gate 红 / 首 T 可 `includeQuality` / dev 可 `includeExamples`。  
+**custom（用户改过 role）**：`Read atlas/role/role-{key}.md` **全文 verbatim**，不替换成 skill 默认层。
 
-### 本次任务块（模板）
+### 本次任务块（薄信封 · 只列路径）
 
 ```markdown
----
 ## 本次任务（总控注入）
 
 - 阶段：{N}
 - 决策：{AF_DECIDE}
 - 任务一句话：{...}
-- 上游路径：
-  - ...
+- 上游路径（Read 读盘，禁止复述正文）：
+  - atlas/requirements/REQ-001-*.md
 - 产物期望：
-  - ...
+  - atlas/requirements/REQ-001-*.md
 - 须过 gate：`validate-atlas --gate {xxx} --root {项目根}`
-- Dev 专用（仅 key=dev）：
-  - Tid：T-xxx
-  - 质量：全端主流程+边界+实现说明（完整质量线）+ 摘要五 bullet → [dev-granularity](../templates/dev-granularity.md)
-  - **一次派活内须按 ①→②→③ 顺序完整交付**（不可跳步、不可先码后补）
----
+- Dev 专用：Tid T-xxx · 一次派活内 ①→②→③ → [dev-granularity](../templates/dev-granularity.md)
 ```
 
 ## 阶段与派活表
@@ -144,21 +169,26 @@
 |------|------|------|------|------|
 | 0 init | 总控 | `atlas/init/` | `init-confirm` | `AF_PHASE=1` |
 | 1 req | `role-req` **Subagent** | requirements + glossary | `req-confirm` → **总控标 REQ 已确认** | 见 [AF_PHASE 路由](#阶段-1-绿后-af_phase-路由) |
-| 2 mod | `role-model` **Subagent** | model/ 或跳过判定 | `mod-confirm` | `AF_PHASE=3` |
+| 2 mod | `role-model` **Subagent**（未 skip 时） | model/ | `mod-confirm` | `AF_PHASE=3` |
 | 3 sol | `role-sol` **Subagent** | solution/ + T 头建议 | **总控先写 todo** → `sol-confirm` | `AF_PHASE=4` |
 | 4 dev | `role-dev` **Subagent**（**每 T 一次**） | dev + 码 + 证据 | 见下表 | 勾 ①②③；下一 T |
-| 5 tests | 总控 | 验收报告 | `test-entry` + 回归 | 完成 |
+| 5 tests | 总控 | 验收报告 | `test-entry` + 回归；**有 FE 须** [Playwright+截图+目视](../tools/fe-smoke-playwright.md) | 完成 |
 
 ### 阶段 1 绿后 AF_PHASE 路由（钉死）
 
 ```
 req-confirm 绿
 → 总控同步 REQ 已确认（requirements/README 索引 + 各 REQ 文件头「状态：已确认」；非写正文）
-→ 总控判定建模（跳过 | 增量 | 全量）：
-   · 建议跳过且自检齐 → 派 role-model 落「建模判定：跳过」→ mod-confirm 绿 → AF_PHASE=3 → 可进 sol
-   · 须建模（增量/全量）→ AF_PHASE=2 → 派 role-model
-   · user → 阶段闸门后再改 AF_PHASE（禁止静默跳）
+→ AF_PHASE=2（进入 model 档）
+→ 读 atlas/flow.yaml 该步：mode=orch → 对照 criteria 判定：
+   · 可 skip → 总控写 model.skip=true + reason（+check）→ AF_PHASE=3 → 进 sol（不派 role-model）
+   · 须做（增量|全量）→ 派 role-model（信封 modelVerdict）→ mod-confirm 绿 → AF_PHASE=3
+→ 派活时：depends/outputs 取自 flow 该步；prompt 走 resolveRolePrompt
 ```
+
+> **init** 不在 flow.steps：brownfield 进场先按 `00-project-init` 做完再进主链。  
+> **depends** 是文件路径列表，跳步不改写 depends；子代理按阶段文档处理缺文件。  
+> 编排权威 → [flow.md](flow.md) / 项目 `atlas/flow.yaml`。
 
 ### 阶段 3 时序（钉死）
 
@@ -185,31 +215,30 @@ req-confirm 绿
 
 ## 验收失败
 
-| 次数 | 动作 |
-|------|------|
-| 1～2 | 报错完整回灌**同角色**修复 |
-| 3 | `user` 阶段闸门；`ai` 摘要后继续自修 |
+| 轮次 | `user` | `ai` |
+|------|--------|------|
+| 1～2 | 报错完整回灌**同角色**修复 | 同左 |
+| 3 | 阶段闸门 → **停** | 摘要 + **最后一轮**自修 |
+| **4+** | — | **禁止** silent 连做；首行 `⚠️ 闸门持续红（gate={名}，已自修3轮）` → **停**，列 rule-id + hint |
+
+**计数**：同 **gate + role/taskId** 为一组；新 T / 新 gate 归零。可选 dispatch entry 加 `repairRound: 1|2|3`（供 resume 读）。
+
+## checkpoint 协议（跨会话续作）
+
+总控在 Subagent 回报后、跑 gate 后 **立即**更新 `atlas/todo.md` → `## 进行中`：
+
+| 原子步完成 | checkpoint |
+|------------|------------|
+| ① dev 落盘 + `dev-step1-literal` 绿 | `T-xxx · 步骤 ① · 日期` |
+| ② 首个业务文件 Write（或 active-edits 登记） | `T-xxx · 步骤 ② · 日期` |
+| ③ 可运行 gate 绿 | `T-xxx · 步骤 ③ · 日期` |
+
+新会话：读 checkpoint → TodoWrite 对齐 → Read 磁盘状态 → 从**下一步**继续（② 中途断线从 ② 续）。
 
 ## 契约分叉
 
 - `ai`：阻塞式串/并派 Subagent + 记台账，不 AskQuestion；闸门绿后**同会话连做**到终点，不甩「继续」  
 - `user`：缺口/确认卡由总控发 → 再派角色  
-
-## 反模式
-
-| 禁止 | 正确 |
-|------|------|
-| 总控写 REQ/model/sol/dev | **派**对应 role **Subagent** |
-| 单会话包办（WorkBuddy 也不例外） | 开多 Agent；无能力则声明降级+分步 gate |
-| 整阶段外包给一个通用 Subagent | 1 角色 = 1 阶段或 **1 T**（dev 一次派活内走 ①→②→③） |
-| 口头「将派活」却自己 Write | 先调用宿主 Subagent/Task API + 记台账 |
-| **`ai` 派完一批等人说「继续」** | **阻塞等回报 → 同会话立刻下一批**，直到交付 |
-| gate 红 ORCH-* | 补派 Subagent 或补写 `atlas/agileflow-dispatch.json` 后再跑 gate |
-| gate 红自己补几行 | 回灌或阶段闸门 |
-| Subagent 说完就信 | 亲自跑 gate |
-| Subagent 写 todo/env | 总控独占 |
-| sol-confirm 前未写 todo | 先写 todo 再跑 gate |
-| 标「开发实现 ✅」但 REQ AC 仍「③ 后填」 | 先回填 AC 再 `dev-complete` |
 
 ## 相关
 

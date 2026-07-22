@@ -10,6 +10,7 @@ import {
   shouldSkipDocModule,
   customSkipMessage,
 } from './rules/role-custom.mjs';
+import { GATE_TO_STEP, isStepSkipped } from './flow.mjs';
 
 /** 闸门 ID 别名 */
 const GATE_ALIASES = {
@@ -54,6 +55,24 @@ export function runGate(gateId, opts = {}) {
   const resolved = resolveGateId(gateId);
   const gate = getGate(gateId);
   const projectRoot = opts.projectRoot ?? process.cwd();
+
+  const flowStepId = GATE_TO_STEP[resolved];
+  if (flowStepId && isStepSkipped(projectRoot, flowStepId)) {
+    const reporter = new Reporter();
+    reporter.add({
+      severity: 'info',
+      rule: 'FLOW-STEP-SKIP',
+      file: 'atlas/flow.yaml',
+      message: `flow.yaml 中 ${flowStepId}.skip=true → 闸门 ${resolved} 视为 SKIP（不验该步产物）。`,
+    });
+    return {
+      passed: true,
+      gateId: resolved,
+      gate,
+      reporter,
+      skippedByFlow: true,
+    };
+  }
 
   if (resolved === 'dev-step1-literal') {
     if (!opts.devFile) {

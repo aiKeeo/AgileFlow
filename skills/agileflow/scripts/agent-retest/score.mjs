@@ -122,7 +122,7 @@ function scoreTodo(root) {
 function scoreDispatch(root) {
   const p = path.join(root, 'atlas', 'agileflow-dispatch.json');
   if (!fs.existsSync(p)) {
-    return { exists: false, entries: 0, missingSubagentId: 0, devMissingTaskId: 0, degraded: false };
+    return { exists: false, entries: 0, missingSubagentId: 0, missingStepId: 0, devMissingTaskId: 0, degraded: false, stepIds: [] };
   }
   try {
     const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
@@ -130,25 +130,196 @@ function scoreDispatch(root) {
     const degraded = raw.mode === 'degraded-single-session';
     let missingSubagentId = 0;
     let devMissingTaskId = 0;
+    let missingStepId = 0;
     if (!degraded) {
       for (const e of list) {
-        if (!e?.subagentId || String(e.subagentId).trim() === '') missingSubagentId++;
-        if (e?.role === 'dev' && (!e.taskId || !/^T-\d+/.test(String(e.taskId)))) devMissingTaskId++;
+        if (!e?.stepId || String(e.stepId).trim() === '') missingStepId++;
+        const role = e?.role != null ? String(e.role) : '';
+        const sub = e?.subagentId != null ? String(e.subagentId).trim() : '';
+        if (role === 'orch-direct') {
+          if (sub !== 'orch-direct') missingSubagentId++;
+        } else if (!sub) {
+          missingSubagentId++;
+        }
+        if (role === 'dev' && (!e.taskId || !/^T-\d+/.test(String(e.taskId)))) devMissingTaskId++;
       }
     }
     return {
       exists: true,
       entries: list.length,
       missingSubagentId,
+      missingStepId,
       devMissingTaskId,
       degraded,
+      stepIds: list.map((e) => e?.stepId).filter(Boolean),
     };
   } catch {
-    return { exists: true, entries: 0, parseError: true, missingSubagentId: 0, devMissingTaskId: 0, degraded: false };
+    return { exists: true, entries: 0, parseError: true, missingSubagentId: 0, missingStepId: 0, devMissingTaskId: 0, degraded: false, stepIds: [] };
   }
 }
 
 /** 直接验 AC 回填（不依赖 gate 相位） */
+function readMeta(root) {
+  const p = path.join(root, 'agent-retest.meta.json');
+  if (!fs.existsSync(p)) return { scenario: 'slimtrack' };
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return { scenario: 'slimtrack' };
+  }
+}
+
+function fileNonEmpty(root, rel) {
+  const p = path.join(root, rel);
+  if (!fs.existsSync(p)) return false;
+  try {
+    return fs.statSync(p).size > 20;
+  } catch {
+    return false;
+  }
+}
+
+function scoreCustomFlow(root) {
+  const checks = [];
+  const flowPath = path.join(root, 'atlas', 'flow.yaml');
+  if (!fs.existsSync(flowPath)) {
+    checks.push({ id: 'FLOW_YAML', ok: false, msg: '缺 atlas/flow.yaml' });
+    return checks;
+  }
+  const flowText = fs.readFileSync(flowPath, 'utf8');
+  for (const id of ['research', 'ux-spike', 'preflight']) {
+    if (!flowText.includes(`id: ${id}`)) {
+      checks.push({ id: 'FLOW_YAML', ok: false, msg: `flow 缺步 ${id}` });
+      return checks;
+    }
+  }
+  checks.push({ id: 'FLOW_YAML', ok: true, msg: 'flow 含 research/ux-spike/preflight' });
+
+  const env = readEnv(root);
+  if (env.AF_STEP) {
+    checks.push({ id: 'AF_STEP', ok: true, msg: `AF_STEP=${env.AF_STEP}` });
+  } else {
+    checks.push({ id: 'AF_STEP', ok: false, msg: '缺 AF_STEP（有 flow 时应维护）' });
+  }
+
+  const researchRel = 'atlas/logs/research-water.md';
+  const researchOk = fileNonEmpty(root, researchRel);
+  let researchMsg = researchOk ? 'research-water.md 已落盘' : '缺 atlas/logs/research-water.md';
+  let researchPass = researchOk;
+  if (researchOk) {
+    const reqDir = path.join(root, 'atlas', 'requirements');
+    let firstReqMtime = null;
+    if (fs.existsSync(reqDir)) {
+      for (const n of fs.readdirSync(reqDir)) {
+        if (!/^REQ-\d+/i.test(n)) continue;
+        const mt = fs.statSync(path.join(reqDir, n)).mtimeMs;
+        if (firstReqMtime == null || mt < firstReqMtime) firstReqMtime = mt;
+      }
+    }
+    if (firstReqMtime != null) {
+      const rMt = fs.statSync(path.join(root, researchRel)).mtimeMs;
+      // 允许 2s 误差；调研不得明显晚于首个 REQ（事后补盘）
+      if (rMt > firstReqMtime + 2000) {
+        researchPass = false;
+        researchMsg = 'research-water.md 修改时间晚于首个 REQ（疑事后补盘）';
+      } else {
+        researchMsg = 'research-water.md 已落盘且不晚于首个 REQ';
+      }
+    }
+  }
+  checks.push({ id: 'CUSTOM_RESEARCH', ok: researchPass, msg: researchMsg });
+
+  const uxOk = fileNonEmpty(root, 'atlas/logs/ux-spike.md');
+  checks.push({
+    id: 'CUSTOM_UX',
+    ok: uxOk,
+    msg: uxOk ? 'ux-spike.md 已落盘' : '缺 atlas/logs/ux-spike.md',
+  });
+
+  const ledgerSteps = new Set(scoreDispatch(root).stepIds || []);
+  const needSteps = ['research', 'ux-spike'];
+  const missingLedger = needSteps.filter((id) => !ledgerSteps.has(id));
+  checks.push({
+    id: 'LEDGER_STEPS',
+    ok: missingLedger.length === 0,
+    msg:
+      missingLedger.length === 0
+        ? '台账含 research / ux-spike'
+        : `台账缺 stepId：${missingLedger.join(', ')}（走过须记账；直做步 role=orch-direct）`,
+  });
+
+  const preflightSkipped = /id:\s*preflight[\s\S]*?skip:\s*true/m.test(flowText);
+  const preflightFile = fileNonEmpty(root, 'atlas/logs/preflight.md');
+  if (preflightSkipped) {
+    checks.push({ id: 'CUSTOM_PREFLIGHT', ok: true, msg: 'preflight 已在 flow skip' });
+  } else if (preflightFile) {
+    checks.push({ id: 'CUSTOM_PREFLIGHT', ok: true, msg: 'preflight.md 已落盘' });
+  } else {
+    checks.push({ id: 'CUSTOM_PREFLIGHT', ok: false, msg: 'preflight 未 skip 且无 preflight.md' });
+  }
+
+  if (flowText.includes('id: model') && /skip:\s*true/.test(flowText.split('id: model')[1]?.split('id: sol')[0] || '')) {
+    checks.push({ id: 'MODEL_SKIP_FLOW', ok: true, msg: 'model 经 flow skip' });
+  } else if (fs.existsSync(path.join(root, 'atlas', 'model', 'README.md'))) {
+    checks.push({ id: 'MODEL_SKIP_FLOW', ok: true, msg: 'model 已落盘（未 skip）' });
+  } else {
+    checks.push({ id: 'MODEL_SKIP_FLOW', ok: false, msg: 'model 既未 flow skip 也无 README' });
+  }
+
+  return checks;
+}
+
+function scoreParallelFlow(root) {
+  const checks = [];
+  const flowPath = path.join(root, 'atlas', 'flow.yaml');
+  if (!fs.existsSync(flowPath)) {
+    checks.push({ id: 'FLOW_YAML', ok: false, msg: '缺 atlas/flow.yaml' });
+    return checks;
+  }
+  const flowText = fs.readFileSync(flowPath, 'utf8');
+  for (const id of ['research', 'competitor', 'req']) {
+    if (!flowText.includes(`id: ${id}`)) {
+      checks.push({ id: 'FLOW_YAML', ok: false, msg: `flow 缺步 ${id}` });
+      return checks;
+    }
+  }
+  checks.push({ id: 'FLOW_YAML', ok: true, msg: 'flow 含 research/competitor/req' });
+
+  const env = readEnv(root);
+  checks.push({
+    id: 'AF_STEP',
+    ok: Boolean(env.AF_STEP),
+    msg: env.AF_STEP ? `AF_STEP=${env.AF_STEP}` : '缺 AF_STEP',
+  });
+
+  const researchOk = fileNonEmpty(root, 'atlas/logs/research-water.md');
+  const competitorOk = fileNonEmpty(root, 'atlas/logs/competitor-water.md');
+  checks.push({
+    id: 'PARALLEL_RESEARCH',
+    ok: researchOk,
+    msg: researchOk ? 'research-water.md 已落盘' : '缺 research-water.md',
+  });
+  checks.push({
+    id: 'PARALLEL_COMPETITOR',
+    ok: competitorOk,
+    msg: competitorOk ? 'competitor-water.md 已落盘' : '缺 competitor-water.md',
+  });
+
+  const ledgerSteps = new Set(scoreDispatch(root).stepIds || []);
+  const need = ['research', 'competitor'];
+  const missing = need.filter((id) => !ledgerSteps.has(id));
+  checks.push({
+    id: 'PARALLEL_LEDGER',
+    ok: missing.length === 0,
+    msg:
+      missing.length === 0
+        ? '台账含 research + competitor（并行波）'
+        : `台账缺 stepId：${missing.join(', ')}`,
+  });
+
+  return checks;
+}
+
 function scoreAcBackfill(root) {
   const reporter = new Reporter();
   validateReqAcBackfill(root, reporter, { force: true });
@@ -170,6 +341,7 @@ function main() {
   }
 
   const wantDecide = expectedDecide(modeId);
+  const meta = readMeta(args.root);
   const env = readEnv(args.root);
   const customRoles = loadCustomRoles(args.root);
   const devFiles = listDevFiles(args.root);
@@ -196,6 +368,8 @@ function main() {
   if (dispatch.exists && dispatch.entries > 0) {
     if (dispatch.degraded) {
       pass('ORCH', `派活台账 entries=${dispatch.entries}（degraded 模式）`);
+    } else if (dispatch.missingStepId > 0) {
+      fail('ORCH', `台账 ${dispatch.missingStepId} 条缺 stepId（走过的步必须记账）`);
     } else if (dispatch.missingSubagentId > 0) {
       fail('ORCH', `台账 ${dispatch.missingSubagentId} 条缺 subagentId（疑似主线程包办后补假账）`);
     } else if (dispatch.devMissingTaskId > 0) {
@@ -257,6 +431,19 @@ function main() {
 
   if (todo.checked3 >= todo.tHeaders && todo.tHeaders > 0) pass('TODO_③', '全部 T 已勾 ③');
   else fail('TODO_③', `③ 未齐：${todo.checked3}/${todo.tHeaders}`);
+
+  if (meta.scenario === 'custom-flow') {
+    for (const c of scoreCustomFlow(args.root)) {
+      if (c.ok) pass(c.id, c.msg);
+      else fail(c.id, c.msg);
+    }
+  }
+  if (meta.scenario === 'parallel-flow') {
+    for (const c of scoreParallelFlow(args.root)) {
+      if (c.ok) pass(c.id, c.msg);
+      else fail(c.id, c.msg);
+    }
+  }
 
   if (modeId === 'ai') {
     if (args.continues > 0) {

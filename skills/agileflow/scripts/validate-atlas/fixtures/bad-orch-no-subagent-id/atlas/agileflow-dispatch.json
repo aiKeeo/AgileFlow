@@ -10,7 +10,8 @@
       "taskId": null,
       "paths": [
         "atlas/requirements/REQ-001-login.md"
-      ]
+      ],
+      "stepId": "req"
     }
   ]
 }

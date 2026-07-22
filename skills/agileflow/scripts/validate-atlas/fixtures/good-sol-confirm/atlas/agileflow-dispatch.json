@@ -11,7 +11,8 @@
       "paths": [
         "atlas/requirements/REQ-001-login.md"
       ],
-      "subagentId": "fixture-subagent-req-1"
+      "subagentId": "fixture-subagent-req-1",
+      "stepId": "req"
     },
     {
       "at": "2026-01-01T00:00:01.000Z",
@@ -22,7 +23,8 @@
       "paths": [
         "atlas/model/README.md"
       ],
-      "subagentId": "fixture-subagent-model-2"
+      "subagentId": "fixture-subagent-model-2",
+      "stepId": "model"
     },
     {
       "at": "2026-01-01T00:00:02.000Z",
@@ -36,7 +38,8 @@
         "atlas/solution/contracts/API-001-login.md",
         "atlas/solution/contracts/UI-001-login.md"
       ],
-      "subagentId": "fixture-subagent-sol-3"
+      "subagentId": "fixture-subagent-sol-3",
+      "stepId": "sol"
     }
   ]
 }

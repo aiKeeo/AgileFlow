@@ -130,7 +130,7 @@
 | **sol**（user） | 技术栈卡→停 → `architecture.md` + `atlas/todo.md` → 确认/闸门→停 |
 | **sol**（ai） | 自选栈落盘 → 摘要/免卡 → **可连做**进 dev① |
 | **init:** | 写法锚点卡→停 → 扫描落盘 init → 确认→停 |
-| **继续 agileflow** | 读 todo checkpoint → 重建 TodoWrite → 接着做（`ai` 可连做） |
+| **继续 agileflow** | 读 `todo.md` → `## 进行中` **checkpoint**（`T-xxx · 步骤 ①|②|③`）→ TodoWrite 对齐 → Read 磁盘代码 → 从下一步续（`ai` 可连做） |
 
 ---
 

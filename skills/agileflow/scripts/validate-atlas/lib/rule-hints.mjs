@@ -59,6 +59,38 @@ export const RULE_HINTS = {
     plain: '勾了③，但 dev 结果里没写编译/启动/冒烟证据',
     who: 'ai',
   },
+  'FE-SMOKE-NO-REPORT': {
+    plain: '有前端目录但缺 fe-smoke-report.json（须 Playwright 逐页冒烟+截图；小程序用 H5）',
+    who: 'ai',
+  },
+  'FE-SMOKE-REPORT-FAIL': {
+    plain: 'Playwright fe-smoke 报告未通过（有页 FAIL）',
+    who: 'ai',
+  },
+  'FE-SMOKE-NO-SHOT': {
+    plain: 'fe-smoke 报告缺截图路径',
+    who: 'ai',
+  },
+  'FE-SMOKE-SHOT-MISSING': {
+    plain: '截图文件不存在（atlas/logs/fe-smoke-shots/）',
+    who: 'ai',
+  },
+  'FE-SMOKE-NO-REVIEW': {
+    plain: '缺 fe-smoke-visual-review.md（总控须 Read 截图后写目视 PASS）',
+    who: 'ai',
+  },
+  'FE-SMOKE-REVIEW-FAIL': {
+    plain: '目视记录未声明 screenshotsReviewed 或有页未 PASS',
+    who: 'ai',
+  },
+  'FE-SMOKE-NO-PAGES': {
+    plain: 'fe-smoke 报告无有效页面结果',
+    who: 'ai',
+  },
+  'FE-SMOKE-REPORT-JSON': {
+    plain: 'fe-smoke-report.json 无法解析',
+    who: 'ai',
+  },
   'DEV-LIT-代码落点': {
     plain: 'dev 里缺少可定位的代码落点（须 Class.method 或 path/）',
     who: 'ai',
@@ -196,7 +228,15 @@ export const RULE_HINTS = {
     who: 'ai',
   },
   'ORCH-DISPATCH-SKIP': {
-    plain: '降级单会话跳过派活校验（仅宿主确无 Subagent 时允许）',
+    plain: '降级单会话跳过派活校验（须 degradedReason 且 capability≠full）',
+    who: 'ai',
+  },
+  'ORCH-DEGRADED-REASON': {
+    plain: 'degraded 模式缺 degradedReason → 禁止跳过 ORCH',
+    who: 'ai',
+  },
+  'ORCH-DEGRADED-CONFLICT': {
+    plain: 'AF_HOST_CAPABILITY=full 却用 degraded 台账 → 须改 normal 或改 env',
     who: 'ai',
   },
   'DOC-FIRST-dev数不符': {
@@ -211,9 +251,45 @@ export const RULE_HINTS = {
     plain: '跳过了建模但没有写「建模判定：跳过」行',
     who: 'ai',
   },
+  'FLOW-ID-RESERVED': {
+    plain: 'step id 不能用 fix/revise 等快捷保留字',
+    who: 'ai',
+  },
+  'FLOW-STRICT-SKIP': {
+    plain: 'strict 步不能擅自 skip；reason 须含用户原话/意图 cue',
+    who: 'ai',
+  },
+  'FLOW-SKIP-REASON': {
+    plain: 'flow 步 skip=true 但缺 reason',
+    who: 'ai',
+  },
+  'AF-ENV-STEP-MISSING': {
+    plain: '有 flow.yaml 时须维护 AF_STEP（当前步 id）',
+    who: 'ai',
+  },
+  'AF-ENV-STEP': {
+    plain: 'AF_STEP 与 flow 或产物推断不一致',
+    who: 'ai',
+  },
+  'AF-ENV-STEP-PHASE': {
+    plain: 'AF_STEP 与 AF_PHASE 未同步（须 AF_PHASE=bandForStep）',
+    who: 'ai',
+  },
+  'ORCH-STEP-ID': {
+    plain: '台账每条须有 stepId（当时走到的 flow 步名）',
+    who: 'ai',
+  },
+  'ORCH-DIRECT-ID': {
+    plain: '总控直做步 role=orch-direct 时 subagentId 须为 orch-direct',
+    who: 'ai',
+  },
   'AF-ENV-BOOT': {
     plain: '还没选谁决策（启动卡未答）',
     who: 'user',
+  },
+  'AF-ENV-CAPABILITY-PENDING': {
+    plain: '总控首条须声明 AF_HOST_CAPABILITY=full|degraded',
+    who: 'ai',
   },
   'DIR-TODO-PATH': {
     plain: 'todo 写错位置（应在 atlas/todo.md 根，不是 solution/todo.md）',

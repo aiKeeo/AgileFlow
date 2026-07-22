@@ -20,6 +20,7 @@ import {
   shouldSkipDevIntegrity,
   shouldSkipModelIntegrity,
 } from './role-custom.mjs';
+import { isStepSkipped } from '../flow.mjs';
 
 /** @typedef {'integrity' | 'write-code'} DocFirstScope */
 
@@ -156,9 +157,11 @@ function loadAtlasContext(projectRoot, opts) {
  */
 function validateProgressIntegrity(projectRoot, reporter, ctx, customRoles = new Set()) {
   const { atlas, todo, todoRel, hasArch, tHeaders, devCount, reqCount, featCount, phaseNum, needFeatures } = ctx;
-  const skipSol = shouldSkipSolIntegrity(customRoles);
-  const skipDev = shouldSkipDevIntegrity(customRoles);
+  const skipSol = shouldSkipSolIntegrity(customRoles) || isStepSkipped(projectRoot, 'sol');
+  const skipDev = shouldSkipDevIntegrity(customRoles) || isStepSkipped(projectRoot, 'dev');
   const skipModel = shouldSkipModelIntegrity(customRoles);
+  const skipReq = customRoles.has('req') || isStepSkipped(projectRoot, 'req');
+  const skipTest = isStepSkipped(projectRoot, 'test');
 
   if (!skipSol && claimedSolDone(todo) && !hasArch) {
     reporter.add({
@@ -233,7 +236,7 @@ function validateProgressIntegrity(projectRoot, reporter, ctx, customRoles = new
         rule: 'SKIP-MODEL-无判定',
         file: todoRel,
         message:
-          'AF_PHASE≥3 但缺少 atlas/model/，且 todo 无正式「建模判定：跳过（依据：…）⏭️」——禁止静默跳过建模。',
+          'AF_PHASE≥3 但缺少 atlas/model/，且 flow.yaml 未 skip model（亦无旧版 todo 跳过判定）——禁止静默跳过建模。',
       });
     }
   }
@@ -250,7 +253,7 @@ function validateProgressIntegrity(projectRoot, reporter, ctx, customRoles = new
     });
   }
 
-  if (claimedTestDone(todo)) {
+  if (claimedTestDone(todo) && !skipTest) {
     const testsReadme = readText(path.join(atlas, 'tests', 'README.md')) || '';
     if (!/\bPASS\b/.test(testsReadme)) {
       reporter.add({
@@ -322,9 +325,9 @@ function validatePreCodeTodoDev(reporter, ctx, customRoles = new Set()) {
  */
 function validateCodeDocAlignment(projectRoot, reporter, ctx, customRoles = new Set()) {
   const { todoRel, hasArch, tHeaders, devCount, reqCount, featCount, phaseNum, needFeatures, todo } = ctx;
-  const skipReq = customRoles.has('req');
-  const skipSol = shouldSkipSolIntegrity(customRoles);
-  const skipDev = shouldSkipDevIntegrity(customRoles);
+  const skipReq = customRoles.has('req') || isStepSkipped(projectRoot, 'req');
+  const skipSol = shouldSkipSolIntegrity(customRoles) || isStepSkipped(projectRoot, 'sol');
+  const skipDev = shouldSkipDevIntegrity(customRoles) || isStepSkipped(projectRoot, 'dev');
 
   if (!skipSol && !hasArch) {
     reporter.add({
@@ -440,21 +443,23 @@ function validateWriteCodeFullChain(projectRoot, reporter, opts) {
       validateSolution(projectRoot, sub, { ...docOpts, templateMode: true });
     }
   } else {
-    if (!customRoles.has('req')) {
+    if (!customRoles.has('req') && !isStepSkipped(projectRoot, 'req')) {
       validateRequirements(projectRoot, sub, docOpts);
       validateReqConfirmed(projectRoot, sub);
     }
     if (!shouldSkipModelIntegrity(customRoles) && !isModelingSkipped(projectRoot)) {
       validateModel(projectRoot, sub);
     }
-    if (!customRoles.has('sol')) {
+    if (!customRoles.has('sol') && !isStepSkipped(projectRoot, 'sol')) {
       validateSolution(projectRoot, sub, docOpts);
     }
-    validateTodo(projectRoot, sub, { tier, phase: '4', customRoles });
+    if (!isStepSkipped(projectRoot, 'dev')) {
+      validateTodo(projectRoot, sub, { tier, phase: '4', customRoles });
+    }
   }
 
   mergeBlockingIssues(reporter, sub);
-  if (!customRoles.has('dev')) {
+  if (!customRoles.has('dev') && !isStepSkipped(projectRoot, 'dev')) {
     validateDevStep1ForAllT(projectRoot, reporter);
   }
 }

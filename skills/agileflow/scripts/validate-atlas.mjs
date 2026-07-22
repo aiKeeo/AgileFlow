@@ -128,6 +128,9 @@ function main() {
       `   todo: ${result.todo.created ? '已创建骨架' : '已存在跳过'} → ${path.relative(root, result.todo.path)}`
     );
     console.log(
+      `   flow: ${result.flow?.created ? '已创建' : '已存在跳过'} → ${path.relative(root, result.flow?.path || 'atlas/flow.yaml')}`
+    );
+    console.log(
       `   agileflow-dispatch: ${result.dispatch.created ? '已创建' : '已存在跳过'} → ${path.relative(root, result.dispatch.path)}`
     );
     const baselineLabel = result.roleBaseline.created

@@ -79,7 +79,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=pending\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_DECIDE=pending\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=pending\n',
     'atlas/todo.md': '# t\n',
   });
   try {
@@ -90,10 +90,25 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
   }
 }
 
+// —— capability pending 跑 gate 必挡 ——
+{
+  const root = writeProject({
+    'atlas/agileflow.env':
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=pending\n',
+    'atlas/todo.md': '# t\n',
+  });
+  try {
+    const { errors } = runAf(root, { gatePhase: '1' });
+    check('capability pending + gate → AF-ENV-CAPABILITY-PENDING', hasRule(errors, 'AF-ENV-CAPABILITY-PENDING'));
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
 // —— 枚举 / 缺失 ——
 {
   const root = writeProject({
-    'atlas/agileflow.env': 'AF_PHASE=9\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
+    'atlas/agileflow.env': 'AF_PHASE=9\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=pending\n',
   });
   try {
     const loaded = loadAfEnv(root);
@@ -152,7 +167,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\n',
+      'AF_PHASE=1\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=pending\nAF_HOST_CAPABILITY=pending\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n',
     'atlas/solution/architecture.md': '## 技术栈\n| 层 | x |\n',
@@ -175,7 +190,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_DECIDE=user\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_DECIDE=user\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\nAF_HOST_CAPABILITY=full\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| a | b |\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',
@@ -192,7 +207,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\nAF_HOST_CAPABILITY=full\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',
@@ -209,7 +224,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\nAF_HOST_CAPABILITY=full\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| 技术栈 | Nest | 依据 |\n',
     'atlas/solution/architecture.md': '# 架构\n本文提到技术栈但无正式节\n',
@@ -232,7 +247,7 @@ check('parse 非法行跳过', Object.keys(parseEnvText('=no\nbad\nOK=1\n')).joi
 {
   const root = writeProject({
     'atlas/agileflow.env':
-      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\n',
+      'AF_PHASE=3\nAF_DECIDE=ai\nAF_TIER=full\nAF_STACK_SOURCE=ai_record\nAF_HOST_CAPABILITY=full\n',
     'atlas/requirements/REQ-001-a.md': '# [REQ-001]\n- 状态：已确认\n',
     'atlas/solution/README.md': '# sol\n- 状态：草稿\n\n## AI 决策记录\n| 技术栈 | x | y |\n',
     'atlas/solution/architecture.md': '## 技术栈\n| FE | x |\n',

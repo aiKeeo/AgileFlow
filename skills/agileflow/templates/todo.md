@@ -45,7 +45,7 @@
 | F-001 | — |
 
 ## 进行中
-- **checkpoint**：`T-xxx` · 步骤 `①|②|③` · 更新于 `YYYY-MM-DD`
+- **checkpoint**：`T-xxx` · 步骤 `①|②|③` · 更新于 `YYYY-MM-DD`（跨会话权威；① gate 绿 / ② 首文件 Write / ③ 可运行 gate 绿时更新）
 - 无
 
 ## 已完成任务
@@ -73,4 +73,4 @@
 | 三段式 / 禁扁平列表 | [04-development](../phases/04-development.md) · validate-atlas todo 规则 |
 | 决策委派 | [contract](contract.md) |
 
-要点速记：1 T = TodoWrite 三条①②③；勾①前过构思闸门；勾③前过可运行闸门；checkpoint 为跨会话权威。
+要点速记：1 T = TodoWrite 三条①②③；勾①前过构思闸门；勾③前过可运行闸门；**checkpoint 三触发点**（① gate 绿 / ② 首业务文件 / ③ 可运行绿）为跨会话权威。

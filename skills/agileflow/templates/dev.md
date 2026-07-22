@@ -1,5 +1,6 @@
 # dev 速查（阶段 4 唯一执行清单）
 
+> **闸门 SSOT**：构思 / 写码 / 可运行 / 开发完成格式 — **本文件**；[04-development.md](../phases/04-development.md) 等人读流程，**只链不抄**本文件检查表。  
 > 范例：BE [dev-exemplar-BE.md](../examples/dev-exemplar-BE.md) · FE [dev-exemplar-FE.md](../examples/dev-exemplar-FE.md)  
 > exemplar 路径：`{skill_root}/examples/dev-exemplar-{端}.md`，skill_root 可通过 `node <validate-atlas.mjs> --print-skill-root` 获取  
 > [FULL] 端须 Read 两个 exemplar；非 BE/FE 项目（CLI/库/桌面/移动端）Read 最接近端（CLI→BE；桌面→FE）  
@@ -69,7 +70,7 @@
 
 ### 段标题
 
-> 权威 → [04 §质量要求](../phases/04-development.md#质量要求) · [dev-rationale](dev.md)。摘要五 bullet + 步骤 + 结果。
+> 段标题与步骤形态 → [dev-granularity](dev-granularity.md) · exemplar。摘要五 bullet + 主流程 + 边界 + 实现说明 + 结果。
 
 步骤：**全端统一 · 唯一完整质量线** → 主流程（3～8）+ 边界（≥2）+ 实现说明（逻辑块怎么做编号 ≥2）。BE 主流程写请求链；FE 写用户动作链。颗粒度（每段解释 + few-shot）→ [dev-granularity](dev-granularity.md) · 例子 → [dev-reuse-examples](../examples/dev-reuse-examples.md) · exemplar-BE/FE。
 
@@ -100,7 +101,7 @@
 | 时机 | 范围 |
 |------|------|
 | **每个 T** 在 ② 写完、勾 ③ 前 | 本 T 涉及的端 + 本 T 主路径 |
-| **一个 F-xxx / MVP 切片** 相关 T 全 ✅ 时 | ① 该模块编译 + 模块冒烟（可运行闸门）→ ② `user`：AskQuestion 阶段性确认（可含 FE 冒烟，见 [fe-smoke-playwright](../tools/fe-smoke-playwright.md)）→ 停；`ai`：默认继续（演示时才问） |
+| **一个 F-xxx / MVP 切片** 相关 T 全 ✅ 时 | ① 该模块编译 + 模块冒烟（可运行闸门）→ ② `user`：AskQuestion 阶段性确认 → 停；`ai`：默认继续（演示时才问）。**进 `test-entry` 前**有 FE 须齐 [Playwright+截图+目视](../tools/fe-smoke-playwright.md) |
 | **给用户看 / MVP 演示 / 交付体验** | 存在端全量：编译 + 启动探针 + MVP 主路径冒烟 → **可询问** FE Playwright → 再问用户或给出启动步骤 |
 
 ### 通过标准（须同时满足适用项）
@@ -130,7 +131,7 @@
 
 | | 可运行闸门 | 步骤 ③（AC） | 阶段 5 测试入场门禁 |
 |--|--------|--------------|----------------|
-| 目的 | **能编、能启、主路径不炸** | Given/When/Then **对不对** | 进 tests 前**全量**再验一遍 |
+| 目的 | **能编、能启、主路径不炸** | Given/When/Then **对不对** | 进 tests 前**按证据可解析性**：可解析→增量；不可解析→全量重验（见 [05 §合并验证](../phases/05-testing.md#测试入场门禁与阶段-4③-合并验证)） |
 | 深度 | 编译+探针/接口+轻量冒烟 | 1 AC ↔ 1 UT（主）+ 薄 ac | 编译+启动+功能冒烟（全端） |
 | 失败 | **禁止勾③ / 禁止说可给用户看** | 回修代码 | 禁止 AC 验收归档 |
 
@@ -139,10 +140,10 @@
 写入 dev `## 结果`（权威；todo 可镜像）：
 
 - 编译构建 / 能启能调 / 主路径冒烟 各一行：命令 + 结果（exit 0 / health UP / 冒烟通过）
-- 若跑了 FE Playwright：附 `atlas/logs/fe-smoke-report.json` 的 summary（pass/fail/skip）
+- **有 FE**：进 `test-entry` 前须齐 [Playwright 三件套](../tools/fe-smoke-playwright.md)（report + shots + visual-review）；`## 结果` 可附 report summary
 - **有强制原型**：勾③前跑 [fe-pixel-compare](../tools/fe-pixel-compare.md)；`## 结果` 写 `atlas/tests/fe-pixel/report.json` PASS
 - **禁止**只写「测过了」无命令无结果；**禁止**空表「③ 验收后填写」就勾③
-- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable、**REQ AC 回填**；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0  
+- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable、**REQ AC 回填**；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0（有 FE 含 `FE-SMOKE-*`）  
   → [validate-atlas-gate](validate-atlas-gate.md)
 
 ### ❌ 不过

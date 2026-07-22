@@ -4,7 +4,7 @@
 
 > **The pipeline is the product.** Built for teams that need **deliverable, auditable, handoff-ready** output — not code trapped in chat history.
 
-[![Version](https://img.shields.io/badge/version-9.23.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-9.31.0-blue.svg)](skills/agileflow/SKILL.md)
 [![Enterprise Ready](https://img.shields.io/badge/Enterprise-Deliverable%20Evidence-green.svg)](#enterprise-grade-deliverables)
 
 ---

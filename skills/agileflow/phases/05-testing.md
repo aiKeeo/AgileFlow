@@ -1,10 +1,9 @@
 # 阶段 5：测试验收
 
-> **AC / 验收全流程**：[../phases/05-testing.md](../phases/05-testing.md)（权威）  
-> humanTodo：[human-todo.md](../templates/human-todo.md) · 测试流水线：[../phases/05-testing.md](../phases/05-testing.md)  
-> 报告模板：[test-report.md](../templates/test-report.md)  
-> **分层入口**：`test:` / `test:smoke` / `test:smoke-be` … → [00-intent `test:` 分层](00-intent-routing.md#test-分层可指定层--单端)
-> **Template ON** 时先读 `atlas/template/tests/` 下对应 `template-*.md`（无则回退 skill templates/）
+> **AC / 验收全流程**：本文（阶段 5 权威）· 合并验证 → [测试入场门禁](#测试入场门禁与阶段-4③-合并验证) · ③ 证据定义 → [③ 证据可解析](#③-证据可解析硬定义)  
+> humanTodo：[human-todo.md](../templates/human-todo.md) · 报告模板：[test-report.md](../templates/test-report.md)  
+> **分层入口**：`test:` / `test:smoke` / `test:smoke-be` … → [00-intent `test:` 分层](00-intent-routing.md#test-分层可指定层--单端)  
+> **Template ON**（`AF_TEMPLATE=yes`）时先读 `atlas/template/tests/` 下对应 `template-*.md`（无则回退 skill templates/）
 
 ## 本阶段做什么
 
@@ -14,7 +13,7 @@
 2. **AC 验收归档**（逐 REQ）：③ 证据可解析 → **默认不复跑**，引用 `## 结果`/checkpoint 摘要更新 AC 状态并出报告；**REQ 表「AC 测试方法/状态」须已在阶段 4③ 回填**（`test-entry` 硬拦「③ 后填」）；不可解析 / 用户点名全量 → 复跑 `test/ac/` 后再归档 → REQ 已实现
 3. **全量回归归档**（全部完成后）：全量静态检查→构建→单元/AC验收测试→集成→冒烟 → 更新 `atlas/tests/README.md` → PASS / BLOCKED-HUMAN / FAIL
 
-步骤细则见 [ac-guide 阶段 5](../phases/05-testing.md#阶段-5tests) · 门禁细则见 [测试流水线](../phases/05-testing.md#测试入场门禁)。
+门禁细则 → [测试入场门禁](#测试入场门禁与阶段-4③-合并验证) · AC 归档 → [AC 验收归档与 ③ 证据复用](#ac-验收归档与-③-证据复用硬默认)。
 
 ## `test:` 分层入口
 
@@ -45,16 +44,25 @@
 
 ### FE 冒烟（`test:smoke-fe`）
 
-见 [fe-smoke-playwright](../templates/../tools/fe-smoke-playwright.md)。Web/后台正常 `dev`；小程序仅 H5。
+**有 FE 时强制**（Web / 小程序-H5）：见 [fe-smoke-playwright](../tools/fe-smoke-playwright.md)。
+
+须齐三件套后才算本层过：
+
+1. `atlas/logs/fe-smoke-report.json`（`ok === true`）
+2. `atlas/logs/fe-smoke-shots/*.png`（每非 skip 页）
+3. `atlas/logs/fe-smoke-visual-review.md`（总控 Read 截图；`screenshotsReviewed: true` + 每页 PASS）
+
+小程序必须起 **H5**；不能起 H5 → humanTodo「补 H5」→ **禁止**标测试 PASS。  
+**禁止** AskQuestion「跳过 Playwright」仍过关。
 
 ### FE 像素对比（`test:pixel-fe`）
 
-权威流程（目录、强制清单、没过怎么办、命令）→ **[fe-pixel-compare](../templates/../tools/fe-pixel-compare.md)**。  
-落库：`atlas/tests/fe-pixel/`。有强制原型时勾③ / 入场须 `report.json` PASS。
+权威流程（目录、强制清单、没过怎么办、命令）→ **[fe-pixel-compare](../tools/fe-pixel-compare.md)**。  
+落库：`atlas/tests/fe-pixel/`。有强制原型时勾③ / 入场须 `report.json` PASS。与 Playwright 冒烟**并行不互替**。
 
 ### `test:smoke`（两端）
 
-存在 BE → 跑 `smoke-be`；存在 FE → 跑 `smoke-fe`（可 AskQuestion 是否 Playwright）。两端都过才算本命令 PASS。
+存在 BE → 跑 `smoke-be`；存在 FE → **必须**跑 `smoke-fe`（含截图 + AI 目视）。两端都过才算本命令 PASS。
 
 ## 前置
 
@@ -66,8 +74,7 @@
 
 ## 测试入场门禁（与阶段 4③ 合并验证）
 
-> **本闸门 = 阶段 4 可运行闸门的延续，不再全量重跑。**
-> **判据 = 证据可解析性**（不以「是否同一会话」判定——关闭重开、Agent 重启均 irrelevant；只看 Agent **能否 Read 并解析**各 T 的 `## 结果`）。
+> **本闸门 = 阶段 4 可运行闸门的延续。** 默认**增量**（③ 证据可解析时）；**不可解析**时全量重验。判据见 [③ 证据可解析](#③-证据可解析硬定义)。
 
 ### ③ 证据可解析（硬定义）
 
@@ -89,7 +96,20 @@
 - 变更涉及的模块间接口联动 happy path 走通（不 500）
 - 无新增编译错误（增量 build）
 - 已验证端的启动探针仍 UP
+- **有 FE**：`fe-smoke-report.json` + 截图 + `fe-smoke-visual-review.md` 仍齐且 PASS（[fe-smoke-playwright](../tools/fe-smoke-playwright.md)）
 
+### 有 FE 时 Playwright 硬门槛（与 SMOKE-L* 叠加）
+
+`test-entry` 在通用 logs 证据之外，若检测到 `frontend/` / `miniprogram/` / `web/` 等目录：
+
+| 缺什么 | 规则码 |
+|--------|--------|
+| 无 `fe-smoke-report.json` | `FE-SMOKE-NO-REPORT` |
+| `ok !== true` | `FE-SMOKE-REPORT-FAIL` |
+| 截图缺失 | `FE-SMOKE-NO-SHOT` / `FE-SMOKE-SHOT-MISSING` |
+| 无目视或未全 PASS | `FE-SMOKE-NO-REVIEW` / `FE-SMOKE-REVIEW-FAIL` |
+
+**禁止**：仅用 unit/be-smoke 关键词冒充 FE 已验；禁止「跳过 Playwright」豁免。
 ### AC 验收归档与 ③ 证据复用（硬默认）
 
 | 场景 | AC 归档动作 |
@@ -139,10 +159,25 @@ AC 验收归档前发现某 REQ 的 AC **无对应 test/ac 或未在 ③ 跑绿*
 |------|------|
 | `atlas/tests/REQ-XXX-验收报告.md` | 每 REQ 一份（全量 / `test:5a`） |
 | `atlas/tests/README.md` | 索引 + 交付汇总（含测试入场门禁证据） |
-| `atlas/logs/be-smoke.*` / `fe-smoke.*` | 分层冒烟证据 |
+| `atlas/logs/be-smoke.*` / `fe-smoke.*` / `fe-smoke-shots/` / `fe-smoke-visual-review.md` | 分层冒烟；有 FE 时 Playwright 三件套必齐 |
 
 humanTodo 未清 → **禁止**标 PASS。  
+**有 FE 但 Playwright 三件套未齐** → **禁止**标 PASS。  
 **技术债未清零** → **禁止**标 PASS（[debt.md](../templates/debt.md) 中待回溯/事后补写/质疑待处理/**环境待复现（未偿还且未用户接受）**须清零或用户确认接受）。
+
+> 环境不可复现降级（仅编译+单测）**默认不豁免** FE Playwright 门槛；不能起 H5/浏览器 → 记 humanTodo，不标 PASS。
+## 测试失败回退（5→4）
+
+> AC 语义变了 → [change-management L2](change-management.md)；单 T bug → L0/L1。
+
+**触发**：阶段 5 FAIL / 用户「测试不过先修」/ AC 归档 BLOCKED
+
+1. 首行：`纠偏：测试回退 → 阶段 4`
+2. `agileflow.env`：`AF_PHASE=4`
+3. todo 流程进度：「开发实现」→ `⚠️ 回退修复中`（原 ✅ 记入变更历史一行）
+4. 目标 T：复用原 T 头，②③ 重跑（必要时回 ①）
+5. `dev-complete` 绿 → `AF_PHASE=5`
+6. 重验：**失败层 + 该 REQ 回归**（沿用上文增量规则，不默认全量）
 
 ## init 刷新（AC 验收归档完成后）
 

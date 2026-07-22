@@ -1,0 +1,71 @@
+version: 1
+steps:
+  - id: req
+    mode: strict
+    prompt: req
+    depends:
+      - atlas/agileflow.env
+      - atlas/glossary.md
+    outputs:
+      - atlas/requirements/REQ-*.md
+      - atlas/requirements/README.md
+      - atlas/requirements/ui/UID-*.md
+      - atlas/requirements/ui/prototypes/
+
+  - id: model
+    mode: orch
+    prompt: model
+    criteria:
+      - "无新业务实体、无状态机、无跨表不变式 → 可判定 skip"
+      - "仅字段级微调且已有 model 覆盖 → 可判定 skip 或增量"
+      - "新实体 / 状态机 / 权限主体变化 → 必须执行（禁止 skip）"
+      - "拿不准 → 按执行，禁止为赶工 skip"
+    depends:
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/model/README.md
+      - atlas/model/conceptual/entity-relations.md
+      - atlas/model/conceptual/domain-rules.md
+      - atlas/model/entities/*.md
+      - atlas/model/physical/schema.md
+
+  - id: sol
+    mode: strict
+    prompt: sol
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/model/
+    outputs:
+      - atlas/solution/README.md
+      - atlas/solution/features/F-*.md
+      - atlas/solution/contracts/
+      - atlas/solution/architecture.md
+      - atlas/solution/code-patterns-*.md
+      - atlas/todo.md
+
+  - id: dev
+    mode: strict
+    prompt: dev
+    depends:
+      - atlas/todo.md
+      - atlas/solution/features/F-*.md
+      - atlas/requirements/REQ-*.md
+      - atlas/solution/contracts/
+    outputs:
+      - atlas/dev/T-*-*.md
+
+  - id: test
+    mode: strict
+    prompt: null
+    depends:
+      - atlas/todo.md
+      - atlas/dev/T-*-*.md
+      - atlas/requirements/REQ-*.md
+      - atlas/tests/
+    outputs:
+      - atlas/tests/REQ-*-验收报告.md
+      - atlas/tests/README.md
+      - atlas/tests/fe-pixel/
+      - atlas/logs/fe-smoke-report.json
+      - atlas/logs/fe-smoke-shots/
+      - atlas/logs/fe-smoke-visual-review.md
