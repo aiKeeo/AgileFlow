@@ -1,7 +1,9 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
-import { collectFiles, exists, rel } from '../fs-utils.mjs';
+import { collectFiles, exists, rel, readText } from '../fs-utils.mjs';
 import { loadAfEnv } from '../af-env.mjs';
+import { validateFlowScope } from '../scope.mjs';
 
 /** 派活台账（与 agileflow.env 同级，项目 atlas/ 内） */
 export const DISPATCH_LEDGER_REL = 'atlas/agileflow-dispatch.json';
@@ -16,6 +18,24 @@ export const DISPATCH_LEDGER_LEGACY_RELS = [
 const DISPATCH_SUBAGENT_HINT = '须先派 Subagent 派 role-{role}（Cursor=Task）';
 
 /** @typedef {'req-confirm'|'mod-confirm'|'sol-confirm'|'dev-step1-literal'|'write-code'} DispatchGateId */
+
+/**
+ * 闸门路径也须校验台账 stepId 在 flow.yaml steps 内（与 validateFlowScope 一致）
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ */
+function reportLedgerFlowScope(projectRoot, reporter) {
+  for (const issue of validateFlowScope(projectRoot)) {
+    if (issue.rule !== 'ORCH-STEP-NOT-IN-FLOW') continue;
+    reporter.add({
+      severity: issue.level === 'error' ? 'error' : 'warn',
+      rule: issue.rule,
+      file: issue.file,
+      message: issue.message,
+      fix: issue.fix,
+    });
+  }
+}
 
 /**
  * 解析台账 JSON（优先权威路径；旧路径可读但 gate warn 硬挡）
@@ -177,11 +197,11 @@ function entriesForRole(entries, role) {
 }
 
 /**
- * 降级台账：须 degradedReason；且不得与 env AF_HOST_CAPABILITY=full 冲突
+ * 降级台账：须 degradedReason；校验 allow 文件；返回 true 表示可继续（仍要验 path 覆盖）
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
  * @param {{ degradedReason?: string }} ledger
- * @returns {boolean} true = 可跳过 ORCH 校验
+ * @returns {boolean}
  */
 function validateDegradedLedger(projectRoot, reporter, ledger) {
   const reason = String(ledger.degradedReason ?? '').trim();
@@ -208,11 +228,51 @@ function validateDegradedLedger(projectRoot, reporter, ledger) {
     return false;
   }
 
+  const home = os.homedir();
+  const inFixture = projectRoot.includes(`${path.sep}fixtures${path.sep}`);
+  const cursorish =
+    exists(path.join(projectRoot, '.cursor')) ||
+    exists(path.join(projectRoot, '.claude')) ||
+    exists(path.join(projectRoot, '.qoder')) ||
+    (!inFixture &&
+      (exists(path.join(home, '.cursor', 'skills')) ||
+        exists(path.join(home, '.claude', 'skills')) ||
+        exists(path.join(home, '.qoder', 'skills'))));
+  const allowPath = path.join(projectRoot, 'atlas', 'logs', 'af-allow-degraded.md');
+  if (cursorish && !exists(allowPath)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'ORCH-DEGRADED-UNPROVEN',
+      file: DISPATCH_LEDGER_REL,
+      message:
+        '检测到 Cursor/Claude/Qoder skill 目录：疑似具备 Subagent，禁止口头 degraded。须落盘 atlas/logs/af-allow-degraded.md（写明宿主确无 Task 的证据）。',
+    });
+    return false;
+  }
+
+  if (exists(allowPath)) {
+    const allowText = readText(allowPath) || '';
+    const compact = allowText.replace(/\s/g, '');
+    const hasEvidence = /无\s*(Task|Subagent)|没有\s*(Task|Subagent)|不具备.*(Task|Subagent)|宿主确无/i.test(
+      allowText,
+    );
+    if (compact.length < 40 || !hasEvidence) {
+      reporter.add({
+        severity: 'error',
+        rule: 'ORCH-DEGRADED-ALLOW-THIN',
+        file: 'atlas/logs/af-allow-degraded.md',
+        message:
+          'af-allow-degraded.md 过薄或未写明「无 Task/Subagent」证据（去空白≥40 且含无 Task/Subagent 陈述）。',
+      });
+      return false;
+    }
+  }
+
   reporter.add({
     severity: 'info',
-    rule: 'ORCH-DISPATCH-SKIP',
+    rule: 'ORCH-DISPATCH-DEGRADED',
     file: DISPATCH_LEDGER_REL,
-    message: `降级单会话模式：跳过派活台账校验（reason: ${reason.slice(0, 80)}）`,
+    message: `降级单会话：免真实 subagentId，但仍须 orch-direct/角色 entries + paths 覆盖（reason: ${reason.slice(0, 80)}）`,
   });
   return true;
 }
@@ -276,37 +336,68 @@ export function validateDispatchLedger(projectRoot, reporter, ctx) {
     warnStaleLegacyLedgers(projectRoot, reporter);
   }
   if (isDegradedDispatchMode(ledger)) {
-    validateDegradedLedger(projectRoot, reporter, ledger);
+    if (!validateDegradedLedger(projectRoot, reporter, ledger)) {
+      return;
+    }
+    const entries = ledger.entries ?? [];
+    if (entries.length === 0) {
+      reporter.add({
+        severity: 'error',
+        rule: 'ORCH-DEGRADED-NO-ENTRIES',
+        file: DISPATCH_LEDGER_REL,
+        message:
+          'degraded 仍须有 entries（role=orch-direct 或对应角色）且 paths 覆盖本闸门产物；禁止空台账交垃圾。',
+      });
+      return;
+    }
+    reportLedgerFlowScope(projectRoot, reporter);
+    validateEntryProvenance(reporter, entries, { degraded: true });
+    runPathChecksForGate(projectRoot, reporter, entries, gateId, ctx.devFile, { degraded: true });
     return;
   }
 
   const entries = ledger.entries ?? [];
 
+  reportLedgerFlowScope(projectRoot, reporter);
   validateEntryProvenance(reporter, entries);
+  runPathChecksForGate(projectRoot, reporter, entries, gateId, ctx.devFile, {});
+}
 
+/**
+ * @param {string} projectRoot
+ * @param {import('../reporter.mjs').Reporter} reporter
+ * @param {object[]} entries
+ * @param {string} gateId
+ * @param {string} [devFile]
+ * @param {{ degraded?: boolean }} [opts]
+ */
+function runPathChecksForGate(projectRoot, reporter, entries, gateId, devFile, opts = {}) {
   if (gateId === 'req-confirm') {
-    validatePathDispatch(projectRoot, reporter, entries, 'req', 'req-confirm', listReqFiles);
+    validatePathDispatch(projectRoot, reporter, entries, 'req', 'req-confirm', listReqFiles, opts);
     return;
   }
   if (gateId === 'mod-confirm') {
-    validatePathDispatch(projectRoot, reporter, entries, 'model', 'mod-confirm', listModelDispatchTargets);
+    validatePathDispatch(projectRoot, reporter, entries, 'model', 'mod-confirm', listModelDispatchTargets, opts);
     return;
   }
   if (gateId === 'sol-confirm') {
-    validatePathDispatch(projectRoot, reporter, entries, 'sol', 'sol-confirm', listSolDispatchTargets);
+    validatePathDispatch(projectRoot, reporter, entries, 'sol', 'sol-confirm', listSolDispatchTargets, opts);
     return;
   }
   if (gateId === 'dev-step1-literal' || gateId === 'write-code') {
-    validateDevDispatch(projectRoot, reporter, entries, ctx.devFile);
+    validateDevDispatch(projectRoot, reporter, entries, devFile);
   }
 }
 
 /**
  * normal 模式：每条台账须能证明「真派过 Subagent」，禁止主线程写完后补假账
+ * degraded：免真实 subagentId，允许 orch-direct 包办正文步
  * @param {import('../reporter.mjs').Reporter} reporter
  * @param {Array<{ role?: string, taskId?: string|null, subagentId?: string|null }>} entries
+ * @param {{ degraded?: boolean }} [opts]
  */
-function validateEntryProvenance(reporter, entries) {
+function validateEntryProvenance(reporter, entries, opts = {}) {
+  const degraded = Boolean(opts.degraded);
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
     const stepId = e.stepId != null ? String(e.stepId).trim() : '';
@@ -332,12 +423,29 @@ function validateEntryProvenance(reporter, entries) {
           message: `台账 entries[${i}] role=orch-direct 时 subagentId 须为字面 "orch-direct"（总控直做步；禁止空串）`,
         });
       }
+      if (!degraded && roleNeedsSubagent(role, stepId, e)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'ORCH-DIRECT-FORBIDDEN',
+          file: DISPATCH_LEDGER_REL,
+          message: `台账 entries[${i}] stepId=${stepId || '?'} 禁止 role=orch-direct：该步须派 Subagent（req/model/sol/dev），总控不得包办正文`,
+        });
+      }
     } else if (!subId) {
+      if (!degraded) {
+        reporter.add({
+          severity: 'error',
+          rule: 'ORCH-NO-SUBAGENT-ID',
+          file: DISPATCH_LEDGER_REL,
+          message: `台账 entries[${i}] role=${role || '?'} 缺 subagentId（宿主 Subagent/Task 返回的 ID）——禁止主线程包办后补 paths`,
+        });
+      }
+    } else if (!degraded && isObviouslyFakeSubagentId(subId)) {
       reporter.add({
         severity: 'error',
-        rule: 'ORCH-NO-SUBAGENT-ID',
+        rule: 'ORCH-FAKE-SUBAGENT-ID',
         file: DISPATCH_LEDGER_REL,
-        message: `台账 entries[${i}] role=${role || '?'} 缺 subagentId（宿主 Subagent/Task 返回的 ID）——禁止主线程包办后补 paths`,
+        message: `台账 entries[${i}] subagentId=${JSON.stringify(subId)} 像手填假 ID（过短或占位词）——须抄宿主 Task/Subagent 返回值`,
       });
     }
 
@@ -355,6 +463,30 @@ function validateEntryProvenance(reporter, entries) {
   }
 }
 
+/** 正文角色 / 带 prompt 的步不得 orch-direct */
+function roleNeedsSubagent(role, stepId, entry) {
+  if (['req', 'model', 'sol', 'dev'].includes(role)) return true;
+  const sid = String(stepId || entry?.stepId || '');
+  return /^(af-)?(req|mod|model|sol|dev)$/i.test(sid);
+}
+
+/**
+ * 明显手填假 ID（不要求 UUID，兼容各宿主；只挡弱模型占位）
+ * @param {string} subId
+ */
+function isObviouslyFakeSubagentId(subId) {
+  const s = String(subId || '').trim();
+  if (s.length < 8) return true;
+  if (
+    /^(fake|xxx+|test|todo|n\/?a|none|null|manual|local|self|orch|main|agent|placeholder|changeme|12345678+|abcdefgh+)$/i.test(
+      s,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * @param {string} projectRoot
  * @param {import('../reporter.mjs').Reporter} reporter
@@ -362,18 +494,24 @@ function validateEntryProvenance(reporter, entries) {
  * @param {string} role
  * @param {string} gateLabel
  * @param {(root: string) => string[]} listTargets
+ * @param {{ degraded?: boolean }} [opts]
  */
-function validatePathDispatch(projectRoot, reporter, entries, role, gateLabel, listTargets) {
+function validatePathDispatch(projectRoot, reporter, entries, role, gateLabel, listTargets, opts = {}) {
   const targets = listTargets(projectRoot);
   if (targets.length === 0) return;
 
-  const roleEntries = entriesForRole(entries, role);
+  let roleEntries = entriesForRole(entries, role);
+  if (opts.degraded) {
+    roleEntries = [...roleEntries, ...entriesForRole(entries, 'orch-direct')];
+  }
   if (roleEntries.length === 0) {
     reporter.add({
       severity: 'error',
       rule: 'ORCH-NO-DISPATCH',
       file: DISPATCH_LEDGER_REL,
-      message: `${gateLabel}：台账无 role=${role} 派活记录（${DISPATCH_SUBAGENT_HINT.replace('{role}', role)}）`,
+      message: opts.degraded
+        ? `${gateLabel}：degraded 台账无 role=${role} 或 orch-direct 记录（paths 须覆盖产物）`
+        : `${gateLabel}：台账无 role=${role} 派活记录（${DISPATCH_SUBAGENT_HINT.replace('{role}', role)}）`,
     });
     return;
   }

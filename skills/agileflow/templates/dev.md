@@ -1,12 +1,12 @@
 # dev 速查（阶段 4 唯一执行清单）
 
-> **闸门 SSOT**：构思 / 写码 / 可运行 / 开发完成格式 — **本文件**；[04-development.md](../phases/04-development.md) 等人读流程，**只链不抄**本文件检查表。  
-> 范例：BE [dev-exemplar-BE.md](../examples/dev-exemplar-BE.md) · FE [dev-exemplar-FE.md](../examples/dev-exemplar-FE.md)  
-> exemplar 路径：`{skill_root}/examples/dev-exemplar-{端}.md`，skill_root 可通过 `node <validate-atlas.mjs> --print-skill-root` 获取  
-> [FULL] 端须 Read 两个 exemplar；非 BE/FE 项目（CLI/库/桌面/移动端）Read 最接近端（CLI→BE；桌面→FE）  
-> exemplar 文件不存在时：标注 `⚠️ exemplar 缺失`，跳过该检查项（不阻塞），但须在 dev 中写出等价的步骤颗粒度参考  
-> 细则：[04-development.md](../phases/04-development.md) · 模板：[dev.md](dev.md)  
-> 角色：[role-dev.md](role/role-dev.md) · 总控派活：[orchestrator.md](orchestrator.md)
+> **闸门 SSOT**：构思 / 写码 / 可运行 / 开发完成格式 — **本文件**；[04-development.md](../phases/04-development.md) 等人读流程，**只链不抄**本文件检查表。
+> 范例：BE [dev-exemplar-BE.md](../examples/dev-exemplar-BE.md) · FE [dev-exemplar-FE.md](../examples/dev-exemplar-FE.md)
+> exemplar 路径：`{skill_root}/examples/dev-exemplar-{端}.md`，skill_root 可通过 `node <validate-atlas.mjs> --print-skill-root` 获取
+> [FULL] 端须 Read 两个 exemplar；非 BE/FE 项目（CLI/库/桌面/移动端）Read 最接近端（CLI→BE；桌面→FE）
+> exemplar 文件不存在时：标注 `⚠️ exemplar 缺失`，跳过该检查项（不阻塞），但须在 dev 中写出等价的步骤颗粒度参考
+> 细则：[04-development.md](../phases/04-development.md) · 模板：[dev.md](dev.md)
+> 角色：[role-dev.md](role/role-dev.md) · 总控派活：[orchestrator-core.md](orchestrator-core.md)
 
 ---
 
@@ -19,7 +19,7 @@
 2. 取 T → 派 role-dev（**一次** · 内须 ①→②→③）→ 回报
    → 总控：literal 绿→勾① → `--gate write-code` 绿→勾② → 证据/`--only todo` 绿→勾③
 3. 下一 T；全部 T 齐 → `dev-complete`。无并行许可时默认逐 T 串行。
-权威流程 → orchestrator.md · 角色正文 → role/role-dev.md
+权威流程 → orchestrator-core.md · 角色正文 → role/role-dev.md
 ```
 
 **连续做 / 全部开发 / yes_all** = **先展开 TodoWrite**，再按清单逐条做（每条含可运行闸门）；**≠** 摘要 / 空壳 / 合并多 T / **从不编译启动** / **跳过 TodoWrite** / **扁平 todo** / **薄写构思**。`ai` 连做同样遵守：无①禁写码、禁合并 T、禁跳过闸门；**sol/dev 质量线唯一**（铁律 → [contract §1](../templates/contract.md#1-env)）。
@@ -91,9 +91,9 @@
 
 ## 可运行闸门（每 T / 每模块强制）
 
-> **写完码 ≠ 能用。** 勾 ③、父任务 ✅、或说「可以给用户看」之前，Agent **必须亲自跑终端**通过。  
-> 命令以 `architecture.md` 为准；无约定用下表默认。  
-> **architecture.md 无启动命令时**：从构建文件推断（package.json→npm/yarn；pom.xml→mvn；go.mod→go；Cargo.toml→cargo；requirements.txt→python）；推断不出→AskQuestion 用户提供命令；**禁止因不知道命令而跳过可运行闸门**。  
+> **写完码 ≠ 能用。** 勾 ③、父任务 ✅、或说「可以给用户看」之前，Agent **必须亲自跑终端**通过。
+> 命令以 `architecture.md` 为准；无约定用下表默认。
+> **architecture.md 无启动命令时**：从构建文件推断（package.json→npm/yarn；pom.xml→mvn；go.mod→go；Cargo.toml→cargo；requirements.txt→python）；推断不出→AskQuestion 用户提供命令；**禁止因不知道命令而跳过可运行闸门**。
 > **纯前端/纯后端项目**：可运行闸门只验存在的端；dev 文件标注 `端：FE` 或 `端：BE`；无 BE 跳过 BE 编译/启动/冒烟，反之亦然。
 
 ### 何时跑
@@ -143,14 +143,14 @@
 - **有 FE**：进 `test-entry` 前须齐 [Playwright 三件套](../tools/fe-smoke-playwright.md)（report + shots + visual-review）；`## 结果` 可附 report summary
 - **有强制原型**：勾③前跑 [fe-pixel-compare](../tools/fe-pixel-compare.md)；`## 结果` 写 `atlas/tests/fe-pixel/report.json` PASS
 - **禁止**只写「测过了」无命令无结果；**禁止**空表「③ 验收后填写」就勾③
-- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable、**REQ AC 回填**；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0（有 FE 含 `FE-SMOKE-*`）  
+- 标「开发实现 ✅」前须 `--gate dev-complete`（含 runnable、**REQ AC 回填**；有原型含 pixel）exit 0；进阶段 5 前须 `--gate test-entry` exit 0（有 FE 含 `FE-SMOKE-*`）
   → [validate-atlas-gate](validate-atlas-gate.md)
 
 ### ❌ 不过
 
-- 只跑 `test/ac` 单测、从不 `package` / `build`  
-- 编译红仍标 T ✅  
-- 服务起不来 / 登录 500 / 首页白屏仍说「MVP 好了给用户看」  
+- 只跑 `test/ac` 单测、从不 `package` / `build`
+- 编译红仍标 T ✅
+- 服务起不来 / 登录 500 / 首页白屏仍说「MVP 好了给用户看」
 - 把可运行闸门 推到「等阶段 5 再说」
 
 ---

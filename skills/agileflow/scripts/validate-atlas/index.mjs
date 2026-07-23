@@ -22,7 +22,9 @@ import { validateSmokeEntry } from './lib/rules/smoke.mjs';
 import { validatePixelCompare } from './lib/rules/pixel.mjs';
 import { validateReqTrace } from './lib/rules/trace.mjs';
 import { validateDocFirst } from './lib/rules/doc-first.mjs';
+import { detectBusinessSource } from './lib/brownfield.mjs';
 import { validateDispatchLedger } from './lib/rules/dispatch-ledger.mjs';
+import { validateAfCommands } from './lib/rules/af-commands.mjs';
 import {
   loadCustomRoles,
   shouldSkipDocModule,
@@ -30,6 +32,29 @@ import {
   customSkipMessage,
 } from './lib/rules/role-custom.mjs';
 import { validateFlowFile, isStepSkipped } from './lib/flow.mjs';
+import { validateFlowScope } from './lib/scope.mjs';
+
+export const VALID_ONLY_MODULES = new Set([
+  'af-commands',
+  'af-env',
+  'dev',
+  'dir',
+  'dispatch-ledger',
+  'doc-first',
+  'flow',
+  'init',
+  'model',
+  'pixel',
+  'req',
+  'req-ac-backfill',
+  'req-confirmed',
+  'runnable',
+  'smoke',
+  'sol',
+  'tests',
+  'todo',
+  'trace',
+]);
 
 /**
  * @typedef {Object} ValidateOptions
@@ -115,6 +140,16 @@ export function validateAtlas(options = {}) {
 
   const reporter = new Reporter();
   const only = options.only ?? null;
+  for (const name of only || []) {
+    if (!VALID_ONLY_MODULES.has(name)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'ARG-ONLY-UNKNOWN',
+        file: '(cli)',
+        message: `未知 --only 模块：${name}。可用：${[...VALID_ONLY_MODULES].join(', ')}`,
+      });
+    }
+  }
   const shouldRun = (name) => !only || only.includes(name);
   const customRoles = loadCustomRoles(projectRoot);
   /** @type {Set<string>} */
@@ -149,6 +184,7 @@ export function validateAtlas(options = {}) {
       brownfield,
       gatePhase: phase,
       requireEnv: true,
+      dispatchGate: options.dispatchGate,
     });
   } else {
     const loaded = loadAfEnv(projectRoot);
@@ -170,6 +206,17 @@ export function validateAtlas(options = {}) {
   if (shouldRun('flow')) {
     const afEnabled = exists(path.join(projectRoot, 'atlas', 'agileflow.env'));
     validateFlowFile(projectRoot, reporter, { requireFile: afEnabled });
+    if (afEnabled) {
+      for (const issue of validateFlowScope(projectRoot)) {
+        reporter.add({
+          severity: issue.level === 'error' ? 'error' : 'warn',
+          rule: issue.rule,
+          file: issue.file,
+          message: issue.message,
+          fix: issue.fix,
+        });
+      }
+    }
   }
 
   if (shouldRun('dir')) {
@@ -240,6 +287,28 @@ export function validateAtlas(options = {}) {
       customRoles,
     });
   }
+  // 弱模型漏跑 write-code：已有业务源码时，收口闸门强制再验 write-code 全链
+  const forceWriteCodeOn = new Set(['sol-confirm', 'dev-complete', 'test-entry']);
+  if (
+    options.dispatchGate &&
+    forceWriteCodeOn.has(options.dispatchGate) &&
+    detectBusinessSource(projectRoot) &&
+    options.docFirstScope !== 'write-code'
+  ) {
+    reporter.add({
+      severity: 'info',
+      rule: 'DOC-FIRST-AUTO-WRITE-CODE',
+      message: `已探测业务源码且闸门 ${options.dispatchGate}：自动追加 write-code 全链校验（不靠自觉先跑 write-code）`,
+    });
+    validateDocFirst(projectRoot, reporter, {
+      scope: 'write-code',
+      afPhase: afState?.phase,
+      templateMode,
+      tier,
+      mode,
+      customRoles,
+    });
+  }
   // 收口硬拦：dev-complete / test-entry 无条件验 AC 回填（不依赖 todo 是否已勾完成）
   if (shouldRun('req-ac-backfill') && !templateMode) {
     validateReqAcBackfill(projectRoot, reporter, { force: true });
@@ -249,6 +318,12 @@ export function validateAtlas(options = {}) {
       gateId: options.dispatchGate,
       devFile: options.devFile,
     });
+  }
+  // /af* 指令留痕：只读硬验。日志须在 gate 前显式写入。
+  if (shouldRun('af-commands') && options.dispatchGate) {
+    validateAfCommands(projectRoot, reporter, { gateId: options.dispatchGate });
+  } else if (shouldRun('af-commands') && !options.dispatchGate) {
+    validateAfCommands(projectRoot, reporter, {});
   }
 
   const decide = afState?.decide ?? '—';

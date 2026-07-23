@@ -1,7 +1,8 @@
 import path from 'node:path';
 import { collectFiles, exists, readText } from './fs-utils.mjs';
 import { isModelingSkipped } from './modeling-skip.mjs';
-import { loadFlow, bandForStep, inferStepFromFlow, inferWaveFromFlow, listFlowSteps, parseAfStep, formatAfStep } from './flow.mjs';
+import { loadFlow, bandForStep, inferStepFromFlow, inferWaveFromFlow, listFlowSteps, parseAfStep, formatAfStep, normalizeStepId, GATE_TO_STEP, getFlowStep, stepOutputsSatisfied } from './flow.mjs';
+import { effectiveGatePass } from './effective-gate.mjs';
 import fs from 'node:fs';
 
 const ENV_REL = 'atlas/agileflow.env';
@@ -125,7 +126,20 @@ export function inferPhaseFromArtifacts(projectRoot, brownfield) {
 
   if (brownfield) {
     const initReadme = readText(path.join(atlas, 'init', 'README.md'));
-    if (!initReadme || !isConfirmed(initReadme)) return '0';
+    if (!initReadme || !isConfirmed(initReadme)) {
+      // 同 inferWaveFromFlow：AF 自造源码触发 brownfield 后，有已确认 REQ 则不退回 0
+      const reqRootEarly = path.join(atlas, 'requirements');
+      const reqFilesEarly = exists(reqRootEarly)
+        ? collectFiles(reqRootEarly, '.md').filter((f) => {
+            const base = path.basename(f);
+            return base.startsWith('REQ-') && !f.includes(`${path.sep}ui${path.sep}`);
+          })
+        : [];
+      const anyConfirmedEarly = reqFilesEarly.some((f) =>
+        /状态[：:]\s*(已确认|已实现)/.test(readText(f) || ''),
+      );
+      if (!anyConfirmedEarly) return '0';
+    }
   }
 
   const reqRoot = path.join(atlas, 'requirements');
@@ -185,7 +199,7 @@ export function isUserStackSettled(stackSource) {
  * 校验 agileflow.env：存在性、枚举、与产物阶段一致、按决策权卡技术栈来源
  * @param {string} projectRoot
  * @param {import('./reporter.mjs').Reporter} reporter
- * @param {{ brownfield?: boolean, gatePhase?: string, requireEnv?: boolean }} [opts]
+ * @param {{ brownfield?: boolean, gatePhase?: string, requireEnv?: boolean, dispatchGate?: string }} [opts]
  * @returns {AfState | null}
  */
 
@@ -217,7 +231,7 @@ export function setAfWave(projectRoot, waveIds) {
     return { ok: false, error: '缺少或无法解析 atlas/flow.yaml' };
   }
   const ids = listFlowSteps(flowLoaded.flow).map((s) => s.id);
-  const wave = (waveIds || []).filter(Boolean);
+  const wave = (waveIds || []).filter(Boolean).map((id) => normalizeStepId(id));
   if (wave.length === 0) {
     return { ok: false, error: '波不能为空' };
   }
@@ -308,7 +322,7 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
     const flow = flowLoaded.flow;
     const stepIds = listFlowSteps(flow).map((s) => s.id);
     const envStepRaw = parseEnvText(readText(path.join(projectRoot, ENV_REL)) || '').AF_STEP || '';
-    const envWave = parseAfStep(envStepRaw);
+    const envWave = parseAfStep(envStepRaw).map((id) => normalizeStepId(id));
     if (envWave.length === 0) {
       blocked = true;
       reporter.add({
@@ -342,9 +356,18 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
         }
         const inferredWave = inferWaveFromFlow(projectRoot, flow, {
           brownfield: Boolean(opts.brownfield),
-        });
+        }).map((id) => normalizeStepId(id));
         const norm = (arr) => [...arr].sort().join(',');
-        if (inferredWave.length && norm(envWave) !== norm(inferredWave)) {
+        // 收口握手：本闸门对应步产物已齐，推断波已指向下一步时，允许 AF_STEP 仍停在本步（否则 mod-confirm/sol-confirm 永远对不上）
+        const gateStepId = opts.dispatchGate ? GATE_TO_STEP[opts.dispatchGate] : null;
+        const gateStepNorm = gateStepId ? normalizeStepId(gateStepId) : null;
+        const gateStep = gateStepNorm ? getFlowStep(flow, gateStepNorm) : null;
+        const confirmHandshake =
+          Boolean(gateStep) &&
+          envWave.length === 1 &&
+          envWave[0] === gateStepNorm &&
+          stepOutputsSatisfied(projectRoot, gateStep);
+        if (inferredWave.length && norm(envWave) !== norm(inferredWave) && !confirmHandshake) {
           blocked = true;
           reporter.add({
             severity: 'error',
@@ -353,18 +376,89 @@ export function validateAfEnv(projectRoot, reporter, opts = {}) {
             message: `AF_STEP=${envStepRaw} 与产物推断波 ${formatAfStep(inferredWave)} 不一致 → 更新后再跑闸门。`,
           });
         }
+        // 握手期相位以本步 band 为准，不强迫跳到推断的下一阶段
+        if (confirmHandshake) {
+          const handshakeBand = bandForStep(flow, gateStepNorm);
+          if (state.phase !== handshakeBand) {
+            blocked = true;
+            reporter.add({
+              severity: 'error',
+              rule: 'AF-ENV-STEP-PHASE',
+              file: ENV_REL,
+              message: `闸门 ${opts.dispatchGate} 收口中：AF_STEP=${gateStepNorm} 要求 AF_PHASE=${handshakeBand}（当前 ${state.phase}）。`,
+            });
+          }
+        }
       }
     }
   }
 
   // 声称阶段必须与产物推断一致（不过 → 报错并写出应改成的值）
-  if (state.phase !== inferred) {
+  // 确认闸门收口握手时跳过（见上 confirmHandshake 已验本步 band）
+  const gateStepIdForPhase = opts.dispatchGate ? GATE_TO_STEP[opts.dispatchGate] : null;
+  const envWaveForPhase = parseAfStep(
+    parseEnvText(readText(path.join(projectRoot, ENV_REL)) || '').AF_STEP || '',
+  ).map((id) => normalizeStepId(id));
+  const handshakePhaseSkip =
+    Boolean(gateStepIdForPhase) &&
+    envWaveForPhase.length === 1 &&
+    envWaveForPhase[0] === normalizeStepId(gateStepIdForPhase) &&
+    Boolean(getFlowStep(flowLoaded.ok ? flowLoaded.flow : null, envWaveForPhase[0])) &&
+    stepOutputsSatisfied(
+      projectRoot,
+      getFlowStep(flowLoaded.ok ? flowLoaded.flow : null, envWaveForPhase[0]),
+    );
+
+  if (state.phase !== inferred && !handshakePhaseSkip) {
     blocked = true;
     reporter.add({
       severity: 'error',
       rule: 'AF-ENV-PHASE',
       file: ENV_REL,
       message: `AF_PHASE=${state.phase} 与产物推断阶段 ${inferred} 不一致 → 更新 AF_PHASE=${inferred} 后再跑闸门（禁止虚假进度）。`,
+    });
+  }
+
+  // 进度已越过某步但无对应 confirm PASS 回执（弱模型跳过 gate）
+  const phaseNum = Number(state.phase);
+  const reqReceipt = effectiveGatePass(projectRoot, 'req-confirm');
+  if (!Number.isNaN(phaseNum) && phaseNum >= 2 && !reqReceipt.valid) {
+    const reqRoot = path.join(projectRoot, 'atlas', 'requirements');
+    let confirmedReq = false;
+    if (exists(reqRoot)) {
+      try {
+        for (const n of fs.readdirSync(reqRoot)) {
+          if (!/^REQ-\d+/i.test(n) || !n.endsWith('.md')) continue;
+          const text = readText(path.join(reqRoot, n)) || '';
+          if (/状态[：:]\s*(已确认|已实现)/.test(text)) {
+            confirmedReq = true;
+            break;
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    if (confirmedReq) {
+      blocked = true;
+      reporter.add({
+        severity: 'error',
+        rule: 'AF-ENV-NO-RECEIPT',
+        file: reqReceipt.source === 'runtime' ? 'atlas/runs/' : 'atlas/logs/af-gate-receipts.md',
+        message:
+          `REQ 已确认且 AF_PHASE≥2，但当前权威缺少有效 req-confirm PASS（${reqReceipt.source}:${reqReceipt.reason}）→ 须先登记产物并跑通 agileflow gate --gate req-confirm。`,
+      });
+    }
+  }
+  const solReceipt = effectiveGatePass(projectRoot, 'sol-confirm');
+  if (!Number.isNaN(phaseNum) && phaseNum >= 4 && !solReceipt.valid) {
+    blocked = true;
+    reporter.add({
+      severity: 'error',
+      rule: 'AF-ENV-NO-RECEIPT',
+      file: solReceipt.source === 'runtime' ? 'atlas/runs/' : 'atlas/logs/af-gate-receipts.md',
+      message:
+        `AF_PHASE≥4 但当前权威缺少有效 sol-confirm PASS（${solReceipt.source}:${solReceipt.reason}）→ 须先登记产物并跑通 agileflow gate --gate sol-confirm。`,
     });
   }
 

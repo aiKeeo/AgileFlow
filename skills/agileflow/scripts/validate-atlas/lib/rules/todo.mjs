@@ -8,6 +8,8 @@ import {
   shouldSkipTodoDevCheck,
   customSkipMessage,
 } from './role-custom.mjs';
+import { detectBusinessSource } from '../brownfield.mjs';
+import { effectiveGatePass } from '../effective-gate.mjs';
 
 /** 非法 T 头：## T- 不算 */
 const ILLEGAL_T_HEADER = /^##\s+T-\d+/gm;
@@ -205,6 +207,21 @@ function validateCheckboxEvidence(projectRoot, content, reporter, relPath, heade
           line: step2 ? absLine(step2.lineInBlock) : header.line,
           message: `${header.id} 已勾 ②，但无合规 ① 构思文件。`,
         });
+      }
+
+      // ② 须有写码闸门回执或已探测业务源码（堵空勾②）
+      if (s2 && s1 && resolved) {
+        const hasCode =
+          detectBusinessSource(projectRoot) || effectiveGatePass(projectRoot, 'write-code').valid;
+        if (!hasCode) {
+          reporter.add({
+            severity: 'error',
+            rule: 'TODO-CHECK-②无写码证据',
+            file: relPath,
+            line: step2 ? absLine(step2.lineInBlock) : header.line,
+            message: `${header.id} 已勾 ②，但无业务源码且无 write-code 闸门 PASS 回执——禁止空勾写码步。先跑 agileflow gate --gate write-code 再写码。`,
+          });
+        }
       }
 
       if (s3 && !s2) {

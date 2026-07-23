@@ -1,0 +1,56 @@
+version: 1
+steps:
+  - id: af-req
+    mode: strict
+    prompt: req
+    depends:
+      - atlas/agileflow.env
+    outputs:
+      - atlas/requirements/REQ-*.md
+      - atlas/requirements/README.md
+
+  - id: af-mod
+    mode: orch
+    prompt: model
+    criteria:
+      - "无新业务实体、无状态机、无跨表不变式 → 可判定 skip"
+      - "仅字段级微调且已有 model 覆盖 → 可判定 skip 或增量"
+      - "新实体 / 状态机 / 权限主体变化 → 必须执行（禁止 skip）"
+      - "拿不准 → 按执行，禁止为赶工 skip"
+    depends:
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/model/README.md
+      - atlas/model/conceptual/entity-relations.md
+      - atlas/model/entities/*.md
+      - atlas/model/physical/schema.md
+
+  - id: af-sol
+    mode: strict
+    prompt: sol
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/model/
+    outputs:
+      - atlas/solution/README.md
+      - atlas/solution/features/F-*.md
+      - atlas/solution/architecture.md
+      - atlas/todo.md
+
+  - id: af-dev
+    mode: strict
+    prompt: dev
+    depends:
+      - atlas/todo.md
+      - atlas/solution/features/F-*.md
+    outputs:
+      - atlas/dev/T-*-*.md
+
+  - id: af-test
+    mode: strict
+    prompt: null
+    depends:
+      - atlas/todo.md
+      - atlas/dev/T-*-*.md
+    outputs:
+      - atlas/tests/README.md

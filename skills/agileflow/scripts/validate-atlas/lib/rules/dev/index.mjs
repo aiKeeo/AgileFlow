@@ -511,12 +511,12 @@ function runAcEvidenceChecks(filePath, content, reporter, relPath) {
       file: relPath,
       message: '## 结果 已有可运行证据时须含「AC 映射表」（AC ID | unit | ac | 人工）。',
     });
-  } else if (!fe && !/test\/unit|unit\//i.test(resultBody)) {
+  } else if (!fe && !/test\/unit|unit\/|src\/test\//i.test(resultBody)) {
     reporter.add({
       severity: 'error',
       rule: 'DEV-AC-UNIT',
       file: relPath,
-      message: 'BE dev 的 AC 映射表须含 test/unit 路径（1 AC ↔ 1 UT）。',
+      message: 'BE dev 的 AC 映射表须含 test/unit 或 src/test/ 路径（1 AC ↔ 1 UT）。',
     });
   }
 }

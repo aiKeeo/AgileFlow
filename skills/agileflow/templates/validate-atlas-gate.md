@@ -1,11 +1,15 @@
 # Atlas 校验（AI 流程闸门）
 
-> **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`  
-> **硬挡**：error 与 warn **同等失败**（exit ≠ 0）。没有「可继续知债」。  
-> **ORCH-*（派活台账）**：`--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 验路径覆盖 + 溯源；`dev-complete` / `test-entry` 另做**台账溯源审计**（`subagentId` / dev `taskId`，不重复路径匹配）。`--only req` 等模块单跑**不**验台账，不可替代对应 gate。  
-> **flow.yaml**：`atlas/flow.yaml` 某步 `skip: true` 时，对应 `req-confirm|mod-confirm|sol-confirm|test-entry` **短路为 PASS**（`FLOW-STEP-SKIP`）；`write-code` / doc-first **不**再硬要已 skip 步的产物。约定 → [flow.md](flow.md)。  
+> **实现**：`scripts/validate-atlas/`（随 skill 安装）· 规范：`lib/phase-spec.mjs`
+> **硬挡**：error 与 warn **同等失败**（exit ≠ 0）。没有「可继续知债」。
+> **ORCH-*（派活台账）**：`--gate req-confirm|mod-confirm|sol-confirm|dev-step1-literal|write-code` 验路径覆盖 + 溯源；`dev-complete` / `test-entry` 另做**台账溯源审计**（`subagentId` / dev `taskId`，不重复路径匹配）。`--only req` 等模块单跑**不**验台账，不可替代对应 gate。
+> **AF-CMD-*（指令留痕）**：主闸门只读硬验 `atlas/logs/af-commands.md` 的**本步门牌**（`/af-req` 等；裸 `/af` 不算）。须先显式执行 `npx @agileflow/cli log --door /af-… --summary … --route … --root .`；gate 不自动补，FAIL 不得制造 ✅。`AF_DECIDE=ai` **不免**留痕。
+> **REQ 质量硬指标（L1）**：`REQ-TITLE-SUBSTANCE`（禁 666/junk）· `REQ-SCOPE-MINLEN` · `REQ-AC-MIN-ROWS`（≥2）· `REQ-AC-CELL-MINLEN`；禁自创大纲冒充（缺 `## 范围提示` / BDD 表 → `REQ-SCOPE`/`REQ-AC-表头`）。
+> **degraded**：只免真实 `subagentId`，**不免**质量与 paths 覆盖；须 `orch-direct` entries +（有 Cursor/Qoder 时）`af-allow-degraded.md`。
+> **回执单权威**：有 current Run 时只认 `atlas/runs/<runId>/receipts.jsonl`，绑定 `runId`、step attempt、flow digest 与该步已登记产物摘要；legacy MD 即使 PASS 也无效。只有从未建立 current Run 的旧项目才兼容 `atlas/logs/af-gate-receipts.md`。validator 只读，`agileflow gate` 在校验结束后按真实最终状态提交回执。
+> **flow.yaml**：`atlas/flow.yaml` 某步 `skip: true` 时，对应 `req-confirm|mod-confirm|sol-confirm|test-entry` **短路为 PASS**（`FLOW-STEP-SKIP`）；`write-code` / doc-first **不**再硬要已 skip 步的产物。约定 → [flow.md](flow.md)。
 > **ROLE-CUSTOM-SKIP**：`atlas/role/role-*.md` 相对 `.agileflow-role-baseline.json` 已改 → 跳过该阶段**文档格式**闸门（info，不 fail）；**ORCH 仍硬挡**。重置 baseline：`--refresh-role-baseline --root .`
-> **契约也是硬规则**：`user` 该停就停；`ai` 闸门绿该连做就连做——不是可选自觉。  
+> **契约也是硬规则**：`user` 该停就停；`ai` 闸门绿该连做就连做——不是可选自觉。
 > **路径**：勿写死 `.cursor/skills/agileflow`。用下方探测或 `AGILEFLOW_SKILL_ROOT`。
 
 ## 闸门覆盖（不过 = 硬挡）
@@ -14,7 +18,7 @@
 
 | 级别 | 谁验 | 典型项 |
 |------|------|--------|
-| **L1 脚本硬挡** | `validate-atlas --gate` exit 0 | ORCH-*（含 `ORCH-DEGRADED-*`）、`AF-ENV-*`（含 `AF-ENV-PHASE`/`AF-ENV-GATE`/`AF-ENV-CAPABILITY-PENDING`）、dir、write-code、dev-step1-literal、dev-complete、test-entry、todo 三段式、`DOC-FIRST-*` |
+| **L1 脚本硬挡** | `validate-atlas --gate` exit 0 | ORCH-*（含 `ORCH-DEGRADED-*`）、`AF-ENV-*`（含 `AF-ENV-NO-RECEIPT`）、REQ 质量硬指标、dir、write-code、dev-step1-literal、dev-complete、test-entry、todo 三段式、`DOC-FIRST-*`、`SOL-F-THIN` |
 | **L2 流程契约** | 总控 + [contract §4](../templates/contract.md#4-停点总表) / [SKILL 裁决表](../SKILL.md) | AskQuestion 停点、`ai` 连做、`user` 阶段闸门、TodoWrite 展开 |
 | **L3 质量可读** | role 模板 + 人审 + dev-granularity | 构思厚度、字面量、AC 映射语义、驾驶舱可读性 |
 
@@ -113,8 +117,8 @@ cd <skill> && npm run validate:sol
 
 写入每个 T 的 **## 结果**，须同时可 grep 到：
 
-1. **编译**：`编译` / `build` / `package` / `mvn` / `gradle` / `cargo` / `go build` / `dotnet` / `make` / `cmake` / `webpack` / `构建` / …  
-2. **启或冒烟**：`启动` / `health` / `冒烟` / `curl` / `serve` / `dev server` / `docker` / `运行` / …  
+1. **编译**：`编译` / `build` / `package` / `mvn` / `gradle` / `cargo` / `go build` / `dotnet` / `make` / `cmake` / `webpack` / `构建` / …
+2. **启或冒烟**：`启动` / `health` / `冒烟` / `curl` / `serve` / `dev server` / `docker` / `运行` / …
 3. **结果**：`exit 0` / `✅` / `通过` / `PASS` / `UP` / `BUILD SUCCESS` / `成功` / `完成`
 
 禁止空表或只写「③ 验收后填写」。
@@ -138,7 +142,7 @@ cd <skill> && npm run validate:sol
 
 ## 像素对比（有强制原型时 · 硬挡）
 
-规则与目录 → [fe-pixel-compare](../tools/fe-pixel-compare.md)。  
+规则与目录 → [fe-pixel-compare](../tools/fe-pixel-compare.md)。
 闸门读 `atlas/tests/fe-pixel/report.json`（`dev-complete` / `test-entry`）。
 
 ## 回复格式（勾①时）

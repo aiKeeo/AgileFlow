@@ -19,6 +19,18 @@ const fixtures = path.join(__dirname, 'fixtures');
 
 const cases = [
   {
+    name: 'unknown --only → 参数错误',
+    args: ['--root', path.join(fixtures, 'good-runnable'), '--only', 'typo-module'],
+    fail: true,
+    assertStdout: 'ARG-ONLY-UNKNOWN',
+  },
+  {
+    name: '--json → stdout 为可解析 JSON',
+    args: ['--root', path.join(fixtures, 'good-runnable'), '--only', 'todo', '--json'],
+    fail: false,
+    assertJson: true,
+  },
+  {
     name: 'bad-flat-todo → 开发完成格式',
     args: ['--root', path.join(fixtures, 'bad-flat-todo'), '--only', 'todo'],
     fail: true,
@@ -51,6 +63,18 @@ const cases = [
     args: ['--root', path.join(fixtures, 'bad-req-empty-ac'), '--only', 'req'],
     fail: true,
     assertStdout: 'REQ-AC-空单元格',
+  },
+  {
+    name: 'bad-req-title-666 → 标题无实质应失败',
+    args: ['--root', path.join(fixtures, 'bad-req-title-666'), '--only', 'req'],
+    fail: true,
+    assertStdout: 'REQ-TITLE-SUBSTANCE',
+  },
+  {
+    name: 'bad-req-freestyle-outline → 自创大纲缺范围提示/BDD 应失败',
+    args: ['--root', path.join(fixtures, 'bad-req-freestyle-outline'), '--only', 'req'],
+    fail: true,
+    assertStdout: 'REQ-',
   },
   {
     name: 'bad-req-no-title-name → 标题无名称应失败',
@@ -531,6 +555,13 @@ for (const c of cases) {
   let good = c.fail ? exitCode !== 0 : exitCode === 0;
   if (good && c.assertStdout && !out.includes(c.assertStdout)) good = false;
   if (good && c.assertNotStdout && out.includes(c.assertNotStdout)) good = false;
+  if (good && c.assertJson) {
+    try {
+      JSON.parse(result.stdout || '');
+    } catch {
+      good = false;
+    }
+  }
   if (good) {
     console.log('PASS: ' + c.name);
     passed++;

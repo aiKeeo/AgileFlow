@@ -23,7 +23,20 @@ const SCENARIOS = {
   'parallel-flow': {
     promptFile: 'PROMPT.ai.parallel-flow.md',
     seed: 'parallel-flow',
-    note: '预置 research∥competitor 同波并行再 req；prompt 含 research: 门牌切入。',
+    note: '预置 af-research∥af-competitor 同波并行再 af-req；prompt 含 /af-research 门牌切入。',
+  },
+  'model-skip': {
+    promptFile: 'PROMPT.ai.model-skip.md',
+    seed: 'model-skip',
+    note: 'E17：瘦 CRUD 需求；验 af-mod skip+reason 或 model 落盘。勿教 skip 写法。',
+  },
+  'change-l2': {
+    promptFiles: {
+      ai: 'PROMPT.ai.change-l2.md',
+      user: 'PROMPT.user.change-l2.md',
+    },
+    seed: 'change-l2',
+    note: 'H3：预置已确认 REQ+方案；验纠偏 L2 与 REQ 先更后码。勿教步名。',
   },
 };
 
@@ -67,7 +80,9 @@ function normalizeMode(mode) {
 function loadTemplate(skillRoot, modeId, scenarioId) {
   const scenario = SCENARIOS[scenarioId] || SCENARIOS.slimtrack;
   const cfg = MODES[modeId];
-  const promptFile = scenario.promptFile && modeId === 'ai' ? scenario.promptFile : cfg.promptFile;
+  const promptFile =
+    scenario.promptFiles?.[modeId] ||
+    (scenario.promptFile && modeId === 'ai' ? scenario.promptFile : cfg.promptFile);
   const p = path.join(skillRoot, 'tools/agent-retest', promptFile);
   if (!fs.existsSync(p)) {
     throw new Error(`缺少提示模板: ${p}`);
@@ -75,10 +90,34 @@ function loadTemplate(skillRoot, modeId, scenarioId) {
   return fs.readFileSync(p, 'utf8');
 }
 
-function seedScenarioWorkdir(skillRoot, workRoot, scenarioId) {
-  const scenario = SCENARIOS[scenarioId];
-  if (!scenario?.seed) return;
-  const seedDir = path.join(skillRoot, 'tools/agent-retest/scenarios', scenario.seed);
+function alignSeedDecision(workRoot, decide) {
+  const envPath = path.join(workRoot, 'atlas', 'agileflow.env');
+  if (!fs.existsSync(envPath)) return;
+  const raw = fs.readFileSync(envPath, 'utf8');
+  const next = /^AF_DECIDE=/m.test(raw)
+    ? raw.replace(/^AF_DECIDE=.*$/m, `AF_DECIDE=${decide}`)
+    : `AF_DECIDE=${decide}\n${raw}`;
+  fs.writeFileSync(envPath, next, 'utf8');
+}
+
+/**
+ * 若 seed 含 atlas/ 子树则整棵复制（change-l2 等 fixture）。
+ * @param {string} seedDir
+ * @param {string} workRoot
+ */
+function copyAtlasSeedTree(seedDir, workRoot) {
+  const atlasSeed = path.join(seedDir, 'atlas');
+  if (!fs.existsSync(atlasSeed)) return false;
+  fs.cpSync(atlasSeed, path.join(workRoot, 'atlas'), { recursive: true });
+  return true;
+}
+
+/**
+ * 复制 flow.yaml 与 role-*.md 到工作区 atlas。
+ * @param {string} seedDir
+ * @param {string} workRoot
+ */
+function copyFlowAndRoleSeed(seedDir, workRoot) {
   const atlas = path.join(workRoot, 'atlas');
   fs.mkdirSync(path.join(atlas, 'role'), { recursive: true });
   fs.mkdirSync(path.join(atlas, 'logs'), { recursive: true });
@@ -86,10 +125,20 @@ function seedScenarioWorkdir(skillRoot, workRoot, scenarioId) {
   if (fs.existsSync(flowSrc)) {
     fs.copyFileSync(flowSrc, path.join(atlas, 'flow.yaml'));
   }
+  if (!fs.existsSync(seedDir)) return;
   for (const name of fs.readdirSync(seedDir)) {
     if (name.startsWith('role-') && name.endsWith('.md')) {
       fs.copyFileSync(path.join(seedDir, name), path.join(atlas, 'role', name));
     }
+  }
+}
+
+function seedScenarioWorkdir(skillRoot, workRoot, scenarioId) {
+  const scenario = SCENARIOS[scenarioId];
+  if (!scenario?.seed) return;
+  const seedDir = path.join(skillRoot, 'tools/agent-retest/scenarios', scenario.seed);
+  if (!copyAtlasSeedTree(seedDir, workRoot)) {
+    copyFlowAndRoleSeed(seedDir, workRoot);
   }
 }
 
@@ -105,7 +154,7 @@ function main() {
   const modeId = normalizeMode(args.mode);
   if (args.help || !args.workRoot || !modeId) {
     console.log(`用法:
-  node scripts/agent-retest/prepare.mjs --work-root <新项目目录> [--mode ai|user] [--scenario slimtrack|custom-flow] [--skill-root <skill>]
+  node scripts/agent-retest/prepare.mjs --work-root <新项目目录> [--mode ai|user] [--scenario <id>] [--skill-root <skill>]
 
 作用:
   1. 创建空工作区（若已存在则保留，不覆盖）
@@ -117,9 +166,14 @@ function main() {
   user 用户决策（须开 user-sim）
 
 --scenario:
-  slimtrack     默认（减肥小程序全栈）
-  custom-flow   预置特殊 flow 步（饮水打卡瘦需求）
-  parallel-flow research∥competitor 并行波 + research: 切入
+  slimtrack     默认（减肥小程序全栈 · D1）
+  custom-flow   预置特殊 flow 步（C1）
+  parallel-flow af-research∥af-competitor 并行波（C2）
+  model-skip    瘦 CRUD + mod skip 判定（E17）
+  change-l2     已确认 REQ 变更（H3）
+
+场景预期 SSOT: <skill>/tools/agent-retest/SCENARIOS.md
+操作手册: 仓库根 AGENT-RETEST.md
 `);
     process.exit(args.help ? 0 : 1);
   }
@@ -134,6 +188,7 @@ function main() {
   const cfg = MODES[modeId];
   fs.mkdirSync(args.workRoot, { recursive: true });
   seedScenarioWorkdir(skillRoot, args.workRoot, args.scenario);
+  alignSeedDecision(args.workRoot, cfg.decide);
   const prompt = renderPrompt(loadTemplate(skillRoot, modeId, args.scenario), skillRoot, args.workRoot);
   const meta = {
     createdAt: new Date().toISOString(),

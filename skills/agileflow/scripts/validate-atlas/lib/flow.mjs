@@ -9,9 +9,50 @@ import { collectFiles, exists, readText } from './fs-utils.mjs';
 
 export const FLOW_REL = 'atlas/flow.yaml';
 
-const BUILTIN_IDS = new Set(['init', 'req', 'model', 'sol', 'dev', 'test']);
+/** 旧短 id → af-*（load 时 warn+normalize） */
+export const LEGACY_TO_AF_STEP = {
+  init: 'af-init',
+  req: 'af-req',
+  model: 'af-mod',
+  mod: 'af-mod',
+  sol: 'af-sol',
+  dev: 'af-dev',
+  test: 'af-test',
+  tests: 'af-tests',
+};
+
+const BUILTIN_IDS = new Set(['af-init', 'af-req', 'af-mod', 'af-sol', 'af-dev', 'af-test']);
 const ROLE_KEYS = new Set(['req', 'model', 'sol', 'dev']);
 const MODES = new Set(['strict', 'orch']);
+
+/** flow / 斜杠同名：须 af- 前缀 */
+export const AF_STEP_ID_RE = /^af-[a-z][a-z0-9_-]*$/i;
+
+/**
+ * @param {string} id
+ * @returns {string}
+ */
+export function normalizeStepId(id) {
+  const s = String(id || '');
+  if (LEGACY_TO_AF_STEP[s]) return LEGACY_TO_AF_STEP[s];
+  return s;
+}
+
+/**
+ * 就地规范化 steps[].id（兼容旧短名）
+ * @param {object} flow
+ */
+export function normalizeFlowStepIds(flow) {
+  if (!Array.isArray(flow?.steps)) return;
+  for (const step of flow.steps) {
+    if (!step || typeof step.id !== 'string') continue;
+    const next = normalizeStepId(step.id);
+    if (next !== step.id) {
+      console.warn(`[agileflow] flow id 已规范化: ${step.id} → ${next}（请改盘为 af-*）`);
+      step.id = next;
+    }
+  }
+}
 
 /**
  * 极简 YAML 子集解析（本 skill flow 模板够用；不引入 js-yaml）
@@ -196,6 +237,7 @@ export function loadFlow(projectRoot) {
   }
   try {
     const flow = parseFlowYaml(readText(abs));
+    normalizeFlowStepIds(flow);
     return { ok: true, flow, path: FLOW_REL };
   } catch (e) {
     return {
@@ -212,7 +254,8 @@ export function loadFlow(projectRoot) {
  */
 export function getFlowStep(flow, id) {
   const steps = Array.isArray(flow?.steps) ? flow.steps : [];
-  return steps.find((s) => s && s.id === id) ?? null;
+  const want = normalizeStepId(id);
+  return steps.find((s) => s && normalizeStepId(s.id) === want) ?? null;
 }
 
 /**
@@ -230,13 +273,15 @@ export function listFlowSteps(flow) {
  * @param {string} stepId
  */
 export function bandForStep(flow, stepId) {
+  const want = normalizeStepId(stepId);
   let lastBuiltinPhase = '1';
   for (const step of listFlowSteps(flow)) {
-    if (step.id === stepId) {
-      const builtin = BUILTIN_STEP_GATE[step.id];
+    const sid = normalizeStepId(step.id);
+    if (sid === want) {
+      const builtin = BUILTIN_STEP_GATE[sid];
       return builtin ? String(builtin.phase) : lastBuiltinPhase;
     }
-    const builtin = BUILTIN_STEP_GATE[step.id];
+    const builtin = BUILTIN_STEP_GATE[sid];
     if (builtin) lastBuiltinPhase = String(builtin.phase);
   }
   return lastBuiltinPhase;
@@ -247,7 +292,8 @@ export function bandForStep(flow, stepId) {
  * @param {string} stepId
  */
 export function stepIndex(flow, stepId) {
-  return listFlowSteps(flow).findIndex((s) => s.id === stepId);
+  const want = normalizeStepId(stepId);
+  return listFlowSteps(flow).findIndex((s) => normalizeStepId(s.id) === want);
 }
 
 /**
@@ -323,7 +369,7 @@ export function stepOutputsSatisfied(projectRoot, step) {
 }
 
 /**
- * 快捷/保留前缀，禁止当作 flow step id（门牌）
+ * 快捷/保留 id，禁止当作 flow step 插入（含旧短名与 af-*）
  */
 export const FLOW_RESERVED_IDS = new Set([
   'fix',
@@ -335,6 +381,16 @@ export const FLOW_RESERVED_IDS = new Set([
   'revise',
   'explore',
   'init',
+  'af-fix',
+  'af-refactor',
+  'af-tweak',
+  'af-perf',
+  'af-chore',
+  'af-ut',
+  'af-revise',
+  'af-explore',
+  'af-init',
+  'af',
 ]);
 
 /**
@@ -363,19 +419,24 @@ export function formatAfStep(ids) {
  * @returns {string|null}
  */
 export function resolvePrefixToStepId(flow, prefix) {
-  const p = String(prefix || '')
+  const raw = String(prefix || '')
     .trim()
+    .replace(/^\/+/, '')
     .replace(/:$/, '')
     .toLowerCase();
-  if (!p) return null;
-  if (p === 'mod' || p === 'model') {
-    return getFlowStep(flow, 'model') ? 'model' : null;
-  }
-  if (p === 'tests' || p === 'test') {
-    return getFlowStep(flow, 'test') ? 'test' : null;
-  }
-  const steps = listFlowSteps(flow);
-  const hit = steps.find((s) => String(s.id).toLowerCase() === p);
+  if (!raw) return null;
+
+  const aliases = {
+    mod: 'af-mod',
+    model: 'af-mod',
+    'af-model': 'af-mod',
+    tests: 'af-test',
+    test: 'af-test',
+    'af-tests': 'af-test',
+  };
+  const want = normalizeStepId(aliases[raw] || raw);
+
+  const hit = listFlowSteps(flow).find((s) => normalizeStepId(s.id) === want || String(s.id).toLowerCase() === raw);
   return hit ? hit.id : null;
 }
 
@@ -387,8 +448,15 @@ export function resolvePrefixToStepId(flow, prefix) {
 export function listFlowCommandIds(flow) {
   const ids = listFlowSteps(flow).map((s) => s.id);
   const out = new Set(ids);
-  if (ids.includes('model')) out.add('mod');
-  if (ids.includes('test')) out.add('tests');
+  const norm = ids.map((id) => normalizeStepId(id));
+  if (norm.includes('af-mod')) {
+    out.add('af-mod');
+    out.add('af-model');
+  }
+  if (norm.includes('af-test')) {
+    out.add('af-test');
+    out.add('af-tests');
+  }
   return [...out];
 }
 
@@ -509,13 +577,37 @@ export function inferWaveFromFlow(projectRoot, flow, opts = {}) {
   if (opts.brownfield) {
     const initReadme = readText(path.join(projectRoot, 'atlas', 'init', 'README.md'));
     if (!initReadme || !/状态[：:]\s*已确认/.test(initReadme)) {
-      return steps[0] ? [steps[0].id] : [];
+      // greenfield 跑 AF 自造 backend/frontend 后会被 detectBrownfield=true；
+      // 若已有已确认 REQ，说明主链已过 init 意图，禁止卡回 steps[0]
+      if (!hasConfirmedRequirement(projectRoot)) {
+        return steps[0] ? [steps[0].id] : [];
+      }
     }
   }
 
   const wave = listParallelWave(projectRoot, flow);
   if (wave.length > 0) return wave;
   return steps[steps.length - 1] ? [steps[steps.length - 1].id] : [];
+}
+
+/**
+ * 是否已有「已确认|已实现」的 REQ（主链已实质启动）
+ * @param {string} projectRoot
+ */
+function hasConfirmedRequirement(projectRoot) {
+  const reqRoot = path.join(projectRoot, 'atlas', 'requirements');
+  if (!exists(reqRoot)) return false;
+  let files = [];
+  try {
+    files = fs.readdirSync(reqRoot).filter((n) => /^REQ-\d+/i.test(n) && n.endsWith('.md'));
+  } catch {
+    return false;
+  }
+  for (const n of files) {
+    const text = readText(path.join(reqRoot, n)) || '';
+    if (/状态[：:]\s*(已确认|已实现)/.test(text)) return true;
+  }
+  return false;
 }
 
 /**
@@ -628,7 +720,16 @@ export function validateFlowFile(projectRoot, reporter, opts = {}) {
         severity: 'error',
         rule: 'FLOW-ID-RESERVED',
         file: FLOW_REL,
-        message: `${id} 为保留前缀（fix/revise/explore…），不可用作 flow 步门牌`,
+        message: `${id} 为保留门牌（af-fix/af-revise/af-explore…），不可用作 flow 步`,
+      });
+    }
+
+    if (!AF_STEP_ID_RE.test(String(id))) {
+      reporter.add({
+        severity: 'error',
+        rule: 'FLOW-ID-AF',
+        file: FLOW_REL,
+        message: `${id} 须为 af-* 形态（如 af-req、af-research），与斜杠 /${String(id).startsWith('af-') ? id : 'af-…'} 同名`,
       });
     }
 
@@ -764,23 +865,26 @@ export function isStepSkipped(projectRoot, stepId) {
  * 内置步 → 默认闸门 / AF_PHASE（自定义步用 bandForStep 映射左侧内置档）
  */
 export const BUILTIN_STEP_GATE = {
-  init: { gate: 'init-confirm', phase: 0 },
-  req: { gate: 'req-confirm', phase: 1 },
-  model: { gate: 'mod-confirm', phase: 2 },
-  sol: { gate: 'sol-confirm', phase: 3 },
-  dev: { gate: 'write-code', phase: 4 },
-  test: { gate: 'test-entry', phase: 5 },
+  'af-init': { gate: 'init-confirm', phase: 0 },
+  'af-req': { gate: 'req-confirm', phase: 1 },
+  'af-mod': { gate: 'mod-confirm', phase: 2 },
+  'af-sol': { gate: 'sol-confirm', phase: 3 },
+  'af-dev': { gate: 'write-code', phase: 4 },
+  'af-test': { gate: 'test-entry', phase: 5 },
 };
 
 /**
  * 闸门 id → flow step id（用于 skip 短路）
  */
 export const GATE_TO_STEP = {
-  'init-confirm': 'init',
-  'req-confirm': 'req',
-  'mod-confirm': 'model',
-  'sol-confirm': 'sol',
-  'test-entry': 'test',
+  'init-confirm': 'af-init',
+  'req-confirm': 'af-req',
+  'mod-confirm': 'af-mod',
+  'sol-confirm': 'af-sol',
+  'dev-step1-literal': 'af-dev',
+  'dev-complete': 'af-dev',
+  'write-code': 'af-dev',
+  'test-entry': 'af-test',
 };
 
 /**
@@ -798,7 +902,7 @@ export function ensureFlowYaml(projectRoot, skillRoot) {
   } else {
     fs.writeFileSync(
       dest,
-      'version: 1\nsteps:\n  - id: req\n    mode: strict\n    prompt: req\n    depends: []\n    outputs:\n      - atlas/requirements/\n',
+      'version: 1\nsteps:\n  - id: af-req\n    mode: strict\n    prompt: req\n    depends: []\n    outputs:\n      - atlas/requirements/\n',
     );
   }
   return { created: true, path: dest };

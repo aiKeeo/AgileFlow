@@ -1,6 +1,6 @@
 version: 1
 steps:
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -10,9 +10,9 @@ steps:
       - atlas/requirements/REQ-*.md
       - atlas/requirements/README.md
       - atlas/requirements/ui/UID-*.md
-      - atlas/requirements/ui/prototypes/
+      # 有线框原型时再落盘 requirements/ui 下 prototypes 目录（勿列入 outputs，否则无原型永远卡在 af-req）
 
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -29,7 +29,7 @@ steps:
       - atlas/model/entities/*.md
       - atlas/model/physical/schema.md
 
-  - id: sol
+  - id: af-sol
     mode: strict
     prompt: sol
     depends:
@@ -40,10 +40,10 @@ steps:
       - atlas/solution/features/F-*.md
       - atlas/solution/contracts/
       - atlas/solution/architecture.md
-      - atlas/solution/code-patterns-*.md
+      # code-patterns-*.md 按需落盘，勿列入 outputs（否则无写法锚点永远卡在 af-sol）
       - atlas/todo.md
 
-  - id: dev
+  - id: af-dev
     mode: strict
     prompt: dev
     depends:
@@ -54,7 +54,7 @@ steps:
     outputs:
       - atlas/dev/T-*-*.md
 
-  - id: test
+  - id: af-test
     mode: strict
     prompt: null
     depends:
@@ -65,7 +65,4 @@ steps:
     outputs:
       - atlas/tests/REQ-*-验收报告.md
       - atlas/tests/README.md
-      - atlas/tests/fe-pixel/
-      - atlas/logs/fe-smoke-report.json
-      - atlas/logs/fe-smoke-shots/
-      - atlas/logs/fe-smoke-visual-review.md
+      # fe-pixel / fe-smoke 由 test-entry 模块按 FE 探测硬验；勿列入 outputs（无 FE 永远卡 af-test）

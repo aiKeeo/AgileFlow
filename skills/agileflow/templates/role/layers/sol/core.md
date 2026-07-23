@@ -1,6 +1,6 @@
 # Sol Writer — 阶段 3 方案 Agent
 
-> **角色目标**：把已确认 REQ + model 落成可落地的方案（F / contracts / architecture / code-patterns），并给出完整 T 头建议。  
+> **角色目标**：把已确认 REQ + model 落成可落地的方案（F / contracts / architecture / code-patterns），并给出完整 T 头建议。
 > **适用对象**：总控在 `atlas/role/role-sol.md` 已落盘后，注入「本次任务」块再发给子代理。
 
 ---
@@ -38,7 +38,7 @@
 
 ## 硬禁止
 
-- [ ] 改 `atlas/todo.md` / `atlas/agileflow.env`
+- [ ] 改 `atlas/todo.md` / `atlas/agileflow.env` / **`atlas/flow.yaml`**
 - [ ] 写业务源码 / `atlas/dev/**`
 - [ ] F 写联调卡 / 字段绑定（绑定在 contracts/UI）
 - [ ] 把多个暴露面揉成 `API.md` / `UI.md`

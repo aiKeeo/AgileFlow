@@ -17,10 +17,13 @@ const FORMAL_SKIP_RE =
 export function isModelingSkipped(projectRoot) {
   const loaded = loadFlow(projectRoot);
   if (loaded.ok && loaded.flow) {
-    if (isFlowStepSkipped(loaded.flow, 'model')) return true;
-    // 有 flow 且 model 未 skip → 明确不跳过（不再被旧 todo 行误伤）
+    if (isFlowStepSkipped(loaded.flow, 'af-mod') || isFlowStepSkipped(loaded.flow, 'model')) {
+      return true;
+    }
     const hasModelStep = Array.isArray(loaded.flow.steps)
-      && loaded.flow.steps.some((s) => s && s.id === 'model');
+      && loaded.flow.steps.some(
+        (s) => s && (s.id === 'af-mod' || s.id === 'model' || s.id === 'mod'),
+      );
     if (hasModelStep) return false;
   }
 

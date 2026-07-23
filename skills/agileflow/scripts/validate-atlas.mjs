@@ -23,6 +23,8 @@ import { bootstrapTemplateTree } from './validate-atlas/lib/template-loader.mjs'
 import { bootstrapAtlasScaffold } from './validate-atlas/lib/atlas-scaffold.mjs';
 import { writeRoleBaselines } from './validate-atlas/lib/rules/role-custom.mjs';
 import { exists } from './validate-atlas/lib/fs-utils.mjs';
+import { printGateResultTrailer } from './validate-atlas/lib/gate-receipts.mjs';
+import { warnSkillVersionSkew } from './validate-atlas/lib/skill-version.mjs';
 
 function parseBooleanFlag(v) {
   if (v === true || v === undefined) return true;
@@ -203,15 +205,39 @@ function main() {
       incremental: parseBooleanFlag(args.incremental),
       brownfield: args.greenfield ? false : args.brownfield !== undefined ? parseBooleanFlag(args.brownfield) : 'auto',
       verbose: parseBooleanFlag(args.verbose),
+      autoAfLog: false,
     });
+    // 版本偏斜：项目副本 ≠ 当前执行 skill → warn 硬挡
+    warnSkillVersionSkew(root, result.reporter);
+    const passed = result.reporter.passed() && result.passed;
     if (args.json) {
-      console.log(JSON.stringify({ gateId, passed: result.passed, class: result.gate.class ?? (result.gate.blocking ? 'A' : 'B'), issues: result.reporter.getIssues() }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            gateId,
+            passed,
+            class: result.gate.class ?? (result.gate.blocking ? 'A' : 'B'),
+            issues: result.reporter.getIssues(),
+          },
+          null,
+          2,
+        ),
+      );
     } else {
       console.log(`🚧 闸门: ${gateId} ${gateClassLabel(result.gate)}`);
       console.log(`   时机: ${result.gate.when}`);
-      result.reporter.print({ verbose: Boolean(args.verbose) });
+      result.reporter.print({
+        verbose: Boolean(args.verbose),
+        successLabel:
+          process.env.AGILEFLOW_GATE_WRAPPER === '1'
+            ? 'ℹ️ validator 层通过；最终结果以 CLI 尾标与 Runtime 为准'
+            : '',
+      });
+      if (process.env.AGILEFLOW_GATE_WRAPPER !== '1') {
+        printGateResultTrailer(result.gateId || gateId, passed);
+      }
     }
-    process.exit(result.passed ? 0 : 1);
+    process.exit(passed ? 0 : 1);
   }
 
   const options = {
@@ -227,9 +253,11 @@ function main() {
   else options.brownfield = 'auto';
   if (args.only) options.only = String(args.only).split(',').map((s) => s.trim());
 
-  console.log('🔍 Agileflow Atlas 校验');
+  if (!args.json) console.log('🔍 Agileflow Atlas 校验');
   const { passed, reporter, mode, tier, brownfield } = validateAtlas(options);
-  console.log(`   根目录: ${root} | 阶段: ${options.phase} | 模式: ${mode} | brownfield: ${brownfield}`);
+  if (!args.json) {
+    console.log(`   根目录: ${root} | 阶段: ${options.phase} | 模式: ${mode} | brownfield: ${brownfield}`);
+  }
 
   if (args.json) {
     console.log(JSON.stringify({

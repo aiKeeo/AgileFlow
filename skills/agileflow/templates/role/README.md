@@ -1,10 +1,10 @@
 # 角色提示词（Subagent）
 
-> **这些文件是给子代理的，不是给总控自己照着写的。**  
-> **首启强制**把本目录落到项目 `atlas/role/`（可改 = 项目自定义）。  
-> 总控派活前 **只读** `atlas/role/role-*.md`，再 **用宿主 Subagent/Task 发出去**。  
-> **产物形态**见 `atlas/template/`；**角色行为**见 `atlas/role/`。两者独立。  
-> 跨 IDE 派活 → [orchestrator §宿主义务](../orchestrator.md#宿主义务workbuddy--cursor--codex--其他)
+> **这些文件是给子代理的，不是给总控自己照着写的。**
+> **首启强制**把本目录落到项目 `atlas/role/`（可改 = 项目自定义）。
+> 总控派活前 **只读** `atlas/role/role-*.md`，再 **用宿主 Subagent/Task 发出去**。
+> **产物形态**见 `atlas/template/`；**角色行为**见 `atlas/role/`。两者独立。
+> 跨 IDE 派活 → [orchestrator-core §宿主义务](../orchestrator-core.md#宿主义务)
 
 ## 加载顺序（硬规则）
 
@@ -37,7 +37,7 @@
 
 **仍硬挡**：`af-env`、`dir`、**ORCH 派活台账**、runnable/smoke 等流程闸门。
 
-重置「默认 assembled」：从 skill 恢复 stamp 后执行  
+重置「默认 assembled」：从 skill 恢复 stamp 后执行
 `node <skill>/scripts/validate-atlas.mjs --refresh-role-baseline --root .`
 
 ### 默认 vs custom 派活体积
@@ -68,4 +68,4 @@ node <skill>/scripts/validate-atlas.mjs --bootstrap-scaffold --root .
 
 `## 身份` · `## 必读` · `## 产物` · `## 验收 gate` · `## 硬禁止` · `## 工作流` · `## 返回给总控`
 
-总控与派活表 → [orchestrator.md](../orchestrator.md)
+总控与派活表 → [orchestrator-core](../orchestrator-core.md) · [orchestrator-ref](../orchestrator-ref.md)

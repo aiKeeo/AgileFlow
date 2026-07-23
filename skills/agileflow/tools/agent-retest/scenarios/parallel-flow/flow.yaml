@@ -1,6 +1,6 @@
 version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
@@ -8,7 +8,7 @@ steps:
       - atlas/logs/research-water.md
     reason: "市场/习惯调研"
 
-  - id: competitor
+  - id: af-competitor
     mode: strict
     prompt: null
     depends: []
@@ -16,7 +16,7 @@ steps:
       - atlas/logs/competitor-water.md
     reason: "竞品分析；与 research 无互依 → 同波并行"
 
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -26,7 +26,7 @@ steps:
       - atlas/requirements/REQ-*.md
       - atlas/requirements/README.md
 
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -37,7 +37,7 @@ steps:
     outputs:
       - atlas/model/README.md
 
-  - id: sol
+  - id: af-sol
     mode: strict
     prompt: sol
     depends:
@@ -49,7 +49,7 @@ steps:
       - atlas/solution/architecture.md
       - atlas/todo.md
 
-  - id: dev
+  - id: af-dev
     mode: strict
     prompt: dev
     depends:
@@ -59,7 +59,7 @@ steps:
     outputs:
       - atlas/dev/T-*-*.md
 
-  - id: test
+  - id: af-test
     mode: strict
     prompt: null
     depends:

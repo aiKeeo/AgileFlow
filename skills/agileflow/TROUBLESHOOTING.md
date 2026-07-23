@@ -1,7 +1,7 @@
 # Agileflow 排障（短表）
 
-> **用法**：先看报错行末 `💡 白话 · 谁修`；本表 = **白话 + 谁修 + 下一步**（不重复规则定义）。  
-> **错误码权威**：规则含义与修复动作 → [validate-atlas-gate](templates/validate-atlas-gate.md)；脚本 `lib/rule-hints.mjs`；流程裁决 → [SKILL 裁决表](SKILL.md#裁决表冲突时以此为准)。  
+> **用法**：先看报错行末 `💡 白话 · 谁修`；本表 = **白话 + 谁修 + 下一步**（不重复规则定义）。
+> **错误码权威**：规则含义与修复动作 → [validate-atlas-gate](templates/validate-atlas-gate.md)；脚本 `lib/rule-hints.mjs`；流程裁决 → [SKILL 裁决表](SKILL.md#裁决表冲突时以此为准)。
 > **谁修**：`AI`=自修后重跑闸门（`AF_DECIDE=ai` 勿等人说继续）· `你`=需选卡/提供资源 · `双方`=配合。
 
 ## 高频（置顶）
@@ -16,12 +16,33 @@
 | `AF-ENV-PHASE` | env 阶段与产物不一致 | AI | 按报错更新 `AF_PHASE` 后重跑 gate |
 | `ORCH-DEGRADED-CONFLICT` | 有 Task 却 degraded 台账 | AI | 改 `normal` 台账 + `subagentId`，或真降级则改 env |
 | AI 不写文件、像卡住 | 在等你点阶段闸门卡 | 你 | 点「继续」；要全自动→「后面都你定」 |
+| AI 说找不到 `00-intent-routing` / 直接跳流程写码 | 在**工作区项目根** Glob，没找 **skill 根**（常在 `~/.qoder|cursor/skills/agileflow` 或门牌同级） | AI | 按 SKILL LOAD「路径锚点」换路径重试；禁止以搜不到为由跳阶段 |
+| `AF-CMD-MISSING` / `AF-CMD-EMPTY` / `AF-CMD-NO-STEP` | `/af*` 做完没显式留痕，或只建了空 `logs/`，或**只写了入口 `/af` 想冒充各步** | AI | 每步先用**本步门牌**跑 `agileflow log` 再 gate；gate 只读，不自动补。`ai` 连做 ≠ 免留痕 |
 | `ai` 却每阶段停 | Agent 误用旧纪律 | AI | 提醒按委托**连做**；仍须闸门绿 |
-| `ai` 派完一批等人「继续」 | 后台派活后交班 | AI | 改阻塞式 Task；同会话循环到交付 → [orchestrator](templates/orchestrator.md) |
+| `ai` 派完一批等人「继续」 | 后台派活后交班 | AI | 改阻塞式 Task；同会话循环到交付 → [orch-core](templates/orchestrator-core.md) |
 | 总控包办 REQ/sol/dev / 未开 Subagent | 口头派活或连做误读 | AI | 查是否真派 Subagent；补派 + 记台账；真无 Subagent → `AF_HOST_CAPABILITY=degraded` + `degradedReason` |
 | `ORCH-NO-DISPATCH` / `ORCH-DISPATCH-MISMATCH` | 无台账或未覆盖产物路径 | AI | 派 Subagent（Cursor=Task）对应 role → 收回报写台账 → 重跑 gate |
 | `ORCH-NO-SUBAGENT-ID` / `ORCH-DEV-NO-TASKID` | 台账缺 Subagent ID 或 dev 缺 taskId | AI | 每条 entry 写宿主返回的 `subagentId`；dev 写 `taskId`（如 T-001）；`dev-complete`/`test-entry` 收口亦验 |
 | 改了 `atlas/role/` 仍被 REQ-*/DEV-* 挡 | baseline 未更新或 role 未判 custom | AI | 确认 `.agileflow-role-baseline.json` 存在；自定义后应见 `ROLE-CUSTOM-SKIP`；恢复默认闸门 → `--refresh-role-baseline` |
+| 绿场写完 `backend/`/`frontend/` 后闸门全退回 `af-req` / `AF_PHASE=0` | 源码目录触发 brownfield，却无 `atlas/init` 已确认 | AI | 用含「已确认 REQ 逃生」的校验脚本（skill ≥ 本修）；或补 `atlas/init` 盘点；**勿**把可选原型/写法锚点写进 `flow.yaml` outputs |
+| `write-code`/`dev-complete` 报 `AF-ENV-STEP` 与波不一致 | 闸门未映射到 `af-dev`，或步 outputs 已齐却 env 仍停在上一步 | AI | 确认 `GATE_TO_STEP` 含 write-code/dev-*；outputs 齐后跑确认闸门应握手；同步 `AF_STEP`/`AF_PHASE` |
+| `[DEV-AC-UNIT]` Java/BE 已有 `src/test/` 仍红 | 旧规则只认 `test/unit` | AI | AC 映射表写 `src/test/…` 或 `test/unit/…`；升级 skill 校验 |
+| 卡在 `af-req`/`af-sol` 永远做不完 | `flow.yaml` outputs 列了可选 `ui/prototypes/` 或 `code-patterns-*.md` | AI | 从 outputs 删掉（按需落盘即可）；模板默认已注明勿列入 |
+| `gate \| tee` 显示 EXIT:0 实际失败 | 未开 `pipefail`，tee 盖住 gate 退出码 | 双方 | 看 CLI 最终尾标；有 current Run 再跑 `run gate-status`，只认 JSONL 当前证明；从未建 Run 的 legacy 项目才看 MD |
+| `RUNTIME-FLOW-STALE` / `flow-stale` | active Run 启动后改了 flow | AI | `agileflow run abandon --reason "flow 已变更" --root .`，再启动新 Run；禁止同 Run 刷新 flowDigest |
+| `no-registered-artifacts` / `artifact-registry-dirty` | 未 scan，或 scan 后又改了产物 | AI | 先 `agileflow artifact scan --root .`，确认内容稳定后重跑 gate |
+| `step sync` 被拒 / 手改 AF_STEP 仍乱 | 前进离开某步无对应 confirm 的 PASS 回执 | AI | 先 `gate` 绿再 sync；紧急才 `--force --reason "…"` |
+| `rewind` 报只能回到更早 / 血缘全 ready | 用 rewind「前进」冲掉 passed | AI | **前进用 advance/step sync**；rewind 只回退；禁 `rewind --to` 更后面的步 |
+| `RUNTIME_LINEAGE` 缺前序步 | 多次错误 rewind/force 后 steps 停在 ready | AI | 从最早缺口合法 advance 重建；勿 rewind 向前跳 |
+| `TODO-CHECK-②无写码证据` | 空勾② | AI | 先 `write-code` 绿再写码；或已有 backend/frontend |
+| `ORCH-FAKE-SUBAGENT-ID` / `ORCH-DIRECT-FORBIDDEN` | 假 ID 或 orch-direct 包办 req/sol/dev | AI | 真派 Task；抄回真实 subagentId |
+| `ORCH-DEGRADED-UNPROVEN` | 有 .cursor 却口头 degraded | AI | 真无 Task 才写 `atlas/logs/af-allow-degraded.md` |
+| `AF-SKILL-SKEW` | 项目 skill 副本落后于当前闸门 | AI | `npx @agileflow/cli init --force --root .` 或设 `AGILEFLOW_SKILL_ROOT` |
+| `REQ-TITLE-SUBSTANCE` / 自创 REQ 大纲 | 标题写 666；或用「## 1. 概述」冒充模板 | AI | 按 `templates/req.md`：`# [REQ-xxx] 名` + `## 范围提示` + BDD 8 列 AC |
+| `REQ-SCOPE-MINLEN` / `REQ-AC-MIN-ROWS` / `REQ-AC-CELL-MINLEN` | 范围内外/AC 注水过短 | AI | 范围内外各≥16字；AC≥2行；Then 含可观测断言 |
+| `ORCH-DEGRADED-NO-ENTRIES` / `ORCH-DEGRADED-ALLOW-THIN` | degraded 空台账或 allow 文件糊弄 | AI | orch-direct+paths 覆盖产物；allow 写明无 Task |
+| `AF-ENV-NO-RECEIPT` | 手改 AF_PHASE/已确认但没跑 gate | AI | 先 `gate --gate req-confirm|sol-confirm` 拿 PASS 回执 |
+| `SOL-F-THIN` | F 卡三行空壳 | AI | 边界做/不做≥40字 + 暴露面 + 全文够厚 |
 
 ## 全表
 

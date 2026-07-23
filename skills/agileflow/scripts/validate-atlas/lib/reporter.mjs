@@ -66,15 +66,15 @@ export class Reporter {
 
   /**
    * 格式化输出到控制台
-   * @param {{ verbose?: boolean }} [opts]
+   * @param {{ verbose?: boolean, successLabel?: string }} [opts]
    */
-  print({ verbose = false } = {}) {
+  print({ verbose = false, successLabel = '' } = {}) {
     const errors = this.#issues.filter((i) => i.severity === 'error');
     const warns = this.#issues.filter((i) => i.severity === 'warn');
     const infos = this.#issues.filter((i) => i.severity === 'info');
 
     if (errors.length === 0 && warns.length === 0 && infos.length === 0) {
-      console.log('✅ 全部校验通过');
+      console.log(successLabel || '✅ 全部校验通过');
       return;
     }
 
@@ -110,6 +110,10 @@ export class Reporter {
     console.log(
       `合计: ${errors.length + warns.length} 阻断${infoNote > 0 ? `, ${infoNote} 信息${verbose ? '' : '（含 ROLE-CUSTOM-SKIP；其余 info 加 --verbose）'}` : ''}`,
     );
-    console.log(this.passed() ? '✅ 校验通过' : '❌ 校验失败（有阻断项）');
+    console.log(
+      this.passed()
+        ? successLabel || '✅ 校验通过'
+        : '❌ 校验失败（有阻断项）',
+    );
   }
 }

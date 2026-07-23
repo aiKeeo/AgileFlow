@@ -1,7 +1,7 @@
 # 方案设计核心模板（atlas/solution/）
 
-> **格式模板**：示例域名（订单/登录等）仅演示章节结构，落盘时替换为当前项目。  
-> **四要素**：① 功能（含边界） ② **契约/接口文档**（按需，集中放 `contracts/`） ③ 架构（全局一份） ④ 任务（**`atlas/todo.md` 根**，禁止 `solution/todo.md`）  
+> **格式模板**：示例域名（订单/登录等）仅演示章节结构，落盘时替换为当前项目。
+> **四要素**：① 功能（含边界） ② **契约/接口文档**（按需，集中放 `contracts/`） ③ 架构（全局一份） ④ 任务（**`atlas/todo.md` 根**，禁止 `solution/todo.md`）
 > **质量同质**：`ai` / `user` **同质**——禁止因决策权薄写 F、契约、architecture、todo。要加速 → [并行](../phases/04-development.md#并行阶段-4)。对照 → [dev](dev.md) · [contract](contract.md)
 
 ## 颗粒度铁律（开发要看得清）
@@ -34,7 +34,7 @@
 
 **禁止**：`contracts/API.md` / `UI.md` 单文件揉全部接口（`SOL-C001-FAT`）；`atlas/solution/todo.md`（todo 只在 `atlas/todo.md`）。
 
-> **前缀**：用户说 `sol:` = 进本目录的口令，**不是**建 `atlas/sol/`。见 [00-intent-routing 目录前缀](../phases/00-intent-routing.md#目录前缀最高优先级)。
+> **门牌**：用户说 `/af-sol` = 进入方案步，**不是**建 `atlas/sol/`。目录名永远是 `atlas/solution/`。见 [atlas-structure 路径铁律](../phases/atlas-structure.md#路径铁律落盘前自检--写错即闸门红)。
 > 技术栈 AskQuestion（写 architecture 前）：[contract.md](contract.md)
 
 ## 目录结构
@@ -130,8 +130,8 @@ atlas/solution/
 
 ## 边界
 
-**做**：{可对 AC Then}（← AC-…）  
-**不做**：{范围外}（← REQ）  
+**做**：{可对 AC Then}（← AC-…）
+**不做**：{范围外}（← REQ）
 **约定**：{关键约束}
 ```
 

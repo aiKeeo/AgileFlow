@@ -199,6 +199,74 @@ export const RULE_HINTS = {
     plain: '未派 Subagent 或未记派活台账：总控禁止包办 REQ/model/sol/dev',
     who: 'ai',
   },
+  'AF-CMD-MISSING': {
+    plain: '缺 atlas/logs/af-commands.md（/af* 须在 gate 前显式留痕）',
+    who: 'ai',
+  },
+  'AF-CMD-EMPTY': {
+    plain: 'af-commands.md 还没有有效日志行；本步收尾先 agileflow log',
+    who: 'ai',
+  },
+  'AF-CMD-FORMAT': {
+    plain: 'af-commands 行格式不对（须 [门牌][摘要][日期][→路由][状态]）',
+    who: 'ai',
+  },
+  'AF-CMD-NO-STEP': {
+    plain: '本步闸门要本步门牌（裸 /af 不够；ai≠免留痕）',
+    who: 'ai',
+  },
+  'REQ-TITLE-SUBSTANCE': {
+    plain: 'REQ 标题无实质（666/纯数字/junk）；须可理解功能名',
+    who: 'ai',
+  },
+  'REQ-SCOPE-MINLEN': {
+    plain: '范围内/外过短；各须≥16字写清边界',
+    who: 'ai',
+  },
+  'REQ-AC-MIN-ROWS': {
+    plain: 'AC 表至少 2 行（成功+失败/边界）',
+    who: 'ai',
+  },
+  'REQ-AC-CELL-MINLEN': {
+    plain: 'AC 单元格过短或 Then 无可观测断言',
+    who: 'ai',
+  },
+  'SOL-F-THIN': {
+    plain: 'F 卡过薄：边界/暴露面/全文不够',
+    who: 'ai',
+  },
+  'ORCH-DEGRADED-NO-ENTRIES': {
+    plain: 'degraded 仍须 entries+paths 覆盖产物',
+    who: 'ai',
+  },
+  'ORCH-DEGRADED-ALLOW-THIN': {
+    plain: 'af-allow-degraded.md 过薄或未写无 Task 证据',
+    who: 'ai',
+  },
+  'AF-ENV-NO-RECEIPT': {
+    plain: '进度已确认但缺对应 gate PASS 回执',
+    who: 'ai',
+  },
+  'ORCH-FAKE-SUBAGENT-ID': {
+    plain: 'subagentId 像手填假值（过短/占位词）；须抄宿主返回 ID',
+    who: 'ai',
+  },
+  'ORCH-DIRECT-FORBIDDEN': {
+    plain: 'req/model/sol/dev 步禁止 orch-direct 包办正文',
+    who: 'ai',
+  },
+  'ORCH-DEGRADED-UNPROVEN': {
+    plain: '有 .cursor 等却口头 degraded；须 af-allow-degraded.md',
+    who: 'ai',
+  },
+  'TODO-CHECK-②无写码证据': {
+    plain: '勾了②但无业务源码且无 write-code PASS 回执',
+    who: 'ai',
+  },
+  'AF-SKILL-SKEW': {
+    plain: '项目 skill 副本版本 ≠ 当前闸门；init --force 同步',
+    who: 'ai',
+  },
   'ORCH-NO-SUBAGENT-ID': {
     plain: '台账缺 subagentId：像主线程写完再补假账，须真派 Subagent 并抄回 ID',
     who: 'ai',
@@ -277,6 +345,14 @@ export const RULE_HINTS = {
   },
   'ORCH-STEP-ID': {
     plain: '台账每条须有 stepId（当时走到的 flow 步名）',
+    who: 'ai',
+  },
+  'ORCH-STEP-NOT-IN-FLOW': {
+    plain: '台账 stepId 不在 flow.yaml steps 中',
+    who: 'ai',
+  },
+  'AF-ENV-STEP-DRIFT': {
+    plain: 'AF_STEP 含非 flow steps 的 id（init/快捷/探索不得写入）',
     who: 'ai',
   },
   'ORCH-DIRECT-ID': {

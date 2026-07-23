@@ -245,6 +245,43 @@ export function validateSolution(projectRoot, reporter, opts = {}) {
 
       });
 
+    } else {
+      const bound = extractSectionBody(content, '## 边界') || '';
+      const boundCompact = bound.replace(/\s/g, '');
+      if (boundCompact.length < 40) {
+        reporter.add({
+          severity: 'error',
+          rule: 'SOL-F-THIN',
+          file: relPath,
+          message: `「## 边界」过薄（去空白 ${boundCompact.length} < 40）；须写清做/不做，禁止三行空壳。`,
+        });
+      } else if (!/(做|不做|范围内|范围外|不包含|不含|禁止|仅)/.test(bound)) {
+        reporter.add({
+          severity: 'error',
+          rule: 'SOL-F-THIN',
+          file: relPath,
+          message: '「## 边界」须含做/不做（或范围内/外）表述，禁止只列口号。',
+        });
+      }
+    }
+
+    const compactF = content.replace(/\s/g, '');
+    if (compactF.length < 180) {
+      reporter.add({
+        severity: 'error',
+        rule: 'SOL-F-THIN',
+        file: relPath,
+        message: `F 卡全文过薄（去空白 ${compactF.length} < 180）；须含边界、暴露面与 REQ 回溯。`,
+      });
+    }
+
+    if (!/^## 暴露面/m.test(content) && !/暴露面[：:]/.test(content)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'SOL-F-THIN',
+        file: relPath,
+        message: 'F 卡须含「## 暴露面」或「暴露面：」行（API/UI/事件编号）。',
+      });
     }
 
     if (!/←\s*REQ-\d+/m.test(content) && !/<\-\s*REQ-\d+/m.test(content)) {

@@ -1,211 +1,193 @@
-# AgileFlow — AI Agent Skill
+# AgileFlow
 
 **English** | [中文](README.zh-CN.md)
 
-> **The pipeline is the product.** Built for teams that need **deliverable, auditable, handoff-ready** output — not code trapped in chat history.
+# When the chat closes — what's still in your hands?
 
-[![Version](https://img.shields.io/badge/version-9.31.0-blue.svg)](skills/agileflow/SKILL.md)
-[![Enterprise Ready](https://img.shields.io/badge/Enterprise-Deliverable%20Evidence-green.svg)](#enterprise-grade-deliverables)
+Typical AI coding: **close the window = the delivery evaporates**. Code lives in a diff, acceptance criteria live in scrollback, and nobody can prove "done."
 
----
+**AgileFlow makes the pipeline the product.**
+You speak once in plain language. When the run finishes, the repo holds an **`atlas/` evidence pack** you can review, audit, and hand off — not leftovers from a chat thread.
 
-## One-liner
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](skills/agileflow/SKILL.md)
+[![npm](https://img.shields.io/badge/npm-%40agileflow%2Fcli-cb3837.svg)](https://www.npmjs.com/package/@agileflow/cli)
+[![Gates](https://img.shields.io/badge/validate--atlas-9%20hard%20gates-brightgreen.svg)](skills/agileflow/templates/validate-atlas-gate.md)
 
-Typical AI coding delivers **code**. Enterprise delivery needs an **evidence package** — how to accept, who dispatched what, what actually ran, what's blocked, whether you can sign off.
-
-AgileFlow: **standard artifacts at every stage + script-verifiable gates**, full REQ → implementation → acceptance report trace. Solo speed still works (`AF_DECIDE=ai` ~1h), but the design center is **team review, audit, and handoff**.
-
----
-
-## Enterprise-grade deliverables
-
-**OpenSpec** excels at the **spec layer** (brownfield increments). **Superpowers** excels at the **execution layer** (TDD + subagents). **AgileFlow** excels at the **delivery layer** — stage-gated evidence you can review, audit, and sign off.
-
-| Deliverable | Enterprise use |
-|-------------|----------------|
-| `REQ-*.md` + BDD AC | Requirements baseline; single acceptance authority — downstream links only |
-| `solution/` contracts + `F-*.md` | Architecture/API/boundary review before code |
-| `dev/T-*.md` + `## 结果` | Per-task design notes + **runnable proof** — not empty checkboxes |
-| `tests/REQ-*-验收报告.md` | Per-REQ sign-off: PASS / FAIL / `BLOCKED-HUMAN` |
-| `agileflow-dispatch.json` | Subagent dispatch ledger (`subagentId` / `taskId`) — process audit |
-| `humanTodo.md` | External deps explicit; never fake "delivered" when blocked |
-| `validate-atlas` (9 gates) | CI-ready: `exit 0` to advance — no verbal "done" |
-
-**In one line**: OpenSpec tracks *how specs evolve*; Superpowers tracks *how to execute the plan*; AgileFlow tracks **whether the delivery package is complete, evidenced, and traceable**.
-
----
-
-## How we compare
-
-vs. **[OpenSpec](https://openspec.dev)** and **[Superpowers](https://github.com/obra/superpowers)** — all three stop blind coding, different layers:
-
-| | **OpenSpec** | **Superpowers** | **AgileFlow** |
-|---|-------------|-----------------|---------------|
-| **Layer** | Individual/team **spec** (brownfield) | Individual/squad **execution** (TDD + subagents) | **Delivery** (stage evidence + hard blocks) |
-| **One-liner** | Lightweight spec-driven: align before code | Brainstorm → plan → subagent execution | Standard artifacts per stage; script says when to advance |
-| **Strength** | Delta specs, fluid `/opsx:*` workflow | TDD enforced, dual review per task | 9 gates, full AC chain, acceptance reports, dispatch ledger |
-| **Trade-off** | No hard gates — verify is soft | No unified CLI gate — discipline via skills | Heavier — not for one-line hotfixes |
-
-### Dimension comparison (with raw AI baseline)
-
-| Dimension | Raw AI chat | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
-|-----------|:-----------:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
-| Structured stages (idea → ship) | ❌ | ⚠️ Fluid OPSX (explore→propose→apply→verify) | ✅ Brainstorm→plan→subagent execution | ✅ **req→model→sol→dev→test** |
-| Machine hard-blocks (CLI fail = can't advance) | ❌ | ❌ `/opsx:verify` is soft | ❌ Skills + review, no unified gate | ✅ **`validate-atlas` — 9 gates** |
-| Checkbox / task done = files + proof | ❌ | ⚠️ `tasks.md` honor system | ⚠️ Plan tasks + review | ✅ **`TODO-CHECK-*` enforced** |
-| Enterprise delivery / compliance trace | ❌ | ⚠️ Spec deltas, no acceptance report chain | ⚠️ Plan + review | ✅ **REQ AC backfill + per-REQ reports + `req-trace`** |
-| Role-based review (docs by zone) | ❌ | ⚠️ proposal/design split | ⚠️ Plan-centric | ✅ **requirements / model / solution / dev / tests isolated** |
-| CI-gatable "done" definition | ❌ | ❌ | ❌ | ✅ **`validate-atlas` exit 0** |
-| Explicit external-dependency blocks | ❌ | ❌ | ❌ | ✅ **`humanTodo` + `BLOCKED-HUMAN`** |
-| Resume after closing chat | ❌ | ✅ `changes/` per change | ⚠️ Session/plan dependent | ✅ **`todo.md` + `agileflow.env`** |
-| Auditable subagent dispatch | ❌ | ❌ | ✅ Per-task dispatch + compliance/quality review | ✅ **`agileflow-dispatch.json` (incl. subagentId)** |
-| TDD / test discipline | ❌ | ⚠️ Not core | ✅ **RED-GREEN-REFACTOR enforced** | ✅ Step ③ proves AC + runnable evidence in `## 结果` |
-| Full BDD / DDD / SDD chain | ❌ | ⚠️ SDD + spec deltas | ⚠️ Plan + TDD focus | ✅ **REQ→model→sol→dev artifacts** |
-| Brownfield incremental change | ❌ | ✅ **Strong** (specs live with code) | ⚠️ | ✅ `init` inventory + code anchors |
-| "You decide" vs "I decide" | — | — | — | ✅ **`AF_DECIDE=ai/user`** |
-| Setup cost | zero | **low** (`openspec init` + slash commands) | **low** (Cursor `/plugin-add superpowers`) | **medium** (install skill, one sentence) |
-| Simple CRUD typical time | 30min–2h (often no docs) | **faster** (lightweight, fewer gates) | 1–3h (brainstorm + plan overhead) | **~1h (full atlas included)** |
-| Handoff / auditability | low | high (`specs/`) | medium (plan + code) | **highest** (full evidence pack + ledger + gate logs) |
-
-### Which to pick
-
-| Your situation | Better fit |
-|----------------|------------|
-| Mature codebase, small increments, specs evolve long-term | **OpenSpec** |
-| Solo/squad, strong TDD, long subagent execution runs | **Superpowers** |
-| **Vendor handoff, internal audit, multi-role review, sign-off reports** | **AgileFlow** |
-| Zero-to-MVP that must demo **and** hand off documentation | **AgileFlow** |
-| One-line bugfix, pure Q&A | All three heavy → raw AI or AF exempt path |
-
-### Measurable facts (AgileFlow itself)
-
-| Metric | Value | What it means |
-|--------|-------|---------------|
-| Hard-block gates | **9** | Full chain `init`→`req`→`mod`→`sol`→`dev`→`test`; `write-code` blocks stage-skipping |
-| Validation fixtures | **63+** | Positive/negative regression; CI via `npm run test:validate` |
-| Rule modules | **40+** | Design-note literals, fake checkboxes, broken UID links, dispatch ledger, etc. |
-| Phase playbooks | **8** | `phases/` — routing, change management, all five stages |
-| Dev quality tier | **1 (full)** | Five-part design notes + numbered logic blocks — autonomy doesn't thin docs |
-| E2E agent retest | **ai + user** | Real agent smoke tests → [AGENT-RETEST.md](AGENT-RETEST.md) |
-
-### Where AgileFlow wins (enterprise delivery)
-
-1. **Nothing advances without complete artifacts** — 9 gates + 63+ fixtures; "done" is script-verifiable and CI-ready.
-2. **REQ owns acceptance** — BDD AC backfilled into sign-off reports; auditors can answer "how was this requirement proven?"
-3. **Process is auditable** — dispatch ledger logs `subagentId`; `AF_DECIDE=user` supports governance gates.
-4. **Clear human/machine boundary** — `humanTodo` + `BLOCKED-HUMAN`; missing keys or sign-off never marked PASS.
-5. **Fast solo, strict enterprise** — `ai` cuts friction; `user` for payments/auth/compliance-sensitive work.
-
-> One-line bugfixes and pure Q&A? AgileFlow is intentionally heavy — that's by design, not a gap.
-
----
-
-## The pipeline
-
-```
-req → model (as needed) → sol → dev (①②③) → test
+```bash
+npx @agileflow/cli init          # ~1 minute
+/af ship a todo-list API today   # then speak normally
 ```
 
-| Stage | What it delivers |
-|-------|------------------|
-| **req** | One REQ per feature, Given/When/Then acceptance criteria |
-| **model** | Domain model when complexity warrants it — or an explicit skip decision |
-| **sol** | Boundaries, contracts, architecture, dev tasks in `todo.md` |
-| **dev** | Design notes per task, business code, runnable proof in `## 结果` |
-| **test** | Batch delivery proof — not "unit tests green = shipped" |
+---
 
-Methods map cleanly: **BDD → DDD → SDD → TDD**, but the point is **traceable stages**, not ceremony for its own sake.
+## What the session actually feels like
 
-Philosophy and constraints → [majorflow.md](majorflow.md). Execution details → [SKILL.md](skills/agileflow/SKILL.md).
+| Moment | You do | You get |
+|--------|--------|---------|
+| **Start** | Type `/af` + what you want | Auto-route: quick fix? explore? or full delivery pipeline |
+| **Authority** | Say "you decide" or "I'll decide" | `AF_DECIDE=ai` = fewer stops; `user` = you approve each stage — **docs stay full either way** |
+| **Progress** | Watch it move | Orchestrator routes; Subagents write REQ / design / code; ledger records who did what |
+| **Hard stop** | Try to code first, docs later | **Gate red = blocked.** No `write-code` green → no business code |
+| **Done** | Open `atlas/` | REQ, solution, design notes, runnable `## 结果` proof, acceptance reports — present |
+| **Tomorrow** | Just `/af` or "continue" | Resume from `todo.md` — no re-briefing |
+
+**One-line feel:** a delivery partner that lands artifacts, passes gates, and hands off cleanly — not a chat buddy that says "done" in the thread.
 
 ---
 
-## Two ways to work with it
+## Four moves that are hard to copy
 
-| | **`AF_DECIDE=ai`** | **`AF_DECIDE=user`** |
-|---|-------------------|----------------------|
-| You say | "You decide" / "Don't ask me" | "I'll decide" |
-| Friction | Fewer clarification cards, fewer stage pauses | Stage gates — you approve before advancing |
-| Speed | Best for demos, CRUD, internal tools | Best for payments, auth, core business |
-| What doesn't change | Full pipeline, `atlas/` artifacts, ①②③, runnable evidence | Same |
+### 1. "Done" is decided by a script, not by the model
 
-> **"You decide" ≠ skip stages.** It means less asking — not thinner docs, not unchecked boxes, not code-before-design.
+Nine hard gates (`validate-atlas`). Checkbox without files? Red. Skip design and jump to code? Red.
+Done = `exit 0`. CI-ready. Verbal "shipped" does not count.
+
+### 2. One entry: `/af` auto-routes
+
+Don't memorize stage commands. `/af fix login bug` → quick track; `/af build a refund API` → requirements pipeline; bare `/af` → resume.
+Power users still jump with `/af-req` `/af-sol` `/af-dev`.
+
+### 3. "You decide" means faster — not thinner
+
+"Don't ask me" / "just finish it" → fewer stops, same-session continue.
+You still run req→sol→dev→test and still fill `atlas/`. Speed = less asking + concurrency — **not** fewer docs, **not** skipped stages.
+
+### 4. You hand off an evidence pack, not just a repo
+
+| Typical handoff | AgileFlow handoff |
+|-----------------|-------------------|
+| Code + "we tested it" | `atlas/`: how to accept, boundaries, per-task run proof, per-REQ sign-off |
+| Acceptance criteria in chat | BDD AC owned by REQ (single authority) |
+| "We used subagents… somewhere" | `agileflow-dispatch.json` ledger (who / which step / which task) |
+
+Close the IDE and still hand off. Auditors can answer: *how was this requirement proven?*
 
 ---
 
-## Why you can trust the output
+## Get started in ~1 minute
 
-Three guardrails keep AI from hallucinating, going off-script, or faking completion:
+```bash
+npx @agileflow/cli init
+# → ~/.cursor|claude|qoder|agents|codebuddy/skills/ (agileflow + /af* doorplates)
+```
 
-| Pillar | What it enforces |
-|--------|------------------|
-| **Shape** | Right artifacts in `atlas/`; checkboxes match real files (`validate-atlas` hard-blocks) |
-| **Command** | You steer direction; AI executes — startup card, stage gates, resume from `todo.md` |
-| **Run** | Compile / start / smoke evidence in dev notes — scripts verify form, **you** run the proof |
+In Cursor / Claude / Qoder / Codex / WorkBuddy:
 
-Blocked on your side? `humanTodo.md` lists what only a human can provide. Incomplete → **`BLOCKED-HUMAN`**, never falsely "delivered".
+```
+/af build a user login API
+```
+
+| Remember one | What it does |
+|--------------|--------------|
+| **`/af` + plain language** | Auto-match mode and run |
+| `/af` | Resume from checkpoint |
+| `/af-fix` … `/af-test` | Quick track or jump to a stage |
+
+> Use **`npx @agileflow/cli`** — not bare `npx agileflow` (unrelated package on npm). Details → [QUICKSTART.md](skills/agileflow/QUICKSTART.md).
 
 ---
 
-## What lands in `atlas/`
+## The pipeline at a glance
+
+```
+idea ──▶ req ──▶ model? ──▶ sol ──▶ dev(① design ② code ③ proof) ──▶ test
+              │                │         │
+              ▼                ▼         ▼
+           BDD accept       contracts  ## 结果 really ran
+```
+
+Methods map to **BDD → DDD → SDD → TDD**. The point is **traceable stage artifacts**, not ceremony.
+
+Philosophy → [majorflow.md](majorflow.md) · Execution → [SKILL.md](skills/agileflow/SKILL.md)
+
+---
+
+## Open `atlas/` — this is what you see
 
 ```
 atlas/
-├── requirements/REQ-*.md      # BDD + optional UID
-├── model/                     # DDD (or skip rationale)
-├── solution/                  # architecture, contracts, features
-├── dev/T-*.md                 # per-task ① design notes
-├── tests/                     # per-REQ acceptance reports
-├── todo.md                    # pipeline + task ①②③ progress
-├── humanTodo.md               # what needs you
-└── agileflow-dispatch.json    # subagent dispatch ledger
+├── requirements/REQ-*.md       ← acceptance authority (Given/When/Then)
+├── solution/                   ← architecture · contracts · boundaries
+├── dev/T-*.md                  ← per-task design + ## 结果 (command + exit code)
+├── tests/REQ-*-验收报告.md     ← PASS / FAIL / BLOCKED-HUMAN
+├── todo.md                     ← progress bar; survives closed chats
+├── humanTodo.md                ← only humans can unblock (no fake PASS)
+└── agileflow-dispatch.json     ← auditable dispatch ledger
 ```
 
-Close the chat, come back, say **"continue agileflow"** — AI reads `todo.md` and picks up. No re-explaining.
+That's the gap vs "chat and scatter": **artifacts on disk, process replayable.**
 
 ---
 
-## Who it's for
+## vs OpenSpec / Superpowers — different layer
 
-| You | AgileFlow helps when… |
-|-----|----------------------|
-| **Enterprise tech lead / delivery owner** | You need role-based review, stage gates, sign-off reports — not just code |
-| **Compliance / QA / internal audit** | Full REQ → impl → acceptance trace; no fake checkboxes |
-| **Agencies / vendor handoff** | You deliver an `atlas/` evidence pack, not just a repo |
-| **Founders / indie devs** | You need something demoable **and** handoff-ready for the next person |
+All three stop blind coding. **Different job:**
 
-**Best for enterprise-grade delivery**; casual one-liners and hotfixes → too heavy; use raw AI or AF exempt path.
+| | OpenSpec | Superpowers | **AgileFlow** |
+|---|----------|-------------|---------------|
+| Owns | How specs evolve | How the plan executes (TDD) | **Whether the delivery pack is complete & evidenced** |
+| "Done" | Soft / honor | Skills + review | **CLI hard-block; exit 0 to advance** |
+| You leave with | Living `specs/` | Plan + code discipline | **Full `atlas/` + sign-off reports + ledger** |
+
+| Your situation | Better fit |
+|----------------|------------|
+| Mature repo, small increments, long-lived specs | OpenSpec |
+| Solo/squad, strong TDD, long subagent runs | Superpowers |
+| **Handoff, audit, sign-off, demo *and* docs** | **AgileFlow** |
+| One-line fix / pure Q&A | Raw AI or AF exempt / quick track |
+
+Full dimension table + metrics (9 gates · 63+ fixtures · 40+ rules) → appendix below.
+
+---
+
+## Who it's for · who it's not
+
+**You'll love it if…**
+
+- Agency / vendor: client wants "how do we accept?" not only "does it run?"
+- Tech lead: role-based review (req / sol / dev zones), not everything in chat
+- Compliance / QA: full REQ → impl → acceptance chain; no fake checkboxes
+- Zero-to-MVP: demo today, hand off to someone else tomorrow
+
+**It will feel heavy if…**
+
+- You only need a one-line copy tweak or a concept answer — use raw AI or `/af-fix` / exempt paths
+  (The main chain is heavy on purpose: delivery evidence is not optional.)
 
 ---
 
 ## Install
 
+**Recommended — user-level (all hosts once):**
+
 ```bash
-git clone https://github.com/aiKeeo/AgileFlow.git
-cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
+npx @agileflow/cli init
 ```
 
-| Tool | Project path | Global path |
-|------|--------------|-------------|
-| **Cursor** | `.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
-| **Claude Code** | `.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
-| **Trae** | `.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
+**Project-level:**
 
-Step-by-step → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
-
----
-
-## Usage
-
-```
-Run agileflow — ship a todo-list API today
+```bash
+cd YOUR_PROJECT
+npx @agileflow/cli init --root . --tools cursor
+# optional: --tools cursor,claude,codex,workbuddy,qoder
+npx @agileflow/cli gate --bootstrap-scaffold --root .
 ```
 
-```
-Continue agileflow
-```
+| Host | User-level | Project |
+|------|------------|---------|
+| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Codex | `~/.agents/skills/` | `.agents/skills/` |
+| WorkBuddy / CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
+| Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
-Stage shortcuts: `write requirements` / `model data` / `design solution` / `implement` / `run acceptance tests`
+`phases/*` resolve against the **agileflow skill root** (usually sibling to doorplates), not an empty workspace root. After `flow.yaml` changes: `npx @agileflow/cli update --step-skills-only --root .`
+
+Gate example:
+
+```bash
+npx @agileflow/cli gate --gate write-code --root .
+```
 
 ---
 
@@ -213,10 +195,13 @@ Stage shortcuts: `write requirements` / `model data` / `design solution` / `impl
 
 ```
 AgileFlow/
-├── majorflow.md           # core philosophy
-├── AGENT-RETEST.md        # agent smoke-test playbook
+├── majorflow.md
+├── AGENT-RETEST.md
 ├── README.md / README.zh-CN.md
-└── skills/agileflow/      # the Skill (SKILL.md, phases/, templates/, scripts/)
+└── skills/agileflow/            # npm @agileflow/cli
+    ├── SKILL.md · phases/ · templates/
+    ├── cli/ · bin/
+    └── scripts/validate-atlas/
 ```
 
 ---
@@ -224,3 +209,36 @@ AgileFlow/
 ## License
 
 MIT — Issues and PRs welcome.
+
+---
+
+<details>
+<summary><b>Appendix: full comparison table & metrics</b></summary>
+
+### Dimension comparison
+
+| Dimension | Raw AI | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
+|-----------|:------:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
+| Structured stages | ❌ | ⚠️ Fluid OPSX | ✅ Brainstorm→plan→execute | ✅ **req→model→sol→dev→test** |
+| Machine hard-block | ❌ | ❌ Soft verify | ❌ No unified gate | ✅ **9 gates** |
+| Checkbox = files + proof | ❌ | ⚠️ Honor | ⚠️ Review | ✅ **Enforced** |
+| Enterprise delivery trace | ❌ | ⚠️ Spec deltas | ⚠️ Plan + review | ✅ **AC backfill + reports** |
+| Role-based review | ❌ | ⚠️ | ⚠️ | ✅ **Five zones** |
+| CI "done" | ❌ | ❌ | ❌ | ✅ **exit 0** |
+| External dep blocks | ❌ | ❌ | ❌ | ✅ **humanTodo** |
+| Resume after chat | ❌ | ✅ | ⚠️ | ✅ **todo + env** |
+| Auditable dispatch | ❌ | ❌ | ✅ | ✅ **dispatch ledger** |
+| You decide / I decide | — | — | — | ✅ **AF_DECIDE** |
+| Simple CRUD with docs | Often none | Faster | 1–3h | **~1h with full atlas** |
+
+### Metrics
+
+| Metric | Value |
+|--------|-------|
+| Hard-block gates | **9** |
+| Validation fixtures | **63+** |
+| Rule modules | **40+** |
+| Phase playbooks | **8** |
+| E2E agent retest | [AGENT-RETEST.md](AGENT-RETEST.md) |
+
+</details>

@@ -17,6 +17,8 @@ import {
   resolvePrefixToStepId,
   listFlowCommandIds,
   inferWaveFromFlow,
+  loadFlow,
+  GATE_TO_STEP,
 } from './lib/flow.mjs';
 import { isModelingSkipped } from './lib/modeling-skip.mjs';
 import { Reporter } from './lib/reporter.mjs';
@@ -39,9 +41,9 @@ const text = fs.readFileSync(templateFlow, 'utf8');
 const flow = parseFlowYaml(text);
 check('parse version', flow.version === 1);
 check('parse 5 steps', Array.isArray(flow.steps) && flow.steps.length === 5);
-check('req prompt', flow.steps[0].id === 'req' && flow.steps[0].prompt === 'req');
+check('req prompt', flow.steps[0].id === 'af-req' && flow.steps[0].prompt === 'req');
 check('model orch', flow.steps[1].mode === 'orch' && flow.steps[1].criteria.length >= 4);
-check('test prompt null', flow.steps[4].id === 'test' && flow.steps[4].prompt === null);
+check('test prompt null', flow.steps[4].id === 'af-test' && flow.steps[4].prompt === null);
 check('sol has depends', flow.steps[2].depends.includes('atlas/model/'));
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'af-flow-'));
@@ -63,7 +65,7 @@ check('validate default shape', reporter.errorCount() === 0);
 const skipFlow = `
 version: 1
 steps:
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -84,7 +86,7 @@ fs.writeFileSync(
   path.join(atlas, 'flow.yaml'),
   `version: 1
 steps:
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria: ["c1"]
@@ -101,14 +103,14 @@ check('mod-confirm skipped by flow', modGate.passed === true && modGate.skippedB
 const insertOk = `
 version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
     outputs:
       - atlas/logs/research-demo.md
     reason: "插入调研"
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -124,7 +126,7 @@ check('insert step shape ok', insertReporter.errorCount() === 0);
 const insertBad = `
 version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
@@ -140,27 +142,27 @@ check(
 
 const customFlow = parseFlowYaml(`version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
     outputs: [atlas/logs/r.md]
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends: []
     outputs: [atlas/requirements/]
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria: [c1]
     depends: []
     outputs: [atlas/model/]
 `);
-check('band custom step', bandForStep(customFlow, 'research') === '1');
-check('band model', bandForStep(customFlow, 'model') === '2');
-check('nextStep research', nextStep(customFlow, 'research') === 'req');
-check('nextEnabled skip model', nextEnabledStep({ steps: [{ id: 'a' }, { id: 'model', skip: true }, { id: 'sol' }] }, 'a') === 'sol');
+check('band custom step', bandForStep(customFlow, 'af-research') === '1');
+check('band model', bandForStep(customFlow, 'af-mod') === '2');
+check('nextStep research', nextStep(customFlow, 'af-research') === 'af-req');
+check('nextEnabled skip model', nextEnabledStep({ steps: [{ id: 'a' }, { id: 'af-mod', skip: true }, { id: 'af-sol' }] }, 'a') === 'af-sol');
 
 // 并行波：两步 depends 空 → 同波
 const parallelRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'af-wave-'));
@@ -171,17 +173,17 @@ for (const k of ['req', 'model', 'sol', 'dev']) {
 }
 const parallelYaml = `version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
     outputs: [atlas/logs/research.md]
-  - id: competitor
+  - id: af-competitor
     mode: strict
     prompt: null
     depends: []
     outputs: [atlas/logs/competitor.md]
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -192,20 +194,20 @@ steps:
 fs.writeFileSync(path.join(parallelRoot, 'atlas', 'flow.yaml'), parallelYaml);
 const pFlow = parseFlowYaml(parallelYaml);
 const wave0 = listParallelWave(parallelRoot, pFlow);
-check('parallel wave both ready', wave0.join(',') === 'research,competitor');
-check('resolve research prefix', resolvePrefixToStepId(pFlow, 'research') === 'research');
+check('parallel wave both ready', wave0.join(',') === 'af-research,af-competitor');
+check('resolve research prefix', resolvePrefixToStepId(pFlow, 'af-research') === 'af-research');
 check('resolve mod alias', resolvePrefixToStepId(pFlow, 'mod') === null);
-check('commands include research', listFlowCommandIds(pFlow).includes('research'));
+check('commands include research', listFlowCommandIds(pFlow).includes('af-research'));
 fs.writeFileSync(path.join(parallelRoot, 'atlas', 'logs', 'research.md'), '# r\n');
 fs.writeFileSync(path.join(parallelRoot, 'atlas', 'logs', 'competitor.md'), '# c\n');
 const wave1 = listParallelWave(parallelRoot, pFlow);
-check('after both done wave is req', wave1.join(',') === 'req');
+check('after both done wave is req', wave1.join(',') === 'af-req');
 const inferred = inferWaveFromFlow(parallelRoot, pFlow);
-check('infer wave req', inferred.join(',') === 'req');
+check('infer wave req', inferred.join(',') === 'af-req');
 
 const reservedYaml = `version: 1
 steps:
-  - id: fix
+  - id: af-fix
     mode: strict
     prompt: null
     depends: []
@@ -215,9 +217,61 @@ fs.writeFileSync(path.join(parallelRoot, 'atlas', 'flow.yaml'), reservedYaml);
 const reservedReporter = new Reporter();
 validateFlowFile(parallelRoot, reservedReporter, { requireFile: true });
 check(
-  'reserved id fix fails',
+  'reserved id af-fix fails',
   reservedReporter.getIssues().some((i) => i.rule === 'FLOW-ID-RESERVED'),
 );
+
+check('GATE_TO_STEP write-code→af-dev', GATE_TO_STEP['write-code'] === 'af-dev');
+check('GATE_TO_STEP dev-complete→af-dev', GATE_TO_STEP['dev-complete'] === 'af-dev');
+check('GATE_TO_STEP dev-step1-literal→af-dev', GATE_TO_STEP['dev-step1-literal'] === 'af-dev');
+
+// greenfield 自造 backend 后 detectBrownfield=true，但已确认 REQ 时不得卡回 steps[0]
+const bfEscapeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'af-bf-escape-'));
+fs.mkdirSync(path.join(bfEscapeRoot, 'atlas', 'requirements'), { recursive: true });
+fs.mkdirSync(path.join(bfEscapeRoot, 'atlas', 'solution', 'features'), { recursive: true });
+fs.mkdirSync(path.join(bfEscapeRoot, 'atlas', 'dev'), { recursive: true });
+fs.mkdirSync(path.join(bfEscapeRoot, 'atlas', 'tests'), { recursive: true });
+fs.writeFileSync(
+  path.join(bfEscapeRoot, 'atlas', 'flow.yaml'),
+  `version: 1
+steps:
+  - id: af-req
+    mode: strict
+    prompt: req
+    depends: []
+    outputs: [atlas/requirements/REQ-*.md]
+  - id: af-sol
+    mode: strict
+    prompt: sol
+    depends: [atlas/requirements/REQ-*.md]
+    outputs: [atlas/solution/features/F-*.md]
+  - id: af-dev
+    mode: strict
+    prompt: null
+    depends: [atlas/solution/features/F-*.md]
+    outputs: [atlas/dev/T-*-*.md]
+  - id: af-test
+    mode: strict
+    prompt: null
+    depends: [atlas/dev/T-*-*.md]
+    outputs: [atlas/tests/README.md]
+`,
+);
+fs.writeFileSync(
+  path.join(bfEscapeRoot, 'atlas', 'requirements', 'REQ-001.md'),
+  '状态：已确认\n',
+);
+fs.writeFileSync(path.join(bfEscapeRoot, 'atlas', 'solution', 'features', 'F-001.md'), '# F\n');
+fs.writeFileSync(path.join(bfEscapeRoot, 'atlas', 'dev', 'T-001-x-BE.md'), '# T\n');
+fs.writeFileSync(path.join(bfEscapeRoot, 'atlas', 'tests', 'README.md'), '# tests\n');
+const bfFlow = loadFlow(bfEscapeRoot).flow;
+const stuck = inferWaveFromFlow(bfEscapeRoot, bfFlow, { brownfield: true });
+check('brownfield+confirmed REQ not stuck on af-req', stuck.join(',') === 'af-test');
+const noReqRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'af-bf-stuck-'));
+fs.mkdirSync(path.join(noReqRoot, 'atlas'), { recursive: true });
+fs.writeFileSync(path.join(noReqRoot, 'atlas', 'flow.yaml'), fs.readFileSync(path.join(bfEscapeRoot, 'atlas', 'flow.yaml')));
+const stuck0 = inferWaveFromFlow(noReqRoot, loadFlow(noReqRoot).flow, { brownfield: true });
+check('brownfield without REQ still steps[0]', stuck0.join(',') === 'af-req');
 
 if (failed) {
   console.error(`\n${failed} failed`);

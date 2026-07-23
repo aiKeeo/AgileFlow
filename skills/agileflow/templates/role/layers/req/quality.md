@@ -12,24 +12,31 @@
 
 | 产物 | 什么时候写 | 必须包含 |
 |---|---|---|
-| `atlas/requirements/REQ-XXX-*.md` | 每 ≥1 个独立可验收功能 1 份 | 标题、范围、AC 表（状态列）、边界 |
+| `atlas/requirements/REQ-XXX-*.md` | 每 ≥1 个独立可验收功能 1 份 | 见下方硬指标表 |
 | `atlas/requirements/ui/UID-*.md` | 有 UI 时 | 区域表、ASCII 线框、样式 **待定** |
 | `atlas/requirements/README.md` | 始终 | 索引表、AI 决策记录（MVP、拆分理由） |
 | `atlas/glossary.md` | 出现新术语时 | 术语定义，标记 `<!-- auto -->` |
 
-**路径铁律**：产物只在 `atlas/requirements/`。  
+**路径铁律**：产物只在 `atlas/requirements/`。
 ❌ 禁止 `atlas/req/`、`atlas/solution/`、`atlas/dev/`、`atlas/todo.md`。
+❌ 禁止自创大纲（`## 1. 概述` / 用户故事表冒充 REQ）——必须用模板节名。
 
 ---
 
-## 4. 质量约束（硬规则）
+## 4. 质量硬指标（闸门认账 · 规则 ID）
 
-### 4.1 每个 REQ 必须满足
-- 标题格式：`REQ-XXX-功能名.md`（不能用 `REQ-001.md` 无后缀）
-- 功能名称在标题、正文第一段、AC 表中一致
-- 范围明确：范围内 / 范围外 两段，不能空
-- AC 表：每行一条可验收用例，状态列只能是 `⬜` / `✅` / `PASS` / `FAIL` / `BLOCKED` / `（③ 后填）`
-- 边界：用 `← REQ-xxx` 引用上游，不直接复制粘贴
+| 硬指标 | 规则 ID | 不过则 |
+|--------|---------|--------|
+| 文件名 `REQ-XXX-名称.md` | `REQ-F001` | 红 |
+| 标题 `# [REQ-XXX] 功能名`（禁 `666`/纯数字/junk） | `REQ-F002` / `REQ-TITLE-SUBSTANCE` | 红 |
+| 版本 + 状态枚举 | `REQ-F003` | 红 |
+| 必须有 `## 范围提示`；范围内/外各 ≥16 字 | `REQ-SCOPE` / `REQ-SCOPE-MINLEN` | 红 |
+| 必须有 `## 验收标准` + BDD 8 列表 | `REQ-F004` / `REQ-AC-表头` | 红 |
+| AC ≥2 行（成功 + 失败/边界） | `REQ-AC-MIN-ROWS` | 红 |
+| 场景/Given/When/Then 各 ≥8 字；Then 含可观测断言 | `REQ-AC-CELL-MINLEN` / `REQ-AC-空单元格` | 红 |
+| 正文去空白 ≥200 | `REQ-BODY-过短` | 红 |
+
+模板权威：`templates/req.md`。写完后总控跑 `agileflow gate --gate req-confirm`。
 
 ### 4.2 有 UI 时 UID 必须满足
 - 不定义配色、字体、圆角、动效（样式由用户后续决定）
@@ -43,7 +50,6 @@
 
 ---
 
-
 ## 9. 必读清单（执行前必须读）
 
 - `phases/01-requirement.md`
@@ -52,5 +58,3 @@
 - `templates/contract.md`（AI 决策记录格式）
 - 上游：用户原话 / 仓库上下文 / 探索结论（总控注入）
 - Template ON 时：`atlas/template/requirements/`
-
----

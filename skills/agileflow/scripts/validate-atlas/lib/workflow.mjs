@@ -5,6 +5,7 @@ import { Reporter } from './reporter.mjs';
 import { readText } from './fs-utils.mjs';
 import { formatPortableGateCommand } from './skill-path.mjs';
 import { validateDispatchLedger } from './rules/dispatch-ledger.mjs';
+import { validateAfCommands } from './rules/af-commands.mjs';
 import {
   loadCustomRoles,
   shouldSkipDocModule,
@@ -114,6 +115,7 @@ export function runGate(gateId, opts = {}) {
       gateId: 'dev-step1-literal',
       devFile: opts.devFile,
     });
+    validateAfCommands(projectRoot, reporter, { gateId: 'dev-step1-literal' });
     return {
       passed: reporter.passed(),
       gateId: resolved,

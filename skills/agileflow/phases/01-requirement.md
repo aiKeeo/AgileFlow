@@ -4,32 +4,27 @@
 > 提问卡片：[templates/contract.md](../templates/contract.md)
 > 文档模板：[templates/req.md](../templates/req.md)
 > **UI 描述**：[templates/uid.md](../templates/uid.md)
-> **Template ON** 时先读 `atlas/template/requirements/` 下对应 `template-*.md`（无则回退 skill templates/）  
+> **Template ON** 时先读 `atlas/template/requirements/` 下对应 `template-*.md`（无则回退 skill templates/）
 > **角色提示词**：[role-req.md](../templates/role/role-req.md)（项目可覆盖 `atlas/role/role-req.md`）· 总控 → [orchestrator](../templates/orchestrator.md)
 
-## ai / user 行为
+<a id="agent-摘要"></a>
 
-→ **[contract §4 行为矩阵](../templates/contract.md#4-停点总表)**（唯一 SSOT；本阶段不再抄表）。  
-充分性清单 → [contract §5](../templates/contract.md#5-信息充分少问user)  
-阶段收尾（user）→ [contract §7.2](../templates/contract.md#72-阶段闸门user)（prompt 示例：`需求澄清已完成。是否继续进入【数据建模】阶段？`）
+## Agent 摘要
 
-## 入口
+**入口**：`/af-req` 或用户描述新需求 → 本阶段。已有「已确认」REQ 且用户要进后续 → [00-intent-routing](00-intent-routing.md) 路由，不重走第 1 步。
 
-**本阶段专有禁止**（全局禁止见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)）：
+**行为矩阵** → [contract §4](../templates/contract.md#4-停点总表)（唯一 SSOT）。充分性 → [contract §5](../templates/contract.md#5-信息充分少问user)。阶段收尾 → [contract §7.2](../templates/contract.md#72-阶段闸门user)。
 
-- ❌ 总控自己写 REQ（须派 role-req）
-- ❌ AskQuestion 后同回复继续写 REQ
-- ❌ 信息已齐仍发整卡澄清
+**做法（总控）**：
+- 派 **role-req** 写 REQ；总控只标状态、更新 todo/env，不写 REQ 正文（原因：职责分离、闸门可验）
+- AskQuestion 后 **立即停止**；下条再派 role-req（原因：契约停点）
+- 信息已齐则跳过澄清卡，首行写 `信息充分：跳过需求澄清卡（依据：…）`
 
-仓库已有「已确认」REQ 且用户说直接进后续阶段 → [00-intent-routing](00-intent-routing.md) 路由，不重走本阶段第 1 步。
-### 用户回答 AskQuestion 之后（必须落盘）
+**执行顺序** → [§执行流程](#执行流程)（详表见正文）
 
-| 上一步 | 用户动作 | **本回复总控必须做** |
-|--------|----------|-------------------------|
-| 第 1 步需求卡片 | 点选/回复 | **派 role-req** 写 REQ 草稿；收产物后总控初始化 todo/env（禁止空回复） |
-| 第 3 步确认 | 选「确认」 | 标 REQ 已确认 → **另发**阶段闸门 → 停 |
-| 第 3 步确认+闸门（合并卡） | 选「确认」+「是，继续」 | 标 REQ 已确认 → **停**（下条派下一阶段；禁止本回复再发闸门） |
-| 阶段闸门 | 选「是，继续」 | **下条回复**派下一阶段角色 |
+**核心产出**：`atlas/requirements/REQ-*.md`（一需求一文档）、按需 `ui/UID-*`、`requirements/README.md`（状态权威）、`atlas/todo.md` / `humanTodo.md`、`atlas/README.md`。
+
+**硬门槛**：未「已确认」不进阶段 2；AC 表即 BDD（禁独立 BDD 专节）；有 UI 须链 UID 且 §2 含布局线条图。
 
 ---
 
@@ -75,19 +70,29 @@
 
 ### 第 4 步：阶段收尾 — **阶段闸门**（仅 user）
 
-→ [contract §7.2 阶段闸门](../templates/contract.md#72-阶段闸门user)（`ai` 跳过）。  
+→ [contract §7.2 阶段闸门](../templates/contract.md#72-阶段闸门user)（`ai` 跳过）。
 本阶段前置：REQ 全部 **已确认**、todo 已更新、humanTodo 已写、`atlas/README.md` 已更新。
+
+**用户答卡后（本回复必做）**：
+
+| 上一步 | 用户动作 | 总控 |
+|--------|----------|------|
+| 缺口卡 | 点选/回复 | 派 role-req；收产物后初始化 todo/env |
+| 确认卡 | 选「确认」 | 标 REQ 已确认 → **另发**闸门 → 停 |
+| 合并卡 | 确认+「是，继续」 | 标已确认 → **停**（下条派下一阶段） |
+| 阶段闸门 | 「是，继续」 | **下条**派下一阶段 |
 
 ---
 
 ## 核心规则
 
-- 一个需求 → 一个文档；**AC 表即 BDD**（Given/When/Then 列）；见 [../phases/05-testing.md](../phases/05-testing.md)；禁止独立 BDD 专节
+- 一个需求 → 一个文档；**AC 表即 BDD**（Given/When/Then 列）；见 [../phases/05-testing.md](../phases/05-testing.md)；独立 BDD 专节不入 REQ
 - **有 UI 时**：REQ 链 **UID**；每个 UID **§2 须含布局线条图**（区域表 alone 不合格；线框唯一权威）
 - **UID ≠ UI-xxx**：UID 属 REQ；`solution/contracts/UI-xxx` 属阶段 3 **增量**契约（只链 UID，禁粘贴整图）
 - 状态：草稿 → 已确认 → 已实现 → 已废弃（**索引 README 为状态权威**，子文件须一致）
 - 未「已确认」不能进入阶段 2
 - 阶段结束须更新 [atlas/README.md](../templates/atlas-readme.md)
+- 全局禁止见 [SKILL 裁决表](../SKILL.md#裁决表冲突时以此为准)
 
 ## 产出
 

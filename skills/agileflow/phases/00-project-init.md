@@ -1,12 +1,42 @@
 # 阶段 0：项目盘点（init — 仅 brownfield）
 
-> 文档模板：[templates/init.md](../templates/init.md)  
-> 扫描与验收：[templates/init.md](../templates/init.md)  
+> 文档模板：[templates/init.md](../templates/init.md)
+> 扫描与验收：[templates/init.md](../templates/init.md)
 > 路由与触发：[00-intent-routing.md](00-intent-routing.md#init-判定brownfield--greenfield)
+
+<a id="agent-摘要"></a>
+
+## Agent 摘要
+
+**入口**：`/af-init` 或 brownfield 首次接手。greenfield **跳过**本阶段。
+
+**目标**：对已有代码仓做 as-is 盘点 → `atlas/init/`（业务给谁用、规则怎么算、怎么跑、API/模块/表/代码长什么样）。
+
+| 执行 init | 跳过 init |
+|-----------|-----------|
+| brownfield：有业务源码/migration/可运行应用 | greenfield：从零、空仓、用户明确不要 init |
+| `/af-init` | 仅 Skill/文档仓做流程验证（可选） |
+| 首次 brownfield 且无 `atlas/init/` | REQ/model 设计阶段（只改 model/，不改 init） |
+
+**brownfield 跳过 init**：须 AskQuestion 确认 + todo 留痕 `init: 用户跳过（风险已知）`（原因：写法锚点可能缺失）。
+
+**执行顺序**：
+```
+① brownfield 判定 → ② 扫描仓库 → ②b 写法锚点模式卡（首次须问）→ ③ 落盘 → ④ 自检 → ⑤ 确认 → 停
+```
+
+**必建（brownfield）**：`README.md`、`p0-business.md`；有 REST → `api-catalog` + `p0-domain-math`；有持久化 → `data/`。
+
+**写法锚点**：`AF_DECIDE=ai` → 模式 B 直接落盘；`user` 且无记录 → AskQuestion → 停。
+
+**后置**：init 已确认 → 可 `/af-req` 或 brownfield 下 `/af-sol`/`/af-dev`（各阶段前置须满足）。
+
+**首行**：`📍 Agileflow | … | 阶段：0-项目盘点 | 入口：/af-init | init：atlas/init/`
+
 
 ## 本阶段做什么
 
-对 **已有代码 / 可运行应用** 的仓库做 **as-is 盘点**，落盘 `atlas/init/`。  
+对 **已有代码 / 可运行应用** 的仓库做 **as-is 盘点**，落盘 `atlas/init/`。
 回答：**业务给谁用、核心规则怎么算、怎么跑、API/模块/表/代码各长什么样**。
 
 **分层阅读** → [init.md §盘点层模型](../templates/init.md#盘点层模型init-阅读导航--非测试层)
@@ -18,11 +48,11 @@
 | 执行 init ✅ | 跳过 init ❌ |
 |--------------|--------------|
 | **brownfield**：已有业务源码、migration、可运行应用 | **greenfield**：纯从零、新系统、空仓库脚手架、用户明确「不需要 init」 |
-| 用户前缀 `init:` | 仅 Skill/文档仓库且用户只做流程验证（可选 init，非强制） |
+| `/af-init` | 仅 Skill/文档仓库且用户只做流程验证（可选 init，非强制） |
 | 首次接触 brownfield 且 `atlas/init/` 不存在 | REQ/model 仅设计阶段（只改 model/，**不**改 init） |
-| `init: refresh …` 增量/全量刷新 | 纯答疑/review；hotfix 仅**未启用 AF** 时走豁免 |
+| `/af-init refresh …` 增量/全量刷新 | 纯答疑/review；hotfix 仅**未启用 AF** 时走豁免 |
 
-**铁律**：greenfield **禁止**创建 `atlas/init/`；brownfield 在进 **dev:/sol:** 前 **须** 有已确认或进行中的 init（见路由硬规则）。
+**铁律**：greenfield 不创建 `atlas/init/`；brownfield 在进 `/af-dev`/`/af-sol` 前 **须** 有已确认或进行中的 init（见路由硬规则）。
 
 ### 用户跳过 init 处理
 
@@ -31,7 +61,7 @@ brownfield 用户显式要求跳过时：
 1. AskQuestion：「检测到已有代码库。跳过 init 可能导致写法锚点缺失。确认跳过？」
 2. 用户确认 → 在 todo.md 标注 `init: 用户跳过（风险已知）`
 3. 后续 dev 阶段写法锚点检查：无 init/code-patterns 时标注 `⚠️ 无写法锚点（init 被跳过）`，不阻塞但提示风险
-4. **禁止静默跳过——必须留痕**
+4. **须 AskQuestion 确认并留痕**，不静默跳过
 
 ---
 
@@ -62,7 +92,7 @@ atlas/init/
     └── state-machines/       # 无状态机则不存在
 ```
 
-命名与文内标签 → [init.md](../templates/init.md)。  
+命名与文内标签 → [init.md](../templates/init.md)。
 术语 → 项目根 **`atlas/glossary.md`**（**勿**在 `init/` 再建 `glossary/`）。
 
 ---
@@ -136,7 +166,7 @@ atlas/init/
 | 内容 | 落盘位置 |
 |------|----------|
 | 完整术语表 | **`atlas/glossary.md`**（唯一权威） |
-| `p0-business`「核心术语」 | 仅 3~5 个总览词 + 链接 glossary；**禁止**只写 p0 不写 glossary |
+| `p0-business`「核心术语」 | 仅 3~5 个总览词 + 链接 glossary；p0 须链 glossary，不单写 p0 |
 
 > **自动维护**：init refresh / REQ 新增时扫描新术语 → 追加 `atlas/glossary.md`（`<!-- auto -->`）。见 [glossary.md](../templates/glossary.md#自动扫描规则)。
 
@@ -144,8 +174,8 @@ atlas/init/
 
 **写法锚点（步骤 6/6b）**：
 
-> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。  
-> **`AF_DECIDE=ai` / 默认**：直接 **模式 B**，落盘时写 `写法锚点模式：B`，**不问**。  
+> 目的：dev 按既有写法写码。详见 [code-conventions.md](../templates/code-conventions.md)。
+> **`AF_DECIDE=ai` / 默认**：直接 **模式 B**，落盘时写 `写法锚点模式：B`，**不问**。
 > **`user` 且**尚无模式记录、无 `conventions/`、无 `codebase/p1-*`、原话未点明 → 才 AskQuestion → 停。
 
 ```yaml
@@ -171,7 +201,7 @@ questions:
 
 1. 从真实代码摘录 §三、§四；标注 `path:行号`；**序列图须与源码一致**
 2. **`p0-domain-math.md`**：集中领域公式，避免新人读 15 个 entity 拼逻辑
-3. greenfield 不 init；写法种子在 **sol:** → `solution/code-patterns-*.md`
+3. greenfield 不 init；写法种子在 **`/af-sol`** → `solution/code-patterns-*.md`
 
 ### ③ 落盘
 
@@ -205,15 +235,15 @@ questions:
 
 | 用户 / 选项 | 动作 |
 |-------------|------|
-| `init: refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`p0-domain-math.md`、`atlas/glossary.md` + README |
-| `init: refresh data` | 重扫 migration + Entity，增删改 `data/**`（含 api-catalog 碰表列） |
-| `init: refresh codebase` | 更新本端 `p1-frontend|backend`（资产 + §三）；**大仓只补当前模块/主路径**，扩覆盖范围声明 |
-| `init: refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |
-| `init: refresh environment` | 更新 `p0-environment.md`、`p1-tech-stack.md` |
-| `init:` 或 `init: refresh` | 全量重扫 |
+| `/af-init refresh business` | 重读 README/docs/REQ/路由，更新 `p0-business.md`、`p0-domain-math.md`、`atlas/glossary.md` + README |
+| `/af-init refresh data` | 重扫 migration + Entity，增删改 `data/**`（含 api-catalog 碰表列） |
+| `/af-init refresh codebase` | 更新本端 `p1-frontend|backend`（资产 + §三）；**大仓只补当前模块/主路径**，扩覆盖范围声明 |
+| `/af-init refresh conventions` | **仅模式 A**：更新 `atlas/conventions/` |
+| `/af-init refresh environment` | 更新 `p0-environment.md`、`p1-tech-stack.md` |
+| `/af-init` 或 `/af-init refresh` | 全量重扫 |
 | [增量 refresh 卡片](../templates/contract.md#init-增量-refreshreq-开发完毕后) | 按用户选择范围执行 |
 
-**禁止**：REQ/model **设计阶段**更新 init（to-be 只写 model/）；实现未落地前 refresh init。
+**做法**：REQ/model **设计阶段**只写 model/（to-be），不更新 init；实现未落地前不 refresh init。
 
 每次 refresh 后：
 
@@ -238,28 +268,28 @@ questions:
 | | |
 |---|---|
 | **前置** | brownfield 判定通过 |
-| **后置** | init 已确认 → 可进入阶段 1 `req:` 或 brownfield 下直接 `sol:`/`dev:`（须满足各阶段前置） |
+| **后置** | init 已确认 → 可进入阶段 1 `/af-req` 或 brownfield 下直接 `/af-sol`/`/af-dev`（须满足各阶段前置） |
 
 ---
 
 ## 首行声明
 
-`📍 Agileflow | 决策：{AI全权/我来} | 阶段：0-项目盘点 | 入口：init:{全量|refresh 范围} | init：atlas/init/`
+`📍 Agileflow | 决策：{AI全权/我来} | 阶段：0-项目盘点 | 入口：/af-init | init：atlas/init/`
 
 refresh 时加：`操作：{全量|增量 data|…} | 触发：{首次|REQ-xxx 开发完毕}`
 
 ---
 
-## 禁止行为
+## 做法与红线
 
-- ❌ greenfield 创建 `atlas/init/`
-- ❌ 跳过 **p0-business.md**（brownfield 必建）
-- ❌ 有 REST/API 却跳过 **api-catalog** 与 **p0-domain-math**（除非用户明确「极简 init」）
-- ❌ 序列图/公式与源码不一致（init 须 as-is）
-- ❌ 实体只写字段、不写业务用途与用户怎么用
-- ❌ init 写任务、AC、open-questions、decisions、接口设计
-- ❌ REQ 设计阶段改 init
-- ❌ 扫描未落盘就写业务代码
-- ❌ init 确认后同回复进入 dev 写码
-- ❌ 无 git/无 DB 仍建 p0-repository / data/ 占位文件
-- ❌ conventions 与 codebase 双份维护
+- greenfield 不创建 `atlas/init/`（原因：init 只描述 as-is）
+- brownfield 必建 **p0-business.md**
+- 有 REST/API 时建 **api-catalog** 与 **p0-domain-math**（除非用户明确「极简 init」）
+- 序列图/公式与源码一致（init 须 as-is）
+- 实体须写业务用途与用户怎么用，不只写字段
+- init 不写任务、AC、open-questions、decisions、接口设计
+- REQ 设计阶段不改 init
+- 扫描落盘后再写业务代码
+- init 确认后同回复不进 dev 写码
+- 无 git/无 DB 不建 p0-repository / data/ 占位文件
+- conventions 与 codebase 不双份维护

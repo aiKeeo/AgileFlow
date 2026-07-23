@@ -1,6 +1,6 @@
 version: 1
 steps:
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
@@ -8,7 +8,7 @@ steps:
       - atlas/logs/research-water.md
     reason: "复测：req 前先调研竞品/习惯"
 
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -17,7 +17,7 @@ steps:
       - atlas/requirements/REQ-*.md
       - atlas/requirements/README.md
 
-  - id: ux-spike
+  - id: af-ux-spike
     mode: strict
     prompt: atlas/role/role-ux-spike.md
     depends:
@@ -25,7 +25,7 @@ steps:
     outputs:
       - atlas/logs/ux-spike.md
 
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -43,7 +43,7 @@ steps:
       - atlas/model/entities/*.md
       - atlas/model/physical/schema.md
 
-  - id: sol
+  - id: af-sol
     mode: strict
     prompt: sol
     depends:
@@ -56,7 +56,7 @@ steps:
       - atlas/solution/architecture.md
       - atlas/todo.md
 
-  - id: preflight
+  - id: af-preflight
     mode: orch
     prompt: null
     criteria:
@@ -68,7 +68,7 @@ steps:
     outputs:
       - atlas/logs/preflight.md
 
-  - id: dev
+  - id: af-dev
     mode: strict
     prompt: dev
     depends:
@@ -78,7 +78,7 @@ steps:
     outputs:
       - atlas/dev/T-*-*.md
 
-  - id: test
+  - id: af-test
     mode: strict
     prompt: null
     depends:

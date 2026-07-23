@@ -1,83 +1,89 @@
-﻿---
+---
 name: agileflow
 description: >-
-  多 Agent 强制流程：当前会话=总控，必须派 Subagent/Task 写 REQ/model/sol/dev，禁止单会话包办正文。
-  按序落盘 atlas/ 再写码与验收。触发：做功能或项目、@agileflow、继续 agileflow、或 req:/mod:/sol:/dev:/test:/tests:/init:/fix:/refactor:/tweak:/perf:/chore:/ut:/revise: 前缀。
-version: 9.31.0
+  多 Agent 强制流程：当前会话=总控，正文由 Subagent 产出，总控只写状态与闸门。
+  按 atlas/flow.yaml 步序落盘再写码验收。触发：/af（默认入口）、@agileflow、
+  /af-req 等门牌。安装：npx @agileflow/cli init。
 ---
 # Agileflow
 
-> 产品思想（人读）→ [majorflow.md](majorflow.md)。编排实例 → 项目 `atlas/flow.yaml`。  
-> **本文只做路由 + 裁决 + 红线**；怎么写产物 → role layers / phases。
+> 思想 → [majorflow.md](majorflow.md)。**只有 `atlas/flow.yaml` steps 里的 id 才受流程管理**。本文=L0；细节按 LOAD 再读。
 
-## L0 五条（总控必读）
+## L0 五条（始终）
 
-1. **按 flow 走到落地** — 启用步过闸；skip 不装完成；写业务码前 `--gate write-code` 绿。快捷轨 → [quick-commands](phases/quick-commands.md)。
-2. **总控只路由** — 派 Subagent 写正文；记 `atlas/agileflow-dispatch.json`；跑 gate；改 env/todo/**flow**。首启 `--bootstrap-scaffold`。**仅总控改 flow**；角色禁改。
-3. **先落盘再进阶** — `validate-atlas --gate …` exit 0 才勾 ✅ / 进下一启用步。
-4. **决策权控停点** — `AF_DECIDE`；`ai` 闸门绿 → **同会话连做**（阻塞派活）；中途 AI 接管 → [contract §3](templates/contract.md#3-话术表必须看上下文)。`ai` ≠ 关 req/sol/test。
-5. **一处定义、他处只链** — 细则在 SSOT；本文不抄。
+1. **flow 启用步才受管** — `AF_STEP`/skip/depends/主链闸门/台账只针对 flow.yaml `steps`；快捷 → [quick-commands](phases/quick-commands.md)；前置 init → [00-project-init](phases/00-project-init.md#agent-摘要)。
+2. **总控只路由（flow 步）** — 派 Subagent；记 `atlas/agileflow-dispatch.json`；改 env/todo/**flow**。首启 `--bootstrap-scaffold`。无 Subagent → [orch-core 宿主](templates/orchestrator-core.md#宿主义务)（含 WorkBuddy）。
+3. **先落盘再进阶** — flow 步先启动/恢复 Run；产物登记后跑 gate；仅当前 Run、当前输入摘要的最新 PASS 才可勾 ✅ / advanceStep。旧项目无 `atlas/state/current.json` 时兼容旧回执。
+4. **决策权控停点** — `AF_DECIDE`；`ai` 绿 → **同会话连做**（**不免**每步 `af-commands` 留痕；仅入口 `/af` 一行不够）；中途 AI 接管 → [contract §3](templates/contract.md#3-话术表必须看上下文)。
+5. **一处定义、他处只链**。首行 `📍 … | 步：{AF_STEP} | 档：{AF_PHASE}` · 自修≤3 · 首条写 `AF_HOST_CAPABILITY` · `pending` 问人。
 
-**牢记**：每阶段/每 T 真派 Subagent · `pending` 默认问人 · 首条写 `AF_HOST_CAPABILITY` · 同 gate 自修最多 3 轮。
+## LOAD（机器解析 · 只读列出的路径）
 
-## 你是总控（多 Agent）
+> **路径锚点**：下列 `phases/*` / `templates/*` 相对 **本 skill 根**（本文件所在目录），**不是**工作区项目根。
+> 门牌 `af`/`af-*` 常在用户级（如 `~/.qoder/skills/af`）或项目级；细则在**同级** `agileflow/`。按序：①门牌同级 `../agileflow/` → ②`~/.{cursor,claude,qoder,…}/skills/agileflow/` → ③`{项目根}/.cursor|…/skills/agileflow/`。
+> **找不到 → 换路径重试；禁止以「在项目根 Glob 不到」为由跳过流程写码。**
 
-流程决策（步、派谁、闸门、env）；**不写** REQ/model/sol/dev 正文。无 Subagent → [orchestrator 宿主义务](templates/orchestrator.md#宿主义务workbuddy--cursor--codex--其他)（含 WorkBuddy）。  
-> 连做的是停点，不是跳过 Task。首行：`📍 Agileflow | 决策：… | 步：{AF_STEP} | 档：{AF_PHASE} | …`
+```
+WHEN enable: phases/00-intent-routing.md#agent-摘要 | phases/atlas-structure.md#agent-摘要
+WHEN decide: templates/contract.md
+WHEN routing af: phases/00-intent-routing.md#agent-摘要
+WHEN pre-flow af-init: phases/00-project-init.md#agent-摘要 | templates/init.md
+WHEN routing af-explore: phases/00-intent-routing.md#探索判定
+WHEN flow-step af-req: phases/01-requirement.md#agent-摘要 | templates/req.md
+WHEN flow-step af-mod: phases/02-modeling.md#agent-摘要 | templates/model.md
+WHEN flow-step af-sol: phases/03-solution-design.md#agent-摘要 | templates/solution.md
+WHEN flow-step af-dev: phases/04-development.md#agent-摘要 | templates/dev.md
+WHEN flow-step af-test: phases/05-testing.md#agent-摘要
+WHEN dispatch: templates/orchestrator-core.md
+WHEN dispatch.ref: templates/orchestrator-ref.md
+WHEN role: templates/role/README.md
+WHEN gate: templates/validate-atlas-gate.md
+WHEN quick: phases/quick-commands.md#agent-摘要
+WHEN exemplar: examples/dev-exemplar-BE.md | examples/dev-exemplar-FE.md
+WHEN change: phases/change-management.md#agent-摘要
+NEVER preload: 无关 phase 全文 | orchestrator-ref | contract（非首启/决策变更）
+```
 
-## 裁决优先级（高→低）
+## DO / 红线（≤15 · 默认仅 **flow-managed** 步 · 全文 [orch-core](templates/orchestrator-core.md#正确做法与红线15)）
 
-1. `validate-atlas`（含 flow skip / `FLOW-*`）  
-2. 项目 `atlas/flow.yaml`（做不做）  
-3. **本文红线**  
-4. [contract](templates/contract.md) · [orchestrator](templates/orchestrator.md) · `phases/*` · `templates/*` · `atlas/role/*`
+快捷/前置/探索不受下列 Subagent·台账·advance 约束，见各 phase。
 
-`flow` 管开关；phases 管怎么做。`skip` 步不准宣称完成。
+1. **正文由 Subagent 产出，总控只写状态**（台账含 `subagentId`+flow `stepId`）
+2. **按 role：req→model→sol→每 T 一次 dev** · 3. **`ai` 连做仍开 Task** · 4. **阻塞回报后同会话派下一批**
+5. **`pending`+启动卡；明确委托才 `ai`** · 6. **有 Task→`full`+normal 台账** · 7. **铁律路径**（`atlas/requirements/` 等）
+8. **写码前 `write-code` exit 0**（快捷轨除外） · 9. **闸门红→回灌同角色** · 10. **总控独占状态文件**
+11. **先写 todo 再 `sol-confirm`** · 12. **自修≤3 仍红→停** · 13. **只读当前步 Agent 摘要+链的正文**
+14. **skip 必须写 reason 到 flow.yaml** · 15. **REQ AC 回填后再标开发完成**
 
-## 红线（≤15 · 与 orchestrator 同表）
+横切只链：一功能一 REQ · AC=BDD · `atlas/README` · glossary · `atlas/role/`。
 
-> 完整「正确做法 + 红线」→ [orchestrator §正确做法与红线](templates/orchestrator.md#正确做法与红线15)。下表为速查。
+## 裁决（冲突时以此为准）
 
-| # | 正确做法 | 踩线（禁） |
-|---|----------|------------|
-| 1 | 派 Subagent + 台账含 `subagentId`（`stepId`） | 单会话包办正文 / 口头派活 |
-| 2 | 按 role：req→model→sol→**每 T** dev | 只开写码 subagent、文档主线程写 |
-| 3 | `ai` 连做仍每阶段/每 T 开 Task | 连做跳过 Task |
-| 4 | 阻塞等回报 → 同会话循环 | 派完一批等人「继续」 |
-| 5 | `pending`+启动卡；明确委托才 `ai` | 静默写 `AF_DECIDE=ai` |
-| 6 | 有 Task → `full` + normal 台账 | 假 `degraded` 躲 ORCH |
-| 7 | 目录 `requirements/` | `atlas/req/` |
-| 8 | `--gate write-code` 绿再写业务码 | 先码后补 ① |
-| 9 | gate exit 0 才进阶 | 红装绿 / 自补糊弄 |
-| 10 | 总控写 env/todo/flow/台账 | Subagent 改状态文件 |
-| 11 | sol 先写 `todo.md` 再 `sol-confirm` | 无 todo 过 sol 闸 |
-| 12 | 同 gate 自修≤3 轮仍红 → **停** | silent 连做 |
-| 13 | 只读当前步 phase + 路由必读 | 预读无关 phase 详情 |
-| 14 | skip 仅 orch criteria 或用户明示 | 静默/赶工 skip |
-| 15 | AC 回填后再勾开发完成 | AC 仍「③ 后填」装 ✅ |
+<a id="裁决表冲突时以此为准"></a>
 
-横切（链 SSOT，不占红线格）：[路径铁律](phases/atlas-structure.md#路径铁律落盘前自检--写错即闸门红) · 一功能一 REQ · AC=BDD · `atlas/README` 驾驶舱 · glossary · `atlas/role/` + bootstrap。
+1. `validate-atlas` → 2. `atlas/flow.yaml` → 3. **本文 DO** → 4. [contract](templates/contract.md)·[orch-core](templates/orchestrator-core.md)·phases·templates·`atlas/role/*`
 
-## 加载（按需）
+CLI：`npx @agileflow/cli`。索引：[orch](templates/orchestrator.md)·[flow](templates/flow.md)·[dev](templates/dev.md)·[change](phases/change-management.md)。
 
-| 场景 | 读 |
-|------|-----|
-| 启用 | 本文 + [00](phases/00-intent-routing.md) + [atlas-structure](phases/atlas-structure.md) + [contract](templates/contract.md) |
-| 到步 | `atlas/flow.yaml` 该步 → **一个** `phases/xx.md` + 一个产物模板 |
-| 派活 | [orchestrator](templates/orchestrator.md) + `resolveRolePrompt` / [role layers](templates/role/README.md) |
-| 阶段 4/5 | [dev](templates/dev.md) · [04](phases/04-development.md) · [05](phases/05-testing.md) |
-| 闸门名 | [validate-atlas-gate](templates/validate-atlas-gate.md) |
-| 快捷 | [quick-commands](phases/quick-commands.md) |
+正式 flow 固定链路：`run start` → 完成本步产物 → `artifact scan` → `log`（本步门牌）→ `gate` → `run gate-status` → `step sync`。`run status --json` 查询当前 Run；特殊产物可用 `artifact record`。有 current Run 时只认 JSONL Runtime 回执，legacy MD 不参与判断。flow 一旦变化，必须 `run abandon --reason "<原因>"` 后新开 Run，禁止在原 Run 偷刷 `flowDigest`。
 
-冲突：以本文红线为准；契约细节以 contract 为准。
+---
 
-## SSOT 索引
+<details>
+<summary><b>English Summary</b> (for international users / agents)</summary>
 
-| 议题 | 文件 |
-|------|------|
-| 决策/停点 | [contract](templates/contract.md) |
-| 派活/台账/红线全文 | [orchestrator](templates/orchestrator.md) |
-| 路径 | [atlas-structure](phases/atlas-structure.md) |
-| 编排 | `atlas/flow.yaml` · [flow](templates/flow.md) |
-| ①②③ | [dev](templates/dev.md) |
-| 纠偏 | [change-management](phases/change-management.md) |
+**AgileFlow** is a multi-agent enforced development workflow skill. It structures feature delivery into gated phases: `req → model → sol → dev → test`, orchestrated by `atlas/flow.yaml`.
+
+**Core principles:**
+- **Hard gates** (`validate-atlas`): code cannot be written until design docs pass validation
+- **Decision authority** (`AF_DECIDE=ai|user`): humans choose how much autonomy the AI gets
+- **Orchestrator/Subagent split**: the main session routes & tracks state; subagents produce content
+- **Three tracks**: full flow (flow.yaml steps) · quick commands (`/af-fix`…) · pre-flow (`/af-init`, `/af-explore`)
+
+**Quick start:** Type `/af` + describe what you want. The AI auto-routes to the appropriate mode.
+
+**Key files:** `SKILL.md` (this file, L0) → `phases/*.md` (L1, per-phase rules) → `templates/*.md` (L2, doc templates)
+
+**Install:** `npx @agileflow/cli init`
+
+</details>

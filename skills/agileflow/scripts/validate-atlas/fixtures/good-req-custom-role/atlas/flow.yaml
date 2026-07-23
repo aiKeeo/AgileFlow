@@ -1,6 +1,6 @@
 version: 1
 steps:
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     depends:
@@ -12,7 +12,7 @@ steps:
       - atlas/requirements/ui/UID-*.md
       - atlas/requirements/ui/prototypes/
 
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -29,7 +29,7 @@ steps:
       - atlas/model/entities/*.md
       - atlas/model/physical/schema.md
 
-  - id: sol
+  - id: af-sol
     mode: strict
     prompt: sol
     depends:
@@ -43,7 +43,7 @@ steps:
       - atlas/solution/code-patterns-*.md
       - atlas/todo.md
 
-  - id: dev
+  - id: af-dev
     mode: strict
     prompt: dev
     depends:
@@ -54,7 +54,7 @@ steps:
     outputs:
       - atlas/dev/T-*-*.md
 
-  - id: test
+  - id: af-test
     mode: strict
     prompt: null
     depends:

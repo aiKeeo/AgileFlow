@@ -1,211 +1,193 @@
-# AgileFlow — AI Agent Skill
+# AgileFlow
 
 [English](README.md) | **中文**
 
-> **流程本身就是产品。** 面向需要**可交付、可审计、可交接**的团队——把想法落成带证据链的成品，不是聊天记录里的一堆代码。
+# 对话关掉以后，你手里还剩什么？
 
-[![Version](https://img.shields.io/badge/version-9.31.0-blue.svg)](skills/agileflow/SKILL.md)
-[![Enterprise Ready](https://img.shields.io/badge/Enterprise-可交付证据链-green.svg)](#企业级可交付)
+普通 AI 编程：**关掉窗口 = 交付物蒸发**——代码散在 diff 里，验收标准在聊天记录里，谁也说不清「做完没有」。
 
----
+**AgileFlow 让流程本身变成产品。**
+你说一句人话，走完一轮，仓库里留下一套能 Review、能审计、能交接的 **`atlas/` 证据包**——不是聊天记录的附属品。
 
-## 一句话
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](skills/agileflow/SKILL.md)
+[![npm](https://img.shields.io/badge/npm-%40agileflow%2Fcli-cb3837.svg)](https://www.npmjs.com/package/@agileflow/cli)
+[![Gates](https://img.shields.io/badge/validate--atlas-9%20hard%20gates-brightgreen.svg)](skills/agileflow/templates/validate-atlas-gate.md)
 
-常见 AI 编程产出的是**代码**；企业交付要的是**证据包**——需求怎么验收、谁派的活、跑过什么、卡在哪、能不能签单。
-
-AgileFlow：**每一阶段都有标准产物 + 脚本可验**，REQ→实现→验收报告全链可追溯。个人快启依然可用（`AF_DECIDE=ai` ~1h），但设计重心在**团队能 Review、能审计、能交接**。
-
----
-
-## 企业级可交付
-
-OpenSpec 擅长 **Spec 活文档**；Superpowers 擅长 **个人/小队的 TDD 执行**。AgileFlow 擅长 **按阶段交出可签收的交付物**——适合外包收尾、内审、合规留痕、多人分工 Review。
-
-| 交付物 | 企业用途 |
-|--------|----------|
-| `REQ-*.md` + BDD AC | 需求基线；验收唯一权威，下游只引用 |
-| `solution/` 契约 + `F-*.md` | 架构/接口/边界分工审阅，开发前对齐 |
-| `dev/T-*.md` + `## 结果` | 每任务设计说明 + **可运行证据**，非空勾 checkbox |
-| `tests/REQ-*-验收报告.md` | 逐 REQ 签收：PASS / FAIL / `BLOCKED-HUMAN` |
-| `agileflow-dispatch.json` | Subagent 派活台账（`subagentId` / `taskId`），过程可审计 |
-| `humanTodo.md` | 外部依赖显式列出，未齐不冒充交付 |
-| `validate-atlas`（9 闸门） | 可接入 CI：`exit 0` 才允许进阶，防「口头完成」 |
-
-**一句话差异**：OpenSpec 管「规格怎么演进」；Superpowers 管「怎么按计划写码」；AgileFlow 管 **「交付包齐不齐、证据在不在、链断没断」**。
-
----
-
-## 竞品对比
-
-与 **[OpenSpec](https://openspec.dev)**、**[Superpowers](https://github.com/obra/superpowers)** 同场——三者都让 AI 别乱写，定位不同：
-
-| | **OpenSpec** | **Superpowers** | **AgileFlow** |
-|---|-------------|-----------------|---------------|
-| **定位** | 个人/团队 **Spec 层**（brownfield 增量） | 个人/小队 **执行层**（TDD + Subagent） | **交付层**（五阶段证据包 + 硬挡） |
-| **一句话** | 轻量 Spec 驱动，先对齐再写码 | 脑暴→计划→Subagent 执行 | 每阶段标准产物，脚本验齐才放行 |
-| **强项** | Delta Spec、`/opsx:*` 流体工作流 | TDD 强制、每任务双轮 Review | 9 闸门、AC 全链、验收报告、派活台账 |
-| **取舍** | 无硬闸门，verify 软校验 | 无统一 CLI 挡，偏执行纪律 | 更重；简单 hotfix 不适用 |
-
-### 维度对比（含裸 AI 基线）
-
-| 维度 | 裸 AI 对话 | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
-|------|:----------:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
-| 结构化阶段（想法→交付） | ❌ | ⚠️ OPSX 流体（explore→propose→apply→verify） | ✅ 脑暴→计划→Subagent 执行 | ✅ **req→model→sol→dev→test** |
-| 机器硬挡（CLI 不过 = 不能进阶） | ❌ | ❌ `/opsx:verify` 软校验 | ❌ Skill + Review，无统一闸门 | ✅ **`validate-atlas` 9 闸门** |
-| 勾选 / 任务完成 = 有文件有证据 | ❌ | ⚠️ `tasks.md` 靠自觉 | ⚠️ 计划任务 + Review | ✅ **`TODO-CHECK-*` 硬检** |
-| 企业交付 / 合规追溯 | ❌ | ⚠️ Spec Delta，无验收报告链 | ⚠️ 计划 + Review | ✅ **REQ AC 回填 + 逐 REQ 验收报告 + `req-trace`** |
-| 分工 Review（按角色审文档） | ❌ | ⚠️ proposal/design 可拆 | ⚠️ 计划为主 | ✅ **requirements / model / solution / dev / tests 五区隔离** |
-| 可接入 CI 的完成判定 | ❌ | ❌ | ❌ | ✅ **`validate-atlas` exit 0** |
-| 外部依赖阻塞显式化 | ❌ | ❌ | ❌ | ✅ **`humanTodo` + `BLOCKED-HUMAN`** |
-| 断点续跑 | ❌ | ✅ `changes/` 变更文件夹 | ⚠️ 依赖会话/计划文件 | ✅ **`todo.md` + `agileflow.env`** |
-| Subagent 派活可审计 | ❌ | ❌ | ✅ 每任务派发 + 合规/质量 Review | ✅ **`agileflow-dispatch.json`（含 subagentId）** |
-| TDD / 测试纪律 | ❌ | ⚠️ 非核心 | ✅ **RED-GREEN-REFACTOR 强制** | ✅ ③ 验 AC + 可运行证据进 `## 结果` |
-| BDD / DDD / SDD 全链 | ❌ | ⚠️ 偏 SDD + Spec Delta | ⚠️ 偏计划 + TDD | ✅ **REQ→model→sol→dev 分工落盘** |
-| Brownfield 增量变更 | ❌ | ✅ **强项**（Spec 与代码同仓） | ⚠️ | ✅ `init` 盘点 + 写法锚点 |
-| 「你定」vs「我来」 | — | — | — | ✅ **`AF_DECIDE=ai/user`** |
-| 上手成本 | 零 | **低**（`openspec init` + 斜杠命令） | **低**（Cursor `/plugin-add superpowers`） | **中**（装 Skill + 说一句话） |
-| 简单 CRUD 典型耗时 | 30min–2h（常缺文档） | **较快**（轻量、少闸门） | 1–3h（脑暴+计划开销） | **~1h（含完整 atlas）** |
-| 可交接 / 可审计 | 低 | 高（`specs/`） | 中（计划 + 代码） | **最高**（完整证据包 + 台账 + 闸门日志） |
-
-### 怎么选
-
-| 你的场景 | 更合适 |
-|----------|--------|
-| 成熟代码库、小步增量、Spec 长期演进 | **OpenSpec** |
-| 个人/小队、强 TDD、Subagent 长跑写码 | **Superpowers** |
-| **外包交付、内审留痕、多人分工 Review、要签收报告** | **AgileFlow** |
-| 从零 MVP 但要能演示 **且** 能交接文档 | **AgileFlow** |
-| 改一行 bug、纯答疑 | 三者都偏重 → 裸 AI 或 AF 豁免 |
-
-### 可量化指标（AgileFlow 本体）
-
-| 指标 | 数值 | 含义 |
-|------|------|------|
-| 硬挡闸门 | **9** | `init`→`req`→`mod`→`sol`→`dev`→`test` 全链，`write-code` 防跳阶段写码 |
-| 校验 fixture | **63+** | 正负向回归，CI `npm run test:validate` |
-| 规则模块 | **40+** | 字面量构思、假勾选、UID 断链、派活台账等 |
-| 阶段指令 | **8** | `phases/` 含路由、变更、五阶段 |
-| dev 质量线 | **1 档（full）** | 五段式构思 + 逻辑块编号，AI 自主不减厚 |
-| 端到端复测 | **ai + user** | [AGENT-RETEST.md](AGENT-RETEST.md) 真实 Agent 冒烟 |
-
-### AgileFlow 独特点（企业交付向）
-
-1. **交付物齐全才可放行** — 不是聊完就算完；9 个闸门 + 63+ fixture，「完成」可脚本判定、可进 CI。
-2. **验收权威在 REQ** — BDD AC 全链回填到验收报告，审计时能回答「这条需求怎么证明做完了」。
-3. **过程可审计** — 派活台账记 `subagentId`；`AF_DECIDE=user` 时阶段闸门支持治理流程。
-4. **人机边界清楚** — `humanTodo` + `BLOCKED-HUMAN`，缺密钥/缺拍板不会误标 PASS。
-5. **个人快、企业严** — `ai` 模式压缩摩擦；`user` 模式适合支付/权限/合规敏感场景。
-
-> 若你只想改一行 bug 或纯答疑，AgileFlow 过重——那是刻意设计，不是缺陷。
-
----
-
-## 主链
-
-```
-req → model（按需）→ sol → dev（①②③）→ test
+```bash
+npx @agileflow/cli init          # 约 1 分钟
+/af 做一个待办清单 API，今天就要    # 然后说人话
 ```
 
-| 阶段 | 产出什么 |
-|------|----------|
-| **req** | 一功能一 REQ，Given/When/Then 验收标准 |
-| **model** | 复杂才加重建模；简单场景可跳过，但须留判定 |
-| **sol** | 边界、契约、架构、`todo.md` 里的开发任务 |
-| **dev** | 每任务构思文件、业务代码、`## 结果` 里的运行证据 |
-| **test** | 整批可交证明——不是「单测绿了就算完」 |
+---
 
-方法论对应 **BDD → DDD → SDD → TDD**，重点是**可追踪的阶段**，不是为仪式而仪式。
+## 你实际会经历什么
 
-核心思想 → [majorflow.md](majorflow.md)。执行细则 → [SKILL.md](skills/agileflow/SKILL.md)。
+| 时刻 | 你做什么 | 系统给你什么 |
+|------|----------|--------------|
+| **开场** | 打 `/af` + 想做的事 | 自动判定：快捷修 bug？探索？还是完整交付主链 |
+| **定调** | 说「你定」或「我来」 | `AF_DECIDE=ai` 少停点连做；`user` 每阶段你点头——**文档厚度不变** |
+| **推进** | 看着进度往前走 | 总控只路由；Subagent 写 REQ / 方案 / 代码；台账记下谁干了啥 |
+| **卡关** | 想先码后补？ | **闸门红 = 进不去**。`write-code` 不过，不许写业务码 |
+| **收工** | 打开 `atlas/` | REQ、方案、构思、`## 结果` 运行证据、验收报告——齐 |
+| **改天** | 只说 `/af` 或「继续」 | 读 `todo.md` 断点续跑，不用复述背景 |
+
+**体感一句话**：像带了一个会落盘、会过闸门、会交接的交付搭档——不是只会在对话框里「写完了」的助手。
 
 ---
 
-## 两种协作方式
+## 我们打的四张牌（别人难抄）
 
-| | **`AF_DECIDE=ai`** | **`AF_DECIDE=user`** |
-|---|-------------------|----------------------|
-| 你怎么说 | 「你定」「别问我」 | 「我来决策」 |
-| 摩擦 | 少澄清卡、少阶段停顿 | 阶段闸门，你点头才往下走 |
-| 适合 | Demo、CRUD、内部工具 | 支付、权限、核心业务 |
-| 不变的东西 | 完整主链、`atlas/` 落盘、①②③、可运行证据 | 同上 |
+### 1. 「做完」由脚本说了算，不是 AI 嘴上说了算
 
-> **「你定」≠ 跳阶段。** 是少问人，不是薄文档、不是空勾 checkbox、不是先码后补构思。
+9 道硬闸门（`validate-atlas`）。勾了 checkbox 却没文件？红。想跳过方案直接写码？红。
+「完成」= `exit 0`，能进 CI——口头 done 无效。
+
+### 2. 一句话入口：`/af` 自动路由
+
+懒得记阶段命令？`/af 修登录 bug` → 快捷轨；`/af 做一个退款 API` → 需求主链；只发 `/af` → 读进度接着干。
+Power user 仍可 `/af-req` `/af-sol` `/af-dev` 直达。
+
+### 3. 「你定」= 加速，≠ 偷工
+
+说「别问我」「直接做完」→ AI 少停、同会话连做。
+**照样**走 req→sol→dev→test，照样写满 `atlas/`。加速靠少问人 + 并发，不是少写文档、不是跳阶段。
+
+### 4. 交出去的是证据包，不只是仓库
+
+| 别人交 | 你交 |
+|--------|------|
+| 一堆代码 + 「测过了」 | `atlas/`：需求怎么验、方案边界、每任务运行证据、逐 REQ 签收报告 |
+| 聊天里的验收标准 | REQ 里的 BDD AC（下游只引用，权威唯一） |
+| 「好像派过 Subagent」 | `agileflow-dispatch.json` 台账（谁、哪一步、哪个 task） |
+
+关掉 IDE 也能交接；内审能回答「这条需求怎么证明做完了」。
 
 ---
 
-## 为什么敢信产出
+## 30 秒上手
 
-三层加固，防 AI 幻觉、不听指挥、假装完成：
+```bash
+npx @agileflow/cli init
+# → ~/.cursor|claude|qoder|agents|codebuddy/skills/（agileflow + /af* 门牌）
+```
 
-| 柱 | 管什么 |
-|----|--------|
-| **形** | `atlas/` 按阶段写对；勾选对得上真实文件（`validate-atlas` 硬挡） |
-| **令** | 你定方向，AI 执行——启动卡、阶段闸门、`todo.md` 断点续跑 |
-| **跑** | 编译 / 启动 / 冒烟证据写在 dev 构思里——脚本验形，**证据要你跑** |
+在 Cursor / Claude / Qoder / Codex / WorkBuddy 里：
 
-缺密钥、缺环境？`humanTodo.md` 列出只有人能办的事。未齐 → **`BLOCKED-HUMAN`**，不会误标「已交付」。
+```
+/af 做一个用户登录 API
+```
+
+| 你只记一个 | 作用 |
+|------------|------|
+| **`/af` + 人话** | 自动匹配模式并执行 |
+| `/af` | 断点续跑 |
+| `/af-fix` … `/af-test` | 快捷轨或指定阶段 |
+
+> 请用 **`npx @agileflow/cli`**，不要用裸命令 `npx agileflow`（npm 上另有无关同名包）。细则 → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)。
 
 ---
 
-## `atlas/` 里有什么
+## 主链一眼看懂
+
+```
+想法 ──▶ req ──▶ model? ──▶ sol ──▶ dev(①构思②写码③证据) ──▶ test
+              │                │         │
+              ▼                ▼         ▼
+           BDD 验收         契约/边界   ## 结果 真跑过
+```
+
+方法论对应 **BDD → DDD → SDD → TDD**，重点是**可追踪的阶段产物**，不是为仪式而仪式。
+
+思想 → [majorflow.md](majorflow.md) · 执行 → [SKILL.md](skills/agileflow/SKILL.md)
+
+---
+
+## 打开 `atlas/`，你看见的是这个
 
 ```
 atlas/
-├── requirements/REQ-*.md      # BDD + 可选 UID
-├── model/                     # DDD（或跳过判定）
-├── solution/                  # 架构、契约、功能边界
-├── dev/T-*.md                 # 每任务 ① 构思
-├── tests/                     # 逐 REQ 验收报告
-├── todo.md                    # 流程进度 + 任务 ①②③
-├── humanTodo.md               # 需要你帮忙的事
-└── agileflow-dispatch.json    # 派活台账
+├── requirements/REQ-*.md       ← 验收权威（Given/When/Then）
+├── solution/                   ← 架构 · 契约 · 功能边界
+├── dev/T-*.md                  ← 每任务构思 + ## 结果（命令与 exit code）
+├── tests/REQ-*-验收报告.md     ← PASS / FAIL / BLOCKED-HUMAN
+├── todo.md                     ← 进度条；关掉对话也能续
+├── humanTodo.md                ← 只有人能办的事（缺密钥不冒充交付）
+└── agileflow-dispatch.json     ← 派活台账（可审计）
 ```
 
-关掉对话回来，说 **「继续 agileflow」**——AI 读 `todo.md` 接着干，不用重复解释。
+这就是和「聊完就散」的最大差别：**产物在磁盘上，流程可回放。**
 
 ---
 
-## 适合谁
+## 和 OpenSpec / Superpowers 差在哪一层
 
-| 你 | 什么时候用 |
-|----|-----------|
-| **企业 Tech Lead / 交付负责人** | 要分工 Review、阶段闸门、签收报告，不能只要代码 |
-| **合规 / 内审 / 质量管理** | 要 REQ→实现→验收全链留痕，防 AI 空跑勾选 |
-| **接包 / 乙方交付** | 交的不只是仓库，还有 `atlas/` 证据包 |
-| **创业者 / 独立开发者** | 也要可演示 **且** 能交给下一个人接着干 |
+三者都让 AI 别瞎写码——**层不同**：
 
-**更适合企业级交付**；纯个人玩票、改一行 hotfix → 过重，用裸 AI 或 AF 豁免。
+| | OpenSpec | Superpowers | **AgileFlow** |
+|---|----------|-------------|---------------|
+| 管什么 | Spec 怎么演进 | 计划怎么执行（TDD） | **交付包齐不齐、证据在不在** |
+| 「完成」 | 偏自觉 / 软校验 | Skill + Review | **CLI 硬挡，exit 0 才进阶** |
+| 你带走 | `specs/` 活文档 | 计划 + 代码纪律 | **整包 `atlas/` + 签收报告 + 台账** |
+
+| 你的场景 | 更合适 |
+|----------|--------|
+| 成熟仓、小步增量、Spec 长期演进 | OpenSpec |
+| 个人/小队、强 TDD、Subagent 长跑 | Superpowers |
+| **要交接、要内审、要签收、要演示且留文档** | **AgileFlow** |
+| 改一行 bug / 纯答疑 | 裸 AI 或 AF 豁免/快捷轨 |
+
+更细维度表与指标（9 闸门 · 63+ fixture · 40+ 规则）→ 文末附录。
+
+---
+
+## 适合谁 · 不适合谁
+
+**你会爽，如果……**
+
+- 接包 / 乙方：客户要的不只是能跑，还要「怎么验、验过没」
+- Tech Lead：要分工 Review（需求/方案/开发分区），不能全堆在聊天里
+- 合规 / 内审：要 REQ→实现→验收全链，防 AI 空勾 checkbox
+- 从零 MVP：既要今天能演示，又要明天能交给别人接着干
+
+**你会觉得重，如果……**
+
+- 只想改一行文案、问概念题——用裸 AI 或 `/af-fix` / 豁免路径即可
+  （主链偏重是刻意的：交付证据不是可选项。）
 
 ---
 
 ## 安装
 
+**推荐 — 用户级（一次装全宿主）：**
+
 ```bash
-git clone https://github.com/aiKeeo/AgileFlow.git
-cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
+npx @agileflow/cli init
 ```
 
-| 工具 | 项目内 | 全局 |
-|------|--------|------|
-| **Cursor** | `.cursor/skills/agileflow` | `~/.cursor/skills/agileflow` |
-| **Claude Code** | `.claude/skills/agileflow` | `~/.claude/skills/agileflow` |
-| **Trae** | `.trae/skills/agileflow` | `~/.trae/skills/agileflow` |
+**项目级：**
 
-手把手步骤 → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
-
----
-
-## 使用
-
-```
-走 agileflow，做一个待办清单 API，今天就要上线
+```bash
+cd YOUR_PROJECT
+npx @agileflow/cli init --root . --tools cursor
+# 可选：--tools cursor,claude,codex,workbuddy,qoder
+npx @agileflow/cli gate --bootstrap-scaffold --root .
 ```
 
-```
-继续 agileflow
-```
+| 宿主 | 用户级 | 项目级 |
+|------|--------|--------|
+| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Codex | `~/.agents/skills/` | `.agents/skills/` |
+| WorkBuddy / CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
+| Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
-指定阶段：`写需求` / `做数据建模` / `出技术方案` / `按方案开发` / `跑验收测试`
+`phases/*` 相对 **agileflow skill 根**（常与门牌同级），不是空工作区根。改 `flow.yaml` 后：`npx @agileflow/cli update --step-skills-only --root .`
+
+闸门示例：
+
+```bash
+npx @agileflow/cli gate --gate write-code --root .
+```
 
 ---
 
@@ -213,10 +195,13 @@ cp -r AgileFlow/skills/agileflow YOUR_PROJECT/.cursor/skills/
 
 ```
 AgileFlow/
-├── majorflow.md           # 核心思想
-├── AGENT-RETEST.md        # Agent 复测手册
+├── majorflow.md
+├── AGENT-RETEST.md
 ├── README.md / README.zh-CN.md
-└── skills/agileflow/      # Skill 本体（SKILL.md、phases/、templates/、scripts/）
+└── skills/agileflow/            # npm @agileflow/cli
+    ├── SKILL.md · phases/ · templates/
+    ├── cli/ · bin/
+    └── scripts/validate-atlas/
 ```
 
 ---
@@ -224,3 +209,36 @@ AgileFlow/
 ## License
 
 MIT — 欢迎 Issue / PR。
+
+---
+
+<details>
+<summary><b>附录：完整对比表与可量化指标</b></summary>
+
+### 维度对比
+
+| 维度 | 裸 AI | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
+|------|:-----:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
+| 结构化阶段 | ❌ | ⚠️ OPSX 流体 | ✅ 脑暴→计划→执行 | ✅ **req→model→sol→dev→test** |
+| 机器硬挡 | ❌ | ❌ 软校验 | ❌ 无统一闸门 | ✅ **9 闸门** |
+| 勾选=有文件有证据 | ❌ | ⚠️ 自觉 | ⚠️ Review | ✅ **硬检** |
+| 企业交付追溯 | ❌ | ⚠️ Spec Delta | ⚠️ 计划+Review | ✅ **AC 回填 + 验收报告** |
+| 分工 Review | ❌ | ⚠️ | ⚠️ | ✅ **五区隔离** |
+| CI 完成判定 | ❌ | ❌ | ❌ | ✅ **exit 0** |
+| 外部依赖阻塞 | ❌ | ❌ | ❌ | ✅ **humanTodo** |
+| 断点续跑 | ❌ | ✅ | ⚠️ | ✅ **todo + env** |
+| 派活可审计 | ❌ | ❌ | ✅ | ✅ **dispatch 台账** |
+| 「你定」vs「我来」 | — | — | — | ✅ **AF_DECIDE** |
+| 简单 CRUD 含文档 | 常无文档 | 较快 | 1–3h | **~1h 含完整 atlas** |
+
+### 指标
+
+| 指标 | 数值 |
+|------|------|
+| 硬挡闸门 | **9** |
+| 校验 fixture | **63+** |
+| 规则模块 | **40+** |
+| 阶段 playbook | **8** |
+| 端到端复测 | [AGENT-RETEST.md](AGENT-RETEST.md) |
+
+</details>

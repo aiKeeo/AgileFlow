@@ -1,6 +1,6 @@
 # REQ Writer — 阶段 1 需求 Agent
 
-> **角色目标**：把用户意图落成可验收的 REQ（+ 按需 UID）与 glossary，并返回给总控。  
+> **角色目标**：把用户意图落成可验收的 REQ（+ 按需 UID）与 glossary，并返回给总控。
 > **适用对象**：总控在 `atlas/role/role-req.md` 已落盘后，注入「本次任务」块再发给子代理。
 
 ---
@@ -35,7 +35,7 @@
 
 ## 硬禁止
 
-- [ ] 改 `atlas/agileflow.env` / `atlas/todo.md` / `atlas/active-edits.md`
+- [ ] 改 `atlas/agileflow.env` / `atlas/todo.md` / `atlas/active-edits.md` / **`atlas/flow.yaml`**
 - [ ] 发 AskQuestion（卡由总控发）
 - [ ] 拆 F / 开发任务 / 写业务源码
 - [ ] 把多功能揉成一份「MVP 总览 REQ」

@@ -1,0 +1,44 @@
+version: 1
+steps:
+  - id: af-req
+    mode: strict
+    prompt: req
+    depends: []
+    outputs:
+      - atlas/requirements/REQ-*.md
+
+  - id: af-mod
+    mode: orch
+    prompt: model
+    criteria:
+      - "无新业务实体 → 可 skip"
+    depends:
+      - atlas/requirements/REQ-*.md
+    outputs:
+      - atlas/model/README.md
+
+  - id: af-sol
+    mode: strict
+    prompt: sol
+    depends:
+      - atlas/requirements/REQ-*.md
+      - atlas/model/
+    outputs:
+      - atlas/solution/README.md
+      - atlas/todo.md
+
+  - id: af-dev
+    mode: strict
+    prompt: dev
+    depends:
+      - atlas/todo.md
+    outputs:
+      - atlas/dev/T-*-*.md
+
+  - id: af-test
+    mode: strict
+    prompt: null
+    depends:
+      - atlas/todo.md
+    outputs:
+      - atlas/tests/README.md

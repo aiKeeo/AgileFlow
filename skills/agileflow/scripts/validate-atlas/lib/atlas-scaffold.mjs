@@ -64,6 +64,19 @@ const TODO_SKELETON = `# 项目待办事项
 | — | 首启 scaffold | bootstrap 创建骨架 |
 `;
 
+const AF_COMMANDS_SKELETON = `# af-commands（指令日志）
+
+> 一行一条；由总控显式执行 \`agileflow log\` 追加。gate 只读校验，不自动补。格式 → skill \`phases/quick-commands.md\` §指令日志。
+> \`AF_DECIDE=ai\` ≠ 免留痕；每步须本步门牌（裸 /af 不够）。
+
+`;
+
+const AF_GATE_RECEIPTS_SKELETON = `# af-gate-receipts（闸门回执）
+
+> 仅从未建立 current Run 的 legacy 项目由 \`agileflow gate\` 按最终退出码追加；有 current Run 时以 \`atlas/runs/<runId>/receipts.jsonl\` 为唯一权威。
+
+`;
+
 /**
  * 定位 skill 根目录（用于读取 templates/role/ 源）
  */
@@ -146,6 +159,22 @@ export function bootstrapAtlasScaffold(projectRoot) {
     ledgerCreated = true;
   }
 
+  const afCmdPath = path.join(projectRoot, 'atlas', 'logs', 'af-commands.md');
+  let afCommandsCreated = false;
+  if (!exists(afCmdPath)) {
+    fs.mkdirSync(path.dirname(afCmdPath), { recursive: true });
+    fs.writeFileSync(afCmdPath, AF_COMMANDS_SKELETON);
+    afCommandsCreated = true;
+  }
+
+  const afReceiptPath = path.join(projectRoot, 'atlas', 'logs', 'af-gate-receipts.md');
+  let afReceiptsCreated = false;
+  if (!exists(afReceiptPath)) {
+    fs.mkdirSync(path.dirname(afReceiptPath), { recursive: true });
+    fs.writeFileSync(afReceiptPath, AF_GATE_RECEIPTS_SKELETON);
+    afReceiptsCreated = true;
+  }
+
   const roleBaseline = bootstrapRoleBaselines(projectRoot, copied);
 
   return {
@@ -154,6 +183,8 @@ export function bootstrapAtlasScaffold(projectRoot) {
     todo: { created: todoCreated, path: todoPath },
     flow: { created: flowBoot.created, path: flowBoot.path },
     dispatch: { created: ledgerCreated, path: ledgerPath },
+    afCommands: { created: afCommandsCreated, path: afCmdPath },
+    afGateReceipts: { created: afReceiptsCreated, path: afReceiptPath },
     roleBaseline: {
       created: roleBaseline.created,
       merged: Boolean(roleBaseline.merged),

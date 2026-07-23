@@ -224,7 +224,7 @@ export const AI_GATES = {
 
     phase: '0',
 
-    modules: ['af-env', 'dir', 'init', 'doc-first'],
+    modules: ['af-env', 'dir', 'init', 'doc-first', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: 'init 落盘完成 · AskQuestion 确认前',
@@ -239,7 +239,7 @@ export const AI_GATES = {
 
     phase: '1',
 
-    modules: ['af-env', 'dir', 'req', 'doc-first', 'dispatch-ledger'],
+    modules: ['af-env', 'dir', 'req', 'doc-first', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: 'REQ 落盘 · 需求确认卡前',
@@ -254,7 +254,7 @@ export const AI_GATES = {
 
     phase: '2',
 
-    modules: ['af-env', 'dir', 'model', 'doc-first', 'dispatch-ledger'],
+    modules: ['af-env', 'dir', 'model', 'doc-first', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: 'model 落盘 · 建模确认前',
@@ -267,7 +267,7 @@ export const AI_GATES = {
 
     phase: '3',
 
-    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed', 'doc-first', 'dispatch-ledger'],
+    modules: ['af-env', 'dir', 'sol', 'todo', 'req-confirmed', 'doc-first', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: '方案+todo 落盘 · 方案确认/阶段闸门前',
@@ -284,7 +284,7 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['dev-step1-literal', 'dispatch-ledger'],
+    modules: ['dev-step1-literal', 'dispatch-ledger', 'af-commands'],
 
     when: '单个 T 的 dev ① 落盘 · 勾 todo ① 前',
 
@@ -300,7 +300,7 @@ export const AI_GATES = {
 
     phase: '4',
 
-    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger'],
+    modules: ['af-env', 'dir', 'todo', 'dev', 'runnable', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: '全部 T ③ 完成 · 标「开发实现 ✅」前',
@@ -316,7 +316,7 @@ export const AI_GATES = {
 
     phase: '5',
 
-    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger'],
+    modules: ['af-env', 'dir', 'tests', 'todo', 'runnable', 'smoke', 'pixel', 'doc-first', 'req-ac-backfill', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'integrity',
 
     when: '进入阶段 5 · 测试入场门禁前',
@@ -330,7 +330,7 @@ export const AI_GATES = {
 
   'write-code': {
     phase: 'all',
-    modules: ['af-env', 'doc-first', 'dispatch-ledger'],
+    modules: ['af-env', 'doc-first', 'dispatch-ledger', 'af-commands'],
     docFirstScope: 'write-code',
     when: 'Write 业务源码前 · 文档先行硬锁（ai/user 无差别）',
     blocking: true,

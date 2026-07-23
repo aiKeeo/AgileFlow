@@ -10,6 +10,23 @@ const OBSERVE_ENUM = /^(API|UI|规则|人工)$/;
 /** AC 状态列白名单 */
 const AC_STATUS_OK = /^(⬜|✅|PASS|FAIL|BLOCKED|（③\s*后填）|\(③\s*后填\))$/i;
 
+/** 范围内/外最小字数（堵「随便写一点」） */
+const SCOPE_MIN_CHARS = 16;
+
+/** AC 场景/Given/When/Then 最小字数 */
+const AC_CELL_MIN_CHARS = 8;
+
+/** AC 至少行数（happy + 失败/边界） */
+const AC_MIN_ROWS = 2;
+
+/** 标题 junk / 无实质 */
+const TITLE_JUNK_RE =
+  /^(666|test|demo|foo|bar|baz|tmp|temp|xxx|asdf|qwer|abc|你好|测试|示例|demo功能|test功能)$/i;
+
+/** Then 可观测断言线索（弱规则，堵「成功」单字） */
+const THEN_ASSERT_CUE =
+  /(返回|状态|码|code|http|200|201|4\d\d|5\d\d|可见|展示|提示|错误|失败|成功创建|token|jwt|为空|非空|等于|包含|写入|落盘|✅|PASS)/i;
+
 /** AC 表必须列（表头别名） */
 const AC_REQUIRED_COLS = [
   { key: 'id', aliases: ['ac id', 'acid', 'ac'] },
@@ -33,6 +50,30 @@ function isPlaceholder(text) {
   if (/^(N\/A|n\/a|null|none|xxx|占位|待填|稍后|TODO|TBD|示例|例子|……|\.\.\.)$/i.test(t)) return true;
   if (/^[…\.．]{2,}$/.test(t)) return true;
   return false;
+}
+
+/**
+ * 标题是否无实质（纯数字/符号/junk）
+ * @param {string} name
+ */
+function isTitleWithoutSubstance(name) {
+  const t = String(name ?? '').trim();
+  if (!t) return true;
+  if (TITLE_JUNK_RE.test(t)) return true;
+  if (/^[\d\s\-_/·.]+$/.test(t)) return true; // 纯数字符号如 666
+  if (/^(.)\1{2,}$/.test(t)) return true; // aaa / 一一一
+  const cjk = (t.match(/[\u4e00-\u9fff]/g) || []).length;
+  const letters = (t.match(/[A-Za-z]/g) || []).length;
+  if (cjk < 2 && letters < 3) return true;
+  return false;
+}
+
+/**
+ * 文本可见长度（去空白）
+ * @param {string} text
+ */
+function compactLen(text) {
+  return String(text ?? '').replace(/\s/g, '').length;
 }
 
 /**
@@ -150,6 +191,13 @@ function validateScopeContent(scopeBody, relPath, reporter) {
       file: relPath,
       message: '「## 范围提示」须含非空「范围内：…」（禁止占位符）。',
     });
+  } else if (compactLen(inMatch[1]) < SCOPE_MIN_CHARS) {
+    reporter.add({
+      severity: 'error',
+      rule: 'REQ-SCOPE-MINLEN',
+      file: relPath,
+      message: `「范围内」过短（去空白 ${compactLen(inMatch[1])} < ${SCOPE_MIN_CHARS}）；须写清本功能交付边界。`,
+    });
   }
   if (!outMatch || isPlaceholder(outMatch[1])) {
     reporter.add({
@@ -157,6 +205,13 @@ function validateScopeContent(scopeBody, relPath, reporter) {
       rule: 'REQ-SCOPE',
       file: relPath,
       message: '「## 范围提示」须含非空「范围外：…」（禁止占位符）。',
+    });
+  } else if (compactLen(outMatch[1]) < SCOPE_MIN_CHARS) {
+    reporter.add({
+      severity: 'error',
+      rule: 'REQ-SCOPE-MINLEN',
+      file: relPath,
+      message: `「范围外」过短（去空白 ${compactLen(outMatch[1])} < ${SCOPE_MIN_CHARS}）；须写清明确不做项。`,
     });
   }
 }
@@ -238,6 +293,15 @@ function validateAcTableStrict(acSection, relPath, reporter) {
     return;
   }
 
+  if (rows.length < AC_MIN_ROWS) {
+    reporter.add({
+      severity: 'error',
+      rule: 'REQ-AC-MIN-ROWS',
+      file: relPath,
+      message: `AC 表至少 ${AC_MIN_ROWS} 行（须含成功路径 + 失败/边界）；当前 ${rows.length} 行。`,
+    });
+  }
+
   for (const row of rows) {
     if (row.cells.length !== colCount) {
       reporter.add({
@@ -259,7 +323,24 @@ function validateAcTableStrict(acSection, relPath, reporter) {
           file: relPath,
           message: `${row.id} 的「${key}」列为空或占位符；须填实质内容。`,
         });
+      } else if (['scene', 'given', 'when', 'then'].includes(key) && compactLen(cell) < AC_CELL_MIN_CHARS) {
+        reporter.add({
+          severity: 'error',
+          rule: 'REQ-AC-CELL-MINLEN',
+          file: relPath,
+          message: `${row.id} 的「${key}」过短（去空白 ${compactLen(cell)} < ${AC_CELL_MIN_CHARS}）。`,
+        });
       }
+    }
+
+    const thenCell = (row.cells[colIndex.then] ?? '').trim();
+    if (thenCell && !isPlaceholder(thenCell) && compactLen(thenCell) >= AC_CELL_MIN_CHARS && !THEN_ASSERT_CUE.test(thenCell)) {
+      reporter.add({
+        severity: 'error',
+        rule: 'REQ-AC-CELL-MINLEN',
+        file: relPath,
+        message: `${row.id} 的 Then 须含可观测断言线索（如返回码/可见/错误提示/token 等），禁止空泛「成功」。`,
+      });
     }
 
     const observe = (row.cells[colIndex.observe] ?? '').trim();
@@ -314,6 +395,14 @@ function validateReqFile(projectRoot, filePath, content, reporter) {
       file: relPath,
       line: findLine(content, /^#/),
       message: 'REQ 标题须为 `# [REQ-XXX] 需求名称`（方括号后必须有实质名称，且不得换行续写）。',
+    });
+  } else if (isTitleWithoutSubstance(titleName)) {
+    reporter.add({
+      severity: 'error',
+      rule: 'REQ-TITLE-SUBSTANCE',
+      file: relPath,
+      line: findLine(content, /^#/),
+      message: `标题「${titleName}」无实质（禁纯数字如 666、junk 词、过短符号）；须为可理解的功能名。`,
     });
   } else if (fileIdMatch && fileIdMatch[1] !== titleMatch[1]) {
     reporter.add({

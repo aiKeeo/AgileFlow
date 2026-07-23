@@ -16,3 +16,10 @@
 
 # Local agent retest output (see AGENT-RETEST.md)
 /agent-retest-reports/
+
+# AgileFlow skill 源树内的 IDE 安装副本（开发只改 skills/agileflow/ 源；init/update materialize）
+skills/agileflow/.cursor/
+skills/agileflow/.claude/
+skills/agileflow/.agents/
+skills/agileflow/.codebuddy/
+skills/agileflow/.qoder/

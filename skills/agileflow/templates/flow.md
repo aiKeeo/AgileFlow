@@ -1,9 +1,9 @@
 # flow.yaml — 流程编排
 
-> **运行时**：`{项目根}/atlas/flow.yaml`  
-> **本文**：约定；默认正文见下方模板（**路径写在模板每一步里**）。  
-> 目录铁律 → [`atlas-structure.md`](../phases/atlas-structure.md)  
-> 派活 → `resolveRolePrompt(projectRoot, prompt)`（`prompt` = RoleKey）  
+> **运行时**：`{项目根}/atlas/flow.yaml`
+> **本文**：约定；默认正文见下方模板（**路径写在模板每一步里**）。
+> 目录铁律 → [`atlas-structure.md`](../phases/atlas-structure.md)
+> 派活 → `resolveRolePrompt(projectRoot, prompt)`（`prompt` = RoleKey）
 > 光标 → `atlas/agileflow.env` 的 **`AF_STEP`**（单步 id，或并行波 `id1,id2`；`AF_PHASE`=最左档）
 
 ---
@@ -12,9 +12,9 @@
 
 `steps` **自上而下是完整轨要走的格子**。到步 → **执行**，不是到步再问「要不要做」。
 
-- **书写序**：阅读序、同波排序、`AF_PHASE` 取最左步。  
-- **能否开干 / 能否并行**：只看各步 **`depends` / `outputs`**。前置已齐且互不依赖对方产物 → **同一波并行**（如调研 ∥ 竞品）。  
-- **门牌 = `id`**：用户打 `research:` → 总控读 flow 命中该 id → 启动**含该步的就绪波** → 做完往下。不加单独 tag 字段。  
+- **书写序**：阅读序、同波排序、`AF_PHASE` 取最左步。
+- **能否开干 / 能否并行**：只看各步 **`depends` / `outputs`**。前置已齐且互不依赖对方产物 → **同一波并行**（如调研 ∥ 竞品）。
+- **门牌 = `id`**：用户打 `/af-research` → 总控读 flow 命中该 id → 启动**含该步的就绪波** → 做完往下。不加单独 tag 字段。
 - **保留字**不可作 id：`fix` / `revise` / `explore` / `ut` 等快捷前缀。
 
 **唯一允许不执行的情况：**
@@ -24,7 +24,7 @@
 | **`mode: orch`** 且对照 **`criteria` 判定可跳** | AI（总控）决策 | 写 `skip: true` + `reason` 后再进下一步/下一波 |
 | **用户明确要求跳过该步**（含关严格步） | 用户 | 写 `skip` + `reason`（须能看出是用户要求） |
 
-除此之外：**禁止静默跳、禁止为赶工跳、禁止把「好像不需要」当成 skip。**  
+除此之外：**禁止静默跳、禁止为赶工跳、禁止把「好像不需要」当成 skip。**
 `mode: strict` → 到步必做；没有用户明示，AI **无权** skip。
 
 ### 与阶段 4「T 并行」划界
@@ -41,7 +41,7 @@
 ```yaml
 version: 1
 steps:
-  - id: req
+  - id: af-req
     mode: strict
     prompt: req
     # 上游依赖（派活前总控保证可读；无则按阶段文档处理）
@@ -55,7 +55,7 @@ steps:
       - atlas/requirements/ui/UID-*.md          # 按需
       - atlas/requirements/ui/prototypes/      # 按需
 
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria:
@@ -72,7 +72,7 @@ steps:
       - atlas/model/entities/*.md
       - atlas/model/physical/schema.md        # 无持久化则 N/A
 
-  - id: sol
+  - id: af-sol
     mode: strict
     prompt: sol
     depends:
@@ -86,7 +86,7 @@ steps:
       - atlas/solution/code-patterns-*.md     # 按需
       - atlas/todo.md                        # T 头只写根 todo
 
-  - id: dev
+  - id: af-dev
     mode: strict
     prompt: dev
     depends:
@@ -98,7 +98,7 @@ steps:
       - atlas/dev/T-*-*.md                   # 每任务构思
       # 业务源码在工程目录（src/ 等），不进 atlas
 
-  - id: test
+  - id: af-test
     mode: strict
     prompt: null                            # 总控直做 phases/05-testing.md
     depends:
@@ -118,7 +118,7 @@ steps:
 **插入步**（夹在中间时）——路径也写在该步上：
 
 ```yaml
-  - id: research
+  - id: af-research
     mode: strict
     prompt: null
     depends: []
@@ -130,7 +130,7 @@ steps:
 **总控 skip model 时**在该 step 上追加（不要另造 `by`）：
 
 ```yaml
-  - id: model
+  - id: af-mod
     mode: orch
     prompt: model
     criteria: [ …同上… ]
@@ -154,30 +154,39 @@ steps:
 
 总控到某步时：
 
-1. 读该步 `mode` / `criteria`（orch 先判定；strict 直接做）。  
-2. **`prompt`** → `resolveRolePrompt` 得到角色提示词正文（或 `null` 总控自己读 `phases/*.md`）。  
-3. **`depends`** → 填进任务信封的 **上游路径**（`upstreamPaths`）：**只列路径，不粘贴正文**。  
-4. **`outputs`** → 填进信封的 **产物期望**（`expectedOutputs`）。  
+1. 读该步 `mode` / `criteria`（orch 先判定；strict 直接做）。
+2. **`prompt`** → `resolveRolePrompt` 得到角色提示词正文（或 `null` 总控自己读 `phases/*.md`）。
+3. **`depends`** → 填进任务信封的 **上游路径**（`upstreamPaths`）：**只列路径，不粘贴正文**。
+4. **`outputs`** → 填进信封的 **产物期望**（`expectedOutputs`）。
 5. 完整 Subagent 输入 = **角色提示词 + 薄信封**（现网 `formatDispatchPrompt`）。
 
 Subagent 侧：
 
-- 先按提示词（`atlas/role/role-*.md` 或 layers 拼装）行事；  
-- 再用 Read **自己去读** `depends` 里的文件；  
+- 先按提示词（`atlas/role/role-*.md` 或 layers 拼装）行事；
+- 再用 Read **自己去读** `depends` 里的文件；
 - **只写** `outputs` 约定路径（写错目录闸门红）。
 
 总控 **不** 把 REQ/方案全文塞进派活 prompt；路径来自本步的 `depends`/`outputs`。
 
 ---
 
+## 管辖声明
+
+- **`AF_STEP` 只遍历 `flow.yaml` 的 `steps[]`**（含用户插入的自定义步如 `af-research`）
+- **`/af`（自动路由）、`/af-init`、`/af-explore`、快捷 `/af-fix`… 永不进 steps**（脚本 `FLOW-ID-RESERVED` 硬挡）
+- init `init-confirm` 绿 **≠** advanceStep；而是 **进入第一个 flow 步**（通常 `af-req`）
+- 台账 `stepId` 必须是 flow 中存在的 id（alias 门牌如 `/af-tests` → canonical `af-test`）
+
+---
+
 ## 总控到步（AF_STEP + skip）
 
-1. **光标**：`atlas/agileflow.env` 的 **`AF_STEP`** = 当前 `flow.yaml` 里某步 `id`（**含自定义步**如 `research`）。  
-2. **到步默认执行**：读该步 `mode` / `prompt` / `depends` / `outputs` 并加载（派活或总控直做）。  
-3. **`orch`**：对照 `criteria`；可跳 → 写 `skip`+`reason`；**然后 `AF_STEP` +1**（`nextEnabledStep`）。  
-4. **`strict`**：做完或用户明示 skip 后 **`AF_STEP` +1**。  
-5. **同步**：`AF_PHASE` = `bandForStep(flow, AF_STEP)`（闸门档 0–5；自定义步映射**左侧最近内置步**）。改 `AF_STEP` 必须同步 `AF_PHASE`。  
-6. **`depends` / `outputs`** 不因跳步改写；缺文件由阶段/角色处理。  
+1. **光标**：`atlas/agileflow.env` 的 **`AF_STEP`** = 当前 `flow.yaml` 里某步 `id`（**含自定义步**如 `af-research`）。
+2. **到步默认执行**：读该步 `mode` / `prompt` / `depends` / `outputs` 并加载（派活或总控直做）。
+3. **`orch`**：对照 `criteria`；可跳 → 写 `skip`+`reason`；**然后 `AF_STEP` +1**（`nextEnabledStep`）。
+4. **`strict`**：做完或用户明示 skip 后 **`AF_STEP` +1**。
+5. **同步**：`AF_PHASE` = `bandForStep(flow, AF_STEP)`（闸门档 0–5；自定义步映射**左侧最近内置步**）。改 `AF_STEP` 必须同步 `AF_PHASE`。
+6. **`depends` / `outputs`** 不因跳步改写；缺文件由阶段/角色处理。
 7. **`init` 不在 steps**：brownfield 进场初始化单独做完再进主链。
 
 ### `AF_STEP` 与 `AF_PHASE`
@@ -193,12 +202,14 @@ Subagent 侧：
 
 | id | `AF_PHASE` | 默认 gate |
 |----|------------|-----------|
-| init | 0 | `init-confirm` |
-| req | 1 | `req-confirm` |
-| model | 2 | `mod-confirm` |
-| sol | 3 | `sol-confirm` |
-| dev | 4 | `write-code`（②前）等 |
-| test | 5 | `test-entry` |
+| af-init（**reserved · never in steps**） | 0 | `init-confirm` |
+| af-req | 1 | `req-confirm` |
+| af-mod | 2 | `mod-confirm` |
+| af-sol | 3 | `sol-confirm` |
+| af-dev | 4 | `write-code`（②前）等 |
+| af-test | 5 | `test-entry` |
+
+> 加载时短名 `req`/`model`/`sol`… 会规范成上表 `af-*`（兼容旧 flow）。
 
 ---
 
@@ -226,9 +237,9 @@ Subagent 侧：
 |------|------|
 | `version` | 格式版，现 `1` |
 | `steps` | 有序步骤 |
-| `id` | 步名；内置 `init\|req\|model\|sol\|dev\|test`，其它=插入 |
+| `id` | 步名；**canonical `af-*`**（如 `af-req`/`af-mod`/`af-test`）。加载时短名 `req`/`model`/`sol`… 规范化为 `af-*`（见 [§内置 id](#内置-id--闸门--phase不写进-yaml)）；自定义插入须 `af-` 前缀 |
 | `mode` | `strict`=到步必做，总控不可 skip；`orch`=须有 `criteria`，总控可判定 skip |
-| `prompt` | `req\|model\|sol\|dev` → `resolveRolePrompt`；`null` → 总控读对应 `phases/*.md`；插入也可 `null` 或已有 `atlas/role/某.md` 路径 |
+| `prompt` | 短名 `req`/`model`/`sol`/`dev`（加载时不变 step id，仅映射 role key）→ `resolveRolePrompt`；`null` → 总控读对应 `phases/*.md`；插入也可 `null` 或已有 `atlas/role/某.md` 路径 |
 | `criteria` | **仅 `orch`**：判定标准（事先） |
 | `depends` | **依赖路径**（派活/开干前应具备的上游） |
 | `outputs` | **产物路径**（本步允许/应写的落盘位置；glob 用 `*`） |
@@ -269,10 +280,10 @@ flowchart TD
 
 ## 校验（形状 + 与闸门联动）
 
-- 每步有 `id`/`mode`/`prompt`/`depends`/`outputs`。  
-- `orch` ⇒ 非空 `criteria`。  
-- `skip: true` ⇒ 非空 `reason`；`strict` 的 skip 须能看出用户意图。  
-- 路径铁律：禁止 `atlas/req/`、`atlas/sol/`、`atlas/solution/todo.md`。  
+- 每步有 `id`/`mode`/`prompt`/`depends`/`outputs`。
+- `orch` ⇒ 非空 `criteria`。
+- `skip: true` ⇒ 非空 `reason`；`strict` 的 skip 须能看出用户意图。
+- 路径铁律：禁止 `atlas/req/`、`atlas/sol/`、`atlas/solution/todo.md`。
 - **闸门**：见上文「脚本如何感知 flow」——skip 步对应 gate **SKIP/PASS**，不验该步 outputs 必存在。
 
 ---
@@ -287,7 +298,7 @@ flowchart TD
 | scaffold | bootstrap **写**默认 flow.yaml |
 | 优先级 | flow 管做不做；phases 管怎么做（SKILL 链已写） |
 | majorflow | 人读产品说明；skill 内有副本，非运行时必读 |
-| test id | step id = `test`；目录仍 `atlas/tests/` |
+| test id | step id = **`af-test`**（门牌 `/af-tests` alias 亦记 `af-test`）；目录仍 `atlas/tests/` |
 | depends | 文件路径，不因跳步改写；缺文件角色/阶段文档处理 |
 | 新阶段 / 改编排 | **不是** revise 禁区说「不行」——默认改 `flow.yaml` 并从该步**重新走**完整轨 → [quick-commands §新阶段](../phases/quick-commands.md) |
 
