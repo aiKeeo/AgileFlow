@@ -2,120 +2,141 @@
 
 **English** | [中文](README.zh-CN.md)
 
-# When the chat closes — what's still in your hands?
+<br>
 
-Typical AI coding: **close the window = the delivery evaporates**. Code lives in a diff, acceptance criteria live in scrollback, and nobody can prove "done."
+<p align="center">
+  <strong>When the chat closes — what's still in your hands?</strong>
+</p>
 
-**AgileFlow makes the pipeline the product.**
-You speak once in plain language. When the run finishes, the repo holds an **`atlas/` evidence pack** you can review, audit, and hand off — not leftovers from a chat thread.
+<p align="center">
+Typical AI coding: close the window = the delivery evaporates.<br>
+Code lives in a diff. Acceptance criteria live in scrollback. Nobody can prove “done.”
+</p>
 
-[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](skills/agileflow/SKILL.md)
-[![npm](https://img.shields.io/badge/npm-%40agileflow%2Fcli-cb3837.svg)](https://www.npmjs.com/package/@agileflow/cli)
-[![Gates](https://img.shields.io/badge/validate--atlas-9%20hard%20gates-brightgreen.svg)](skills/agileflow/templates/validate-atlas-gate.md)
+<p align="center">
+  <b>AgileFlow makes the pipeline the product.</b><br>
+  Speak once in plain language. When the run finishes, the repo holds an <code>atlas/</code> evidence pack you can review, audit, and hand off.
+</p>
 
-```bash
-npx @agileflow/cli init          # ~1 minute
-/af ship a todo-list API today   # then speak normally
-```
+<p align="center">
+  <a href="https://www.npmjs.com/package/@agileflow/cli"><img src="https://img.shields.io/npm/v/@agileflow/cli.svg?style=flat-square&color=cb3837" alt="npm"></a>
+  <a href="skills/agileflow/templates/validate-atlas-gate.md"><img src="https://img.shields.io/badge/gates-9%20hard-brightgreen?style=flat-square" alt="gates"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license"></a>
+  <img src="https://img.shields.io/badge/hosts-Cursor%20%7C%20Claude%20%7C%20Codex%20%7C%20Qoder%20%7C%20WorkBuddy%20%7C%20CodeBuddy-111?style=flat-square" alt="hosts">
+</p>
+
+<p align="center">
+<pre>
+npx @agileflow/cli init
+/af ship a todo-list API today
+</pre>
+</p>
 
 ---
 
-## What the session actually feels like
+## Get started in 30 seconds
 
-| Moment | You do | You get |
-|--------|--------|---------|
-| **Start** | Type `/af` + what you want | Auto-route: quick fix? explore? or full delivery pipeline |
-| **Authority** | Say "you decide" or "I'll decide" | `AF_DECIDE=ai` = fewer stops; `user` = you approve each stage — **docs stay full either way** |
-| **Progress** | Watch it move | Orchestrator routes; Subagents write REQ / design / code; ledger records who did what |
-| **Hard stop** | Try to code first, docs later | **Gate red = blocked.** No `write-code` green → no business code |
-| **Done** | Open `atlas/` | REQ, solution, design notes, runnable `## 结果` proof, acceptance reports — present |
-| **Tomorrow** | Just `/af` or "continue" | Resume from `todo.md` — no re-briefing |
+```bash
+# 1. Install once (user-level, all hosts)
+npx @agileflow/cli init
 
-**One-line feel:** a delivery partner that lands artifacts, passes gates, and hands off cleanly — not a chat buddy that says "done" in the thread.
+# 2. In Cursor / Claude / Codex / Qoder / WorkBuddy / CodeBuddy, say:
+/af build a user login API
+```
+
+That's it. The agent picks a track, lands artifacts, writes code, and passes gates. You only choose “you decide” or “I'll decide” at kickoff.
+
+| Remember one | What it does |
+|--------------|--------------|
+| **`/af` + plain language** | Auto-match: quick fix / explore / full delivery |
+| `/af` | Resume from checkpoint |
+| `/af-req` … `/af-test` | Power-user stage jumps |
+
+> Use **`npx @agileflow/cli`** — not bare `npx agileflow` (unrelated package on npm).
+
+---
+
+## What a session feels like
+
+```
+You  /af build a refund API — demo today
+AI   → Routes to full delivery pipeline
+     → Asks: you decide, or I decide? (docs stay full either way)
+You  You decide
+AI   → Subagent writes REQ (BDD AC)
+     → Solution + contracts land on disk
+     → write-code gate green → implementation
+     → Per-task ## 结果 (commands that actually ran)
+     → Acceptance report PASS / FAIL
+You  Open atlas/ — evidence pack is ready to hand off
+```
+
+Tomorrow, just type `/af` or “continue” — resume from `todo.md`. No re-briefing.
 
 ---
 
 ## Four moves that are hard to copy
 
-### 1. "Done" is decided by a script, not by the model
+### 1. “Done” is decided by a script
 
 Nine hard gates (`validate-atlas`). Checkbox without files? Red. Skip design and jump to code? Red.
-Done = `exit 0`. CI-ready. Verbal "shipped" does not count.
 
-### 2. One entry: `/af` auto-routes
+**Done = `exit 0`.** Verbal “shipped” does not count. CI-ready.
 
-Don't memorize stage commands. `/af fix login bug` → quick track; `/af build a refund API` → requirements pipeline; bare `/af` → resume.
-Power users still jump with `/af-req` `/af-sol` `/af-dev`.
+### 2. One entry: `/af`
 
-### 3. "You decide" means faster — not thinner
+Don't memorize stage commands.
 
-"Don't ask me" / "just finish it" → fewer stops, same-session continue.
-You still run req→sol→dev→test and still fill `atlas/`. Speed = less asking + concurrency — **not** fewer docs, **not** skipped stages.
+- `/af fix login bug` → quick track  
+- `/af build a refund API` → requirements pipeline  
+- bare `/af` → resume  
 
-### 4. You hand off an evidence pack, not just a repo
+### 3. “You decide” means faster — not thinner
+
+Fewer stops, same-session continue — you still run req→sol→dev→test and still fill `atlas/`.  
+Speed = less asking + concurrency — **not** fewer docs, **not** skipped stages.
+
+### 4. You hand off an evidence pack
 
 | Typical handoff | AgileFlow handoff |
 |-----------------|-------------------|
-| Code + "we tested it" | `atlas/`: how to accept, boundaries, per-task run proof, per-REQ sign-off |
+| Code + “we tested it” | `atlas/`: how to accept, boundaries, run proof, sign-off |
 | Acceptance criteria in chat | BDD AC owned by REQ (single authority) |
-| "We used subagents… somewhere" | `agileflow-dispatch.json` ledger (who / which step / which task) |
+| “We used subagents… somewhere” | `agileflow-dispatch.json` ledger |
 
-Close the IDE and still hand off. Auditors can answer: *how was this requirement proven?*
-
----
-
-## Get started in ~1 minute
-
-```bash
-npx @agileflow/cli init
-# → ~/.cursor|claude|qoder|agents|workbuddy|codebuddy/skills/ (agileflow + /af* doorplates)
-```
-
-In Cursor / Claude / Qoder / Codex / WorkBuddy:
-
-```
-/af build a user login API
-```
-
-| Remember one | What it does |
-|--------------|--------------|
-| **`/af` + plain language** | Auto-match mode and run |
-| `/af` | Resume from checkpoint |
-| `/af-fix` … `/af-test` | Quick track or jump to a stage |
-
-> Use **`npx @agileflow/cli`** — not bare `npx agileflow` (unrelated package on npm). Details → [QUICKSTART.md](skills/agileflow/QUICKSTART.md).
+Close the IDE and still hand off. Auditors can answer: **how was this requirement proven?**
 
 ---
 
 ## The pipeline at a glance
 
-```
-idea ──▶ req ──▶ model? ──▶ sol ──▶ dev(① design ② code ③ proof) ──▶ test
-              │                │         │
-              ▼                ▼         ▼
-           BDD accept       contracts  ## 结果 really ran
+```text
+idea ──▶ req ──▶ model? ──▶ sol ──▶ dev (design → code → proof) ──▶ test
+           │                  │                │
+           ▼                  ▼                ▼
+        BDD accept         contracts        ## 结果 really ran
 ```
 
-Methods map to **BDD → DDD → SDD → TDD**. The point is **traceable stage artifacts**, not ceremony.
+Maps to **BDD → DDD → SDD → TDD**. The point is **traceable stage artifacts**, not ceremony.
 
-Philosophy → [majorflow.md](majorflow.md) · Execution → [SKILL.md](skills/agileflow/SKILL.md)
+Philosophy → [majorflow.md](majorflow.md) · Execution → [SKILL.md](skills/agileflow/SKILL.md) · Details → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
 
 ---
 
 ## Open `atlas/` — this is what you see
 
-```
+```text
 atlas/
-├── requirements/REQ-*.md       ← acceptance authority (Given/When/Then)
-├── solution/                   ← architecture · contracts · boundaries
-├── dev/T-*.md                  ← per-task design + ## 结果 (command + exit code)
-├── tests/REQ-*-验收报告.md     ← PASS / FAIL / BLOCKED-HUMAN
-├── todo.md                     ← progress bar; survives closed chats
-├── humanTodo.md                ← only humans can unblock (no fake PASS)
-└── agileflow-dispatch.json     ← auditable dispatch ledger
+├── requirements/REQ-*.md     # acceptance authority (Given / When / Then)
+├── solution/                 # architecture · contracts · boundaries
+├── dev/T-*.md                # per-task design + ## 结果 (command + exit code)
+├── tests/REQ-*-验收报告.md   # PASS / FAIL / BLOCKED-HUMAN
+├── todo.md                   # progress bar; survives closed chats
+├── humanTodo.md              # only humans can unblock (no fake PASS)
+└── agileflow-dispatch.json   # auditable dispatch ledger
 ```
 
-That's the gap vs "chat and scatter": **artifacts on disk, process replayable.**
+**Artifacts on disk. Process replayable.** That's the gap vs “chat and scatter.”
 
 ---
 
@@ -126,17 +147,17 @@ All three stop blind coding. **Different job:**
 | | OpenSpec | Superpowers | **AgileFlow** |
 |---|----------|-------------|---------------|
 | Owns | How specs evolve | How the plan executes (TDD) | **Whether the delivery pack is complete & evidenced** |
-| "Done" | Soft / honor | Skills + review | **CLI hard-block; exit 0 to advance** |
-| You leave with | Living `specs/` | Plan + code discipline | **Full `atlas/` + sign-off reports + ledger** |
+| “Done” | Soft verify | Skills + review | **CLI hard-block; `exit 0` to advance** |
+| You leave with | `specs/` | Plan + code discipline | **Full `atlas/` + sign-off + ledger** |
 
 | Your situation | Better fit |
 |----------------|------------|
 | Mature repo, small increments, long-lived specs | OpenSpec |
-| Solo/squad, strong TDD, long subagent runs | Superpowers |
+| Solo / squad, strong TDD, long subagent runs | Superpowers |
 | **Handoff, audit, sign-off, demo *and* docs** | **AgileFlow** |
-| One-line fix / pure Q&A | Raw AI or AF exempt / quick track |
+| One-line fix / pure Q&A | Raw AI, or `/af-fix` |
 
-Full dimension table + metrics (9 gates · 63+ fixtures · 40+ rules) → appendix below.
+Full comparison + metrics → appendix below.
 
 ---
 
@@ -144,27 +165,27 @@ Full dimension table + metrics (9 gates · 63+ fixtures · 40+ rules) → append
 
 **You'll love it if…**
 
-- Agency / vendor: client wants "how do we accept?" not only "does it run?"
-- Tech lead: role-based review (req / sol / dev zones), not everything in chat
-- Compliance / QA: full REQ → impl → acceptance chain; no fake checkboxes
-- Zero-to-MVP: demo today, hand off to someone else tomorrow
+- **Agency / vendor**: clients want “how do we accept?” — not only “does it run?”
+- **Tech lead**: role-based review (req / sol / dev), not everything in chat
+- **Compliance / QA**: full REQ → impl → acceptance chain; no fake checkboxes
+- **Zero-to-MVP**: demo today, hand off to someone else tomorrow
 
 **It will feel heavy if…**
 
-- You only need a one-line copy tweak or a concept answer — use raw AI or `/af-fix` / exempt paths
-  (The main chain is heavy on purpose: delivery evidence is not optional.)
+You only need a one-line copy tweak or a concept answer — use raw AI or `/af-fix`.  
+The main chain is heavy on purpose: **delivery evidence is not optional.**
 
 ---
 
 ## Install
 
-**Recommended — user-level (all hosts once):**
+**Recommended — user-level (all hosts once)**
 
 ```bash
 npx @agileflow/cli init
 ```
 
-**Project-level:**
+**Project-level**
 
 ```bash
 cd YOUR_PROJECT
@@ -182,7 +203,13 @@ npx @agileflow/cli gate --bootstrap-scaffold --root .
 | CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
 | Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
-`phases/*` resolve against the **agileflow skill root** (usually sibling to doorplates), not an empty workspace root. After `flow.yaml` changes: `npx @agileflow/cli update --step-skills-only --root .`
+> WorkBuddy and CodeBuddy use different directories; `--tools workbuddy` or `codebuddy` installs **both**.
+
+After `flow.yaml` changes:
+
+```bash
+npx @agileflow/cli update --step-skills-only --root .
+```
 
 Gate example:
 
@@ -194,12 +221,12 @@ npx @agileflow/cli gate --gate write-code --root .
 
 ## Repo layout
 
-```
+```text
 AgileFlow/
-├── majorflow.md
-├── AGENT-RETEST.md
+├── majorflow.md                 # methodology
+├── AGENT-RETEST.md              # end-to-end retest handbook
 ├── README.md / README.zh-CN.md
-└── skills/agileflow/            # npm @agileflow/cli
+└── skills/agileflow/            # npm: @agileflow/cli
     ├── SKILL.md · phases/ · templates/
     ├── cli/ · bin/
     └── scripts/validate-atlas/
@@ -209,7 +236,7 @@ AgileFlow/
 
 ## License
 
-MIT — Issues and PRs welcome.
+MIT — [Issues](https://github.com/aiKeeo/AgileFlow/issues) and PRs welcome.
 
 ---
 
@@ -225,7 +252,7 @@ MIT — Issues and PRs welcome.
 | Checkbox = files + proof | ❌ | ⚠️ Honor | ⚠️ Review | ✅ **Enforced** |
 | Enterprise delivery trace | ❌ | ⚠️ Spec deltas | ⚠️ Plan + review | ✅ **AC backfill + reports** |
 | Role-based review | ❌ | ⚠️ | ⚠️ | ✅ **Five zones** |
-| CI "done" | ❌ | ❌ | ❌ | ✅ **exit 0** |
+| CI “done” | ❌ | ❌ | ❌ | ✅ **exit 0** |
 | External dep blocks | ❌ | ❌ | ❌ | ✅ **humanTodo** |
 | Resume after chat | ❌ | ✅ | ⚠️ | ✅ **todo + env** |
 | Auditable dispatch | ❌ | ❌ | ✅ | ✅ **dispatch ledger** |
