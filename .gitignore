@@ -1,5 +1,11 @@
-# WorkBuddy local state
+# 仓库根：本地 init / IDE 安装副本（勿提交）
+.cursor/
+.claude/
+.agents/
+.codex/
 .workbuddy/
+.codebuddy/
+.qoder/
 
 # Skill 仓库根勿落业务 atlas（bootstrap 误跑产物）
 /atlas/
@@ -12,7 +18,6 @@
 !/README.zh-CN.md
 !/AGENT-RETEST.md
 !/majorflow.md
-.qoder/
 
 # Local agent retest output (see AGENT-RETEST.md)
 /agent-retest-reports/
@@ -21,6 +26,7 @@
 skills/agileflow/.cursor/
 skills/agileflow/.claude/
 skills/agileflow/.agents/
+skills/agileflow/.codex/
 skills/agileflow/.workbuddy/
 skills/agileflow/.codebuddy/
 skills/agileflow/.qoder/
