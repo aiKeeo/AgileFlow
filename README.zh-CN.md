@@ -2,271 +2,325 @@
 
 [English](README.md) | **中文**
 
-<br>
-
 <p align="center">
-  <strong>关掉对话以后，你手里还剩什么？</strong>
+  <strong>让 AI 不只是「写完代码」，而是交出一份可验证、可追踪、可接手的交付包。</strong>
 </p>
 
 <p align="center">
-普通 AI 编程：关掉窗口 = 交付物蒸发。<br>
-代码在 diff 里，验收在聊天记录里，谁也说不清「做完没有」。
-</p>
-
-<p align="center">
-  <b>AgileFlow 让流程本身变成产品。</b><br>
-  说一句人话，走完一轮——仓库里留下能 Review、能审计、能交接的 <code>atlas/</code> 证据包。
+  面向 AI 编程 Agent 的多阶段交付 Skill 与 CLI。<br>
+  你说一句人话；它负责路由、分工、落盘、闸门和断点续跑。
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@agileflow/cli"><img src="https://img.shields.io/npm/v/@agileflow/cli.svg?style=flat-square&color=cb3837" alt="npm"></a>
-  <a href="skills/agileflow/templates/validate-atlas-gate.md"><img src="https://img.shields.io/badge/gates-9%20hard-brightgreen?style=flat-square" alt="gates"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license"></a>
-  <img src="https://img.shields.io/badge/hosts-Cursor%20%7C%20Claude%20%7C%20Codex%20%7C%20Qoder%20%7C%20WorkBuddy%20%7C%20CodeBuddy-111?style=flat-square" alt="hosts">
+  <a href="skills/agileflow/templates/validate-atlas-gate.md"><img src="https://img.shields.io/badge/gates-9%20hard-brightgreen?style=flat-square" alt="9 hard gates"></a>
+  <img src="https://img.shields.io/badge/routing-/af-7c3aed?style=flat-square" alt="semantic routing">
+  <img src="https://img.shields.io/badge/flow-extensible-2563eb?style=flat-square" alt="extensible flow">
+  <img src="https://img.shields.io/badge/agents-multi--role-0891b2?style=flat-square" alt="multi-agent">
+  <img src="https://img.shields.io/badge/runtime-receipts-f97316?style=flat-square" alt="runtime receipts">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT"></a>
 </p>
 
-<p align="center">
-<pre>
+```bash
 npx @agileflow/cli init
-/af 做一个待办清单 API，今天就要
-</pre>
-</p>
+/af 做一个支持微信和支付宝退款的订单 API，后面都你定
+```
+
+> **重要：** AgileFlow 的核心不是一套提示词。
+>
+> **AgileFlow = `/af` 语义路由 + 可扩展 `flow.yaml` + 多 Agent 分工 + 9 道硬闸门 + Run 级回执 + `atlas/` 证据包。**
+
+**导航：** [演示](#demo-一次会话长什么样) · [痛点](#problems-它解决什么问题) · [上手](#quick-start-1-分钟上手) · [四张硬牌](#moves-四张硬牌) · [对比](#compare-和-openspec-与-superpowers) · [更深](#deeper-机制与扩展)
 
 ---
 
-## 30 秒上手
+## Demo: 一次会话长什么样
+
+```text
+你   /af 做一个支持微信和支付宝退款的订单 API，后面都你定
+AI   → 路由：完整交付主链
+     → AF_DECIDE=ai（少停点；文档与闸门不减）
+     → 创建 Run，进入 af-req
+     → Subagent 落盘 requirements/REQ-*.md（BDD AC）
+     → 闸门 req-confirm 绿灯 → 方案 / 契约落盘
+     → write-code 绿灯后才写业务码
+     → 每任务留下 ## 结果（真跑过的命令与 exit code）
+     → 验收报告 PASS / FAIL
+你   打开 atlas/ —— 证据包齐了，可以交接
+
+改天  /af
+AI   → 读 flow.yaml · env · todo · 当前 Run，从断点继续
+```
+
+> `/af` 是发给 **AI 聊天** 的门牌，**不是**终端命令。请用 `npx @agileflow/cli`，不要用 npm 上无关的同名包 `npx agileflow`。
+
+---
+
+## Problems: 它解决什么问题
+
+| 普通 AI 编程 | AgileFlow |
+|--------------|-----------|
+| 需求和验收只在聊天里 | 落盘 `REQ-*.md` + BDD AC |
+| 先写码，方案和边界缺失 | `write-code` 不过，禁止写业务码 |
+| 口头「测过了」 | 检查真实命令、exit code、验收报告 |
+| 勾了任务却没文件 | todo · T 文档 · 证据 · 验收交叉校验 |
+| 派了谁、干了啥说不清 | `agileflow-dispatch.json` 台账 |
+| 对话断了无法继续 | `todo + env + Run` 断点续跑 |
+| 改了产物还拿旧 PASS 顶 | 回执绑定内容摘要；一变即失效 |
+
+最终带走的不是「代码 + 一句完成了」，而是：
+
+```text
+代码
++ 可确认的需求
++ 可 Review 的方案与契约
++ 每任务的构思与运行证据
++ 可追踪的验收报告
++ 可恢复的流程状态
+= 一份能交接的交付包
+```
+
+---
+
+## Quick start: 1 分钟上手
+
+需要 Node.js 20+。
 
 ```bash
-# 1. 装一次（用户级，全宿主）
+# 用户级：一次装到 Cursor / Claude / Codex / Qoder / WorkBuddy / CodeBuddy
 npx @agileflow/cli init
+```
 
-# 2. 在 Cursor / Claude / Codex / Qoder / WorkBuddy / CodeBuddy 里说：
+重启或重新加载对应宿主后，在聊天里发：
+
+```text
 /af 做一个用户登录 API
 ```
 
-完了。AI 自动选轨、落盘、写码、过闸门。你只需在启动时选「你定」或「我来」。
+没写「你定」时，Agent 会先问你：
 
-| 你只记一个 | 作用 |
-|------------|------|
-| **`/af` + 人话** | 自动匹配：快捷修 bug / 探索 / 完整交付 |
-| `/af` | 读进度，断点续跑 |
-| `/af-req` … `/af-test` | Power user 直达阶段 |
+| 决策方式 | 效果 |
+|----------|------|
+| **你定** | `AF_DECIDE=ai`：闸门绿后同会话续跑，少打断 |
+| **我来** | `AF_DECIDE=user`：关键节点停下来等你确认 |
 
-> 请用 **`npx @agileflow/cli`**，不要用裸命令 `npx agileflow`（npm 上另有无关同名包）。
+两种模式的质量标准相同。「你定」只减少停点，**不减文档、不跳测试、不绕闸门**。
+
+只想给当前项目装：
+
+```bash
+cd YOUR_PROJECT
+npx @agileflow/cli init --root . --tools cursor,codex
+npx @agileflow/cli gate --bootstrap-scaffold --root .
+```
+
+只发 `/af`（无正文）→ 读进度，从断点继续。
 
 ---
 
-## 体感：一次会话长什么样
+## Moves: 四张硬牌
 
-```
-你   /af 做一个退款 API，今天要演示
-AI   → 判定：完整交付主链
-     → 问：你定，还是我来？（文档厚度不变）
-你   你定
-AI   → Subagent 写 REQ（BDD AC）
-     → 方案 + 契约落盘
-     → 闸门 write-code 绿灯后写码
-     → 每任务留下 ## 结果（真跑过的命令）
-     → 验收报告 PASS / FAIL
-你   打开 atlas/ —— 证据包齐了，可以交接
-```
+### 1. `/af` 语义自动路由
 
-改天只说 `/af` 或「继续」——读 `todo.md`，不用复述背景。
+不必背阶段命令。
 
----
+| 你的表达 | 默认路由 |
+|----------|----------|
+| 「做一个退款 API」 | 完整轨：req → model? → sol → dev → test |
+| 「修登录超时」「补单测」 | 快捷轨 |
+| 「先研究瓶颈」 | 探索支路 |
+| 只发 `/af` /「继续」 | 断点续跑 |
 
-## 为什么难抄：四张牌
+Power user 仍可用 `/af-req` `/af-sol` `/af-dev` `/af-test`；门牌不能绕过 `flow.yaml` 依赖与闸门。
 
-### 1. 「做完」由脚本说了算
+### 2. 可扩展 `flow.yaml`
 
-9 道硬闸门（`validate-atlas`）。勾了 checkbox 却没文件？红。想跳过方案直接写码？红。
+`atlas/flow.yaml` 是项目执行图：可插步骤、依赖、并行波、自定义产物。  
+`prompt` 可写短名（`req`/`model`/`sol`/`dev`）、`null`（总控直做），或**已有角色文件路径**（如 `atlas/role/role-security.md`）。  
+改 flow 后跑 `update --step-skills-only` 刷新 `/af-*` 门牌；再 **abandon 旧 Run + start 新 Run**——旧 PASS 不能偷渡。
 
-**完成 = `exit 0`。** 口头 done 无效，能进 CI。
+### 3. 硬闸门 + Run 级回执
 
-### 2. 一个入口：`/af`
+9 道闸门；完成 = `exit 0`。  
+PASS 绑定 `runId`、step attempt、`flow` 摘要、产物内容摘要。改产物、回退阶段或换 flow → 旧回执立即失效。  
+`gate` 只校验，**不替 Agent 补证据**。
 
-懒得记阶段命令？
+### 4. `atlas/` 证据包 + 多 Agent 台账
 
-- `/af 修登录 bug` → 快捷轨  
-- `/af 做一个退款 API` → 需求主链  
-- 只发 `/af` → 接着干  
-
-### 3. 「你定」= 加速，≠ 偷工
-
-少问人、同会话连做——**照样**走 req→sol→dev→test，**照样**写满 `atlas/`。  
-加速靠少停 + 并发，不是少写文档、不是跳阶段。
-
-### 4. 交出去的是证据包
-
-| 别人交 | 你交 |
-|--------|------|
-| 一堆代码 +「测过了」 | `atlas/`：怎么验、边界、运行证据、签收报告 |
-| 聊天里的验收标准 | REQ 里的 BDD AC（权威唯一） |
-| 「好像派过 Subagent」 | `agileflow-dispatch.json` 台账 |
-
-关掉 IDE 也能交接。内审能回答：**这条需求，怎么证明做完了？**
+总控只路由；正文由 Subagent 产出；派活写入 `agileflow-dispatch.json`。  
+关掉 IDE 也能交接；内审能回答：**这条需求怎么证明做完了？**
 
 ---
 
 ## 主链一眼看懂
 
 ```text
-想法 ──▶ req ──▶ model? ──▶ sol ──▶ dev（构思 → 写码 → 证据）──▶ test
-           │                  │              │
-           ▼                  ▼              ▼
-        BDD 验收           契约 / 边界     ## 结果 真跑过
+一句需求 ─▶ req ─▶ model? ─▶ sol ─▶ dev（构思→写码→证据）─▶ test ─▶ 交付
+              │         │       │              │
+              ▼         ▼       ▼              ▼
+           BDD AC    领域模型  契约/边界    ## 结果 真跑过
 ```
-
-对应 **BDD → DDD → SDD → TDD**。重点是可追踪的阶段产物，不是为仪式而仪式。
-
-思想 → [majorflow.md](majorflow.md) · 执行 → [SKILL.md](skills/agileflow/SKILL.md) · 上手细节 → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
-
----
-
-## 打开 `atlas/`，你看见的是这个
 
 ```text
 atlas/
-├── requirements/REQ-*.md     # 验收权威（Given / When / Then）
-├── solution/                 # 架构 · 契约 · 功能边界
-├── dev/T-*.md                # 每任务构思 + ## 结果（命令与 exit code）
-├── tests/REQ-*-验收报告.md   # PASS / FAIL / BLOCKED-HUMAN
-├── todo.md                   # 进度条；关掉对话也能续
-├── humanTodo.md              # 只有人能办的事（缺密钥不冒充交付）
-└── agileflow-dispatch.json   # 派活台账（可审计）
+├── flow.yaml / agileflow.env / todo.md
+├── requirements/ · model/ · solution/ · dev/ · tests/
+├── humanTodo.md · agileflow-dispatch.json
+└── runs/<runId>/              # 产物登记与 JSONL 回执
 ```
 
-**产物在磁盘上，流程可回放**——这就是和「聊完就散」的差别。
+思想 → [majorflow.md](majorflow.md) · 执行 → [SKILL.md](skills/agileflow/SKILL.md) · 安装细节 → [QUICKSTART.md](skills/agileflow/QUICKSTART.md)
 
 ---
 
-## 和 OpenSpec / Superpowers 差在哪一层
+## Compare: 和 OpenSpec 与 Superpowers
 
-三者都让 AI 别瞎写码——**管的层不同**：
+他们帮你**想清楚、写对**；AgileFlow 管**做完有没有留下证据，机器认不认账**。
 
 | | OpenSpec | Superpowers | **AgileFlow** |
 |---|----------|-------------|---------------|
 | 管什么 | Spec 怎么演进 | 计划怎么执行（TDD） | **交付包齐不齐、证据在不在** |
-| 「完成」 | 软校验 | Skill + Review | **CLI 硬挡，`exit 0` 才进阶** |
-| 你带走 | `specs/` | 计划 + 代码纪律 | **整包 `atlas/` + 签收 + 台账** |
+| 「完成」 | 软对齐 | Skill + Review | **CLI 硬挡，`exit 0` 才进阶** |
+| 你带走 | 活的 `specs/` | 计划 + 代码纪律 | **`atlas/` + 签收 + Run 回执 + 台账** |
 
-| 你的场景 | 更合适 |
-|----------|--------|
-| 成熟仓、小步增量、Spec 长期演进 | OpenSpec |
-| 个人 / 小队、强 TDD、Subagent 长跑 | Superpowers |
-| **要交接、要内审、要签收、要演示且留文档** | **AgileFlow** |
-| 改一行 bug / 纯答疑 | 裸 AI，或 `/af-fix` |
-
-完整对比与指标 → 文末附录。
+不是互斥：可用 OpenSpec 管长期规格、Superpowers 强化执行，再让 AgileFlow 守交付边界。
 
 ---
 
-## 适合谁 · 不适合谁
+## 适合 · 不适合
 
-**你会爽，如果……**
+**适合：** 要交给客户 / 测试 / 下一位开发 / 审计；功能跨需求·接口·实现·验收；团队要统一「完成」的机器判定；长任务跨会话要可靠恢复。
 
-- **接包 / 乙方**：客户要的不只是能跑，还要「怎么验、验过没」
-- **Tech Lead**：需求 / 方案 / 开发分区 Review，不能全堆在聊天里
-- **合规 / 内审**：REQ → 实现 → 验收全链，防 AI 空勾 checkbox
-- **从零 MVP**：今天能演示，明天能交给别人接着干
+**不适合：** 一次性问答；一行文案；不准备维护任何仓库内文档；指望它替代测试框架、CI 或产品判断。
 
-**你会觉得重，如果……**
-
-只想改一行文案、问概念题——用裸 AI 或 `/af-fix` 即可。  
-主链偏重是刻意的：**交付证据不是可选项。**
+AgileFlow 是 Agent 的**交付协议与校验层**，不是云端任务平台。
 
 ---
 
-## 安装
+## Deeper: 机制与扩展
 
-**推荐 — 用户级（一次装全宿主）**
+### 为什么不会轻易「假完成」
 
-```bash
-npx @agileflow/cli init
+正式流程创建 `atlas/runs/<runId>/`。每阶段闭环：
+
+```text
+Subagent 产出 → artifact scan → log（本步门牌）→ gate → run gate-status → step sync
 ```
 
-**项目级**
+- 闸门绿 = **当前 Run / attempt / flow / 产物** 对应的有效 PASS，不是「历史上绿过」。
+- 存在 Run 时只认 Runtime JSONL 回执；旧 Markdown PASS 不能兜底。
+- 密钥、审批、真机等进入 `humanTodo.md`，不冒充 PASS。
 
-```bash
-cd YOUR_PROJECT
-npx @agileflow/cli init --root . --tools cursor
-# 可选：--tools cursor,claude,codex,workbuddy,codebuddy,qoder
-npx @agileflow/cli gate --bootstrap-scaffold --root .
+<details>
+<summary>九道硬闸门</summary>
+
+| 闸门 | 阻止什么 |
+|------|----------|
+| `init-confirm` | 旧项目未盘点就进主链 |
+| `req-confirm` | REQ / 范围 / BDD AC 不完整 |
+| `mod-confirm` | 建模不完整或静默跳过 |
+| `sol-confirm` | 架构、契约、边界或 todo 缺失 |
+| `dev-step1-literal` | 开发构思空壳 |
+| `write-code` | 需求方案未就绪就写业务码 |
+| `dev-complete` | 勾完任务却无运行证据 |
+| `test-entry` | 未满足测试入场与冒烟 |
+| `req-trace` | REQ → F → T → AC → 报告断链 |
+
+</details>
+
+### 多 Agent 怎么分工
+
+当前会话 = 总控：读 flow、派活、跑闸门、推进状态。  
+req / model / sol / dev 正文由对应角色 Subagent 产出，写入 `agileflow-dispatch.json`。  
+宿主无 Subagent 时进入显式 degraded，**质量闸门不降级**。
+
+### 如何扩展
+
+| 层 | 改哪里 | 能做什么 |
+|----|--------|----------|
+| 步骤 | `atlas/flow.yaml` | 插入安全审查、设计评审等 |
+| 依赖 / 并行 | `depends` · `outputs` | 并行波与产物等待 |
+| 角色 / 提示词 | `prompt` + `atlas/role/*.md` | 短名、总控直做、或指定提示词路径 |
+| 门牌 | `update --step-skills-only` | 把新 `af-*` 步刷进各宿主 `/af-*` 指令 |
+| 校验 | gate / validator | 把团队完成标准变成 `exit ≠ 0` |
+
+**`prompt` 三种写法：**
+
+| `prompt` | 谁干、读什么 |
+|----------|----------------|
+| `req` / `model` / `sol` / `dev` | Subagent；默认 layers，或项目覆盖 `atlas/role/role-{key}.md` |
+| `null` | 总控直做，按 step id 读对应 `phases/*.md` |
+| `atlas/role/role-xxx.md` | Subagent；**路径文件须已存在**（团队自定义角色） |
+
+示例：在方案与开发之间加安全审查（指定角色文件）：
+
+```yaml
+# 先写好 atlas/role/role-security.md，再挂进 flow
+steps:
+  - id: af-security-review
+    mode: strict
+    prompt: atlas/role/role-security.md
+    depends:
+      - atlas/solution/
+    outputs:
+      - atlas/logs/security-review.md
 ```
 
-| 宿主 | 用户级 | 项目级 |
-|------|--------|--------|
-| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
-| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
-| Codex | `~/.agents/skills/` | `.agents/skills/` |
-| WorkBuddy | `~/.workbuddy/skills/` | `.workbuddy/skills/` |
-| CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
-| Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
-
-> WorkBuddy / CodeBuddy 目录不同；`--tools workbuddy` 或 `codebuddy` 会**两边都装**。
-
-改 `flow.yaml` 后刷新门牌：
+改完 flow **必须刷门牌**，宿主才会出现 `/af-security-review`：
 
 ```bash
 npx @agileflow/cli update --step-skills-only --root .
+# → 生成/更新 .cursor|claude|…/skills/af-security-review/SKILL.md
+# → flow 里删掉的自定义步，对应门牌也会被清掉
 ```
 
-闸门示例：
+然后再换 Run（改 flow 不能偷渡旧 PASS）：
 
 ```bash
+npx @agileflow/cli run abandon --reason "新增安全审查步骤" --root .
+npx @agileflow/cli run start --change security-review --step af-req --root .
+```
+
+> **Flow 变化 = `update --step-skills-only` 刷门牌 + abandon 旧 Run + start 新 Run。**  
+> 只改 yaml 不 update，聊天里不会多出新 `/af-*`；只 update 不换 Run，旧回执仍可能绑在旧 `flowDigest` 上。
+
+新增步骤 / 依赖 / 产物路径：改 `flow.yaml` 即可。  
+需要验文件内容、命令结果或跨文档追踪：必须扩 validator，不能只靠提示词。  
+总控编排、`write-code` 前置与 Runtime 回执约束不会因扩展自动消失。
+
+<details>
+<summary>常用 CLI</summary>
+
+```bash
+npx @agileflow/cli init
+npx @agileflow/cli update --step-skills-only --root .
+npx @agileflow/cli run status --json --root .
 npx @agileflow/cli gate --gate write-code --root .
+npx @agileflow/cli run gate-status --gate req-confirm --json --root .
+npx @agileflow/cli gate --list-gates --root .
+npx @agileflow/cli run abandon --reason "flow 已变更" --root .
+npx @agileflow/cli run start --change refund-v2 --step af-req --root .
 ```
 
----
+WorkBuddy → `~/.workbuddy/skills/`；CodeBuddy → `~/.codebuddy/skills/`。`--tools workbuddy` 或 `codebuddy` 会**两边都装**。
 
-## 仓库结构
+</details>
 
-```text
-AgileFlow/
-├── majorflow.md                 # 方法论
-├── AGENT-RETEST.md              # 端到端复测手册
-├── README.md / README.zh-CN.md
-└── skills/agileflow/            # npm: @agileflow/cli
-    ├── SKILL.md · phases/ · templates/
-    ├── cli/ · bin/
-    └── scripts/validate-atlas/
-```
+### 文档导航
+
+| 想了解 | 文档 |
+|--------|------|
+| 方法论 | [majorflow.md](majorflow.md) |
+| Agent 执行规则 | [SKILL.md](skills/agileflow/SKILL.md) |
+| 安装与宿主 | [QUICKSTART.md](skills/agileflow/QUICKSTART.md) |
+| 闸门细则 | [validate-atlas-gate.md](skills/agileflow/templates/validate-atlas-gate.md) |
+| 排错 | [TROUBLESHOOTING.md](skills/agileflow/TROUBLESHOOTING.md) |
+| 端到端复测 | [AGENT-RETEST.md](AGENT-RETEST.md) |
+
+产品源在 `skills/agileflow/`，npm 包：[`@agileflow/cli`](https://www.npmjs.com/package/@agileflow/cli)。
 
 ---
 
 ## License
 
-MIT — 欢迎 [Issue](https://github.com/aiKeeo/AgileFlow/issues) / PR。
-
----
-
-<details>
-<summary><b>附录：完整对比表与可量化指标</b></summary>
-
-### 维度对比
-
-| 维度 | 裸 AI | [OpenSpec](https://openspec.dev) | [Superpowers](https://github.com/obra/superpowers) | **AgileFlow** |
-|------|:-----:|:--------------------------------:|:--------------------------------------------------:|:-------------:|
-| 结构化阶段 | ❌ | ⚠️ OPSX 流体 | ✅ 脑暴→计划→执行 | ✅ **req→model→sol→dev→test** |
-| 机器硬挡 | ❌ | ❌ 软校验 | ❌ 无统一闸门 | ✅ **9 闸门** |
-| 勾选 = 有文件有证据 | ❌ | ⚠️ 自觉 | ⚠️ Review | ✅ **硬检** |
-| 企业交付追溯 | ❌ | ⚠️ Spec Delta | ⚠️ 计划 + Review | ✅ **AC 回填 + 验收报告** |
-| 分工 Review | ❌ | ⚠️ | ⚠️ | ✅ **五区隔离** |
-| CI 完成判定 | ❌ | ❌ | ❌ | ✅ **exit 0** |
-| 外部依赖阻塞 | ❌ | ❌ | ❌ | ✅ **humanTodo** |
-| 断点续跑 | ❌ | ✅ | ⚠️ | ✅ **todo + env** |
-| 派活可审计 | ❌ | ❌ | ✅ | ✅ **dispatch 台账** |
-| 「你定」vs「我来」 | — | — | — | ✅ **AF_DECIDE** |
-| 简单 CRUD 含文档 | 常无文档 | 较快 | 1–3h | **~1h 含完整 atlas** |
-
-### 指标
-
-| 指标 | 数值 |
-|------|------|
-| 硬挡闸门 | **9** |
-| 校验 fixture | **63+** |
-| 规则模块 | **40+** |
-| 阶段 playbook | **8** |
-| 端到端复测 | [AGENT-RETEST.md](AGENT-RETEST.md) |
-
-</details>
+MIT · [Issues](https://github.com/aiKeeo/AgileFlow/issues) / PR 欢迎。
