@@ -28,6 +28,7 @@ const PROJECT_SKILL_DIRS = [
   ['.claude', 'skills'],
   ['.agents', 'skills'],
   ['.codex', 'skills'],
+  ['.workbuddy', 'skills'],
   ['.codebuddy', 'skills'],
   ['.qoder', 'skills'],
 ];

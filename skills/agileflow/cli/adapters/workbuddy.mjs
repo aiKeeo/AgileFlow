@@ -1,5 +1,6 @@
 /**
- * WorkBuddy / CodeBuddy 适配
+ * WorkBuddy 适配：用户 ~/.workbuddy/skills 或项目 .workbuddy/skills
+ * @see https://github.com/yinqd3/workbuddy-skills （~/.workbuddy/skills/）
  */
 import { installHost, pruneHostDoorplates } from './_install.mjs';
 

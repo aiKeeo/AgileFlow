@@ -1,6 +1,6 @@
 {
   "name": "@agileflow/cli",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AgileFlow CLI：init 挂载门牌 skill + validate-atlas 闸门",
   "type": "module",
   "bin": {

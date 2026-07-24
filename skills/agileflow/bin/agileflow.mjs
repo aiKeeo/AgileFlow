@@ -29,7 +29,7 @@ function printHelp() {
 ${name} v${version}  (bin: agileflow)
 
 用法:
-  agileflow init [--root 项目目录] [--tools cursor,claude,codex,workbuddy,qoder] [--force]
+  agileflow init [--root 项目目录] [--tools cursor,claude,codex,workbuddy,codebuddy,qoder] [--force]
     无 --root：装到用户 HOME，默认全部宿主（最轻量）
     有 --root：装到该项目，--tools 指定宿主（默认 cursor）
   agileflow update [--root .] [--step-skills-only] [--skill-sync] [--tools …]

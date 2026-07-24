@@ -35,7 +35,7 @@ npx @agileflow/cli init
 
 ```bash
 npx @agileflow/cli init
-# → ~/.cursor/skills/、~/.agents/skills/、~/.claude/skills/、~/.codebuddy/skills/、~/.qoder/skills/
+# → ~/.cursor/skills/、~/.agents/skills/、~/.claude/skills/、~/.workbuddy/skills/、~/.codebuddy/skills/、~/.qoder/skills/
 # 重启各 IDE / Agent 后全局可用
 ```
 
@@ -44,7 +44,7 @@ npx @agileflow/cli init
 ```bash
 cd YOUR_PROJECT
 npx @agileflow/cli init --root . --tools cursor
-# 或：--tools cursor,codex,workbuddy,qoder
+# 或：--tools cursor,codex,workbuddy,codebuddy,qoder
 # 脚手架（写入 atlas/ 骨架）：
 npx @agileflow/cli gate --bootstrap-scaffold --root .
 ```
@@ -53,7 +53,7 @@ npx @agileflow/cli gate --bootstrap-scaffold --root .
 
 | 命令 | 装到哪 | 默认 tools |
 |------|--------|------------|
-| `init` | 用户 HOME 下各宿主 skills | **全部**（cursor+claude+codex+workbuddy+qoder） |
+| `init` | 用户 HOME 下各宿主 skills | **全部**（cursor+claude+codex+workbuddy+codebuddy+qoder） |
 | `init --root .` | 项目目录 | **cursor**（用 `--tools` 改） |
 
 各宿主 skills 根：
@@ -63,10 +63,13 @@ npx @agileflow/cli gate --bootstrap-scaffold --root .
 | Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
 | Claude | `~/.claude/skills/` | `.claude/skills/` |
 | Codex | `~/.agents/skills/` | `.agents/skills/` |
-| WorkBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` | `.workbuddy/skills/` |
+| CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
 | Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
 > **Codex 说明**：官方项目 skill 根是 [`.agents/skills/`](https://developers.openai.com/codex/skills)（跨 Agent 标准路径）。`~/.codex/skills/` 为用户级旧路径仍可读，但 init 不会往 `.codex/skills/` 写项目 skill。
+>
+> **WorkBuddy / CodeBuddy**：目录不同；`--tools workbuddy` 或 `codebuddy` 会**两边都装**。
 
 改 `atlas/flow.yaml` 后刷新门牌 skill：
 
@@ -77,7 +80,7 @@ npx @agileflow/cli update --step-skills-only --root .
 ### 开发者（AgileFlow 仓库本身）
 
 - **唯一源**：`skills/agileflow/`（`SKILL.md`、`phases/`、`templates/`、`cli/`、`scripts/`）
-- **勿**在仓库内提交 `.cursor/.claude/.agents/.codebuddy/.qoder/skills/` 副本（已 gitignore）；改源后跑 `npm run test:cli` 验证生成
+- **勿**在仓库内提交 `.cursor/.claude/.agents/.workbuddy/.codebuddy/.qoder/skills/` 副本（已 gitignore）；改源后跑 `npm run test:cli` 验证生成
 - 用户/项目侧仍用 `npx @agileflow/cli init` 把 skill materialize 到各宿主目录
 
 **管辖边界**：只有 `atlas/flow.yaml` 的 `steps[]` 受 `AF_STEP`/主链闸门管理；`/af`（自动路由）、`/af-init`、`/af-explore`、快捷 `/af-fix`… 不进 flow steps。详见 [majorflow.md §管辖边界](majorflow.md#管辖边界铁律)。

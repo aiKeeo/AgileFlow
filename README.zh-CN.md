@@ -9,7 +9,7 @@
 **AgileFlow 让流程本身变成产品。**
 你说一句人话，走完一轮，仓库里留下一套能 Review、能审计、能交接的 **`atlas/` 证据包**——不是聊天记录的附属品。
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](skills/agileflow/SKILL.md)
 [![npm](https://img.shields.io/badge/npm-%40agileflow%2Fcli-cb3837.svg)](https://www.npmjs.com/package/@agileflow/cli)
 [![Gates](https://img.shields.io/badge/validate--atlas-9%20hard%20gates-brightgreen.svg)](skills/agileflow/templates/validate-atlas-gate.md)
 
@@ -68,7 +68,7 @@ Power user 仍可 `/af-req` `/af-sol` `/af-dev` 直达。
 
 ```bash
 npx @agileflow/cli init
-# → ~/.cursor|claude|qoder|agents|codebuddy/skills/（agileflow + /af* 门牌）
+# → ~/.cursor|claude|qoder|agents|workbuddy|codebuddy/skills/（agileflow + /af* 门牌）
 ```
 
 在 Cursor / Claude / Qoder / Codex / WorkBuddy 里：
@@ -169,7 +169,7 @@ npx @agileflow/cli init
 ```bash
 cd YOUR_PROJECT
 npx @agileflow/cli init --root . --tools cursor
-# 可选：--tools cursor,claude,codex,workbuddy,qoder
+# 可选：--tools cursor,claude,codex,workbuddy,codebuddy,qoder
 npx @agileflow/cli gate --bootstrap-scaffold --root .
 ```
 
@@ -178,7 +178,8 @@ npx @agileflow/cli gate --bootstrap-scaffold --root .
 | Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
 | Claude Code | `~/.claude/skills/` | `.claude/skills/` |
 | Codex | `~/.agents/skills/` | `.agents/skills/` |
-| WorkBuddy / CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` | `.workbuddy/skills/` |
+| CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
 | Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
 `phases/*` 相对 **agileflow skill 根**（常与门牌同级），不是空工作区根。改 `flow.yaml` 后：`npx @agileflow/cli update --step-skills-only --root .`

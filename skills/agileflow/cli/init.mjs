@@ -17,8 +17,9 @@ import { installCursor, pruneCursorDoorplates } from './adapters/cursor.mjs';
 import { installClaude, pruneClaudeDoorplates } from './adapters/claude.mjs';
 import { installCodex, pruneCodexDoorplates } from './adapters/codex.mjs';
 import { installWorkbuddy, pruneWorkbuddyDoorplates } from './adapters/workbuddy.mjs';
+import { installCodebuddy, pruneCodebuddyDoorplates } from './adapters/codebuddy.mjs';
 import { installQoder, pruneQoderDoorplates } from './adapters/qoder.mjs';
-import { ALL_HOSTS, isKnownHost } from './adapters/_host.mjs';
+import { ALL_HOSTS, expandBuddyHosts, isKnownHost } from './adapters/_host.mjs';
 import { readPackageMeta } from './package-meta.mjs';
 import { assertRootFlag, parseArgv, resolveInitContext, resolveUpdateModes } from './parse-argv.mjs';
 
@@ -30,6 +31,7 @@ const INSTALLERS = {
   claude: installClaude,
   codex: installCodex,
   workbuddy: installWorkbuddy,
+  codebuddy: installCodebuddy,
   qoder: installQoder,
 };
 
@@ -39,6 +41,7 @@ const PRUNERS = {
   claude: pruneClaudeDoorplates,
   codex: pruneCodexDoorplates,
   workbuddy: pruneWorkbuddyDoorplates,
+  codebuddy: pruneCodebuddyDoorplates,
   qoder: pruneQoderDoorplates,
 };
 
@@ -120,6 +123,7 @@ function hasInstalledAgileflowSkill(projectRoot) {
     path.join(projectRoot, '.claude', 'skills', 'agileflow'),
     path.join(projectRoot, '.agents', 'skills', 'agileflow'),
     path.join(projectRoot, '.codex', 'skills', 'agileflow'),
+    path.join(projectRoot, '.workbuddy', 'skills', 'agileflow'),
     path.join(projectRoot, '.codebuddy', 'skills', 'agileflow'),
     path.join(projectRoot, '.qoder', 'skills', 'agileflow'),
   ];
@@ -132,7 +136,7 @@ function hasInstalledAgileflowSkill(projectRoot) {
  */
 function installTools(tools, opts) {
   const results = {};
-  for (const tool of tools) {
+  for (const tool of expandBuddyHosts(tools)) {
     if (!isKnownHost(tool)) {
       console.warn(`[agileflow] 未知 tool=${tool}，已忽略（可用: ${ALL_HOSTS.join(',')}）`);
       continue;
@@ -152,7 +156,7 @@ function installTools(tools, opts) {
 function pruneAll(installRoot, scope, catalog, tools) {
   const keep = new Set(catalog.map((e) => e.id));
   const removed = [];
-  for (const tool of tools) {
+  for (const tool of expandBuddyHosts(tools)) {
     const prune = PRUNERS[tool];
     if (prune) removed.push(...prune(installRoot, scope, keep));
   }

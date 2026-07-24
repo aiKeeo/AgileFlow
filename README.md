@@ -9,7 +9,7 @@ Typical AI coding: **close the window = the delivery evaporates**. Code lives in
 **AgileFlow makes the pipeline the product.**
 You speak once in plain language. When the run finishes, the repo holds an **`atlas/` evidence pack** you can review, audit, and hand off — not leftovers from a chat thread.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](skills/agileflow/SKILL.md)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](skills/agileflow/SKILL.md)
 [![npm](https://img.shields.io/badge/npm-%40agileflow%2Fcli-cb3837.svg)](https://www.npmjs.com/package/@agileflow/cli)
 [![Gates](https://img.shields.io/badge/validate--atlas-9%20hard%20gates-brightgreen.svg)](skills/agileflow/templates/validate-atlas-gate.md)
 
@@ -68,7 +68,7 @@ Close the IDE and still hand off. Auditors can answer: *how was this requirement
 
 ```bash
 npx @agileflow/cli init
-# → ~/.cursor|claude|qoder|agents|codebuddy/skills/ (agileflow + /af* doorplates)
+# → ~/.cursor|claude|qoder|agents|workbuddy|codebuddy/skills/ (agileflow + /af* doorplates)
 ```
 
 In Cursor / Claude / Qoder / Codex / WorkBuddy:
@@ -169,7 +169,7 @@ npx @agileflow/cli init
 ```bash
 cd YOUR_PROJECT
 npx @agileflow/cli init --root . --tools cursor
-# optional: --tools cursor,claude,codex,workbuddy,qoder
+# optional: --tools cursor,claude,codex,workbuddy,codebuddy,qoder
 npx @agileflow/cli gate --bootstrap-scaffold --root .
 ```
 
@@ -178,7 +178,8 @@ npx @agileflow/cli gate --bootstrap-scaffold --root .
 | Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
 | Claude Code | `~/.claude/skills/` | `.claude/skills/` |
 | Codex | `~/.agents/skills/` | `.agents/skills/` |
-| WorkBuddy / CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` | `.workbuddy/skills/` |
+| CodeBuddy | `~/.codebuddy/skills/` | `.codebuddy/skills/` |
 | Qoder | `~/.qoder/skills/` | `.qoder/skills/` |
 
 `phases/*` resolve against the **agileflow skill root** (usually sibling to doorplates), not an empty workspace root. After `flow.yaml` changes: `npx @agileflow/cli update --step-skills-only --root .`

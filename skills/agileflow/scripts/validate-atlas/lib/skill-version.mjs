@@ -43,6 +43,7 @@ export function readInstalledSkillVersion(projectRoot) {
     path.join(projectRoot, '.claude', 'skills', 'agileflow', '.agileflow-installed.json'),
     path.join(projectRoot, '.qoder', 'skills', 'agileflow', '.agileflow-installed.json'),
     path.join(projectRoot, '.agents', 'skills', 'agileflow', '.agileflow-installed.json'),
+    path.join(projectRoot, '.workbuddy', 'skills', 'agileflow', '.agileflow-installed.json'),
     path.join(projectRoot, '.codebuddy', 'skills', 'agileflow', '.agileflow-installed.json'),
   ];
   for (const p of candidates) {
@@ -59,6 +60,8 @@ export function readInstalledSkillVersion(projectRoot) {
     ['.cursor', 'skills', 'agileflow'],
     ['.claude', 'skills', 'agileflow'],
     ['.qoder', 'skills', 'agileflow'],
+    ['.workbuddy', 'skills', 'agileflow'],
+    ['.codebuddy', 'skills', 'agileflow'],
   ]) {
     const dir = path.join(projectRoot, ...rel);
     const v = readSkillPackageVersion(dir);

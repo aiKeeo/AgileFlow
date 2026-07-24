@@ -2,14 +2,28 @@
  * 各宿主 skills 根目录：用户级（~）与项目级（--root）
  *
  * Codex 官方：项目/用户均为 `.agents/skills/`；`~/.codex/skills/` 仅 legacy 清理
+ * WorkBuddy：`~/.workbuddy/skills/`；CodeBuddy：`~/.codebuddy/skills/`（两产品分目录）
  */
 import os from 'node:os';
 import path from 'node:path';
 
-/** @typedef {'cursor'|'claude'|'codex'|'workbuddy'|'qoder'} HostId */
+/** @typedef {'cursor'|'claude'|'codex'|'workbuddy'|'codebuddy'|'qoder'} HostId */
 /** @typedef {'user'|'project'} InstallScope */
 
-export const ALL_HOSTS = /** @type {const} */ (['cursor', 'claude', 'codex', 'workbuddy', 'qoder']);
+export const ALL_HOSTS = /** @type {const} */ ([
+  'cursor',
+  'claude',
+  'codex',
+  'workbuddy',
+  'codebuddy',
+  'qoder',
+]);
+
+/**
+ * 选其一即两边都装（腾讯系两产品目录不同）
+ * @type {readonly HostId[]}
+ */
+export const BUDDY_HOSTS = /** @type {const} */ (['workbuddy', 'codebuddy']);
 
 /**
  * @typedef {Object} HostConfig
@@ -47,7 +61,14 @@ export const HOSTS = {
     userLegacySkillRels: [['.codex', 'skills']],
   },
   workbuddy: {
-    label: 'WorkBuddy / CodeBuddy',
+    label: 'WorkBuddy',
+    projectRel: ['.workbuddy', 'skills'],
+    userRel: ['.workbuddy', 'skills'],
+    projectLegacySkillRels: [],
+    userLegacySkillRels: [],
+  },
+  codebuddy: {
+    label: 'CodeBuddy',
     projectRel: ['.codebuddy', 'skills'],
     userRel: ['.codebuddy', 'skills'],
     projectLegacySkillRels: [],
@@ -111,4 +132,31 @@ export function hostLegacySkillRoots(hostId, scope, installRoot) {
  */
 export function isKnownHost(tool) {
   return tool in HOSTS;
+}
+
+/**
+ * workbuddy / codebuddy 互扩：任选其一则两边都装
+ * @param {string[]} tools
+ * @returns {string[]}
+ */
+export function expandBuddyHosts(tools) {
+  const set = new Set(tools);
+  const hitBuddy = BUDDY_HOSTS.some((h) => set.has(h));
+  if (!hitBuddy) return tools;
+  for (const h of BUDDY_HOSTS) set.add(h);
+  const ordered = [];
+  const seen = new Set();
+  for (const t of tools) {
+    if (seen.has(t)) continue;
+    seen.add(t);
+    ordered.push(t);
+    if (BUDDY_HOSTS.includes(/** @type {HostId} */ (t))) {
+      for (const h of BUDDY_HOSTS) {
+        if (seen.has(h)) continue;
+        seen.add(h);
+        ordered.push(h);
+      }
+    }
+  }
+  return ordered;
 }

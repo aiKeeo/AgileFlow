@@ -59,6 +59,8 @@ assert(r.status === 0, 'user init exit 0');
 assert(fs.existsSync(path.join(fakeHome, '.cursor', 'skills', 'agileflow', 'SKILL.md')), 'user cursor skill');
 assert(fs.existsSync(path.join(fakeHome, '.agents', 'skills', 'af-dev', 'SKILL.md')), 'user codex doorplate');
 assert(fs.existsSync(path.join(fakeHome, '.qoder', 'skills', 'agileflow', 'SKILL.md')), 'user qoder skill');
+assert(fs.existsSync(path.join(fakeHome, '.workbuddy', 'skills', 'agileflow', 'SKILL.md')), 'user workbuddy skill');
+assert(fs.existsSync(path.join(fakeHome, '.codebuddy', 'skills', 'af', 'SKILL.md')), 'user codebuddy doorplate');
 assert(!fs.existsSync(path.join(tmp, 'atlas', 'agileflow-cli.json')), 'user init 不写项目 cli.json');
 
 // 项目级 init
@@ -77,7 +79,9 @@ assert(!fs.existsSync(path.join(tmp, '.cursor', 'commands', 'af-req.md')), '无 
 assert(fs.existsSync(path.join(tmp, '.claude', 'skills', 'af-req', 'SKILL.md')), 'claude af-req SKILL.md');
 assert(fs.existsSync(path.join(tmp, '.agents', 'skills', 'af-dev', 'SKILL.md')), 'codex af-dev SKILL.md (.agents/skills)');
 assert(!fs.existsSync(path.join(tmp, '.codex', 'skills', 'af-dev', 'SKILL.md')), 'codex 不写 .codex/skills');
-assert(fs.existsSync(path.join(tmp, '.codebuddy', 'skills', 'af-fix', 'SKILL.md')), 'workbuddy af-fix SKILL.md');
+assert(fs.existsSync(path.join(tmp, '.codebuddy', 'skills', 'af-fix', 'SKILL.md')), 'codebuddy af-fix SKILL.md');
+assert(fs.existsSync(path.join(tmp, '.workbuddy', 'skills', 'af-fix', 'SKILL.md')), 'workbuddy af-fix SKILL.md');
+assert(fs.existsSync(path.join(tmp, '.workbuddy', 'skills', 'agileflow', 'SKILL.md')), 'workbuddy agileflow skill');
 assert(fs.existsSync(path.join(tmp, '.qoder', 'skills', 'af-req', 'SKILL.md')), 'qoder af-req SKILL.md');
 assert(fs.existsSync(path.join(tmp, '.qoder', 'skills', 'agileflow', 'SKILL.md')), 'qoder agileflow skill');
 assert(fs.existsSync(path.join(tmp, 'atlas', 'agileflow-cli.json')), 'cli.json');
